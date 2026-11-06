@@ -1,0 +1,71 @@
+/* .modal-bg and .modal from mock/v2/assets/styles.css; the sheet placement from .panel in host.css. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .dialog {
+    width: min(560px, calc(100% - 48px));
+    max-height: calc(100vh - 48px);
+    padding: 0;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--r-24);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .dialog[open] {
+    animation: rise var(--dur-220) var(--ease-out);
+  }
+
+  .dialog::backdrop {
+    background: var(--scrim);
+    backdrop-filter: blur(3px);
+    animation: fade var(--dur-180) ease;
+  }
+
+  .sheet {
+    width: min(560px, 100%);
+    max-height: 78vh;
+    margin: auto auto 0;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+  }
+
+  .head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-12);
+    padding: 22px var(--sp-24) 0;
+  }
+
+  .title {
+    margin: 0;
+    font-size: var(--fs-19);
+  }
+
+  .body {
+    padding: var(--sp-18) var(--sp-24) var(--sp-24);
+  }
+
+  [data-app="trade"] .dialog {
+    border-radius: var(--r-6);
+  }
+
+  [data-app="trade"] .title {
+    font-size: var(--fs-16);
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.985);
+    }
+  }
+}

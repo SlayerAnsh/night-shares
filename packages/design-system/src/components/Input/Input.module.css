@@ -1,0 +1,46 @@
+/* .input from mock/v2/assets/styles.css; trade fields from .st-fields in trade.css. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .input {
+    width: 100%;
+    height: 44px;
+    padding: 0 var(--sp-14);
+    border-radius: var(--r-12);
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    outline: none;
+    transition:
+      border-color var(--dur-150),
+      box-shadow var(--dur-150);
+  }
+
+  .input:focus {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-focus);
+  }
+
+  .input::placeholder {
+    color: var(--muted);
+  }
+
+  .mono {
+    font-family: var(--mono);
+    font-feature-settings: "tnum";
+  }
+
+  [data-app="trade"] .input {
+    height: 38px;
+    padding: 0 var(--sp-10);
+    border-radius: var(--r);
+    font-size: var(--fs-14);
+    font-variant-numeric: tabular-nums;
+  }
+
+  [data-app="trade"] .input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 0;
+    border-color: transparent;
+    box-shadow: none;
+  }
+}

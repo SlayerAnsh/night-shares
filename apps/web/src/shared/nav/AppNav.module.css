@@ -1,0 +1,52 @@
+/* .nav from mock/v2/assets/styles.css; trade height from trade.css. */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav);
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-24);
+  padding: 0 var(--gutter);
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter: saturate(1.4) blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+
+/* Over a full bleed photo: transparent, white text, laid over the hero. */
+.hero {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: transparent;
+  backdrop-filter: none;
+  border-color: transparent;
+  color: #fff;
+}
+
+.right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-14);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+}
+
+.link {
+  font-weight: var(--fw-bold);
+  white-space: nowrap;
+  border-radius: var(--r-8);
+}
+
+.link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 720px) {
+  .nav {
+    gap: var(--sp-10);
+    padding: 0 var(--sp-16);
+  }
+}

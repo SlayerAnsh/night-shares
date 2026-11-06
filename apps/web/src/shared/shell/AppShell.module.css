@@ -1,0 +1,25 @@
+/* Page widths: .wrap (stay), .wrap-wide (host) from styles.css, .tr (trade) from trade.css. */
+.main {
+  margin: 0 auto;
+  padding: var(--sp-32) var(--gutter) 80px;
+}
+
+.stay {
+  max-width: var(--wrap-max);
+}
+
+.host {
+  max-width: var(--wrap-wide-max);
+}
+
+.trade {
+  max-width: 1200px;
+  padding: 0 var(--sp-32) 48px;
+}
+
+@media (max-width: 720px) {
+  .main {
+    padding-left: var(--sp-16);
+    padding-right: var(--sp-16);
+  }
+}

@@ -1,0 +1,43 @@
+/* .badge and its tones from mock/v2/assets/styles.css. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 22px;
+    padding: 0 var(--sp-8);
+    border-radius: var(--r-6);
+    font-size: var(--fs-11);
+    font-weight: var(--fw-extrabold);
+    letter-spacing: var(--ls-label);
+    white-space: nowrap;
+  }
+
+  .soft {
+    background: var(--surface-2);
+    color: var(--ink-2);
+  }
+
+  .pos {
+    background: var(--pos-soft);
+    color: var(--pos);
+  }
+
+  .neg {
+    background: var(--neg-soft);
+    color: var(--neg);
+  }
+
+  .accent {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  [data-app="trade"] .badge {
+    border-radius: var(--r);
+    font-weight: var(--w6);
+    letter-spacing: 0;
+  }
+}

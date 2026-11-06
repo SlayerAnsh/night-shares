@@ -1,0 +1,41 @@
+/* .stepper from mock/v2/assets/styles.css. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .stepper {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-inline-size: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-12);
+  }
+
+  .step {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--line-2);
+    display: grid;
+    place-items: center;
+    font-size: var(--fs-17);
+    line-height: 1;
+  }
+
+  .step:hover:not(:disabled) {
+    border-color: var(--ink-2);
+  }
+
+  .step:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .value {
+    min-width: 18px;
+    text-align: center;
+    font-family: var(--mono);
+    font-feature-settings: "tnum";
+  }
+}

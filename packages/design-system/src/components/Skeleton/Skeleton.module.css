@@ -1,0 +1,23 @@
+/* Loading placeholder. Pulses between the surface tints, like the trade row flash. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .skeleton {
+    display: block;
+    width: 100%;
+    height: 16px;
+    border-radius: var(--r-6);
+    background: var(--surface-2);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  [data-app="trade"] .skeleton {
+    border-radius: var(--r);
+  }
+
+  @keyframes pulse {
+    50% {
+      background: var(--surface-3);
+    }
+  }
+}

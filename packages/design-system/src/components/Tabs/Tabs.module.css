@@ -1,0 +1,49 @@
+/* Underlined section tabs: .n-tabs (trade.css, final style) and .nav-links. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .tabs {
+    display: flex;
+    gap: var(--sp-28);
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab {
+    flex: none;
+    height: 44px;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    font-size: var(--fs-14-5);
+    font-weight: var(--fw-bold);
+    color: var(--muted);
+  }
+
+  .tab:hover {
+    color: var(--ink);
+  }
+
+  .tab[aria-selected="true"] {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+
+  [data-app="trade"] .tab {
+    font-weight: var(--fw-regular);
+  }
+
+  [data-app="trade"] .tab[aria-selected="true"] {
+    font-weight: var(--w6);
+  }
+
+  @media (max-width: 720px) {
+    .tabs {
+      gap: var(--sp-20);
+    }
+  }
+}

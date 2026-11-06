@@ -1,0 +1,17 @@
+/* .ph from mock/v2/assets/styles.css: a two tone gradient that shows until (or instead of) the photo. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .photo {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--a, #9aa), var(--b, #355));
+  }
+
+  .image {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+  }
+}

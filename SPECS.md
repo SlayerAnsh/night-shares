@@ -32,7 +32,7 @@ app/
     tsconfig/             shared tsconfig presets
     proto/                .proto sources, buf config, generated code and OpenAPI
     market-model/         pure pricing and book math (port of mock/v2/assets/model.js)
-    design-system/        tokens and, later, React components shared by all web apps
+    design-system/        tokens, global base CSS and React primitives shared by all web apps
 ```
 
 ## packages/proto
@@ -221,13 +221,13 @@ Portfolio includes agent balance, budget, spent total and agent purchase attribu
 
 ## apps/web
 
-One Next.js (App Router) app. Stay, Host and Trade are separate product areas, each in its own route group with its own URL prefix and layout. They share one World ID session, like the mock. The first cut is logic only: real data flows on plain placeholder markup. Visual design follows the approved mock.
+One Next.js (App Router) app. Stay, Host and Trade are separate product areas, each in its own route group with its own URL prefix and layout. They share one World ID session, like the mock. Visual design follows the approved mock: CSS Modules next to each component, using only design tokens, with shared primitives from `@night-shares/design-system` (see its README). No Tailwind, no CSS in JS.
 
 ```
 apps/web/
   app/
-    layout.tsx                 root: tokens.css, Providers (React Query, Connect transport, session)
-    page.tsx                   neutral entry with three doors (Stay, Host, Trade)
+    layout.tsx                 root: tokens.css, base.css, next/font families, Providers (React Query, Connect transport, session)
+    page.tsx                   landing: hero, three doors (Stay, Host, Trade), how a night moves
     login/page.tsx             World ID sign in; honours ?next=&why=&need= (why: trade, host, book, portfolio, watchlist, continue; need: orb or device)
     rpc/[...path]/route.ts     proxy to the API; adds Authorization from the session cookie
     (stay)/stay/...            Stay app: search, stay detail, checkout, trips
@@ -238,7 +238,8 @@ apps/web/
     session/                   cookie, server actions (complete sign in, sign out), useSession, guards
     world-id/                  WorldIdClient port, mock adapter (QR plus Simulate scan), IDKit adapter for configured World ID mode
     features/<app>/            hooks and small components per app, grouped by screen
-    shared/                    formatting (USDC micros, tenths, dates), nav helpers
+    shared/                    formatting (USDC micros, tenths, dates), fonts, nav (brand, app switcher, account menu), shell (AppShell per app)
+    landing/                   landing page sections
 ```
 
 ### Session

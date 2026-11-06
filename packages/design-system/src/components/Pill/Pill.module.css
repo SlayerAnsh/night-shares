@@ -1,0 +1,26 @@
+/* .pill from mock/v2/assets/styles.css. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-8);
+    padding: 7px var(--sp-12);
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: var(--fs-13);
+    font-weight: var(--fw-bold);
+    white-space: nowrap;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--pos);
+    box-shadow: 0 0 0 3px var(--pos-soft);
+  }
+}

@@ -1,6 +1,8 @@
 # @night-shares/web
 
-Next.js App Router foundation for Stay, Trade and Host. Route pages are placeholders for independent screen work. Import generated Connect Query descriptors for browser data access. The root layout loads design tokens.
+Next.js App Router foundation for Stay, Trade and Host. Import generated Connect Query descriptors for browser data access. The root layout loads the design tokens, the global base CSS and the fonts (`src/shared/fonts`). Style screens with CSS Modules on tokens and the primitives from `@night-shares/design-system` (see its README).
+
+Each app layout renders `AppShell` (`src/shared/shell`) with its app key. It draws the shared nav (`src/shared/nav`: brand, Stay, Trade and Host switcher, trade section links, World ID account menu with sign out) and the page column: 1240px for Stay, 1480px for Host, 1200px for Trade. The Trade shell sets `data-app="trade"`, which switches to the trade palette, Inter and a 60px nav. App names, homes and menu links live in `src/shared/nav/apps.ts`. `AppNav` also takes `hero` for a transparent nav over a full bleed photo, as on the landing page.
 
 Run `pnpm --filter @night-shares/web dev` from the workspace. The API must already be running at `http://localhost:8787`; override it with server-only `API_URL`. Build with `pnpm --filter @night-shares/web build`, then run `start`. Validation scripts are `typecheck` and `test`.
 

@@ -1,0 +1,116 @@
+/* .btn and its variants from mock/v2/assets/styles.css; trade sizes from .btn-x in trade.css. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-8);
+    height: 44px;
+    padding: 0 var(--sp-20);
+    border-radius: var(--r-12);
+    font-weight: var(--fw-extrabold);
+    font-size: var(--fs-14-5);
+    letter-spacing: var(--ls-display);
+    white-space: nowrap;
+    transition:
+      transform var(--dur-80),
+      box-shadow var(--dur-150),
+      background var(--dur-150),
+      border-color var(--dur-150),
+      opacity var(--dur-150);
+  }
+
+  .btn:active {
+    transform: translateY(1px);
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .primary {
+    background: var(--grad);
+    color: var(--on-accent);
+    box-shadow: var(--shadow-glow);
+  }
+
+  .primary:hover:not(:disabled) {
+    box-shadow: var(--shadow-glow-hover);
+  }
+
+  .secondary {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .ghost {
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+  }
+
+  .ghost:hover:not(:disabled) {
+    border-color: var(--ink-2);
+  }
+
+  .danger {
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    color: var(--neg);
+  }
+
+  .danger:hover:not(:disabled) {
+    border-color: var(--neg);
+  }
+
+  .sm {
+    height: 34px;
+    padding: 0 var(--sp-14);
+    border-radius: var(--r-sm);
+    font-size: var(--fs-13);
+  }
+
+  .lg {
+    height: 54px;
+    padding: 0 var(--sp-28);
+    border-radius: var(--r-14);
+    font-size: var(--fs-16);
+  }
+
+  .block {
+    width: 100%;
+  }
+
+  /* Trader app: flat, small, one solid accent. */
+  [data-app="trade"] .btn {
+    height: 36px;
+    padding: 0 var(--sp-12);
+    gap: var(--sp-6);
+    border-radius: var(--r);
+    font-size: var(--fs-13);
+    font-weight: var(--w6);
+    letter-spacing: 0;
+  }
+
+  [data-app="trade"] .sm {
+    height: 30px;
+  }
+
+  [data-app="trade"] .lg {
+    height: 44px;
+    font-size: var(--fs-14);
+  }
+
+  [data-app="trade"] .primary {
+    background: var(--accent-btn);
+    color: var(--on-accent);
+    box-shadow: none;
+  }
+
+  [data-app="trade"] .ghost,
+  [data-app="trade"] .danger {
+    background: transparent;
+  }
+}

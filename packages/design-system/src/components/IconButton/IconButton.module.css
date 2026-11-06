@@ -1,0 +1,49 @@
+/* .ib from mock/v2/assets/styles.css; trade look from trade.css. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .ib {
+    width: 34px;
+    height: 34px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .ib:hover:not(:disabled) {
+    border-color: var(--ink-2);
+  }
+
+  .ib:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .ib svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  [data-app="trade"] .ib {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: var(--r);
+    background: transparent;
+    color: var(--ink-2);
+  }
+
+  [data-app="trade"] .ib:hover:not(:disabled) {
+    background: var(--surface-2);
+    color: var(--ink);
+  }
+
+  [data-app="trade"] .ib svg {
+    width: 14px;
+    height: 14px;
+  }
+}

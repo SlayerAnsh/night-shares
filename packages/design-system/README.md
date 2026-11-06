@@ -1,8 +1,58 @@
 # @night-shares/design-system
 
-Design tokens for the Night Shares web apps (Stay, Host and Trade). Values are extracted from the approved mock in `mock/v2/assets/` (`styles.css`, plus `login.css`, `host.css` and `trade.css`), so all three apps share one look.
+Design tokens, a global base stylesheet and small React primitives for the Night Shares web apps (Stay, Host and Trade). Values are extracted from the approved mock in `mock/v2/assets/` (`styles.css`, plus `login.css`, `host.css` and `trade.css`), so all three apps share one look.
 
-This package holds tokens only. React components come later, after the mock is approved.
+## Styling rule
+
+- Style with CSS Modules (`Name.module.css`) next to the component that uses them.
+- Use only the design tokens (CSS variables from `tokens.css`) for color, type, space, radius, shadow, motion and z-index. A literal value is fine only where the mock has no token (for example the white text over hero photos).
+- No Tailwind, no CSS in JS, no UI library. No global class names: the only global CSS is `tokens.css` and `base.css`.
+- Trade differences go in the same module under `[data-app="trade"] .className`. Attribute selectors are not renamed by CSS Modules, so no `:global` is needed. The same works for `[data-theme="dark"]`.
+- Reach for a primitive first. If two features need the same new piece, add it here.
+
+### Cascade layers
+
+`base.css` sits in `@layer ns-base` and every primitive in `@layer ns-ui`. Unlayered CSS always wins over layered CSS, so a class you pass through `className` overrides the primitive without specificity tricks:
+
+```css
+/* Feature.module.css */
+.cta { background: #fff; color: #16131f; } /* beats Button's own background */
+```
+
+## Primitives
+
+All are exported from the package root. Each lives in `src/components/<Name>/` as `Name.tsx`, `Name.module.css` and `index.ts`. Every primitive takes `className`, and those that wrap a native element pass its other props through.
+
+| Component | Props | Mock source |
+| --- | --- | --- |
+| `Button` | `variant`: `primary` (gradient) \| `secondary` (ink) \| `ghost` (outlined, default) \| `danger`; `size`: `sm` \| `md` \| `lg`; `block`; native button props (`type` defaults to `button`) | `.btn-*` |
+| `buttonClass({ variant, size, block })` | returns the class string, for `next/link` or `<a>` styled as a button | `.btn` |
+| `IconButton` | `label` (required, becomes `aria-label` and `title`), icon as children, native button props | `.ib` |
+| `Card` | `as`: `div` \| `section` \| `article` \| `aside`; `padded` (20px 24px); `inverse` (ink tile) | `.card`, `.kpi.main` |
+| `Field` | `label`, `hint`, `error`, control as children (wraps it in a `<label>`) | `.field` |
+| `Input` | `mono` (tabular figures), native input props | `.input` |
+| `Select` | native select props, `<option>` children | `.select` (host) |
+| `Stepper` | `value`, `onChange(value)`, `label` (required), `min` (0), `max`, `step` (1), `disabled` | `.stepper` |
+| `Pill` | `dot` (green live dot), span props | `.pill` |
+| `Badge` | `tone`: `soft` (default) \| `pos` \| `neg` \| `accent` | `.badge` |
+| `Chip` | `on` (pressed), native button props | `.chip`, trade `.chip-x` |
+| `Stat` | `label`, `value`, `detail`, `size`: `md` \| `sm`, `inverse` | `.kpi`, `.hero-meta` |
+| `Segmented` | `options: { value, label }[]`, `value`, `onChange(value)`, `label` (required), `block` | `.seg`, trade `.tk-tabs` |
+| `Tabs` | `options: { value, label }[]`, `value`, `onChange(value)`, `label` (required). Arrow keys move. Render the panel yourself with `role="tabpanel"` | `.n-tabs`, `.nav-links` |
+| `Switch` | `checked`, `onChange(checked)`, `label` (when no visible label), native button props | `.switch` |
+| `Dialog` | `open`, `onClose`, `title`, children, `sheet` (bottom sheet) | `.modal`, host `.panel` sheet |
+| `Table` | native table props; write `thead` and `tbody`; mark number cells with `data-numeric` | trade `.mh`, `.mr` |
+| `EmptyState` | `title`, children (body text), `action` | `.empty`, trade `.mt-empty` |
+| `Spinner` | `size`: `sm` (16px, current color) \| `lg` (48px), `label` ("Loading") | `.spin`, `.lg-spin` |
+| `Skeleton` | `width`, `height`, `radius` | none (loading placeholder) |
+| `Photo` | `src`, `tone: [from, to]` (gradient shown under or instead of the photo), `alt` (empty means decorative), children; size it with `className` | `.ph` |
+| `Display` | `as`: `h1` \| `h2` (default) \| `h3` \| `p` \| `span`; set the size with `className` | `.display` |
+| `Eyebrow` | `as`: `span` (default) \| `p` \| `h2` \| `h3` \| `div` | `.eyebrow` |
+| `cx(...names)` | joins class names, skipping falsy values | |
+
+Components with hooks (`Tabs`, `Dialog`) are client components. The rest render on the server too; pass callbacks only from client components.
+
+Not ported as primitives: the range calendar, toasts and the command palette. They are app specific or not wired yet.
 
 ## Token groups
 
@@ -26,11 +76,26 @@ Breakpoints are not emitted as CSS variables because custom properties do not wo
 
 ## Using it in an app
 
-Import the stylesheet once in the Next.js root layout:
+Import both stylesheets once in the Next.js root layout, tokens first, and let Next compile the package source:
 
 ```ts
 // app/layout.tsx
 import "@night-shares/design-system/tokens.css";
+import "@night-shares/design-system/base.css";
+
+// next.config.ts
+const config = { transpilePackages: ["@night-shares/design-system"] };
+```
+
+`base.css` holds the reset, body type and background, link and button resets, the `[hidden]` rule, focus rings (`2px` accent outline) and the trade type rules under `[data-app="trade"]`.
+
+```tsx
+import { Button, Card, Stat } from "@night-shares/design-system";
+
+<Card padded>
+  <Stat label="Revenue, next 30 nights" value="$163,397" detail="rooms booked by guests" />
+  <Button variant="primary" size="lg">Open nights</Button>
+</Card>
 ```
 
 Light is the default. Set `data-theme="dark"` on `<html>` to force dark, or `data-theme="light"` to force light. Without the attribute the system preference decides.
@@ -45,7 +110,7 @@ import { darkTheme, lightTheme } from "@night-shares/design-system";
 const series = { up: lightTheme.pos, down: lightTheme.neg };
 ```
 
-Fonts are not bundled. Load Bebas Neue, Nunito Sans and JetBrains Mono (and Inter for the World ID and trade screens), for example with `next/font`, so the stacks in `--display`, `--sans`, `--mono` and `--w-font` resolve.
+Fonts are not bundled. Each stack reads an optional `--font-*` variable first, then the family name: `--font-bebas-neue`, `--font-nunito-sans`, `--font-jetbrains-mono` and `--font-inter` (World ID and trade). The web app sets them with `next/font/google` on `<html>` (`apps/web/src/shared/fonts/fonts.ts`). Without them the plain family names apply, so a Google Fonts link works too.
 
 ## Scripts
 

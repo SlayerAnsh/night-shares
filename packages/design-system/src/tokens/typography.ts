@@ -1,8 +1,10 @@
 // Font stacks keep the mock variable names (--display, --sans, --mono).
+// Each family is read from an optional --font-* variable first (set by next/font
+// in the web app), then falls back to the plain family name.
 export const fontFamily = {
-  display: "'Bebas Neue', 'Oswald', Impact, sans-serif",
-  sans: "'Nunito Sans', ui-sans-serif, system-ui, sans-serif",
-  mono: "'JetBrains Mono', ui-monospace, SFMono-Regular, monospace",
+  display: "var(--font-bebas-neue, 'Bebas Neue'), 'Oswald', Impact, sans-serif",
+  sans: "var(--font-nunito-sans, 'Nunito Sans'), ui-sans-serif, system-ui, sans-serif",
+  mono: "var(--font-jetbrains-mono, 'JetBrains Mono'), ui-monospace, SFMono-Regular, monospace",
 } as const;
 
 // Every font-size the v2 mock uses, keyed by pixel value ("13.5" becomes --fs-13-5).

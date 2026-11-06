@@ -1,0 +1,50 @@
+/* .empty from mock/v2/guest.html and .empty-p from host.css. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .empty {
+    display: grid;
+    justify-items: center;
+    gap: var(--sp-12);
+    padding: 80px var(--sp-20);
+    text-align: center;
+    color: var(--ink-2);
+  }
+
+  .title {
+    margin: 0;
+    font-family: var(--display);
+    font-size: var(--fs-40);
+    font-weight: var(--fw-regular);
+    letter-spacing: var(--ls-display);
+    line-height: var(--lh-display);
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .body {
+    margin: 0;
+    max-width: 46ch;
+  }
+
+  .action {
+    margin-top: var(--sp-8);
+  }
+
+  [data-app="trade"] .empty {
+    justify-items: start;
+    padding: var(--sp-20) 0;
+    border-top: 1px solid var(--line);
+    text-align: left;
+    color: var(--muted);
+  }
+
+  [data-app="trade"] .title {
+    font-family: var(--sans);
+    font-size: var(--fs-15);
+    font-weight: var(--w6);
+    letter-spacing: 0;
+    line-height: var(--lh-snug);
+    text-transform: none;
+  }
+}

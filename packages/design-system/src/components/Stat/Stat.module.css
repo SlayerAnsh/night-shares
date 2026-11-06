@@ -1,0 +1,63 @@
+/* .kpi (host.css) and .hero-meta / .ps-grid figures (index.html): label, big value, detail. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .stat {
+    margin: 0;
+    min-width: 0;
+  }
+
+  .label {
+    font-size: var(--fs-12-5);
+    font-weight: var(--fw-bold);
+    color: var(--muted);
+  }
+
+  .value {
+    margin: var(--sp-8) 0 0;
+    font-family: var(--display);
+    font-size: var(--fs-42);
+    font-weight: var(--fw-regular);
+    line-height: var(--lh-tight);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sm .value {
+    font-size: var(--fs-28);
+  }
+
+  .detail {
+    margin-top: var(--sp-6);
+    font-size: var(--fs-12-5);
+    font-weight: var(--fw-bold);
+    color: var(--ink-2);
+  }
+
+  .inverse .label,
+  .inverse .detail {
+    color: color-mix(in srgb, var(--bg) 72%, transparent);
+  }
+
+  /* Trader app: figures in the sans face, tabular, no display type. */
+  [data-app="trade"] .label {
+    font-weight: var(--fw-regular);
+    font-size: var(--fs-13);
+  }
+
+  [data-app="trade"] .value {
+    margin-top: var(--sp-4);
+    font-family: var(--sans);
+    font-size: var(--fs-24);
+    font-weight: var(--w6);
+    letter-spacing: -0.01em;
+  }
+
+  [data-app="trade"] .sm .value {
+    font-size: var(--fs-18);
+  }
+
+  [data-app="trade"] .detail {
+    font-weight: var(--fw-regular);
+    color: var(--muted);
+  }
+}

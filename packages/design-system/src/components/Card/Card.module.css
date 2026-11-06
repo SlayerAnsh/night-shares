@@ -1,0 +1,26 @@
+/* .card from mock/v2/assets/styles.css. Trade uses hairlines, so its card drops the shadow. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow);
+  }
+
+  .pad {
+    padding: var(--sp-20) var(--sp-24);
+  }
+
+  .inverse {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--bg);
+  }
+
+  [data-app="trade"] .card {
+    border-radius: var(--r);
+    box-shadow: none;
+  }
+}

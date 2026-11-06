@@ -1,0 +1,44 @@
+/* .brand from mock/v2/assets/styles.css; trade size and monochrome mark from trade.css. */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-10);
+  flex: none;
+  border-radius: var(--r-8);
+}
+
+.mark {
+  width: 34px;
+  height: 34px;
+}
+
+.word {
+  font-family: var(--display);
+  font-size: var(--fs-25);
+  letter-spacing: 0.04em;
+  padding-top: 3px;
+  white-space: nowrap;
+}
+
+[data-app="trade"] .mark {
+  width: 28px;
+  height: 28px;
+}
+
+[data-app="trade"] .mark > rect {
+  fill: var(--ink);
+}
+
+[data-app="trade"] .mark > circle {
+  fill: var(--bg);
+}
+
+[data-app="trade"] .word {
+  font-size: var(--fs-21);
+}
+
+@media (max-width: 720px) {
+  .word {
+    display: none;
+  }
+}

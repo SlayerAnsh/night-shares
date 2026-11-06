@@ -5,8 +5,8 @@
 
 // Theme independent overrides (`.trade-page` block).
 export const tradeStatic = {
-  sans: "'Inter', ui-sans-serif, system-ui, sans-serif",
-  mono: "'JetBrains Mono', ui-monospace, SFMono-Regular, monospace",
+  sans: "var(--font-inter, 'Inter'), ui-sans-serif, system-ui, sans-serif",
+  mono: "var(--font-jetbrains-mono, 'JetBrains Mono'), ui-monospace, SFMono-Regular, monospace",
   w6: "600", // the one heavy weight the trade screens use
   r: "3px",
 } as const;

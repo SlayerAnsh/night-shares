@@ -1,0 +1,44 @@
+/* .nav-links from mock/v2/assets/trade.css: text tabs underlined by the nav's bottom edge. */
+.links {
+  display: flex;
+  gap: var(--sp-24);
+  align-self: stretch;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-14);
+  color: var(--muted);
+}
+
+.link:hover {
+  color: var(--ink);
+}
+
+.link[aria-current="page"] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+@media (max-width: 720px) {
+  .links {
+    gap: var(--sp-14);
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .link {
+    flex: none;
+    font-size: var(--fs-13-5);
+  }
+}

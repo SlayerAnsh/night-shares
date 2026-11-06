@@ -1,0 +1,93 @@
+/* QR step from mock/v2/assets/login.css. */
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-8);
+  padding: var(--sp-24) var(--sp-16) var(--sp-16);
+  border-radius: var(--r);
+  border: 1px solid var(--w-line);
+  background: var(--w-soft);
+}
+
+.code {
+  width: min(200px, 56vw);
+  aspect-ratio: 1;
+  margin-bottom: var(--sp-8);
+  padding: var(--sp-8);
+  overflow: hidden;
+  border-radius: var(--r);
+  background: #fff;
+}
+
+.code svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ask {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+}
+
+.pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--w-ink);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.askLevel {
+  font-size: var(--fs-13);
+  color: var(--w-muted);
+}
+
+.askLevel b {
+  color: var(--w-ink);
+  font-weight: var(--fw-semibold);
+}
+
+.payload {
+  max-width: 100%;
+  font-family: var(--mono);
+  font-size: var(--fs-11);
+  color: var(--w-muted);
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.seed {
+  display: grid;
+  gap: var(--sp-6);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+  color: var(--w-ink-2);
+}
+
+.seed input {
+  height: 44px;
+  padding: 0 var(--sp-14);
+  border-radius: var(--r-12);
+  border: 1px solid var(--w-line-2);
+  background: var(--w-surface);
+  font-family: var(--mono);
+  font-size: var(--fs-14);
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.2;
+    transform: scale(0.7);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse {
+    animation: none;
+  }
+}

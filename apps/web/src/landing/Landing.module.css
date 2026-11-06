@@ -1,0 +1,31 @@
+/* Page column and footer from mock/v2/index.html. */
+.main {
+  max-width: var(--wrap-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.footer {
+  margin: 120px 0 0;
+  padding: var(--sp-28) 0 40px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--fs-13);
+}
+
+.footerIn {
+  max-width: var(--wrap-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-20);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .main,
+  .footerIn {
+    padding: 0 var(--sp-16);
+  }
+}

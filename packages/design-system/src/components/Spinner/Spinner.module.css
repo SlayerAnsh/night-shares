@@ -1,0 +1,30 @@
+/* .spin from mock/v2/assets/host.css (inherits the text color) and .lg-spin from login.css. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .spin {
+    display: inline-block;
+    flex: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: spin 0.7s linear infinite;
+  }
+
+  .lg {
+    width: 48px;
+    height: 48px;
+    border-width: 3px;
+    border-color: var(--line-2);
+    border-top-color: var(--ink);
+    animation-duration: 0.8s;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

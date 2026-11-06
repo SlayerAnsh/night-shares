@@ -1,0 +1,124 @@
+/* Shared pieces of each sign in step, from mock/v2/assets/login.css. */
+.mark {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--sp-8);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--w-btn);
+  color: var(--w-btn-ink);
+}
+
+.mark svg {
+  width: 28px;
+  height: 28px;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-28);
+  line-height: 1.15;
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--ls-tight);
+}
+
+.title:focus {
+  outline: none;
+}
+
+.step {
+  font-size: var(--fs-24);
+}
+
+.ctx {
+  margin: -8px 0 var(--sp-8);
+  color: var(--w-muted);
+  line-height: var(--lh-body);
+}
+
+.btn {
+  width: 100%;
+  height: 56px;
+  padding: 0 var(--sp-24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-8);
+  border-radius: var(--r-pill);
+  background: var(--w-btn);
+  color: var(--w-btn-ink);
+  font-family: var(--w-font);
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+  transition:
+    opacity var(--dur-150),
+    transform var(--dur-80);
+}
+
+.btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.note {
+  margin: 0;
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+  color: var(--w-muted);
+}
+
+.links {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-16);
+  margin-top: var(--sp-8);
+  padding-top: var(--sp-16);
+  border-top: 1px solid var(--w-line);
+}
+
+.links a,
+.links button {
+  font-family: var(--w-font);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  color: var(--w-ink-2);
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: var(--w-line-2);
+  text-underline-offset: 3px;
+}
+
+.links a:hover,
+.links button:hover {
+  color: var(--w-ink);
+  text-decoration-color: var(--w-ink);
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: var(--fs-26);
+  }
+
+  .step {
+    font-size: var(--fs-22);
+  }
+
+  .links {
+    flex-direction: column;
+    gap: var(--sp-8);
+  }
+}

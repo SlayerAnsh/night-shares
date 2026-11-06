@@ -1,0 +1,22 @@
+/* .display and .eyebrow from mock/v2/assets/styles.css. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .display {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: var(--fw-regular);
+    letter-spacing: var(--ls-display);
+    line-height: var(--lh-display);
+    text-transform: uppercase;
+  }
+
+  .eyebrow {
+    margin: 0;
+    font-size: var(--fs-11);
+    font-weight: var(--fw-extrabold);
+    letter-spacing: var(--ls-eyebrow);
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+}

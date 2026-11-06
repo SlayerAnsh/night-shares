@@ -1,0 +1,48 @@
+/* .chip from mock/v2/assets/styles.css; trade .chip-x from trade.css. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-6);
+    height: 36px;
+    padding: 0 var(--sp-16);
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    font-size: var(--fs-13-5);
+    font-weight: var(--fw-bold);
+    color: var(--ink-2);
+    white-space: nowrap;
+    transition: all var(--dur-150);
+  }
+
+  .chip:hover {
+    color: var(--ink);
+    border-color: var(--ink-2);
+  }
+
+  .chip[aria-pressed="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--bg);
+  }
+
+  [data-app="trade"] .chip {
+    height: 30px;
+    padding: 0 var(--sp-12);
+    border: 0;
+    border-radius: var(--r);
+    background: transparent;
+    font-size: var(--fs-13);
+    font-weight: var(--fw-regular);
+  }
+
+  [data-app="trade"] .chip[aria-pressed="true"] {
+    background: var(--surface);
+    color: var(--ink);
+    font-weight: var(--w6);
+    box-shadow: 0 0 0 1px var(--line-2);
+  }
+}

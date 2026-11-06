@@ -1,6 +1,14 @@
 "use client";
 import { WorldIdMode } from "@night-shares/proto/identity/v1/identity_pb";
 import { type AccessLevel, canAccess } from "../session/access";
+import { AlreadyStep } from "./login/AlreadyStep";
+import { browseHref } from "./login/browse-href";
+import { ErrorNote } from "./login/ErrorNote";
+import { IntroStep } from "./login/IntroStep";
+import { LoginFrame } from "./login/LoginFrame";
+import { LoginLinks } from "./login/LoginLinks";
+import { ScanStep } from "./login/ScanStep";
+import { VerifyingStep } from "./login/VerifyingStep";
 import { Success } from "./Success";
 import { useLogin } from "./use-login";
 
@@ -12,6 +20,8 @@ const reasons: Record<string, string> = {
   watchlist: "To save stays and room nights to your list.",
   continue: "To book, trade and host on Night Shares.",
 };
+const levelNames = { device: "Device", orb: "Orb" };
+
 export function Login({
   next,
   why,
@@ -21,99 +31,64 @@ export function Login({
   why: string;
   need: AccessLevel;
 }) {
-  const {
-    router,
-    session,
-    request,
-    seed,
-    setSeed,
-    stage,
-    error,
-    busy,
-    start,
-    scan,
-    switchAccount,
-  } = useLogin(need);
+  const login = useLogin(need);
+  const { session, request, stage, busy } = login;
   const already = session.user && canAccess(session.level, need);
+  const onSwitch = session.user ? () => void login.switchAccount() : undefined;
+  const links = (browse?: string) => (
+    <LoginLinks browse={browse} onSwitch={onSwitch} busy={busy} />
+  );
+  function step() {
+    if (stage === "success")
+      return (
+        <Success
+          next={next}
+          user={session.user}
+          levelName={levelNames[session.level ?? need]}
+        />
+      );
+    if (stage === "verifying") return <VerifyingStep need={need} />;
+    if (already && session.user)
+      return (
+        <AlreadyStep
+          levelName={levelNames[session.level ?? need]}
+          wallet={session.user.walletAddress}
+          busy={busy}
+          onContinue={() => login.router.replace(next)}
+          links={links()}
+        />
+      );
+    if (request)
+      return (
+        <ScanStep
+          need={need}
+          isWorldId={request.mode === WorldIdMode.WORLD_ID}
+          payload={request.qrPayload}
+          seed={login.seed}
+          onSeed={login.setSeed}
+          busy={busy}
+          onScan={() => void login.scan()}
+          links={links()}
+        />
+      );
+    const needsOrb = session.user
+      ? " You are signed in with Device, this needs Orb."
+      : "";
+    return (
+      <IntroStep
+        reason={(reasons[why] ?? reasons.continue) + needsOrb}
+        why={why}
+        need={need}
+        busy={busy}
+        onStart={() => void login.start()}
+        links={links(browseHref(next))}
+      />
+    );
+  }
   return (
-    <main>
-      <h1>Sign in with World ID</h1>
-      <p>{reasons[why] ?? reasons.continue}</p>
-      <p>World ID level: {need === "orb" ? "Orb" : "Device"}</p>
-      {session.user && (
-        <p>
-          Signed in: {session.level}. Wallet: {session.user.walletAddress}
-        </p>
-      )}
-      {session.user && !already && <p>This action needs Orb verification.</p>}
-      {error && <p role="alert">{error}</p>}
-      {stage === "success" ? (
-        <Success next={next} />
-      ) : (
-        <>
-          {stage === "verifying" ? (
-            <ol aria-live="polite">
-              <li>Proof received</li>
-              <li>{need} credential checked</li>
-              <li>USDC wallet on Arc ready</li>
-            </ol>
-          ) : already ? (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => router.replace(next)}
-            >
-              Continue
-            </button>
-          ) : request?.mode === WorldIdMode.WORLD_ID ? (
-            <button type="button" disabled={busy} onClick={() => void scan()}>
-              Verify with World ID
-            </button>
-          ) : request ? (
-            <>
-              <p>Scan with World App</p>
-              <div
-                style={{
-                  border: "1px solid",
-                  padding: 16,
-                  overflowWrap: "anywhere",
-                }}
-              >
-                {request.qrPayload}
-              </div>
-              {process.env.NODE_ENV === "development" && (
-                <label>
-                  Demo seed{" "}
-                  <input
-                    value={seed}
-                    onChange={(event) => setSeed(event.target.value)}
-                  />
-                </label>
-              )}
-              <button
-                type="button"
-                disabled={busy || !seed.trim()}
-                onClick={() => void scan()}
-              >
-                Simulate scan
-              </button>
-            </>
-          ) : (
-            <button type="button" disabled={busy} onClick={() => void start()}>
-              Sign in with World ID
-            </button>
-          )}
-          {session.user && (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void switchAccount()}
-            >
-              Switch account
-            </button>
-          )}
-        </>
-      )}
-    </main>
+    <LoginFrame>
+      <ErrorNote message={login.error} />
+      {step()}
+    </LoginFrame>
   );
 }

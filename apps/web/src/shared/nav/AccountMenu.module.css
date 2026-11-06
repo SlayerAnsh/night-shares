@@ -1,0 +1,173 @@
+/* Nav account block (.nav-auth-*) from mock/v2/assets/styles.css. */
+.wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.signin {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 var(--sp-16);
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: var(--fs-13-5);
+  font-weight: var(--fw-extrabold);
+  white-space: nowrap;
+}
+
+.signin:hover {
+  opacity: 0.9;
+}
+
+[data-on-hero] .signin {
+  background: #fff;
+  color: #16131f;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  height: 38px;
+  padding: 3px var(--sp-12) 3px 3px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+}
+
+.chip:hover {
+  border-color: var(--ink-2);
+}
+
+[data-on-hero] .chip {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.32);
+  color: #fff;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--grad);
+  color: var(--on-accent);
+  display: grid;
+  place-items: center;
+}
+
+.avatar svg {
+  width: 16px;
+  height: 16px;
+}
+
+.level {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-6);
+  white-space: nowrap;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--pos);
+  box-shadow: 0 0 0 3px var(--pos-soft);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: var(--z-popover);
+  width: 260px;
+  padding: var(--sp-8);
+  display: grid;
+  gap: var(--sp-2);
+  border-radius: var(--r);
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--fs-14);
+}
+
+.head {
+  display: flex;
+  gap: var(--sp-10);
+  align-items: center;
+  padding: var(--sp-10) var(--sp-10) var(--sp-8);
+}
+
+.head b,
+.wallet b {
+  display: block;
+  font-size: var(--fs-14);
+}
+
+.sub {
+  display: block;
+  font-size: var(--fs-12-5);
+  font-weight: var(--fw-semibold);
+  color: var(--muted);
+}
+
+.wallet {
+  margin: 0 var(--sp-4) var(--sp-6);
+  padding: var(--sp-10) var(--sp-12);
+  border-radius: var(--r-12);
+  background: var(--surface-2);
+}
+
+.wallet b {
+  font-family: var(--mono);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+}
+
+.item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 9px var(--sp-10);
+  border-radius: var(--r-sm);
+  font-weight: var(--fw-bold);
+  color: var(--ink);
+}
+
+.item:hover,
+.item:focus-visible {
+  background: var(--surface-2);
+}
+
+.out {
+  margin-top: var(--sp-4);
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 var(--r-sm) var(--r-sm);
+  color: var(--neg);
+}
+
+[data-app="trade"] .menu {
+  border-radius: var(--r-6);
+}
+
+@media (max-width: 720px) {
+  .levelText {
+    display: none;
+  }
+
+  .chip {
+    padding-right: var(--sp-10);
+  }
+
+  .signin {
+    padding: 0 var(--sp-12);
+  }
+}

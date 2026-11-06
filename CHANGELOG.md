@@ -6,6 +6,7 @@ All notable changes to this monorepo. Newest first.
 
 ### Added
 
+- Web visual base: global base CSS and React primitives in `packages/design-system` (Button, IconButton, Card, Field, Input, Select, Stepper, Pill, Badge, Chip, Stat, Segmented, Tabs, Switch, Dialog, Table, EmptyState, Spinner, Skeleton, Photo, Display, Eyebrow), CSS Modules on tokens only, fonts through `next/font`, the shared app shell and nav (brand, Stay, Trade and Host switcher, section links, World ID account menu with sign out), the landing page and the World ID sign in page styled after the mock.
 - Automatic per-property host payout sweeps on every job tick, net of double-sale debt, with idempotent reservations and failure compensation.
 - Agent wallets with funding, withdrawals, lifetime and per-order budgets, optional night allowlists, and fresh World ID approval for orders over 1,000 USDC.
 - Double-sale cover through a neutral booking report port, with reserve, pending payout and cover fund settlement, host debt, and retry-safe report handling. Failed hotel inventory pushes restore changes and return UNAVAILABLE.

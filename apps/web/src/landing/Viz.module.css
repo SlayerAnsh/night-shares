@@ -1,0 +1,109 @@
+/* .viz previews inside the doors, from mock/v2/index.html. */
+.viz {
+  height: 150px;
+  overflow: hidden;
+  border-radius: var(--r);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.photo {
+  height: 100%;
+}
+
+.cal {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--sp-4);
+  padding: var(--sp-12);
+}
+
+.day {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-6);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.day::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: var(--w);
+  background: var(--accent);
+}
+
+.off {
+  background: transparent;
+  border-style: dashed;
+}
+
+.sel {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* The order book preview is always dark, like the trader app. */
+.book {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: var(--sp-12) var(--sp-14);
+  background: #14121b;
+  font: 11px / 1 var(--mono);
+}
+
+.level {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: var(--sp-2) var(--sp-4);
+}
+
+.level::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--w);
+  border-radius: 2px;
+}
+
+.level span {
+  position: relative;
+}
+
+.level span:last-child {
+  color: #b3aec2;
+}
+
+.ask {
+  color: #f2604a;
+}
+
+.ask::before {
+  background: rgba(242, 96, 74, 0.14);
+}
+
+.bid {
+  color: #2cc07c;
+}
+
+.bid::before {
+  background: rgba(44, 192, 124, 0.14);
+}
+
+.mid {
+  color: #eeebf6;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-bold);
+  padding: 5px var(--sp-4);
+}
+
+.mid span:last-child {
+  color: #2cc07c;
+}

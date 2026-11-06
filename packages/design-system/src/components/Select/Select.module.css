@@ -1,0 +1,35 @@
+/* .select from mock/v2/assets/host.css; trade fields from .st-fields in trade.css. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .select {
+    width: 100%;
+    height: 40px;
+    padding: 0 var(--sp-12);
+    border-radius: var(--r-sm);
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    font-weight: var(--fw-semibold);
+    font-size: var(--fs-14);
+    outline: none;
+  }
+
+  .select:focus {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-focus);
+  }
+
+  [data-app="trade"] .select {
+    height: 38px;
+    padding: 0 var(--sp-10);
+    border-radius: var(--r);
+    font-weight: var(--fw-regular);
+  }
+
+  [data-app="trade"] .select:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 0;
+    border-color: transparent;
+    box-shadow: none;
+  }
+}

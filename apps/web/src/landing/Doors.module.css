@@ -1,0 +1,104 @@
+/* .doors and .door from mock/v2/index.html. */
+.doors {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-20);
+  margin: -40px auto 0;
+}
+
+.door {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-18);
+  min-height: 420px;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition:
+    transform var(--dur-200),
+    box-shadow var(--dur-200);
+}
+
+.door:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: var(--fs-56);
+}
+
+.body {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+.note {
+  display: flex;
+  gap: var(--sp-8);
+  align-items: baseline;
+  margin: -6px 0 0;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--ink-2);
+}
+
+.note::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateY(-1px);
+}
+
+.go {
+  margin-top: auto;
+  padding-top: var(--sp-16);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  font-weight: var(--fw-extrabold);
+}
+
+.arrow {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  transition: transform var(--dur-200);
+}
+
+.arrow svg {
+  width: 16px;
+}
+
+.door:hover .arrow {
+  transform: translateX(4px);
+}
+
+@media (max-width: 960px) {
+  .doors {
+    grid-template-columns: 1fr;
+    margin-top: var(--sp-24);
+  }
+
+  .door {
+    min-height: 0;
+  }
+}

@@ -1,0 +1,80 @@
+/* World ID sign in page from mock/v2/assets/login.css: monochrome, neutral background,
+   black (light) or white (dark) pill button. Colors come from the --w-* tokens. */
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--w-bg);
+  color: var(--w-ink);
+  font-family: var(--w-font);
+  font-size: var(--fs-15);
+}
+
+.page :focus-visible {
+  outline: 2px solid var(--w-ink);
+  outline-offset: 3px;
+}
+
+.top {
+  display: flex;
+  justify-content: center;
+  padding: var(--sp-24) var(--sp-16) 0;
+}
+
+.for {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  border-radius: var(--r-8);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  color: var(--w-muted);
+}
+
+.for svg {
+  width: 20px;
+  height: 20px;
+  filter: grayscale(1);
+}
+
+.for:hover {
+  color: var(--w-ink);
+}
+
+.main {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--sp-24) var(--sp-16) 48px;
+}
+
+.card {
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-16);
+  padding: var(--sp-32);
+  border: 1px solid var(--w-line);
+  border-radius: var(--r-24);
+  background: var(--w-surface);
+}
+
+.error {
+  margin: 0;
+  padding: var(--sp-12) var(--sp-14);
+  border-radius: var(--r-12);
+  border: 1px solid var(--w-line-2);
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding: var(--sp-16) var(--sp-16) var(--sp-32);
+  }
+
+  .card {
+    padding: var(--sp-24);
+    border-radius: var(--sp-20);
+  }
+}

@@ -3,7 +3,7 @@
 
 export const worldIdFont = {
   "w-font":
-    "'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif",
+    "var(--font-inter, 'Inter'), -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif",
 } as const;
 
 export const worldIdLight = {

@@ -1,0 +1,81 @@
+/* Global base for every Night Shares app. Import once, after tokens.css.
+   Ported from the reset and body rules in mock/v2/assets/styles.css and trade.css.
+   Everything else is styled by CSS Modules next to each component. */
+@layer ns-base, ns-ui;
+
+@layer ns-base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font: var(--fs-15) / var(--lh-body) var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  [hidden] {
+    /* biome-ignore lint/complexity/noImportantStyles: the hidden attribute must win over component display rules. */
+    display: none !important;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* The trader app swaps the palette through tokens; type and focus follow trade.css. */
+  [data-app="trade"] {
+    --nav-h: 60px;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: var(--fs-14);
+    line-height: var(--lh-body);
+    font-feature-settings: "cv11" 1;
+  }
+
+  [data-app="trade"] :where(b, strong, h1, h2, h3) {
+    font-weight: var(--w6);
+  }
+
+  [data-app="trade"] :focus-visible {
+    border-radius: var(--r);
+  }
+}

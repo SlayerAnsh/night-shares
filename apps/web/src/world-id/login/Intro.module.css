@@ -1,0 +1,72 @@
+/* Level row and fine print from mock/v2/assets/login.css. */
+.level {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-16);
+  border-radius: var(--r);
+  border: 1px solid var(--w-ink);
+  box-shadow: inset 0 0 0 1px var(--w-ink);
+}
+
+.levelName {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-8);
+  font-weight: var(--fw-semibold);
+}
+
+.radio {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--w-ink);
+}
+
+.radio::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--w-ink);
+}
+
+.levelSub {
+  padding-left: var(--sp-24);
+  font-size: var(--fs-13);
+  line-height: 1.4;
+  color: var(--w-muted);
+}
+
+.small {
+  display: grid;
+  gap: var(--sp-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+  color: var(--w-muted);
+}
+
+.small li {
+  display: flex;
+  gap: var(--sp-8);
+  align-items: flex-start;
+}
+
+.small svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin-top: 1px;
+}
+
+@media (max-width: 480px) {
+  .levelSub {
+    padding-left: 0;
+  }
+}

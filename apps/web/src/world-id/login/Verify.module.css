@@ -1,0 +1,133 @@
+/* Verifying and success steps from mock/v2/assets/login.css. */
+.spin {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--sp-8);
+  border-radius: 50%;
+  border: 3px solid var(--w-line-2);
+  border-top-color: var(--w-ink);
+  animation: spin 0.8s linear infinite;
+}
+
+.steps {
+  display: grid;
+  gap: var(--sp-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-14);
+}
+
+/* Each line ticks in turn, as in the mock. Purely visual: the real check runs meanwhile. */
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-8);
+  color: var(--w-muted);
+  animation: done 0.2s ease forwards;
+  animation-delay: var(--delay);
+}
+
+.tick {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--w-line-2);
+  animation: tick 0.2s ease forwards;
+  animation-delay: var(--delay);
+}
+
+.tick::after {
+  content: "";
+  width: 8px;
+  height: 4px;
+  border: 2px solid var(--w-btn-ink);
+  border-top: 0;
+  border-right: 0;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.ok {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--sp-8);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--w-btn);
+  color: var(--w-btn-ink);
+}
+
+.ok svg {
+  width: 24px;
+}
+
+.ids {
+  display: grid;
+  margin: 0;
+  border: 1px solid var(--w-line);
+  border-radius: var(--r);
+}
+
+.ids > div {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: var(--sp-8);
+  padding: var(--sp-16);
+}
+
+.ids > div + div {
+  border-top: 1px solid var(--w-line);
+}
+
+.ids dt,
+.ids dd {
+  margin: 0;
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+  color: var(--w-muted);
+}
+
+.mono {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-medium);
+  color: var(--w-ink);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes done {
+  to {
+    color: var(--w-ink);
+    font-weight: var(--fw-medium);
+  }
+}
+
+@keyframes tick {
+  to {
+    background: var(--w-btn);
+    border-color: var(--w-btn);
+  }
+}
+
+@media (max-width: 480px) {
+  .ids > div {
+    grid-template-columns: 1fr;
+    gap: var(--sp-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}

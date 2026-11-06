@@ -1,0 +1,60 @@
+/* Hairline rows from the trade market list (.mh, .mr in trade.css): muted head, ruled rows,
+   numbers right aligned in tabular figures. Mark numeric cells with data-numeric. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-14);
+  }
+
+  .table th {
+    height: 36px;
+    padding: 0 var(--sp-12);
+    border-bottom: 1px solid var(--line-2);
+    font-size: var(--fs-12-5);
+    font-weight: var(--fw-bold);
+    color: var(--muted);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .table td {
+    height: 52px;
+    padding: var(--sp-8) var(--sp-12);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .table tbody tr:hover {
+    background: var(--surface-2);
+  }
+
+  .table :is(th, td):first-child {
+    padding-left: 0;
+  }
+
+  .table :is(th, td):last-child {
+    padding-right: 0;
+  }
+
+  .table [data-numeric] {
+    text-align: right;
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .table th[data-numeric] {
+    font-family: inherit;
+  }
+
+  [data-app="trade"] .table th {
+    font-weight: var(--fw-regular);
+  }
+}

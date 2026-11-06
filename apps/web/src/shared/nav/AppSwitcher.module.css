@@ -1,0 +1,149 @@
+/* App switcher (.nav-apps-*) from mock/v2/assets/styles.css. Wide screens: a small segmented
+   control. Small screens: a button naming the current app that opens the links as a list. */
+.wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: -8px;
+}
+
+.button {
+  display: none;
+}
+
+.list {
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  border-radius: var(--r-6);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.link {
+  padding: var(--sp-4) var(--sp-10);
+  border-radius: var(--r-4);
+  font-size: var(--fs-12-5);
+  font-weight: var(--fw-bold);
+  line-height: 1.4;
+  color: var(--muted);
+  white-space: nowrap;
+  transition:
+    background var(--dur-150),
+    color var(--dur-150);
+}
+
+.link:hover {
+  color: var(--ink);
+}
+
+.link[aria-current="page"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-seg-on);
+}
+
+/* Dark wide screens lift the current app with surface-3 instead of a shadow. */
+@media (min-width: 721px) and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .link[aria-current="page"] {
+    background: var(--surface-3);
+  }
+}
+
+@media (min-width: 721px) {
+  [data-theme="dark"] .link[aria-current="page"] {
+    background: var(--surface-3);
+  }
+}
+
+@media (min-width: 721px) {
+  [data-on-hero] .list {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+
+  [data-on-hero] .link {
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  [data-on-hero] .link:hover {
+    color: #fff;
+  }
+
+  [data-on-hero] .link[aria-current="page"] {
+    background: rgba(255, 255, 255, 0.24);
+    color: #fff;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .wrap {
+    margin-left: -6px;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-4);
+    height: 32px;
+    padding: 0 var(--sp-8) 0 11px;
+    border-radius: var(--r-6);
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: var(--fs-13);
+    font-weight: var(--fw-extrabold);
+    white-space: nowrap;
+  }
+
+  .button svg {
+    transition: transform var(--dur-150);
+  }
+
+  .open .button svg {
+    transform: rotate(180deg);
+  }
+
+  [data-on-hero] .button {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.32);
+    color: #fff;
+  }
+
+  .list {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: var(--z-popover);
+    min-width: 168px;
+    padding: var(--sp-4);
+    border-color: var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .open .list {
+    display: grid;
+  }
+
+  .link,
+  [data-on-hero] .link {
+    padding: 9px var(--sp-10);
+    font-size: var(--fs-14);
+    color: var(--ink);
+  }
+
+  .link:hover {
+    background: var(--surface-2);
+  }
+
+  .link[aria-current="page"] {
+    background: var(--surface-2);
+    color: var(--ink);
+    font-weight: var(--fw-extrabold);
+    box-shadow: inset 2px 0 0 currentColor;
+  }
+}

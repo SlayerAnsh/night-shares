@@ -1,0 +1,57 @@
+/* .hero from mock/v2/index.html. */
+.hero {
+  position: relative;
+  min-height: 92vh;
+  display: flex;
+  align-items: flex-end;
+  color: #fff;
+  overflow: hidden;
+}
+
+.photo {
+  position: absolute;
+  inset: 0;
+}
+
+.photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(12, 10, 20, 0.45) 0%,
+    rgba(12, 10, 20, 0.05) 35%,
+    rgba(12, 10, 20, 0.72) 100%
+  );
+}
+
+.inner {
+  position: relative;
+  width: 100%;
+  max-width: var(--wrap-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter) 64px;
+}
+
+.eyebrow {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.title {
+  margin-top: var(--sp-14);
+  max-width: 12ch;
+  font-size: clamp(64px, 11vw, 168px);
+}
+
+.lead {
+  max-width: 520px;
+  margin: 22px 0 0;
+  font-size: var(--fs-19);
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.note {
+  margin: var(--sp-12) 0 0;
+  font-size: var(--fs-13-5);
+  color: rgba(255, 255, 255, 0.75);
+}
