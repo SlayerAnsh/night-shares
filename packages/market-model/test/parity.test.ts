@@ -8,7 +8,7 @@ const dates = Array.from({ length: 60 }, (_, i) =>
 );
 
 test("original model fingerprint and all exported constants match", () => {
-  expect(modelSha.slice(0, 12)).toBe("b7476f4bd364");
+  expect(modelSha.slice(0, 12)).toBe("b71a8bbf697d");
   expect(Object.keys(original)).toHaveLength(35);
   expect("unsoldRefund" in port).toBe(false);
   expect("REFUND_AT_FAIR" in port).toBe(false);

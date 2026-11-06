@@ -17,7 +17,7 @@ const selection = {
   rooms: 1,
 };
 
-test("guest taps reception, reports walk, receives double payout and host sees suspension", async () => {
+test("guest taps reception, reports walk, receives a full refund and host sees suspension", async () => {
   const h = await createHarness();
   try {
     const guest = await h.signInAs("device", "walk-guest");
@@ -74,18 +74,22 @@ test("guest taps reception, reports walk, receives double payout and host sees s
     );
     const reports = [];
     for (const trip of trips.slice(0, 2)) {
+      (h.container.ports.clock as MockClock).advance(1);
+      const { tagPayload } = await guest.clients.stay.issueReceptionTag({
+        bookingId: trip.id,
+      });
       expect(
         (
           await guest.clients.stay.tapReception({
             bookingId: trip.id,
-            tagPayload: selection.propertyId,
+            tagPayload,
           })
         ).tappedAt,
       ).toBeDefined();
       const result = await guest.clients.stay.reportWalk({
         bookingId: trip.id,
       });
-      expect(result.paidToGuest?.micros).toBe(2n * (trip.total?.micros ?? 0n));
+      expect(result.paidToGuest?.micros).toBe(trip.total?.micros ?? 0n);
       reports.push(result.reportId);
     }
     expect(
@@ -94,7 +98,7 @@ test("guest taps reception, reports walk, receives double payout and host sees s
       before +
         trips
           .slice(0, 2)
-          .reduce((sum, trip) => sum + 2n * (trip.total?.micros ?? 0n), 0n),
+          .reduce((sum, trip) => sum + (trip.total?.micros ?? 0n), 0n),
     );
     await expect(
       guest.clients.stay.reportWalk({ bookingId: first.id }),

@@ -7,18 +7,19 @@ import { getTrip } from "./get-trip";
 export function createTapReception(ports: Ports, repo: StayRepo) {
   return (bookingId: string, tagPayload: string, userId: string) => {
     const saved = getTrip(repo, bookingId, userId);
-    // The mock tag payload is the property ID; a real adapter must verify proximity.
-    if (tagPayload !== saved.trip.propertyId)
-      throw new DomainError(
-        "INVALID_ARGUMENT",
-        "Reception tag does not match this property.",
-      );
     const at = ports.clock.now();
+    const result = ports.receptionTag.verify({
+      payload: tagPayload,
+      propertyId: saved.trip.propertyId,
+      bookingId,
+      now: at,
+    });
+    if (!result.ok) throw new DomainError("INVALID_ARGUMENT", result.reason);
     ports.db
       .query(
         "INSERT INTO reception_taps VALUES (?, ?, ?) ON CONFLICT(booking_id) DO NOTHING",
       )
-      .run(bookingId, tagPayload, at);
+      .run(bookingId, result.tagId, at);
     const row = ports.db
       .query<{ tapped_at: bigint }, [string]>(
         "SELECT tapped_at FROM reception_taps WHERE booking_id = ?",

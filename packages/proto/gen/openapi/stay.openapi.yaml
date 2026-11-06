@@ -141,6 +141,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.stay.v1.GetReceiptResponse'
+  /night_shares.stay.v1.StayService/IssueReceptionTag:
+    post:
+      tags:
+        - night_shares.stay.v1.StayService
+      summary: IssueReceptionTag
+      operationId: night_shares.stay.v1.StayService.IssueReceptionTag
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.stay.v1.IssueReceptionTagRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.stay.v1.IssueReceptionTagResponse'
   /night_shares.stay.v1.StayService/ListSaves:
     post:
       tags:
@@ -717,6 +752,22 @@ components:
           title: receipt
           $ref: '#/components/schemas/night_shares.stay.v1.Receipt'
       title: GetReceiptResponse
+      additionalProperties: false
+    night_shares.stay.v1.IssueReceptionTagRequest:
+      type: object
+      properties:
+        bookingId:
+          type: string
+          title: booking_id
+      title: IssueReceptionTagRequest
+      additionalProperties: false
+    night_shares.stay.v1.IssueReceptionTagResponse:
+      type: object
+      properties:
+        tagPayload:
+          type: string
+          title: tag_payload
+      title: IssueReceptionTagResponse
       additionalProperties: false
     night_shares.stay.v1.ListSavesRequest:
       type: object

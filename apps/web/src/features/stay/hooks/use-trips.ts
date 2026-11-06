@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "@connectrpc/connect-query";
 import {
   checkIn,
   getReceipt,
+  issueReceptionTag,
   listTrips,
   reportWalk,
   tapReception,
@@ -38,6 +39,11 @@ export function useTripActions(tripId: string) {
     { enabled: showReceipt && session.isSignedIn },
   );
   const tap = useMutation(tapReception);
+  const issue = useMutation(issueReceptionTag);
+  async function tapAtReception() {
+    const { tagPayload } = await issue.mutateAsync({ bookingId: tripId });
+    await tap.mutateAsync({ bookingId: tripId, tagPayload });
+  }
   const walk = useMutation(reportWalk, {
     onSuccess: () => cache.invalidateQueries(),
   });
@@ -62,6 +68,8 @@ export function useTripActions(tripId: string) {
   }
   return {
     tap,
+    issue,
+    tapAtReception,
     walk,
     seed,
     setSeed,

@@ -7,7 +7,7 @@ import { createSqliteStayRepo } from "../../stay/repo/stay-repo.sqlite";
 import { createStayCases } from "../../stay/use-cases/create-stay-cases";
 import { adjustCoverAccount } from "../repo/cover-accounts";
 
-export async function fixture(pending = 12000n) {
+export async function fixture(pending = 6000n) {
   const { ports } = buildContainer({
     port: 0,
     adapters: "mock",

@@ -6,10 +6,13 @@ import type { ChannelManager } from "../ports/channel-manager/channel-manager";
 import type { Clock } from "../ports/clock/clock";
 import type { IdentityVerifier } from "../ports/identity-verifier/identity-verifier";
 import type { IdGenerator } from "../ports/ids/id-generator";
+import type { ReceptionTag } from "../ports/reception-tag/reception-tag";
 import type { SessionStore } from "../ports/sessions/session-store";
 import type { VerificationStore } from "../ports/verifications/verification-store";
 import type { WalletProvider } from "../ports/wallet-provider/wallet-provider";
 export type Ports = {
+  receptionTag: ReceptionTag;
+  issueReceptionTag?: (propertyId: string, now: number) => string;
   db: Database;
   clock: Clock;
   ids: IdGenerator;

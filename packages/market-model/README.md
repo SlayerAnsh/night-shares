@@ -1,6 +1,6 @@
 # @night-shares/market-model
 
-Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `b7476f4bd364`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
+Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `b71a8bbf697d`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
 
 ## Public API
 
@@ -78,7 +78,7 @@ For `F = 6000`, `k = 1.2`, `S = 15`, rounded costs are `cost(6, 7) = 10092` and 
 
 ## Walked guest payouts
 
-`walkPayout({ paid, pending = 0 })` pays `WALK_MULTIPLE = 2` times the booking price to the guest, using nonnegative pending host payouts first, then the cover fund. The fund advance becomes host debt. For `paid: 10000`, `pending: 12000`, the result is `toGuest: 20000`, `fromPending: 12000`, `fromFund: 8000`, `hostDebt: 8000`.
+`walkPayout({ paid, pending = 0 })` refunds the booking price to the guest (`WALK_MULTIPLE = 1`), using nonnegative pending host payouts first, then the cover fund. The fund advance becomes host debt. For `paid: 10000`, `pending: 6000`, the result is `toGuest: 10000`, `fromPending: 6000`, `fromFund: 4000`, `hostDebt: 4000`.
 
 Eligibility is enforced by the API: reception tag presence, no World ID desk check-in, and a report within `WALK_REPORT_HOURS = 24` hours of check-in. Each valid walk is public; `WALK_SUSPEND_AFTER = 2` incidents suspend new openings. False reporters are banned by human ID. Debt is netted from automatic host sweeps. `COVER_FUND` remains 0.001 of trade notional, carved out of `PLATFORM_FEE`, and backs walk payouts only. The pure helper does not enforce eligibility.
 

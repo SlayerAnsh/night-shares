@@ -16,6 +16,8 @@ export function createStayHandler(
       trip: await cases.createBooking(req, requireUser(ctx)),
     }),
     listTrips: (_req, ctx) => cases.listTrips(requireUser(ctx).id),
+    issueReceptionTag: (req, ctx) =>
+      cases.issueReceptionTag(req.bookingId, requireUser(ctx).id),
     tapReception: (req, ctx) =>
       cases.tapReception(req.bookingId, req.tagPayload, requireUser(ctx).id),
     reportWalk: (req, ctx) => cases.reportWalk(req.bookingId, requireUser(ctx)),

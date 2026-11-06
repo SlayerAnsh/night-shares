@@ -24,6 +24,9 @@ service StayService {
   rpc ListTrips(ListTripsRequest) returns (ListTripsResponse) {
     option (night_shares.auth.v1.access) = ACCESS_DEVICE;
   }
+  rpc IssueReceptionTag(IssueReceptionTagRequest) returns (IssueReceptionTagResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
   rpc TapReception(TapReceptionRequest) returns (TapReceptionResponse) {
     option (night_shares.auth.v1.access) = ACCESS_DEVICE;
   }
@@ -135,4 +138,11 @@ message ReportWalkRequest {
 message ReportWalkResponse {
   string report_id = 1;
   night_shares.common.v1.Usdc paid_to_guest = 2;
+}
+
+message IssueReceptionTagRequest {
+  string booking_id = 1;
+}
+message IssueReceptionTagResponse {
+  string tag_payload = 1;
 }

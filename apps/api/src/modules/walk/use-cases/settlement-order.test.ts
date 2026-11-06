@@ -9,7 +9,11 @@ import { markWalkFalse } from "./mark-false";
 
 test("sweep and moderation wait for pending walk, then sweep nets the fund advance", async () => {
   const f = await fixture();
-  f.cases.tapReception(f.trip.id, f.trip.propertyId, f.user.id);
+  f.cases.tapReception(
+    f.trip.id,
+    f.cases.issueReceptionTag(f.trip.id, f.user.id).tagPayload,
+    f.user.id,
+  );
   const repo = createSqliteHostRepo(f.ports);
   const host = {
     id: "host",
@@ -27,7 +31,7 @@ test("sweep and moderation wait for pending walk, then sweep nets the fund advan
   let calls = 0;
   f.ports.walletProvider.settle = async (legs) => {
     calls++;
-    expect(coverAccount(f.ports.db, f.trip.propertyId).debt).toBe(8000n);
+    expect(coverAccount(f.ports.db, f.trip.propertyId).debt).toBe(4000n);
     await gate;
     return settle(legs);
   };
@@ -40,14 +44,18 @@ test("sweep and moderation wait for pending walk, then sweep nets the fund advan
   release();
   await reporting;
   f.ports.walletProvider.settle = settle;
-  adjustCoverAccount(f.ports.db, f.trip.propertyId, -20000n, 0n);
+  adjustCoverAccount(f.ports.db, f.trip.propertyId, -10000n, 0n);
   const result = await sweep(host.id, f.trip.propertyId, host.walletAddress);
-  expect(result?.debt).toBe(8000n);
+  expect(result?.debt).toBe(4000n);
   expect(coverAccount(f.ports.db, f.trip.propertyId).debt).toBe(0n);
 });
 test("walk waits for pending host sweep and market settlement", async () => {
   const f = await fixture();
-  f.cases.tapReception(f.trip.id, f.trip.propertyId, f.user.id);
+  f.cases.tapReception(
+    f.trip.id,
+    f.cases.issueReceptionTag(f.trip.id, f.user.id).tagPayload,
+    f.user.id,
+  );
   f.ports.db
     .query(
       "INSERT INTO host_sweeps (id, property_id, amount, debt, at, status) VALUES ('sweep', ?, 1, 0, 0, 'pending')",

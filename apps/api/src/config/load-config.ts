@@ -1,6 +1,7 @@
 import { parseDate } from "../shared/dates";
 import { loadServerConfig, type ServerConfig } from "./server-config";
 export type Config = Partial<ServerConfig> & {
+  receptionTagSecret?: string;
   jobIntervalMs?: number;
   worldIdMode?: "mock" | "world-id";
   worldIdAppId?: string;
@@ -16,6 +17,11 @@ export type Config = Partial<ServerConfig> & {
 export function loadConfig(
   env: Record<string, string | undefined> = process.env,
 ): Config {
+  const receptionTagSecret = env.RECEPTION_TAG_SECRET?.trim() || undefined;
+  if ((env.ADAPTERS ?? "mock") !== "mock" && !receptionTagSecret)
+    throw new Error(
+      "RECEPTION_TAG_SECRET is required when ADAPTERS is not mock.",
+    );
   const jobIntervalMs = Number(env.JOB_INTERVAL_MS ?? "60000");
   if (
     !Number.isSafeInteger(jobIntervalMs) ||
@@ -66,6 +72,7 @@ export function loadConfig(
     throw new Error("DB_PATH must be a nonempty SQLite file path or :memory:.");
   return {
     ...loadServerConfig(env),
+    receptionTagSecret,
     jobIntervalMs,
     worldIdMode,
     worldIdAppId,

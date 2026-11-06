@@ -5,7 +5,11 @@ import { validateReport } from "./validate-report";
 for (const offset of [-1, 24 * 3600000 + 1]) {
   test(`walk rejects report outside window at offset ${offset}`, async () => {
     const f = await fixture();
-    f.cases.tapReception(f.trip.id, f.trip.propertyId, f.user.id);
+    f.cases.tapReception(
+      f.trip.id,
+      f.cases.issueReceptionTag(f.trip.id, f.user.id).tagPayload,
+      f.user.id,
+    );
     f.clock.advance(offset);
     expect(() =>
       validateReport(f.ports, f.repo, {
@@ -20,7 +24,11 @@ test("walk accepts exact deadline and rejects missing tap and checked-in booking
   expect(() => validateReport(f.ports, f.repo, f.report)).toThrow(
     "Tap the reception",
   );
-  f.cases.tapReception(f.trip.id, f.trip.propertyId, f.user.id);
+  f.cases.tapReception(
+    f.trip.id,
+    f.cases.issueReceptionTag(f.trip.id, f.user.id).tagPayload,
+    f.user.id,
+  );
   f.clock.advance(24 * 3600000);
   expect(
     validateReport(f.ports, f.repo, { ...f.report, reportedAt: f.clock.now() })
@@ -45,11 +53,19 @@ test("tap and report require booking owner and matching property tag", async () 
   expect(() =>
     validateReport(f.ports, f.repo, { ...f.report, userId: "other" }),
   ).toThrow("Trip not found");
-  const first = f.cases.tapReception(f.trip.id, f.trip.propertyId, f.user.id);
-  f.clock.advance(1000);
-  expect(f.cases.tapReception(f.trip.id, f.trip.propertyId, f.user.id)).toEqual(
-    first,
+  const first = f.cases.tapReception(
+    f.trip.id,
+    f.cases.issueReceptionTag(f.trip.id, f.user.id).tagPayload,
+    f.user.id,
   );
+  f.clock.advance(1000);
+  expect(
+    f.cases.tapReception(
+      f.trip.id,
+      f.cases.issueReceptionTag(f.trip.id, f.user.id).tagPayload,
+      f.user.id,
+    ),
+  ).toEqual(first);
 });
 test("future reports and taps after report time cannot establish presence", async () => {
   const f = await fixture();
@@ -60,7 +76,11 @@ test("future reports and taps after report time cannot establish presence", asyn
     }),
   ).toThrow("within 24 hours");
   f.clock.advance(1000);
-  f.cases.tapReception(f.trip.id, f.trip.propertyId, f.user.id);
+  f.cases.tapReception(
+    f.trip.id,
+    f.cases.issueReceptionTag(f.trip.id, f.user.id).tagPayload,
+    f.user.id,
+  );
   expect(() => validateReport(f.ports, f.repo, f.report)).toThrow(
     "Tap the reception",
   );

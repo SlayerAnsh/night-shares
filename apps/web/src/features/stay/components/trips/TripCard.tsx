@@ -55,13 +55,12 @@ export function TripCard({
         <section>
           <button
             type="button"
-            disabled={action.tap.isPending || action.walk.isSuccess}
-            onClick={() =>
-              action.tap.mutate({
-                bookingId: trip.id,
-                tagPayload: trip.propertyId,
-              })
+            disabled={
+              action.issue.isPending ||
+              action.tap.isPending ||
+              action.walk.isSuccess
             }
+            onClick={() => void action.tapAtReception().catch(() => {})}
           >
             Tap reception tag
           </button>
@@ -77,7 +76,9 @@ export function TripCard({
             Report within 24 hours after check-in time. A reception tap is
             required.
           </p>
-          <QueryState error={action.tap.error || action.walk.error} />
+          <QueryState
+            error={action.issue.error || action.tap.error || action.walk.error}
+          />
           {action.walk.data && (
             <p>
               Walk reported. Paid{" "}

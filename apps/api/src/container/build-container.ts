@@ -17,12 +17,17 @@ import { createMockIdentityVerifier } from "../ports/identity-verifier/identity-
 import { createWorldIdIdentityVerifier } from "../ports/identity-verifier/identity-verifier.world-id";
 import { createMockIdGenerator } from "../ports/ids/id-generator.mock";
 import { createRandomIdGenerator } from "../ports/ids/id-generator.random";
+import { createMockReceptionTag } from "../ports/reception-tag/reception-tag.mock";
 import { createSqliteSessionStore } from "../ports/sessions/session-store.sqlite";
 import { createSqliteVerificationStore } from "../ports/verifications/verification-store.sqlite";
 import { createSqliteWalletProvider } from "../ports/wallet-provider/wallet-provider.sqlite";
 import { parseDate } from "../shared/dates";
 import type { Ports } from "./ports";
 export function buildContainer(config: Config) {
+  if (config.adapters !== "mock" && !config.receptionTagSecret?.trim())
+    throw new Error(
+      "RECEPTION_TAG_SECRET is required when ADAPTERS is not mock.",
+    );
   if (config.adapters !== "mock")
     throw new Error("Only mock adapters are available.");
   // Older unit fixtures omit these options. Boot config always supplies them.
@@ -40,10 +45,16 @@ export function buildContainer(config: Config) {
     (config.ids ?? (testing ? "sequential" : "random")) === "sequential"
       ? createMockIdGenerator()
       : createRandomIdGenerator();
+  const receptionTag = createMockReceptionTag(
+    config.receptionTagSecret?.trim() || "night-shares-dev-reception-secret",
+  );
   const catalog = createMemoryCatalogRepo();
   const walletProvider = createSqliteWalletProvider({ db, ids, clock });
   const ports: Ports & { bookingReport: ReturnType<typeof bookingReportFor> } =
     {
+      receptionTag,
+      issueReceptionTag:
+        config.adapters === "mock" ? receptionTag.issueTagPayload : undefined,
       bookingReport: bookingReportFor({ db, ids }),
       db,
       clock,

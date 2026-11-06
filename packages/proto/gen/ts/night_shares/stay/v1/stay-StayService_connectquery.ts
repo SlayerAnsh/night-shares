@@ -30,6 +30,11 @@ export const createBooking = StayService.method.createBooking;
 export const listTrips = StayService.method.listTrips;
 
 /**
+ * @generated from rpc night_shares.stay.v1.StayService.IssueReceptionTag
+ */
+export const issueReceptionTag = StayService.method.issueReceptionTag;
+
+/**
  * @generated from rpc night_shares.stay.v1.StayService.TapReception
  */
 export const tapReception = StayService.method.tapReception;
