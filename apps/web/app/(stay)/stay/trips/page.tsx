@@ -1,4 +1,9 @@
-// TODO: Use StayService.ListTrips, CheckIn, GetReceipt; IdentityService.VerifyAction.
+import { Suspense } from "react";
+import { TripsScreen } from "../../../../src/features/stay/components/trips/TripsScreen";
 export default function Page() {
-  return <p>My trips: /stay/trips</p>;
+  return (
+    <Suspense fallback={<p>Loading trips…</p>}>
+      <TripsScreen />
+    </Suspense>
+  );
 }

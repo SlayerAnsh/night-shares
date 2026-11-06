@@ -1,4 +1,14 @@
-// TODO: Use CatalogService.GetProperty; StayService.GetPriceCalendar, QuoteStay, ToggleSave.
-export default function Page() {
-  return <p>Stay detail: /stay/[propertyId]</p>;
+import { Suspense } from "react";
+import { DetailScreen } from "../../../../src/features/stay/components/detail/DetailScreen";
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ propertyId: string }>;
+}) {
+  const { propertyId } = await params;
+  return (
+    <Suspense fallback={<p>Loading stay…</p>}>
+      <DetailScreen propertyId={propertyId} />
+    </Suspense>
+  );
 }

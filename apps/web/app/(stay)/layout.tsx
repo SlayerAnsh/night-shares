@@ -11,7 +11,16 @@ export default function Layout({ children }: { children: ReactNode }) {
         accountHref="/stay/trips"
         need="device"
       />
-      <main>{children}</main>
+      <main
+        style={{
+          color: "var(--ink)",
+          background: "var(--bg)",
+          fontFamily: "var(--sans)",
+          padding: "var(--sp-24)",
+        }}
+      >
+        {children}
+      </main>
     </>
   );
 }
