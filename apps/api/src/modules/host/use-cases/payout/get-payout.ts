@@ -1,5 +1,5 @@
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
-import { coverAccount } from "../../../double-sale/repo/cover-accounts";
+import { coverAccount } from "../../../walk/repo/cover-accounts";
 import { payoutOf } from "../../mappers/payout";
 import type { HostDeps } from "../deps";
 import { recordsFor } from "../reporting/records";

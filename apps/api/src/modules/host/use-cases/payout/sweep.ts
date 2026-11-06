@@ -3,7 +3,7 @@ import { SYSTEM_ADDRESSES } from "../../../../ports/wallet-provider/wallet-provi
 import {
   adjustCoverAccount,
   coverAccount,
-} from "../../../double-sale/repo/cover-accounts";
+} from "../../../walk/repo/cover-accounts";
 import type { HostDeps } from "../deps";
 import { createGetPayout } from "./get-payout";
 
@@ -19,7 +19,7 @@ export function createSweep(deps: HostDeps) {
           .get(propertyId) ||
         ports.db
           .query(
-            "SELECT 1 FROM double_sale_reports r JOIN inventory i ON i.night_key = r.night_key WHERE i.property_id = ? AND r.status = 'pending'",
+            "SELECT 1 FROM walk_reports WHERE property_id = ? AND status = 'pending'",
           )
           .get(propertyId)
       )

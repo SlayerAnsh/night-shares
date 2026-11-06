@@ -51,6 +51,41 @@ export function TripCard({
           <QueryState error={action.verify.error || action.check.error} />
         </form>
       )}
+      {!trip.checkedIn && (
+        <section>
+          <button
+            type="button"
+            disabled={action.tap.isPending || action.walk.isSuccess}
+            onClick={() =>
+              action.tap.mutate({
+                bookingId: trip.id,
+                tagPayload: trip.propertyId,
+              })
+            }
+          >
+            Tap reception tag
+          </button>
+          {action.tap.isSuccess && <p>Reception presence recorded.</p>}
+          <button
+            type="button"
+            disabled={action.walk.isPending || action.walk.isSuccess}
+            onClick={() => action.walk.mutate({ bookingId: trip.id })}
+          >
+            I was not let in
+          </button>
+          <p>
+            Report within 24 hours after check-in time. A reception tap is
+            required.
+          </p>
+          <QueryState error={action.tap.error || action.walk.error} />
+          {action.walk.data && (
+            <p>
+              Walk reported. Paid{" "}
+              {formatUsdc(action.walk.data.paidToGuest?.micros ?? 0n)}.
+            </p>
+          )}
+        </section>
+      )}
       <button
         type="button"
         aria-expanded={action.showReceipt}

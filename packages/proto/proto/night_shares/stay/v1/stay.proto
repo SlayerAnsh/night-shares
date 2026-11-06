@@ -3,6 +3,7 @@ syntax = "proto3";
 package night_shares.stay.v1;
 
 import "google/protobuf/timestamp.proto";
+import "night_shares/common/v1/money.proto";
 import "night_shares/auth/v1/access.proto";
 import "night_shares/catalog/v1/property.proto";
 import "night_shares/stay/v1/trip.proto";
@@ -21,6 +22,12 @@ service StayService {
     option (night_shares.auth.v1.access) = ACCESS_DEVICE;
   }
   rpc ListTrips(ListTripsRequest) returns (ListTripsResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+  rpc TapReception(TapReceptionRequest) returns (TapReceptionResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+  rpc ReportWalk(ReportWalkRequest) returns (ReportWalkResponse) {
     option (night_shares.auth.v1.access) = ACCESS_DEVICE;
   }
   rpc CheckIn(CheckInRequest) returns (CheckInResponse) {
@@ -113,4 +120,19 @@ message ListSavesRequest {}
 
 message ListSavesResponse {
   repeated night_shares.catalog.v1.Property properties = 1;
+}
+
+message TapReceptionRequest {
+  string booking_id = 1;
+  string tag_payload = 2;
+}
+message TapReceptionResponse {
+  google.protobuf.Timestamp tapped_at = 1;
+}
+message ReportWalkRequest {
+  string booking_id = 1;
+}
+message ReportWalkResponse {
+  string report_id = 1;
+  night_shares.common.v1.Usdc paid_to_guest = 2;
 }

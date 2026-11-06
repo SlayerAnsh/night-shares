@@ -1,6 +1,7 @@
 import { toMicros } from "@night-shares/market-model";
 import { addDays } from "../../../../shared/dates";
 import type { NightRecord } from "../../../inventory/inventory-repo";
+import { walkIncidents } from "../../../walk/repo/incidents";
 import { kpisOf, occupancyOf } from "../../mappers/aggregates";
 import { guestMicros } from "../../mappers/night";
 import type { HostDeps } from "../deps";
@@ -49,6 +50,7 @@ export function createGetPortfolio(deps: HostDeps) {
         return {
           propertyId,
           name: p.name,
+          walkIncidents: walkIncidents(deps.ports.db, propertyId),
           city: p.city,
           kpis: kpisOf(
             records.filter((r) => r.date < addDays(today, 30)),

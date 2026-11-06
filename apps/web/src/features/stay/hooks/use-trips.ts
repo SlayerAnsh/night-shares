@@ -4,6 +4,8 @@ import {
   checkIn,
   getReceipt,
   listTrips,
+  reportWalk,
+  tapReception,
 } from "@night-shares/proto/stay/v1/stay-StayService_connectquery";
 import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -35,6 +37,10 @@ export function useTripActions(tripId: string) {
     { tripId },
     { enabled: showReceipt && session.isSignedIn },
   );
+  const tap = useMutation(tapReception);
+  const walk = useMutation(reportWalk, {
+    onSuccess: () => cache.invalidateQueries(),
+  });
   const verify = useVerifyAction();
   const check = useMutation(checkIn, {
     onSuccess: () => cache.invalidateQueries(),
@@ -55,6 +61,8 @@ export function useTripActions(tripId: string) {
     if (access.require("trips", "device")) setShowReceipt(!showReceipt);
   }
   return {
+    tap,
+    walk,
     seed,
     setSeed,
     showReceipt,

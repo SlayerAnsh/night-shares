@@ -6,6 +6,8 @@ import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegen
 import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
+import type { Usdc } from "../../common/v1/money_pb";
+import { file_night_shares_common_v1_money } from "../../common/v1/money_pb";
 import { file_night_shares_auth_v1_access } from "../../auth/v1/access_pb";
 import type { Property } from "../../catalog/v1/property_pb";
 import { file_night_shares_catalog_v1_property } from "../../catalog/v1/property_pb";
@@ -17,7 +19,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file night_shares/stay/v1/stay.proto.
  */
 export const file_night_shares_stay_v1_stay: GenFile = /*@__PURE__*/
-  fileDesc("Ch9uaWdodF9zaGFyZXMvc3RheS92MS9zdGF5LnByb3RvEhRuaWdodF9zaGFyZXMuc3RheS52MSJqChdHZXRQcmljZUNhbGVuZGFyUmVxdWVzdBITCgtwcm9wZXJ0eV9pZBgBIAEoCRIUCgxyb29tX3R5cGVfaWQYAiABKAkSEgoKc3RhcnRfZGF0ZRgDIAEoCRIQCghlbmRfZGF0ZRgEIAEoCSJMChhHZXRQcmljZUNhbGVuZGFyUmVzcG9uc2USMAoGbmlnaHRzGAEgAygLMiAubmlnaHRfc2hhcmVzLnN0YXkudjEuTmlnaHRQcmljZSJKChBRdW90ZVN0YXlSZXF1ZXN0EjYKCXNlbGVjdGlvbhgBIAEoCzIjLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlN0YXlTZWxlY3Rpb24iQwoRUXVvdGVTdGF5UmVzcG9uc2USLgoFcXVvdGUYASABKAsyHy5uaWdodF9zaGFyZXMuc3RheS52MS5TdGF5UXVvdGUiJAoQTG9ja1F1b3RlUmVxdWVzdBIQCghxdW90ZV9pZBgBIAEoCSJUChFMb2NrUXVvdGVSZXNwb25zZRIPCgdsb2NrX2lkGAEgASgJEi4KCmV4cGlyZXNfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wImIKFENyZWF0ZUJvb2tpbmdSZXF1ZXN0Eg8KB2xvY2tfaWQYASABKAkSEgoKZ3Vlc3RfbmFtZRgCIAEoCRITCgtndWVzdF9lbWFpbBgDIAEoCUoECAQQBVIKcGF5X21ldGhvZCJBChVDcmVhdGVCb29raW5nUmVzcG9uc2USKAoEdHJpcBgBIAEoCzIaLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlRyaXAiEgoQTGlzdFRyaXBzUmVxdWVzdCJrChFMaXN0VHJpcHNSZXNwb25zZRIsCgh1cGNvbWluZxgBIAMoCzIaLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlRyaXASKAoEcGFzdBgCIAMoCzIaLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlRyaXAiPQoOQ2hlY2tJblJlcXVlc3QSDwoHdHJpcF9pZBgBIAEoCRIaChJ2ZXJpZmljYXRpb25fdG9rZW4YAiABKAkiOwoPQ2hlY2tJblJlc3BvbnNlEigKBHRyaXAYASABKAsyGi5uaWdodF9zaGFyZXMuc3RheS52MS5UcmlwIiQKEUdldFJlY2VpcHRSZXF1ZXN0Eg8KB3RyaXBfaWQYASABKAkiRAoSR2V0UmVjZWlwdFJlc3BvbnNlEi4KB3JlY2VpcHQYASABKAsyHS5uaWdodF9zaGFyZXMuc3RheS52MS5SZWNlaXB0IigKEVRvZ2dsZVNhdmVSZXF1ZXN0EhMKC3Byb3BlcnR5X2lkGAEgASgJIiYKElRvZ2dsZVNhdmVSZXNwb25zZRIQCghpc19zYXZlZBgBIAEoCCISChBMaXN0U2F2ZXNSZXF1ZXN0IkoKEUxpc3RTYXZlc1Jlc3BvbnNlEjUKCnByb3BlcnRpZXMYASADKAsyIS5uaWdodF9zaGFyZXMuY2F0YWxvZy52MS5Qcm9wZXJ0eTKyBwoLU3RheVNlcnZpY2USdwoQR2V0UHJpY2VDYWxlbmRhchItLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLkdldFByaWNlQ2FsZW5kYXJSZXF1ZXN0Gi4ubmlnaHRfc2hhcmVzLnN0YXkudjEuR2V0UHJpY2VDYWxlbmRhclJlc3BvbnNlIgSItRgBEmIKCVF1b3RlU3RheRImLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlF1b3RlU3RheVJlcXVlc3QaJy5uaWdodF9zaGFyZXMuc3RheS52MS5RdW90ZVN0YXlSZXNwb25zZSIEiLUYARJiCglMb2NrUXVvdGUSJi5uaWdodF9zaGFyZXMuc3RheS52MS5Mb2NrUXVvdGVSZXF1ZXN0GicubmlnaHRfc2hhcmVzLnN0YXkudjEuTG9ja1F1b3RlUmVzcG9uc2UiBIi1GAISbgoNQ3JlYXRlQm9va2luZxIqLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLkNyZWF0ZUJvb2tpbmdSZXF1ZXN0GisubmlnaHRfc2hhcmVzLnN0YXkudjEuQ3JlYXRlQm9va2luZ1Jlc3BvbnNlIgSItRgCEmIKCUxpc3RUcmlwcxImLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLkxpc3RUcmlwc1JlcXVlc3QaJy5uaWdodF9zaGFyZXMuc3RheS52MS5MaXN0VHJpcHNSZXNwb25zZSIEiLUYAhJcCgdDaGVja0luEiQubmlnaHRfc2hhcmVzLnN0YXkudjEuQ2hlY2tJblJlcXVlc3QaJS5uaWdodF9zaGFyZXMuc3RheS52MS5DaGVja0luUmVzcG9uc2UiBIi1GAISZQoKR2V0UmVjZWlwdBInLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLkdldFJlY2VpcHRSZXF1ZXN0GigubmlnaHRfc2hhcmVzLnN0YXkudjEuR2V0UmVjZWlwdFJlc3BvbnNlIgSItRgCEmUKClRvZ2dsZVNhdmUSJy5uaWdodF9zaGFyZXMuc3RheS52MS5Ub2dnbGVTYXZlUmVxdWVzdBooLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlRvZ2dsZVNhdmVSZXNwb25zZSIEiLUYAhJiCglMaXN0U2F2ZXMSJi5uaWdodF9zaGFyZXMuc3RheS52MS5MaXN0U2F2ZXNSZXF1ZXN0GicubmlnaHRfc2hhcmVzLnN0YXkudjEuTGlzdFNhdmVzUmVzcG9uc2UiBIi1GAJiBnByb3RvMw", [file_google_protobuf_timestamp, file_night_shares_auth_v1_access, file_night_shares_catalog_v1_property, file_night_shares_stay_v1_trip]);
+  fileDesc("Ch9uaWdodF9zaGFyZXMvc3RheS92MS9zdGF5LnByb3RvEhRuaWdodF9zaGFyZXMuc3RheS52MSJqChdHZXRQcmljZUNhbGVuZGFyUmVxdWVzdBITCgtwcm9wZXJ0eV9pZBgBIAEoCRIUCgxyb29tX3R5cGVfaWQYAiABKAkSEgoKc3RhcnRfZGF0ZRgDIAEoCRIQCghlbmRfZGF0ZRgEIAEoCSJMChhHZXRQcmljZUNhbGVuZGFyUmVzcG9uc2USMAoGbmlnaHRzGAEgAygLMiAubmlnaHRfc2hhcmVzLnN0YXkudjEuTmlnaHRQcmljZSJKChBRdW90ZVN0YXlSZXF1ZXN0EjYKCXNlbGVjdGlvbhgBIAEoCzIjLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlN0YXlTZWxlY3Rpb24iQwoRUXVvdGVTdGF5UmVzcG9uc2USLgoFcXVvdGUYASABKAsyHy5uaWdodF9zaGFyZXMuc3RheS52MS5TdGF5UXVvdGUiJAoQTG9ja1F1b3RlUmVxdWVzdBIQCghxdW90ZV9pZBgBIAEoCSJUChFMb2NrUXVvdGVSZXNwb25zZRIPCgdsb2NrX2lkGAEgASgJEi4KCmV4cGlyZXNfYXQYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wImIKFENyZWF0ZUJvb2tpbmdSZXF1ZXN0Eg8KB2xvY2tfaWQYASABKAkSEgoKZ3Vlc3RfbmFtZRgCIAEoCRITCgtndWVzdF9lbWFpbBgDIAEoCUoECAQQBVIKcGF5X21ldGhvZCJBChVDcmVhdGVCb29raW5nUmVzcG9uc2USKAoEdHJpcBgBIAEoCzIaLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlRyaXAiEgoQTGlzdFRyaXBzUmVxdWVzdCJrChFMaXN0VHJpcHNSZXNwb25zZRIsCgh1cGNvbWluZxgBIAMoCzIaLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlRyaXASKAoEcGFzdBgCIAMoCzIaLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlRyaXAiPQoOQ2hlY2tJblJlcXVlc3QSDwoHdHJpcF9pZBgBIAEoCRIaChJ2ZXJpZmljYXRpb25fdG9rZW4YAiABKAkiOwoPQ2hlY2tJblJlc3BvbnNlEigKBHRyaXAYASABKAsyGi5uaWdodF9zaGFyZXMuc3RheS52MS5UcmlwIiQKEUdldFJlY2VpcHRSZXF1ZXN0Eg8KB3RyaXBfaWQYASABKAkiRAoSR2V0UmVjZWlwdFJlc3BvbnNlEi4KB3JlY2VpcHQYASABKAsyHS5uaWdodF9zaGFyZXMuc3RheS52MS5SZWNlaXB0IigKEVRvZ2dsZVNhdmVSZXF1ZXN0EhMKC3Byb3BlcnR5X2lkGAEgASgJIiYKElRvZ2dsZVNhdmVSZXNwb25zZRIQCghpc19zYXZlZBgBIAEoCCISChBMaXN0U2F2ZXNSZXF1ZXN0IkoKEUxpc3RTYXZlc1Jlc3BvbnNlEjUKCnByb3BlcnRpZXMYASADKAsyIS5uaWdodF9zaGFyZXMuY2F0YWxvZy52MS5Qcm9wZXJ0eSI+ChNUYXBSZWNlcHRpb25SZXF1ZXN0EhIKCmJvb2tpbmdfaWQYASABKAkSEwoLdGFnX3BheWxvYWQYAiABKAkiRQoUVGFwUmVjZXB0aW9uUmVzcG9uc2USLQoJdGFwcGVkX2F0GAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCInChFSZXBvcnRXYWxrUmVxdWVzdBISCgpib29raW5nX2lkGAEgASgJIlwKElJlcG9ydFdhbGtSZXNwb25zZRIRCglyZXBvcnRfaWQYASABKAkSMwoNcGFpZF90b19ndWVzdBgCIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYzKGCQoLU3RheVNlcnZpY2USdwoQR2V0UHJpY2VDYWxlbmRhchItLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLkdldFByaWNlQ2FsZW5kYXJSZXF1ZXN0Gi4ubmlnaHRfc2hhcmVzLnN0YXkudjEuR2V0UHJpY2VDYWxlbmRhclJlc3BvbnNlIgSItRgBEmIKCVF1b3RlU3RheRImLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlF1b3RlU3RheVJlcXVlc3QaJy5uaWdodF9zaGFyZXMuc3RheS52MS5RdW90ZVN0YXlSZXNwb25zZSIEiLUYARJiCglMb2NrUXVvdGUSJi5uaWdodF9zaGFyZXMuc3RheS52MS5Mb2NrUXVvdGVSZXF1ZXN0GicubmlnaHRfc2hhcmVzLnN0YXkudjEuTG9ja1F1b3RlUmVzcG9uc2UiBIi1GAISbgoNQ3JlYXRlQm9va2luZxIqLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLkNyZWF0ZUJvb2tpbmdSZXF1ZXN0GisubmlnaHRfc2hhcmVzLnN0YXkudjEuQ3JlYXRlQm9va2luZ1Jlc3BvbnNlIgSItRgCEmIKCUxpc3RUcmlwcxImLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLkxpc3RUcmlwc1JlcXVlc3QaJy5uaWdodF9zaGFyZXMuc3RheS52MS5MaXN0VHJpcHNSZXNwb25zZSIEiLUYAhJrCgxUYXBSZWNlcHRpb24SKS5uaWdodF9zaGFyZXMuc3RheS52MS5UYXBSZWNlcHRpb25SZXF1ZXN0GioubmlnaHRfc2hhcmVzLnN0YXkudjEuVGFwUmVjZXB0aW9uUmVzcG9uc2UiBIi1GAISZQoKUmVwb3J0V2FsaxInLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlJlcG9ydFdhbGtSZXF1ZXN0GigubmlnaHRfc2hhcmVzLnN0YXkudjEuUmVwb3J0V2Fsa1Jlc3BvbnNlIgSItRgCElwKB0NoZWNrSW4SJC5uaWdodF9zaGFyZXMuc3RheS52MS5DaGVja0luUmVxdWVzdBolLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLkNoZWNrSW5SZXNwb25zZSIEiLUYAhJlCgpHZXRSZWNlaXB0EicubmlnaHRfc2hhcmVzLnN0YXkudjEuR2V0UmVjZWlwdFJlcXVlc3QaKC5uaWdodF9zaGFyZXMuc3RheS52MS5HZXRSZWNlaXB0UmVzcG9uc2UiBIi1GAISZQoKVG9nZ2xlU2F2ZRInLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlRvZ2dsZVNhdmVSZXF1ZXN0GigubmlnaHRfc2hhcmVzLnN0YXkudjEuVG9nZ2xlU2F2ZVJlc3BvbnNlIgSItRgCEmIKCUxpc3RTYXZlcxImLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLkxpc3RTYXZlc1JlcXVlc3QaJy5uaWdodF9zaGFyZXMuc3RheS52MS5MaXN0U2F2ZXNSZXNwb25zZSIEiLUYAmIGcHJvdG8z", [file_google_protobuf_timestamp, file_night_shares_common_v1_money, file_night_shares_auth_v1_access, file_night_shares_catalog_v1_property, file_night_shares_stay_v1_trip]);
 
 /**
  * @generated from message night_shares.stay.v1.GetPriceCalendarRequest
@@ -358,6 +360,84 @@ export const ListSavesResponseSchema: GenMessage<ListSavesResponse> = /*@__PURE_
   messageDesc(file_night_shares_stay_v1_stay, 17);
 
 /**
+ * @generated from message night_shares.stay.v1.TapReceptionRequest
+ */
+export type TapReceptionRequest = Message<"night_shares.stay.v1.TapReceptionRequest"> & {
+  /**
+   * @generated from field: string booking_id = 1;
+   */
+  bookingId: string;
+
+  /**
+   * @generated from field: string tag_payload = 2;
+   */
+  tagPayload: string;
+};
+
+/**
+ * Describes the message night_shares.stay.v1.TapReceptionRequest.
+ * Use `create(TapReceptionRequestSchema)` to create a new message.
+ */
+export const TapReceptionRequestSchema: GenMessage<TapReceptionRequest> = /*@__PURE__*/
+  messageDesc(file_night_shares_stay_v1_stay, 18);
+
+/**
+ * @generated from message night_shares.stay.v1.TapReceptionResponse
+ */
+export type TapReceptionResponse = Message<"night_shares.stay.v1.TapReceptionResponse"> & {
+  /**
+   * @generated from field: google.protobuf.Timestamp tapped_at = 1;
+   */
+  tappedAt?: Timestamp | undefined;
+};
+
+/**
+ * Describes the message night_shares.stay.v1.TapReceptionResponse.
+ * Use `create(TapReceptionResponseSchema)` to create a new message.
+ */
+export const TapReceptionResponseSchema: GenMessage<TapReceptionResponse> = /*@__PURE__*/
+  messageDesc(file_night_shares_stay_v1_stay, 19);
+
+/**
+ * @generated from message night_shares.stay.v1.ReportWalkRequest
+ */
+export type ReportWalkRequest = Message<"night_shares.stay.v1.ReportWalkRequest"> & {
+  /**
+   * @generated from field: string booking_id = 1;
+   */
+  bookingId: string;
+};
+
+/**
+ * Describes the message night_shares.stay.v1.ReportWalkRequest.
+ * Use `create(ReportWalkRequestSchema)` to create a new message.
+ */
+export const ReportWalkRequestSchema: GenMessage<ReportWalkRequest> = /*@__PURE__*/
+  messageDesc(file_night_shares_stay_v1_stay, 20);
+
+/**
+ * @generated from message night_shares.stay.v1.ReportWalkResponse
+ */
+export type ReportWalkResponse = Message<"night_shares.stay.v1.ReportWalkResponse"> & {
+  /**
+   * @generated from field: string report_id = 1;
+   */
+  reportId: string;
+
+  /**
+   * @generated from field: night_shares.common.v1.Usdc paid_to_guest = 2;
+   */
+  paidToGuest?: Usdc | undefined;
+};
+
+/**
+ * Describes the message night_shares.stay.v1.ReportWalkResponse.
+ * Use `create(ReportWalkResponseSchema)` to create a new message.
+ */
+export const ReportWalkResponseSchema: GenMessage<ReportWalkResponse> = /*@__PURE__*/
+  messageDesc(file_night_shares_stay_v1_stay, 21);
+
+/**
  * @generated from service night_shares.stay.v1.StayService
  */
 export const StayService: GenService<{
@@ -400,6 +480,22 @@ export const StayService: GenService<{
     methodKind: "unary";
     input: typeof ListTripsRequestSchema;
     output: typeof ListTripsResponseSchema;
+  },
+  /**
+   * @generated from rpc night_shares.stay.v1.StayService.TapReception
+   */
+  tapReception: {
+    methodKind: "unary";
+    input: typeof TapReceptionRequestSchema;
+    output: typeof TapReceptionResponseSchema;
+  },
+  /**
+   * @generated from rpc night_shares.stay.v1.StayService.ReportWalk
+   */
+  reportWalk: {
+    methodKind: "unary";
+    input: typeof ReportWalkRequestSchema;
+    output: typeof ReportWalkResponseSchema;
   },
   /**
    * @generated from rpc night_shares.stay.v1.StayService.CheckIn

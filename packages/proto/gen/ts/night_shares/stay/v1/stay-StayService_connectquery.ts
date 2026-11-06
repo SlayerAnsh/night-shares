@@ -30,6 +30,16 @@ export const createBooking = StayService.method.createBooking;
 export const listTrips = StayService.method.listTrips;
 
 /**
+ * @generated from rpc night_shares.stay.v1.StayService.TapReception
+ */
+export const tapReception = StayService.method.tapReception;
+
+/**
+ * @generated from rpc night_shares.stay.v1.StayService.ReportWalk
+ */
+export const reportWalk = StayService.method.reportWalk;
+
+/**
  * @generated from rpc night_shares.stay.v1.StayService.CheckIn
  */
 export const checkIn = StayService.method.checkIn;

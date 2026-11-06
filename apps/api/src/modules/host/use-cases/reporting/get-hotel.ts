@@ -1,6 +1,7 @@
 import { toMicros } from "@night-shares/market-model";
 import { addDays, diffDays, parseDate } from "../../../../shared/dates";
 import { DomainError } from "../../../../shared/errors/domain-error";
+import { walkIncidents } from "../../../walk/repo/incidents";
 import { kpisOf, occupancyOf } from "../../mappers/aggregates";
 import { guestMicros, mapNight } from "../../mappers/night";
 import type { HostDeps } from "../deps";
@@ -45,6 +46,7 @@ export function createGetHotel(deps: HostDeps) {
     });
     return {
       property,
+      walkIncidents: walkIncidents(deps.ports.db, propertyId),
       kpis: kpisOf(
         next.filter((r) => r.date < addDays(today, 30)),
         createGetPayout(deps)(userId, propertyId).availableNow.micros,

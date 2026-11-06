@@ -45,5 +45,6 @@ message GetPropertyRequest {
 }
 
 message GetPropertyResponse {
+  repeated WalkIncident walk_incidents = 2;
   night_shares.catalog.v1.Property property = 1;
 }

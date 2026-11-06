@@ -3,6 +3,7 @@ syntax = "proto3";
 package night_shares.host.v1;
 
 import "google/protobuf/timestamp.proto";
+import "night_shares/catalog/v1/property.proto";
 import "night_shares/common/v1/money.proto";
 import "night_shares/common/v1/night.proto";
 import "night_shares/host/v1/opening.proto";
@@ -38,6 +39,7 @@ message HostKpis {
 }
 
 message HotelSummary {
+  repeated night_shares.catalog.v1.WalkIncident walk_incidents = 5;
   string property_id = 1;
   string name = 2;
   string city = 3;

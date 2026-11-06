@@ -57,6 +57,7 @@ message GetHotelRequest {
 }
 
 message GetHotelResponse {
+  repeated night_shares.catalog.v1.WalkIncident walk_incidents = 6;
   night_shares.catalog.v1.Property property = 1;
   HostKpis kpis = 2;
   repeated Occupancy month_glance = 3;

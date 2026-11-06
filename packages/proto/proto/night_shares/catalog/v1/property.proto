@@ -3,6 +3,7 @@ syntax = "proto3";
 package night_shares.catalog.v1;
 
 import "night_shares/common/v1/money.proto";
+import "google/protobuf/timestamp.proto";
 
 message RoomType {
   string id = 1;
@@ -39,4 +40,10 @@ message StayCard {
   night_shares.common.v1.Usdc total = 2;
   night_shares.common.v1.Usdc average = 3;
   bool is_deal = 4;
+}
+
+message WalkIncident {
+  string id = 1;
+  google.protobuf.Timestamp reported_at = 2;
+  bool is_false = 3;
 }

@@ -68,6 +68,19 @@ export function DetailScreen({ propertyId }: { propertyId: string }) {
             ))}
           </ul>
           <p>{property.blurb}</p>
+          <h2>Walked guest incidents</h2>
+          <ul>
+            {model.property.data?.walkIncidents.map((incident) => (
+              <li key={incident.id}>
+                {incident.reportedAt
+                  ? new Date(
+                      Number(incident.reportedAt.seconds) * 1000,
+                    ).toISOString()
+                  : incident.id}
+                {incident.isFalse ? " (false report)" : " (walked guest)"}
+              </li>
+            ))}
+          </ul>
           <h2>Amenities</h2>
           <ul>
             {property.amenities.map((a) => (

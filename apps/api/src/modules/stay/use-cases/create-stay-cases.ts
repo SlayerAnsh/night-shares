@@ -9,6 +9,8 @@ import { createToggleSave } from "./saves/toggle-save";
 import { createCheckIn } from "./trips/check-in";
 import { createGetReceipt } from "./trips/get-receipt";
 import { createListTrips } from "./trips/list-trips";
+import { createReportWalk } from "./trips/report-walk";
+import { createTapReception } from "./trips/tap-reception";
 export function createStayCases(ports: Ports, repo: StayRepo) {
   return {
     getPriceCalendar: createGetPriceCalendar(ports),
@@ -16,6 +18,8 @@ export function createStayCases(ports: Ports, repo: StayRepo) {
     lockQuote: createLockQuote(ports, repo),
     createBooking: createCreateBooking(ports, repo),
     listTrips: createListTrips(ports, repo),
+    tapReception: createTapReception(ports, repo),
+    reportWalk: createReportWalk(ports, repo),
     checkIn: createCheckIn(ports, repo),
     getReceipt: createGetReceipt(repo),
     toggleSave: createToggleSave(ports, repo),

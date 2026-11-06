@@ -484,6 +484,20 @@ components:
           format: double
       title: RoomType
       additionalProperties: false
+    night_shares.catalog.v1.WalkIncident:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        reportedAt:
+          title: reported_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        isFalse:
+          type: boolean
+          title: is_false
+      title: WalkIncident
+      additionalProperties: false
     night_shares.common.v1.NightKey:
       type: object
       properties:
@@ -592,6 +606,11 @@ components:
     night_shares.host.v1.GetHotelResponse:
       type: object
       properties:
+        walkIncidents:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.catalog.v1.WalkIncident'
+          title: walk_incidents
         property:
           title: property
           $ref: '#/components/schemas/night_shares.catalog.v1.Property'
@@ -768,6 +787,11 @@ components:
     night_shares.host.v1.HotelSummary:
       type: object
       properties:
+        walkIncidents:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.catalog.v1.WalkIncident'
+          title: walk_incidents
         propertyId:
           type: string
           title: property_id

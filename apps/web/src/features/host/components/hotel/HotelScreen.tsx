@@ -25,6 +25,25 @@ function HotelBody({
         {property.city}, {property.country}
       </p>
       <Kpis value={data.kpis} />
+      <section>
+        <h2>Walked guest incidents</h2>
+        <p>
+          {data.walkIncidents.filter((incident) => !incident.isFalse).length}{" "}
+          valid incidents. Two incidents suspend new openings.
+        </p>
+        <ul>
+          {data.walkIncidents.map((incident) => (
+            <li key={incident.id}>
+              {incident.reportedAt
+                ? new Date(
+                    Number(incident.reportedAt.seconds) * 1000,
+                  ).toISOString()
+                : incident.id}
+              {incident.isFalse ? " (false report)" : " (walked guest)"}
+            </li>
+          ))}
+        </ul>
+      </section>
       <a href={`/host/payout?property=${property.id}`}>Payout</a>
       <OccupancyTable rows={data.monthGlance} caption="Month at a glance" />
       <HotelCalendar

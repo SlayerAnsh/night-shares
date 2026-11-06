@@ -72,7 +72,7 @@ test("CORS permits the frontend origin and its Connect preflight", async () => {
   );
 });
 
-test("all 46 RPCs are registered and authenticated sessions reach every stub", async () => {
+test("all 48 RPCs are registered and authenticated sessions reach every stub", async () => {
   const token = h.container.ports.sessions.create({
     id: "usr_all",
     humanId: "all",
@@ -101,5 +101,5 @@ test("all 46 RPCs are registered and authenticated sessions reach every stub", a
       count++;
     }
   }
-  expect(count).toBe(46);
+  expect(count).toBe(48);
 });

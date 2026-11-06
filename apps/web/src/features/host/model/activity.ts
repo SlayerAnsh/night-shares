@@ -5,6 +5,8 @@ export function activityLabel(kind: string) {
     (
       {
         guest_booked: "Guest booked",
+        double_sale_reported: "Guest reported being walked",
+        double_sale_refund: "Walked guest payout",
         trader_bought: "Trader took rooms",
         trader_sold_back: "Trader returned rooms",
         ask_filled: "Rooms sold for a trader",

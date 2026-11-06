@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import {
   adjustCoverAccount,
   coverAccount,
-} from "../../../double-sale/repo/cover-accounts";
+} from "../../../walk/repo/cover-accounts";
 import { fixture } from "../fixture";
 import { createSweep } from "./sweep";
 

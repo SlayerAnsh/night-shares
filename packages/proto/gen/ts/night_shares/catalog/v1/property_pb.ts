@@ -6,13 +6,15 @@ import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Usdc } from "../../common/v1/money_pb";
 import { file_night_shares_common_v1_money } from "../../common/v1/money_pb";
+import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file night_shares/catalog/v1/property.proto.
  */
 export const file_night_shares_catalog_v1_property: GenFile = /*@__PURE__*/
-  fileDesc("CiZuaWdodF9zaGFyZXMvY2F0YWxvZy92MS9wcm9wZXJ0eS5wcm90bxIXbmlnaHRfc2hhcmVzLmNhdGFsb2cudjEiSwoIUm9vbVR5cGUSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIMCgRzcGVjGAMgASgJEhcKD3JhdGVfbXVsdGlwbGllchgEIAEoASL6AQoIUHJvcGVydHkSCgoCaWQYASABKAkSDAoEY29kZRgCIAEoCRIMCgRuYW1lGAMgASgJEgwKBGNpdHkYBCABKAkSDwoHY291bnRyeRgFIAEoCRIMCgR0eXBlGAYgASgJEg4KBnJhdGluZxgHIAEoARIPCgdyZXZpZXdzGAggASgFEg8KB3BvcHVsYXIYCSABKAgSDgoGcGhvdG9zGAogAygJEg0KBWJsdXJiGAsgASgJEhEKCWFtZW5pdGllcxgMIAMoCRI1Cgpyb29tX3R5cGVzGA0gAygLMiEubmlnaHRfc2hhcmVzLmNhdGFsb2cudjEuUm9vbVR5cGUicgoLRGVzdGluYXRpb24SDAoEY2l0eRgBIAEoCRIPCgdjb3VudHJ5GAIgASgJEhIKCnN0YXlfY291bnQYAyABKAUSMAoKZnJvbV9wcmljZRgEIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyKsAQoIU3RheUNhcmQSMwoIcHJvcGVydHkYASABKAsyIS5uaWdodF9zaGFyZXMuY2F0YWxvZy52MS5Qcm9wZXJ0eRIrCgV0b3RhbBgCIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxItCgdhdmVyYWdlGAMgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEg8KB2lzX2RlYWwYBCABKAhiBnByb3RvMw", [file_night_shares_common_v1_money]);
+  fileDesc("CiZuaWdodF9zaGFyZXMvY2F0YWxvZy92MS9wcm9wZXJ0eS5wcm90bxIXbmlnaHRfc2hhcmVzLmNhdGFsb2cudjEiSwoIUm9vbVR5cGUSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIMCgRzcGVjGAMgASgJEhcKD3JhdGVfbXVsdGlwbGllchgEIAEoASL6AQoIUHJvcGVydHkSCgoCaWQYASABKAkSDAoEY29kZRgCIAEoCRIMCgRuYW1lGAMgASgJEgwKBGNpdHkYBCABKAkSDwoHY291bnRyeRgFIAEoCRIMCgR0eXBlGAYgASgJEg4KBnJhdGluZxgHIAEoARIPCgdyZXZpZXdzGAggASgFEg8KB3BvcHVsYXIYCSABKAgSDgoGcGhvdG9zGAogAygJEg0KBWJsdXJiGAsgASgJEhEKCWFtZW5pdGllcxgMIAMoCRI1Cgpyb29tX3R5cGVzGA0gAygLMiEubmlnaHRfc2hhcmVzLmNhdGFsb2cudjEuUm9vbVR5cGUicgoLRGVzdGluYXRpb24SDAoEY2l0eRgBIAEoCRIPCgdjb3VudHJ5GAIgASgJEhIKCnN0YXlfY291bnQYAyABKAUSMAoKZnJvbV9wcmljZRgEIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyKsAQoIU3RheUNhcmQSMwoIcHJvcGVydHkYASABKAsyIS5uaWdodF9zaGFyZXMuY2F0YWxvZy52MS5Qcm9wZXJ0eRIrCgV0b3RhbBgCIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxItCgdhdmVyYWdlGAMgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEg8KB2lzX2RlYWwYBCABKAgiXQoMV2Fsa0luY2lkZW50EgoKAmlkGAEgASgJEi8KC3JlcG9ydGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIQCghpc19mYWxzZRgDIAEoCGIGcHJvdG8z", [file_night_shares_common_v1_money, file_google_protobuf_timestamp]);
 
 /**
  * @generated from message night_shares.catalog.v1.RoomType
@@ -186,4 +188,31 @@ export type StayCard = Message<"night_shares.catalog.v1.StayCard"> & {
  */
 export const StayCardSchema: GenMessage<StayCard> = /*@__PURE__*/
   messageDesc(file_night_shares_catalog_v1_property, 3);
+
+/**
+ * @generated from message night_shares.catalog.v1.WalkIncident
+ */
+export type WalkIncident = Message<"night_shares.catalog.v1.WalkIncident"> & {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id: string;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp reported_at = 2;
+   */
+  reportedAt?: Timestamp | undefined;
+
+  /**
+   * @generated from field: bool is_false = 3;
+   */
+  isFalse: boolean;
+};
+
+/**
+ * Describes the message night_shares.catalog.v1.WalkIncident.
+ * Use `create(WalkIncidentSchema)` to create a new message.
+ */
+export const WalkIncidentSchema: GenMessage<WalkIncident> = /*@__PURE__*/
+  messageDesc(file_night_shares_catalog_v1_property, 4);
 

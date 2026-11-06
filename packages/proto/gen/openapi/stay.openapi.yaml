@@ -281,6 +281,76 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.stay.v1.QuoteStayResponse'
+  /night_shares.stay.v1.StayService/ReportWalk:
+    post:
+      tags:
+        - night_shares.stay.v1.StayService
+      summary: ReportWalk
+      operationId: night_shares.stay.v1.StayService.ReportWalk
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.stay.v1.ReportWalkRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.stay.v1.ReportWalkResponse'
+  /night_shares.stay.v1.StayService/TapReception:
+    post:
+      tags:
+        - night_shares.stay.v1.StayService
+      summary: TapReception
+      operationId: night_shares.stay.v1.StayService.TapReception
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.stay.v1.TapReceptionRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.stay.v1.TapReceptionResponse'
   /night_shares.stay.v1.StayService/ToggleSave:
     post:
       tags:
@@ -758,6 +828,25 @@ components:
           $ref: '#/components/schemas/google.protobuf.Timestamp'
       title: Receipt
       additionalProperties: false
+    night_shares.stay.v1.ReportWalkRequest:
+      type: object
+      properties:
+        bookingId:
+          type: string
+          title: booking_id
+      title: ReportWalkRequest
+      additionalProperties: false
+    night_shares.stay.v1.ReportWalkResponse:
+      type: object
+      properties:
+        reportId:
+          type: string
+          title: report_id
+        paidToGuest:
+          title: paid_to_guest
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: ReportWalkResponse
+      additionalProperties: false
     night_shares.stay.v1.StayQuote:
       type: object
       properties:
@@ -811,6 +900,25 @@ components:
           title: rooms
           format: int32
       title: StaySelection
+      additionalProperties: false
+    night_shares.stay.v1.TapReceptionRequest:
+      type: object
+      properties:
+        bookingId:
+          type: string
+          title: booking_id
+        tagPayload:
+          type: string
+          title: tag_payload
+      title: TapReceptionRequest
+      additionalProperties: false
+    night_shares.stay.v1.TapReceptionResponse:
+      type: object
+      properties:
+        tappedAt:
+          title: tapped_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+      title: TapReceptionResponse
       additionalProperties: false
     night_shares.stay.v1.ToggleSaveRequest:
       type: object

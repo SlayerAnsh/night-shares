@@ -1,22 +1,16 @@
 import type { Database } from "bun:sqlite";
-import { DomainError } from "../../shared/errors/domain-error";
 import type { IdGenerator } from "../ids/id-generator";
-import type { DoubleSaleReport } from "./booking-report";
+import type { WalkReport } from "./booking-report";
 
 const adapters = new WeakMap<Database, ReturnType<typeof createAdapter>>();
 function createAdapter(ids: IdGenerator) {
-  const reports: DoubleSaleReport[] = [];
+  const reports: WalkReport[] = [];
   return {
     async poll() {
       return reports.map((report) => ({ ...report }));
     },
-    report(nightKey: string, rooms: number) {
-      if (!Number.isSafeInteger(rooms) || rooms <= 0)
-        throw new DomainError(
-          "INVALID_ARGUMENT",
-          "Report a positive number of rooms.",
-        );
-      const report = { id: ids.next("report"), nightKey, rooms };
+    report(input: Omit<WalkReport, "id">) {
+      const report = { ...input, id: ids.next("report") };
       reports.push(report);
       return { ...report };
     },
