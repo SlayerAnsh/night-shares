@@ -1,11 +1,8 @@
 "use client";
-import {
-  Alert,
-  BackLink,
-  Badge,
-  EmptyState,
-} from "@night-shares/design-system";
+import { Alert, BackLink, Badge } from "@night-shares/design-system";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ErrorState } from "../../../../shared/fallback/ErrorState";
 import { useNight } from "../../hooks/use-night";
 import { useUrlState } from "../../hooks/use-url-state";
 import { parseNightKey } from "../../model/market";
@@ -23,16 +20,9 @@ import ticket from "./ticket.module.css";
 
 export function NightScreen({ nightKey }: { nightKey: string }) {
   const night = parseNightKey(nightKey);
-  if (night) return <NightContent night={night} />;
-  return (
-    <div className={page.page}>
-      <MarketsLink />
-      <Feedback error="This market link is not valid." />
-      <EmptyState plain>
-        Pick a market from the <Link href="/trade">list of markets</Link>.
-      </EmptyState>
-    </div>
-  );
+  // A malformed key is not a page: show Trade's not-found.tsx.
+  if (!night) notFound();
+  return <NightContent night={night} />;
 }
 
 function MarketsLink() {
@@ -54,6 +44,22 @@ function NightContent({
   const { update } = useUrlState();
   const card = state.detail.data?.night;
   const fair = state.book.data?.fairPrice?.micros;
+  // No market behind the key (or it failed to load): one panel, no empty
+  // chart, book or ticket.
+  if (state.detail.error && !card)
+    return (
+      <div className={page.page}>
+        <MarketsLink />
+        <ErrorState
+          error={state.detail.error}
+          thing="This market"
+          need="orb"
+          onRetry={() => void state.detail.refetch()}
+          retrying={state.detail.isFetching}
+          back={{ href: "/trade", label: "Back to markets" }}
+        />
+      </div>
+    );
   return (
     <div className={`${page.page} ${page.wide} ${styles.screen}`}>
       <MarketsLink />
@@ -74,7 +80,6 @@ function NightContent({
       ) : state.detail.isPending ? (
         <Skeleton rows={2} height={48} label="Loading market" />
       ) : null}
-      <Feedback error={state.detail.error?.message} />
       <Feedback
         error={state.actions.error || state.watch.error?.message}
         notice={state.actions.notice}

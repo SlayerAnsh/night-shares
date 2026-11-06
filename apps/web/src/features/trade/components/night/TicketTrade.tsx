@@ -1,4 +1,5 @@
 import { Button } from "@night-shares/design-system";
+import { errorLine } from "../../../../shared/fallback/error-copy";
 import { formatRoomNights } from "../../../../shared/format";
 import type { useTicket } from "../../hooks/use-ticket";
 import { usd } from "../../model/display";
@@ -79,7 +80,7 @@ export function TicketTrade({
       )}
       {t.preview.error && (
         <p role="alert" className={styles.warn}>
-          {t.preview.error.message}
+          {errorLine(t.preview.error, "This market")}
         </p>
       )}
       {t.quote && <QuotePreview quote={t.quote} mode={t.mode} />}

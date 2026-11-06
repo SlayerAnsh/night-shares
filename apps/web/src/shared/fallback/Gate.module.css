@@ -1,0 +1,175 @@
+/* Sign in gate: a card over a blurred outline of the page it unlocks. */
+.gate {
+  display: grid;
+  margin: var(--sp-8) 0 var(--sp-32);
+}
+
+.gate > * {
+  grid-area: 1 / 1;
+}
+
+.withPreview {
+  min-height: 560px;
+}
+
+.preview {
+  pointer-events: none;
+  user-select: none;
+  filter: blur(3px);
+  opacity: 0.7;
+  mask-image: linear-gradient(to bottom, #000 30%, transparent 92%);
+}
+
+.card {
+  position: relative;
+  z-index: var(--z-raised);
+  align-self: start;
+  justify-self: center;
+  display: grid;
+  gap: var(--sp-12);
+  width: 100%;
+  max-width: 560px;
+  margin-top: var(--sp-24);
+  padding: var(--sp-28);
+  box-shadow: var(--shadow-lg);
+}
+
+.level {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-6);
+  justify-self: start;
+  padding: var(--sp-4) var(--sp-10);
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: var(--fs-12-5);
+  font-weight: var(--fw-bold);
+}
+
+.glyph {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--display);
+  font-size: var(--fs-36);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
+  text-transform: uppercase;
+}
+
+.lead {
+  margin: 0;
+  color: var(--ink-2);
+  line-height: var(--lh-body);
+}
+
+.perks {
+  display: grid;
+  gap: var(--sp-10);
+  margin: var(--sp-4) 0 0;
+  padding: var(--sp-14) 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+  font-size: var(--fs-14);
+}
+
+.perks li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-10);
+  align-items: start;
+}
+
+.perks b {
+  display: block;
+  color: var(--ink);
+}
+
+.perks li > span:last-child {
+  color: var(--muted);
+}
+
+.tick {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  background: var(--pos-soft);
+  color: var(--pos);
+}
+
+.why {
+  margin: 0;
+  padding: var(--sp-10) var(--sp-12);
+  border-radius: var(--r-12);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-8) var(--sp-12);
+  margin-top: var(--sp-4);
+}
+
+/* Trade: flat, square, sans */
+[data-app="trade"] .card {
+  box-shadow: var(--shadow-lg);
+}
+
+[data-app="trade"] .level {
+  border-radius: var(--r);
+  background: var(--pos-soft);
+  color: var(--pos);
+  font-weight: var(--w6);
+}
+
+[data-app="trade"] .title {
+  font-family: var(--sans);
+  font-size: var(--fs-24);
+  font-weight: var(--w6);
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: var(--lh-snug);
+}
+
+[data-app="trade"] .tick {
+  border-radius: var(--r);
+}
+
+/* Trade surfaces are flat (surface-2 equals surface in dark), so outline it. */
+[data-app="trade"] .why {
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: transparent;
+}
+
+@media (max-width: 720px) {
+  .withPreview {
+    min-height: 0;
+  }
+  .preview {
+    display: none;
+  }
+  .card {
+    margin-top: 0;
+    padding: var(--sp-20);
+  }
+  .title {
+    font-size: var(--fs-30);
+  }
+  [data-app="trade"] .title {
+    font-size: var(--fs-20);
+  }
+}

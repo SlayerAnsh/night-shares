@@ -2,6 +2,7 @@
 import { BackLink, Card } from "@night-shares/design-system";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { ErrorState } from "../../../../shared/fallback/ErrorState";
 import { useCheckout } from "../../hooks/use-checkout";
 import { BookingSuccess } from "./BookingSuccess";
 import styles from "./Checkout.module.css";
@@ -19,6 +20,18 @@ function Checkout({ propertyId }: { propertyId: string }) {
   const c = useCheckout(propertyId);
   const trip = c.booking.data?.trip;
   const property = c.model.property.data?.property;
+  if (c.model.property.error && !property)
+    return (
+      <div className={styles.wrap}>
+        <ErrorState
+          error={c.model.property.error}
+          thing="This stay"
+          onRetry={() => void c.model.property.refetch()}
+          retrying={c.model.property.isFetching}
+          back={{ href: "/stay", label: "See all stays" }}
+        />
+      </div>
+    );
   return (
     <div className={styles.wrap}>
       {trip ? (

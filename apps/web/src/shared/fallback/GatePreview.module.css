@@ -1,0 +1,40 @@
+/* Placeholder outline of a signed in page, shown blurred behind SignInGate. */
+.pv {
+  display: grid;
+  gap: var(--sp-24);
+}
+
+.pvFigs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--sp-14);
+}
+
+.pvFig {
+  display: grid;
+  gap: var(--sp-8);
+  padding: var(--sp-16);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  font-size: var(--fs-13);
+  color: var(--muted);
+}
+
+.pvRows {
+  display: grid;
+}
+
+.pvRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-16);
+  padding: var(--sp-16) var(--sp-4);
+  border-bottom: 1px solid var(--line);
+}
+
+[data-app="trade"] .pvFig {
+  border-radius: var(--r);
+  border-width: 0 0 0 1px;
+  background: transparent;
+}

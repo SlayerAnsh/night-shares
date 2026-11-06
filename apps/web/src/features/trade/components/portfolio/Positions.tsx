@@ -1,6 +1,7 @@
-import { EmptyState } from "@night-shares/design-system";
+import { buttonClass, EmptyState } from "@night-shares/design-system";
 import type { Ask } from "@night-shares/proto/market/v1/book_pb";
 import type { Holding } from "@night-shares/proto/market/v1/portfolio_pb";
+import Link from "next/link";
 import { nightHref } from "../../model/market";
 import { Section } from "../ui/Section";
 import { HoldingRow } from "./HoldingRow";
@@ -48,7 +49,20 @@ export function Positions({
           ))}
         </div>
       ) : (
-        <EmptyState plain>No positions yet. Pick a market and buy.</EmptyState>
+        <EmptyState
+          title="No positions yet"
+          action={
+            <Link
+              href="/trade"
+              className={buttonClass({ variant: "primary", size: "sm" })}
+            >
+              Browse markets
+            </Link>
+          }
+        >
+          Buy room nights on any market and they show up here with their value
+          and P&L. Anything unsold at cutoff refunds 70% of the average bid.
+        </EmptyState>
       )}
     </Section>
   );

@@ -5,6 +5,8 @@ import { getSession } from "@night-shares/proto/identity/v1/identity-IdentitySer
 import type { User } from "@night-shares/proto/identity/v1/user_pb";
 import { useQueryClient } from "@tanstack/react-query";
 import { createContext, type ReactNode, useContext } from "react";
+import { isRetryable } from "../shared/fallback/error-copy";
+import { SessionError } from "../shared/fallback/SessionError";
 import { type AccessLevel, sessionLevel } from "./access";
 
 type Session = {
@@ -13,13 +15,17 @@ type Session = {
   isSignedIn: boolean;
   refresh: () => Promise<void>;
 };
+// Retry only network style failures (API restarting), never a signed out answer.
+export function retrySession(failures: number, error: unknown) {
+  return failures < 2 && isRetryable(error);
+}
 const SessionContext = createContext<Session | null>(null);
 export function SessionProvider({ children }: { children: ReactNode }) {
   const cache = useQueryClient();
   const query = useQuery(
     getSession,
     {},
-    { retry: false, meta: { session: true } },
+    { retry: retrySession, meta: { session: true } },
   );
   const user = query.error ? null : (query.data?.user ?? null);
   async function refresh() {
@@ -29,22 +35,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     cache.getMutationCache().clear();
     await query.refetch();
   }
-  if (
-    query.error &&
+  // Unauthenticated means signed out: the app renders and its gates show.
+  // Any other failure (API down or reloading) gets a retry panel in the shell.
+  const failed =
+    !!query.error &&
     !(
       query.error instanceof ConnectError &&
       query.error.code === Code.Unauthenticated
-    )
-  ) {
-    return (
-      <p role="alert">
-        Session unavailable.{" "}
-        <button type="button" onClick={() => void query.refetch()}>
-          Retry
-        </button>
-      </p>
     );
-  }
   return (
     <SessionContext.Provider
       value={{
@@ -54,7 +52,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         refresh,
       }}
     >
-      {children}
+      {failed ? (
+        <SessionError
+          error={query.error}
+          onRetry={() => void query.refetch()}
+        />
+      ) : (
+        children
+      )}
     </SessionContext.Provider>
   );
 }

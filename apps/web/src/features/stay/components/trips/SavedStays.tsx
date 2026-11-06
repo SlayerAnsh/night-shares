@@ -16,7 +16,10 @@ export function SavedStays() {
         error={saves.query.error || saves.mutation.error}
       />
       {saved?.length === 0 && (
-        <p className={styles.muted}>No saved stays yet.</p>
+        <p className={styles.muted}>
+          No saved stays yet. Tap the heart on any stay to keep it here.{" "}
+          <Link href="/stay">Browse stays</Link>
+        </p>
       )}
       {!!saved?.length && (
         <ul className={styles.saved}>

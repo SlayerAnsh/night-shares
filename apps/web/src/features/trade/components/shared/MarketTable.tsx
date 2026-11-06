@@ -1,7 +1,7 @@
 "use client";
 import { EmptyState } from "@night-shares/design-system";
 import type { NightCard } from "@night-shares/proto/market/v1/analytics_pb";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { MarketRow } from "./MarketRow";
 import styles from "./market-table.module.css";
 
@@ -30,7 +30,8 @@ export function MarketTable({
   nights: NightCard[];
   sort?: MarketSort;
   onSort?: (sort: MarketSort) => void;
-  empty?: string;
+  // A string renders as one muted line; pass a node for a fuller empty state.
+  empty?: ReactNode;
 }) {
   const now = Date.now();
   const [limit, setLimit] = useState(PAGE);
@@ -75,8 +76,10 @@ export function MarketTable({
             now={now}
           />
         ))
-      ) : (
+      ) : typeof empty === "string" ? (
         <EmptyState plain>{empty}</EmptyState>
+      ) : (
+        empty
       )}
       {more > 0 && (
         <button

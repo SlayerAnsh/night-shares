@@ -71,8 +71,13 @@ export function PortfolioScreen() {
     return (
       <>
         {head}
-        <StateCard title="Your hotels could not load" error={query.error}>
-          Check your connection and reload the page.
+        <StateCard
+          title="Your hotels could not load"
+          error={query.error}
+          back={null}
+        >
+          Nothing is lost: payouts keep sweeping to your wallet while this page
+          is unavailable.
         </StateCard>
       </>
     );
@@ -134,8 +139,19 @@ export function PortfolioScreen() {
           <OffHotelCard key={property.id} property={property} />
         ))}
         {!hotels.length && !connect.options.length && (
-          <StateCard title="No hotels connected yet">
-            Connect a channel manager below to start offering nights.
+          <StateCard
+            title="No hotels connected yet"
+            action={
+              <a
+                href="#connect"
+                className={buttonClass({ variant: "primary" })}
+              >
+                Connect a hotel
+              </a>
+            }
+          >
+            Connect your channel manager and choose which nights to open. Guests
+            book them first, and payouts sweep to your wallet in USDC.
           </StateCard>
         )}
         <div className={styles.legend}>

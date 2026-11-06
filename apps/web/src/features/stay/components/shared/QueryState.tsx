@@ -1,8 +1,9 @@
-import { ConnectError } from "@connectrpc/connect";
 import { Alert, Spinner } from "@night-shares/design-system";
+import { errorLine } from "../../../../shared/fallback/error-copy";
 import styles from "./QueryState.module.css";
 
-// Loading and error line for one query. Renders nothing once data is in.
+// Loading and error line for one query or action, in plain words (no codes).
+// Renders nothing once data is in. Whole page failures use ErrorState.
 export function QueryState({
   pending,
   error,
@@ -12,7 +13,7 @@ export function QueryState({
   error?: unknown;
   label?: string;
 }) {
-  if (error) return <Alert>{ConnectError.from(error).rawMessage}</Alert>;
+  if (error) return <Alert>{errorLine(error)}</Alert>;
   if (!pending) return null;
   return (
     <p className={styles.pending}>

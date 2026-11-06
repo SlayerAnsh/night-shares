@@ -1,9 +1,10 @@
 "use client";
-import { Kpis } from "@night-shares/design-system";
+import { buttonClass, Kpis } from "@night-shares/design-system";
 import type {
   HotelSummary,
   Payout,
 } from "@night-shares/proto/host/v1/hotel_pb";
+import Link from "next/link";
 import { useBalance, usePayout, usePortfolio } from "../../hooks/use-host-data";
 import { useHostSearch } from "../../hooks/use-host-search";
 import { sumPayouts } from "../../model/host-view";
@@ -145,13 +146,29 @@ export function PayoutScreen() {
         <Loading label="Loading hotels" rows={[[260], [260]]} />
       )}
       {!portfolio.isPending && !portfolio.data && (
-        <StateCard title="Payouts could not load" error={portfolio.error}>
-          Check your connection and reload the page.
+        <StateCard
+          title="Payouts could not load"
+          error={portfolio.error}
+          onRetry={() => void portfolio.refetch()}
+        >
+          Payouts still sweep to your wallet automatically while this page is
+          unavailable.
         </StateCard>
       )}
       {portfolio.data && !hotels.length && (
-        <StateCard title="No hotels connected yet">
-          Connect a channel manager on Your hotels to start earning.
+        <StateCard
+          title="No payouts yet"
+          action={
+            <Link
+              href="/host#connect"
+              className={buttonClass({ variant: "primary" })}
+            >
+              Connect a hotel
+            </Link>
+          }
+        >
+          Payouts start once a hotel is connected and its nights sell. Each
+          hotel is paid out on its own, straight to your wallet.
         </StateCard>
       )}
       {portfolio.data && hotels.length > 0 && (

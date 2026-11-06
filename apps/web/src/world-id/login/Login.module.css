@@ -64,6 +64,7 @@
   padding: var(--sp-12) var(--sp-14);
   border-radius: var(--r-12);
   border: 1px solid var(--w-line-2);
+  border-left: 3px solid var(--neg);
   font-size: var(--fs-13);
   line-height: var(--lh-normal);
 }

@@ -1,0 +1,134 @@
+/* Error and not found panels. Stay and Host use the display face, Trade its flat sans look. */
+.state {
+  display: grid;
+  justify-items: start;
+  gap: var(--sp-10);
+  width: 100%;
+  max-width: 620px;
+  margin: var(--sp-24) auto;
+  padding: var(--sp-28);
+  text-align: left;
+}
+
+.inline {
+  max-width: none;
+  margin: var(--sp-12) 0;
+  padding: var(--sp-16) 0;
+  border-top: 1px solid var(--line);
+}
+
+.page {
+  display: grid;
+  place-items: start center;
+  min-height: 60vh;
+  padding: calc(var(--sp-32) * 2) var(--gutter);
+}
+
+.eyebrow {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.code {
+  font-family: var(--display);
+  font-size: var(--fs-64);
+  line-height: var(--lh-display);
+  color: var(--accent);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--display);
+  font-size: var(--fs-36);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-display);
+  letter-spacing: var(--ls-display);
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.text {
+  margin: 0;
+  max-width: 52ch;
+  color: var(--ink-2);
+  line-height: var(--lh-body);
+}
+
+.alert {
+  width: 100%;
+  font-weight: var(--fw-semibold);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-10);
+  margin-top: var(--sp-8);
+}
+
+.links {
+  justify-self: stretch;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-6) var(--sp-18);
+  margin: var(--sp-8) 0 0;
+  padding: var(--sp-14) 0 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+  font-size: var(--fs-13-5);
+  color: var(--muted);
+}
+
+.links a {
+  color: var(--ink);
+  font-weight: var(--fw-bold);
+}
+
+.links a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+[data-app="trade"] .title {
+  font-family: var(--sans);
+  font-size: var(--fs-24);
+  font-weight: var(--w6);
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: var(--lh-snug);
+}
+
+[data-app="trade"] .code {
+  font-family: var(--mono);
+  font-size: var(--fs-40);
+  color: var(--muted);
+}
+
+[data-app="trade"] .alert {
+  border-radius: var(--r);
+  font-weight: var(--fw-medium);
+}
+
+[data-app="trade"] .links a {
+  color: var(--pos);
+  font-weight: var(--fw-medium);
+}
+
+@media (max-width: 720px) {
+  .state {
+    padding: var(--sp-20);
+  }
+  .page {
+    padding: var(--sp-32) var(--sp-16);
+  }
+  .title {
+    font-size: var(--fs-30);
+  }
+  [data-app="trade"] .title {
+    font-size: var(--fs-20);
+  }
+}

@@ -1,15 +1,15 @@
 "use client";
-import { Button, EmptyState, Kpis } from "@night-shares/design-system";
-import { useRequireAccess } from "../../../../session/require-access";
+import { Kpis } from "@night-shares/design-system";
+import { ErrorState } from "../../../../shared/fallback/ErrorState";
 import { useAccount } from "../../hooks/use-account";
 import { signedUsd, tone, usd } from "../../model/display";
 import { percent } from "../../model/market";
 import { AgentWalletPanel } from "../agent/AgentWalletPanel";
 import { AgentOrders } from "../shared/AgentOrders";
-import { Feedback } from "../shared/Feedback";
 import { Listings } from "../shared/Listings";
 import page from "../shared/page.module.css";
-import { Skeleton } from "../ui/Skeleton";
+import { PortfolioGate } from "./PortfolioGate";
+import { PortfolioSkeleton } from "./PortfolioSkeleton";
 import { Positions } from "./Positions";
 import styles from "./portfolio.module.css";
 import { TrackRecord } from "./TrackRecord";
@@ -17,26 +17,8 @@ import { Watchlist } from "./Watchlist";
 
 export function PortfolioScreen() {
   const a = useAccount();
-  const access = useRequireAccess();
   const p = a.portfolio.data;
-  if (a.level !== "orb")
-    return (
-      <div className={page.page}>
-        <header className={page.head}>
-          <h1>Portfolio</h1>
-          <p>Your nights, listings and agent orders, checked with World ID.</p>
-        </header>
-        <EmptyState plain>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => access.require("portfolio", "orb")}
-          >
-            Sign in with World ID to see your portfolio
-          </Button>
-        </EmptyState>
-      </div>
-    );
+  if (a.level !== "orb") return <PortfolioGate />;
   const value =
     p?.holdings.reduce((sum, h) => sum + (h.value?.micros ?? 0n), 0n) ?? 0n;
   const unreal = p?.unrealisedPnl?.micros ?? 0n;
@@ -52,8 +34,17 @@ export function PortfolioScreen() {
           </p>
         )}
       </header>
-      <Feedback error={a.portfolio.error?.message} />
-      {a.portfolio.isPending && <Skeleton rows={4} label="Loading portfolio" />}
+      {a.portfolio.error && !p && (
+        <ErrorState
+          error={a.portfolio.error}
+          thing="Your portfolio"
+          need="orb"
+          onRetry={() => void a.portfolio.refetch()}
+          retrying={a.portfolio.isFetching}
+          back={{ href: "/trade", label: "Back to markets" }}
+        />
+      )}
+      {a.portfolio.isPending && <PortfolioSkeleton />}
       {p && (
         <>
           <div className={styles.figs}>

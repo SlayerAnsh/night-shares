@@ -27,6 +27,8 @@ export function useDiscover() {
     query,
     gated,
     change,
+    // Back to every market: drops city, value, soon and watchlist filters.
+    reset: () => update({ city: "", value: "", soon: "", watchlist: "" }),
     signIn: () => access.require("watchlist", "orb"),
   };
 }

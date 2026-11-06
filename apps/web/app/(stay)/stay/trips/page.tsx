@@ -3,7 +3,7 @@ import { PageLoading } from "../../../../src/features/stay/components/shared/Pag
 import { TripsScreen } from "../../../../src/features/stay/components/trips/TripsScreen";
 export default function Page() {
   return (
-    <Suspense fallback={<PageLoading label="Loading trips" />}>
+    <Suspense fallback={<PageLoading label="Loading trips" shape="trips" />}>
       <TripsScreen />
     </Suspense>
   );

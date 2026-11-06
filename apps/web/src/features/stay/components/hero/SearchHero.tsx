@@ -1,4 +1,4 @@
-import { Photo } from "@night-shares/design-system";
+import { Photo, Skeleton } from "@night-shares/design-system";
 import { SearchBar } from "./SearchBar";
 import styles from "./SearchHero.module.css";
 
@@ -24,6 +24,22 @@ export function SearchHero({ compact = false }: { compact?: boolean }) {
           </>
         )}
         <SearchBar />
+      </div>
+    </section>
+  );
+}
+
+// The hero while the page reads its URL: same photo, a placeholder search bar.
+export function SearchHeroShell({ compact = false }: { compact?: boolean }) {
+  return (
+    <section
+      className={`${styles.hero} ${compact ? styles.compact : ""}`}
+      data-bleed
+      aria-hidden="true"
+    >
+      <Photo src={HERO} className={styles.photo} />
+      <div className={styles.wrap}>
+        <Skeleton height={74} radius="var(--r-24)" className={styles.shell} />
       </div>
     </section>
   );

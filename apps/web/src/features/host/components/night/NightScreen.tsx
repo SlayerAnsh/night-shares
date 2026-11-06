@@ -51,8 +51,16 @@ export function NightScreen({
         />
       )}
       {!query.isPending && !query.data && (
-        <StateCard title="This night could not load" error={query.error}>
-          Go back to the hotel calendar and pick the night again.
+        <StateCard
+          title="This night could not load"
+          error={query.error}
+          onRetry={() => void query.refetch()}
+          back={{
+            href: `/host/${propertyId}`,
+            label: "Back to hotel calendar",
+          }}
+        >
+          Pick the night again on the hotel calendar.
         </StateCard>
       )}
       {query.data && !rows.length && (

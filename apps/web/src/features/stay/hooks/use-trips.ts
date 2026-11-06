@@ -8,20 +8,15 @@ import {
   reportWalk,
   tapReception,
 } from "@night-shares/proto/stay/v1/stay-StayService_connectquery";
-import { useIsFetching, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useRequireAccess } from "../../../session/require-access";
 import { useSession } from "../../../session/SessionProvider";
 import { useVerifyAction } from "../../../world-id/use-verify-action";
+// Signed out visitors see a sign in gate on the trips page (TripsGate), so
+// the list only loads with a session.
 export function useTrips() {
   const session = useSession();
-  const access = useRequireAccess();
-  const sessionPending = useIsFetching({
-    predicate: (query) => query.meta?.session === true,
-  });
-  useEffect(() => {
-    if (!sessionPending) access.require("trips", "device");
-  });
   return useQuery(listTrips, {}, { enabled: session.isSignedIn });
 }
 export function useTripActions(tripId: string) {

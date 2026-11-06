@@ -171,7 +171,11 @@ export function HotelScreen({ propertyId }: { propertyId: string }) {
         </>
       )}
       {!query.isPending && !property && (
-        <StateCard title="This hotel could not load" error={query.error}>
+        <StateCard
+          title="This hotel could not load"
+          error={query.error}
+          onRetry={() => void query.refetch()}
+        >
           It may not be connected to your account. Go back to all hotels and try
           again.
         </StateCard>

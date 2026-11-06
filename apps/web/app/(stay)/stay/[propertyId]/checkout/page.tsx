@@ -8,7 +8,9 @@ export default async function Page({
 }) {
   const { propertyId } = await params;
   return (
-    <Suspense fallback={<PageLoading label="Loading stay" />}>
+    <Suspense
+      fallback={<PageLoading label="Loading checkout" shape="checkout" />}
+    >
       <CheckoutScreen propertyId={propertyId} />
     </Suspense>
   );

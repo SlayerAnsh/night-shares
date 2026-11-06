@@ -40,6 +40,7 @@ All notable changes to this monorepo. Newest first.
 
 ### Changed
 
+- Web fallbacks: a shared sign in gate (purpose, what you get, World ID level and a browse link), error panels in plain words with retry and a way back, page shaped skeletons, and per app `error.tsx` and `not-found.tsx` across Stay, Trade and Host. Queries no longer retry errors a retry cannot fix, and My trips shows the gate instead of jumping to sign in.
 - Market model synced to `53a8f129bd65`: ladder boundaries snap down to the Uniswap v4 tick grid using the raw USDC/NightToken decimal ratio; parity, quote expectations and ladder examples are re-pinned.
 
 - Web UI consolidated into `@night-shares/design-system`: new `Kpis`, `Icon`, `BackLink` and `Alert` primitives; `Segmented` takes number values and trade sizes, `Button` gains `text`, `Badge` gains `warn`, `Pill` gains status dots and a small size, `EmptyState` gains `plain`. Stay, Host and Trade use them instead of local copies. `AppShell` adds `layout` (`column`, `bleed`, `free`) and a transparent hero nav, so the Stay hero is full bleed without negative margins and Trade uses the shell too.
