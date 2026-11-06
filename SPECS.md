@@ -14,7 +14,7 @@ Coding rules live in `STANDARDS.md`.
 
 ## Non-goals (for now)
 
-- Frontend UI. The Next.js app is planned below but built only after the mock is approved.
+- Visual design of the web app. The Next.js app is built logic first; styling follows the approved mock.
 - Real chain, real World ID, real channel manager. They come later, one adapter at a time.
 - A database. Repositories are in memory and seeded on boot.
 
@@ -191,20 +191,47 @@ Night state (allotment, pool position `q`, booked, held, trader asks) lives in t
 
 Not in the first cut (listed so it is not forgotten): release at cutoff with unsold refunds, bond return after checkout, background order flow simulation, offline double sale slashing.
 
-## apps/web (later)
+## apps/web
 
-One Next.js app, three product areas as route groups with their own URL prefix:
+One Next.js (App Router) app. Stay, Host and Trade are separate product areas, each in its own route group with its own URL prefix and layout. They share one World ID session, like the mock. The first cut is logic only: real data flows on plain placeholder markup. Visual design follows the approved mock.
 
 ```
-apps/web/app/
-  layout.tsx              root: World ID session provider, Connect transport, React Query
-  (stay)/stay/...         Stay app
-  (host)/host/...         Host app
-  (trade)/trade/...       Trade app
-  login/                  World ID sign in, honours ?next=&why=&need=
+apps/web/
+  app/
+    layout.tsx                 root: tokens.css, Providers (React Query, Connect transport, session)
+    page.tsx                   neutral entry with three doors (Stay, Host, Trade)
+    login/page.tsx             World ID sign in; honours ?next=&why=&need= (why: trade, host, book, portfolio, watchlist, continue; need: orb or device)
+    rpc/[...path]/route.ts     proxy to the API; adds Authorization from the session cookie
+    (stay)/stay/...            Stay app: search, stay detail, checkout, trips
+    (trade)/trade/...          Trade app: discover, night, portfolio
+    (host)/host/...            Host app: portfolio, hotel, night, payout (whole area needs Orb)
+  src/
+    providers/                 query client, transport, session provider
+    session/                   cookie, server actions (complete sign in, sign out), useSession, guards
+    world-id/                  WorldIdClient port, mock adapter (QR plus Simulate scan), IDKit adapter later
+    features/<app>/            hooks and small components per app, grouped by screen
+    shared/                    formatting (USDC micros, tenths, dates), nav helpers
 ```
 
-Data access uses the generated Connect Query hooks only.
+### Session
+
+- Sign in: the login page calls `StartSignIn` through the proxy, shows the QR, and on scan (simulated in the mock) calls a server action that runs `CompleteSignIn` on the server and stores the session token in an httpOnly, SameSite=Lax cookie. The token is never readable by browser JavaScript.
+- Every Connect call from the browser goes to `/rpc/<service>/<method>` on the Next app. The route handler forwards it to `API_URL` (default http://localhost:8787) with `Authorization: Bearer <cookie token>`.
+- Server components may call the API directly with the same cookie.
+- A gated action calls `requireAccess(why, need)`: signed out or below the needed level sends the user to `/login?next=<current url>&why=..&need=..`, then back. Mirrors `NSAuth.require` in the mock.
+- `next` is accepted only as a same site relative path.
+
+### Access by area
+
+| Area | Public | Device | Orb |
+| --- | --- | --- | --- |
+| Stay | search, stay pages, prices | book, saves, trips, check in | |
+| Trade | discover, night views | | buy, sell, asks, watchlist, portfolio, agent |
+| Host | | | everything |
+
+### Data
+
+Data access uses the generated Connect Query hooks only (`@connectrpc/connect-query` with the `_connectquery` exports from `@night-shares/proto`). Money is formatted from bigint micros, quantities from tenths, in `src/shared`.
 
 ## Build order
 
