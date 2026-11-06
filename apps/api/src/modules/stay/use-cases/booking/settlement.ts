@@ -3,12 +3,16 @@ import {
   type BuyResult,
   toMicros,
 } from "@night-shares/market-model";
+import { SYSTEM_ADDRESSES } from "../../../../ports/wallet-provider/wallet-provider";
 export function settlement(route: BuyResult) {
   const payments: { to: string; amount: bigint }[] = [];
   for (const fill of route.fills) {
     const gross = toMicros(askFillProceeds(fill.price, fill.take).gross);
     if (fill.src === "trader") {
-      const to = !fill.who || fill.who === "mm-bot" ? "market_maker" : fill.who;
+      const to =
+        !fill.who || fill.who === "mm-bot"
+          ? SYSTEM_ADDRESSES.marketMaker
+          : fill.who;
       const fee = toMicros(fill.sellerFee ?? 0);
       payments.push(
         { to, amount: toMicros(fill.sellerNet ?? 0) },

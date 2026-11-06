@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { toMicros } from "@night-shares/market-model";
+import { SYSTEM_ADDRESSES } from "../../../../ports/wallet-provider/wallet-provider";
 import { fixture } from "../../testing/fixture";
 import { getPortfolio } from "../account/get-portfolio";
 import { postAsk } from "../account/post-ask";
@@ -58,7 +59,7 @@ test("seeded market maker receives seller proceeds", async () => {
     ...r,
     state: { ...r.state, traderAsks: [{ who: "mm-bot", price: 1, size: 0.5 }] },
   }));
-  const maker = await d.ports.walletProvider.linkWallet("market_maker");
+  const maker = SYSTEM_ADDRESSES.marketMaker;
   const before = await d.ports.walletProvider.balance(maker);
   await buy(d, d.user, d.key, 5, toMicros(10));
   expect((await d.ports.walletProvider.balance(maker)) - before).toBe(493500n);

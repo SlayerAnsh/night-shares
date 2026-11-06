@@ -34,7 +34,8 @@ export function createMarketHandler(
     discover: (r, ctx) => discover(deps, r, optionalUser(ctx)),
     getNight: (r) => getNight(deps, nightKey(r.night)),
     getBook: (r) => getBook(deps, nightKey(r.night)),
-    listTape: (r) => listTape(deps, nightKey(r.night)),
+    listTape: (r, ctx) =>
+      listTape(deps, nightKey(r.night), optionalUser(ctx)?.id),
     quoteBuy: (r, ctx) => ({
       quote: quoteBuy(
         deps,

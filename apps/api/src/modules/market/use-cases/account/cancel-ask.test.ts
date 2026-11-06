@@ -18,6 +18,10 @@ test("cancel returns remaining escrow after an external guest fill", async () =>
   );
   cancelAsk(d, d.user, ask.id);
   expect(d.repo.position(d.user.humanId, d.key).free).toBe(3);
+  expect(d.ports.activity.list({ nightKey: d.key })[0]).toMatchObject({
+    kind: "ask_cancelled",
+    tenths: 3,
+  });
   expect(d.repo.position(d.user.humanId, d.key).escrow).toBe(0);
   expect(() => cancelAsk(d, d.user, ask.id)).toThrow("Ask not found.");
 });

@@ -65,10 +65,20 @@ message NightStats {
   night_shares.common.v1.RoomNights sell_liquidity = 7;
 }
 
+enum TapeActor {
+  TAPE_ACTOR_UNSPECIFIED = 0;
+  TAPE_ACTOR_GUEST = 1;
+  TAPE_ACTOR_TRADER = 2;
+  TAPE_ACTOR_YOU = 3;
+  TAPE_ACTOR_SELL_BACK = 4;
+  TAPE_ACTOR_AGENT = 5;
+}
+
 message TapePrint {
   string id = 1;
   night_shares.common.v1.Usdc price = 2;
   night_shares.common.v1.RoomNights size = 3;
   TradeSide side = 4;
   google.protobuf.Timestamp at = 5;
+  TapeActor actor = 6;
 }

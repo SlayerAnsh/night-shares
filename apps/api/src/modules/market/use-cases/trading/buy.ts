@@ -10,6 +10,7 @@ import {
 } from "@night-shares/market-model";
 import { ExecutionSchema } from "@night-shares/proto/market/v1/book_pb";
 import type { User } from "../../../../ports/sessions/session-store";
+import { SYSTEM_ADDRESSES } from "../../../../ports/wallet-provider/wallet-provider";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { mulTenths } from "../../../../shared/money";
 import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
@@ -25,7 +26,7 @@ export async function buy(
 ) {
   const { ports } = deps;
   const balance = await ports.walletProvider.balance(user.walletAddress);
-  const marketMaker = await ports.walletProvider.linkWallet("market_maker");
+  const marketMaker = SYSTEM_ADDRESSES.marketMaker;
   let result: BuyResult | undefined;
   let used = 0;
   const record = ports.inventory.update(key, (current) => {

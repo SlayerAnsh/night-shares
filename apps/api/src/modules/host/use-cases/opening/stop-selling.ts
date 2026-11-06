@@ -29,7 +29,8 @@ export function createStopSelling(deps: HostDeps) {
         }),
       ),
     ];
-    return keys.map((key) => {
+    let roomsTakenBack = 0;
+    const result = keys.map((key) => {
       let taken = 0,
         changed = false;
       const updated = deps.ports.inventory.update(key, (current) => {
@@ -44,6 +45,7 @@ export function createStopSelling(deps: HostDeps) {
             );
         return stop(current);
       });
+      roomsTakenBack += taken;
       if (changed)
         deps.ports.activity.append({
           nightKey: key,
@@ -55,5 +57,6 @@ export function createStopSelling(deps: HostDeps) {
         });
       return mapNight(updated, deps.repo);
     });
+    return { nights: result, roomsTakenBack: { tenths: roomsTakenBack } };
   };
 }

@@ -76,6 +76,8 @@ message PreviewOpenNightsRequest {
 
 message PreviewOpenNightsResponse {
   repeated OpenNightPreview nights = 1;
+  int32 slots = 2;
+  int32 kept = 3;
 }
 
 message OpenNightsRequest {
@@ -92,6 +94,7 @@ message StopSellingRequest {
 
 message StopSellingResponse {
   repeated HostNight nights = 1;
+  night_shares.common.v1.RoomNights rooms_taken_back = 2;
 }
 
 message GetNightRequest {

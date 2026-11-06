@@ -990,6 +990,14 @@ components:
           items:
             $ref: '#/components/schemas/night_shares.host.v1.OpenNightPreview'
           title: nights
+        slots:
+          type: integer
+          title: slots
+          format: int32
+        kept:
+          type: integer
+          title: kept
+          format: int32
       title: PreviewOpenNightsResponse
       additionalProperties: false
     night_shares.host.v1.ReleaseEvent:
@@ -1029,6 +1037,9 @@ components:
           items:
             $ref: '#/components/schemas/night_shares.host.v1.HostNight'
           title: nights
+        roomsTakenBack:
+          title: rooms_taken_back
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
       title: StopSellingResponse
       additionalProperties: false
     night_shares.host.v1.WithdrawRequest:

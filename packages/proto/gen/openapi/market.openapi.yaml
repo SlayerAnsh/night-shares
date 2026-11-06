@@ -1336,6 +1336,16 @@ components:
           $ref: '#/components/schemas/night_shares.market.v1.Execution'
       title: SellResponse
       additionalProperties: false
+    night_shares.market.v1.TapeActor:
+      type: string
+      title: TapeActor
+      enum:
+        - TAPE_ACTOR_UNSPECIFIED
+        - TAPE_ACTOR_GUEST
+        - TAPE_ACTOR_TRADER
+        - TAPE_ACTOR_YOU
+        - TAPE_ACTOR_SELL_BACK
+        - TAPE_ACTOR_AGENT
     night_shares.market.v1.TapePrint:
       type: object
       properties:
@@ -1354,6 +1364,9 @@ components:
         at:
           title: at
           $ref: '#/components/schemas/google.protobuf.Timestamp'
+        actor:
+          title: actor
+          $ref: '#/components/schemas/night_shares.market.v1.TapeActor'
       title: TapePrint
       additionalProperties: false
     night_shares.market.v1.ToggleWatchRequest:

@@ -36,6 +36,8 @@ test("Orb host connects, previews, opens, inspects, stops and withdraws", async 
   };
   const preview = await clients.host.previewOpenNights({ selection });
   expect(preview.nights[0]?.floor?.micros).toBeGreaterThan(0n);
+  expect(preview.slots).toBe(1);
+  expect(preview.kept).toBe(0);
   const opened = await clients.host.openNights({ selection });
   expect(opened.nights[0]?.allotment).toEqual(preview.nights[0]?.allotment);
   const night = await clients.host.getNight({
@@ -63,6 +65,7 @@ test("Orb host connects, previews, opens, inspects, stops and withdraws", async 
       },
     ],
   });
+  expect(stopped.roomsTakenBack?.tenths).toBe(opened.nights[0]?.onSale?.tenths);
   expect(stopped.nights[0]?.isStopped).toBe(true);
   expect(stopped.nights[0]?.onSale?.tenths).toBe(0);
   const payout = await clients.host.getPayout({

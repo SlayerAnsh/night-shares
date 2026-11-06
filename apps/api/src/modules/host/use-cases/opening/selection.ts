@@ -51,6 +51,7 @@ export function selectNights(
       const record = deps.ports.inventory.get(key);
       return {
         record,
+        kept: record.state.booked + record.state.held > requested,
         preset,
         tenths: Math.max(
           toTenths(requested),

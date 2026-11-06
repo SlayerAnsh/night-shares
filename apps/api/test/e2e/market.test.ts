@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import { Code } from "@connectrpc/connect";
+import { TapeActor } from "@night-shares/proto/market/v1/analytics_pb";
 import { BookSource } from "@night-shares/proto/market/v1/book_pb";
 import { AgentOrderStatus } from "@night-shares/proto/market/v1/portfolio_pb";
 import { createHarness } from "./harness";
@@ -53,6 +54,12 @@ test("discover, detail, book, quote, buy, list, cancel and late sell-back", asyn
   expect(
     (await market.listTape({ night })).prints.length,
   ).toBeGreaterThanOrEqual(2);
+  expect((await market.listTape({ night })).prints[0]?.actor).toBe(
+    TapeActor.YOU,
+  );
+  expect(
+    (await harness.clients.market.listTape({ night })).prints[0]?.actor,
+  ).toBe(TapeActor.SELL_BACK);
   expect((await market.toggleWatch({ night })).isWatched).toBe(true);
   expect((await market.listWatch({})).nights).toHaveLength(1);
   expect((await market.discover({ watchlist: true })).nights).toHaveLength(1);

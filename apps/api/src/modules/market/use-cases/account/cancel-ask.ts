@@ -20,14 +20,13 @@ export function cancelAsk(deps: Deps, user: User, askId: string) {
   const size = position.escrow;
   position.free += size;
   position.escrow = 0;
-  // The shared activity vocabulary represents listing edits as ask_posted.
   deps.ports.activity.append({
     nightKey: key,
     propertyId: record.propertyId,
-    kind: "ask_posted",
+    kind: "ask_cancelled",
     actor: "trader",
     userId: user.id,
-    tenths: 0,
+    tenths: size,
     priceMicros: position.askPrice,
   });
   return {};

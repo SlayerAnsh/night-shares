@@ -16,15 +16,12 @@ export function createHostHandler(
     getPortfolio: (_, ctx) => use.getPortfolio(requireUser(ctx).id),
     getHotel: (r, ctx) =>
       use.getHotel(requireUser(ctx).id, r.propertyId, r.month),
-    previewOpenNights: (r, ctx) => ({
-      nights: use.previewOpenNights(requireUser(ctx).id, r.selection),
-    }),
+    previewOpenNights: (r, ctx) =>
+      use.previewOpenNights(requireUser(ctx).id, r.selection),
     openNights: (r, ctx) => ({
       nights: use.openNights(requireUser(ctx).id, r.selection),
     }),
-    stopSelling: (r, ctx) => ({
-      nights: use.stopSelling(requireUser(ctx).id, r.nights),
-    }),
+    stopSelling: (r, ctx) => use.stopSelling(requireUser(ctx).id, r.nights),
     getNight: (r, ctx) =>
       use.getNight(requireUser(ctx).id, r.propertyId, r.date),
     getPayout: (r, ctx) => ({

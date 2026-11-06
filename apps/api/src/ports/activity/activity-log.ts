@@ -4,6 +4,7 @@ export type ActivityKind =
   | "trader_sold_back"
   | "ask_filled"
   | "ask_posted"
+  | "ask_cancelled"
   | "nights_opened"
   | "nights_edited"
   | "selling_stopped";

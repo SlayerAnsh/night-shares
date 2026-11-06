@@ -11,8 +11,9 @@ import type { OpenNightsSelection } from "@night-shares/proto/host/v1/opening_pb
 import type { HostDeps } from "../deps";
 import { selectNights } from "./selection";
 export function createPreviewOpenNights(deps: HostDeps) {
-  return (userId: string, selection?: OpenNightsSelection) =>
-    selectNights(deps, userId, selection).map(({ record, preset, tenths }) => {
+  return (userId: string, selection?: OpenNightsSelection) => {
+    const plans = selectNights(deps, userId, selection);
+    const nights = plans.map(({ record, preset, tenths }) => {
       const F = floorFromRate(record.state.usualRate),
         k = PRESETS[preset],
         S = tenths / 10;
@@ -32,4 +33,10 @@ export function createPreviewOpenNights(deps: HostDeps) {
         },
       };
     });
+    return {
+      nights,
+      slots: plans.length,
+      kept: plans.filter((plan) => plan.kept).length,
+    };
+  };
 }
