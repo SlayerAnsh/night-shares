@@ -32,13 +32,19 @@ export function linkEnrollment(
         "PERMISSION_DENIED",
         "This Orb credential belongs to another identity. Switch accounts to continue.",
       );
+    // Preserve the previous key even for users enrolled before alias tracking.
+    db.query("INSERT OR IGNORE INTO world_id_enrollments VALUES (?, ?, ?)").run(
+      user.humanId,
+      user.humanId,
+      user.level,
+    );
+    // Ban keys are permanent; alias lookups carry penalties to the upgraded identity.
     // Device users cannot own trader or host positions. Still migrate all indexed human references.
     for (const table of [
       "identity_users",
       "world_id_enrollments",
       "world_id_sessions",
       "walk_reports",
-      "walk_bans",
       "market_watchlist",
       "market_human_wallets",
       "market_holders",

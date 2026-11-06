@@ -1,6 +1,7 @@
 import type { Ports } from "../../../container/ports";
 import { transaction } from "../../../db/transaction";
 import { DomainError } from "../../../shared/errors/domain-error";
+import { banWalkReporter } from "../repo/bans";
 
 // Moderation stub for trusted administrators and tests; deliberately no public RPC.
 export function markWalkFalse(ports: Ports, reportId: string) {
@@ -19,8 +20,6 @@ export function markWalkFalse(ports: Ports, reportId: string) {
     ports.db
       .query("UPDATE walk_reports SET status = 'false' WHERE id = ?")
       .run(reportId);
-    ports.db
-      .query("INSERT OR IGNORE INTO walk_bans VALUES (?, ?, ?)")
-      .run(report.human_id, reportId, ports.clock.now());
+    banWalkReporter(ports.db, report.human_id, reportId, ports.clock.now());
   });
 }

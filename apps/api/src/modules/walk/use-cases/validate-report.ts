@@ -4,6 +4,7 @@ import type { WalkReport } from "../../../ports/booking-report/booking-report";
 import { DomainError } from "../../../shared/errors/domain-error";
 import type { StayRepo } from "../../stay/repo/stay-repo";
 import { getTrip } from "../../stay/use-cases/trips/get-trip";
+import { isWalkBanned } from "../repo/bans";
 
 export function validateReport(
   ports: Ports,
@@ -12,10 +13,7 @@ export function validateReport(
 ) {
   const saved = getTrip(repo, report.bookingId, report.userId);
   const { db } = ports;
-  if (
-    !report.humanId ||
-    db.query("SELECT 1 FROM walk_bans WHERE human_id = ?").get(report.humanId)
-  )
+  if (!report.humanId || isWalkBanned(db, report.humanId))
     throw new DomainError(
       "PERMISSION_DENIED",
       "Walk reports are banned for this World ID.",

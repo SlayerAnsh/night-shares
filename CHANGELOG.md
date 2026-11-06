@@ -4,6 +4,8 @@ All notable changes to this monorepo. Newest first.
 
 ## Unreleased
 
+- Security: Walk bans persist across all linked World ID enrollment nullifiers and aliases, including later credential upgrades and enrollment recovery.
+
 ### Added
 
 - Cutoff pull claims: persisted entitlements, cutoff_claims escrow, Orb ClaimCutoff and ListCutoffClaims RPCs, unclaimed portfolio amounts, and claim activity. Holder payouts occur only on claim.

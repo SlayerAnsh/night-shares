@@ -99,7 +99,7 @@ test("Selfie to Orb upgrade links distinct nullifiers and preserves bans, wallet
         .get(),
     ).toEqual({ id: "usr_alice", wallet_address: "wallet_alice" });
     expect(s.db.query("SELECT human_id FROM walk_bans").get()).toEqual({
-      human_id: "66",
+      human_id: "17",
     });
     const recovery = await s.verifier.startRequest("device");
     const recovered = await s.verifier.verifyProof({
