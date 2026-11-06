@@ -1,4 +1,14 @@
-// TODO: Use HostService.GetHotel, PreviewOpenNights, OpenNights, StopSelling.
-export default function Page() {
-  return <p>Hotel: /host/[propertyId]</p>;
+import { Suspense } from "react";
+import { HotelScreen } from "../../../../src/features/host/components/hotel/HotelScreen";
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ propertyId: string }>;
+}) {
+  const { propertyId } = await params;
+  return (
+    <Suspense fallback={<p>Loading hotel…</p>}>
+      <HotelScreen propertyId={propertyId} />
+    </Suspense>
+  );
 }

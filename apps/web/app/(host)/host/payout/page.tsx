@@ -1,4 +1,9 @@
-// TODO: Use HostService.GetPayout, Withdraw.
+import { Suspense } from "react";
+import { PayoutScreen } from "../../../../src/features/host/components/payout/PayoutScreen";
 export default function Page() {
-  return <p>Payout: /host/payout</p>;
+  return (
+    <Suspense fallback={<p>Loading…</p>}>
+      <PayoutScreen />
+    </Suspense>
+  );
 }

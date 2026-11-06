@@ -1,4 +1,9 @@
-// TODO: Use HostService.GetNight, PreviewOpenNights, OpenNights, StopSelling.
-export default function Page() {
-  return <p>Host night: /host/[propertyId]/[date]</p>;
+import { NightScreen } from "../../../../../src/features/host/components/night/NightScreen";
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ propertyId: string; date: string }>;
+}) {
+  const { propertyId, date } = await params;
+  return <NightScreen propertyId={propertyId} date={date} />;
 }

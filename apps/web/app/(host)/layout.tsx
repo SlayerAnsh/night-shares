@@ -14,7 +14,18 @@ export default async function Layout({ children }: { children: ReactNode }) {
         accountHref="/host"
         need="orb"
       />
-      <main>{children}</main>
+      <main
+        style={{
+          color: "var(--ink)",
+          background: "var(--bg)",
+          fontFamily: "var(--sans)",
+          padding: "var(--sp-24)",
+          display: "grid",
+          gap: "var(--sp-16)",
+        }}
+      >
+        {children}
+      </main>
     </>
   );
 }
