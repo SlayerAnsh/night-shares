@@ -69,6 +69,19 @@ export async function createHarness(
       });
       return { ...session, clients: clientsFor(session.sessionToken) };
     },
+    // Creates a session directly through the ports, without the World ID
+    // flow. Use it in domain tests so they do not depend on identity.
+    async signInAs(level: "device" | "orb", seed = "e2e") {
+      const humanId = `human_${seed}`;
+      const user = {
+        id: `usr_${seed}`,
+        humanId,
+        level,
+        walletAddress: await container.ports.walletProvider.linkWallet(humanId),
+      };
+      const token = container.ports.sessions.create(user);
+      return { user, token, clients: clientsFor(token) };
+    },
     async close() {
       await new Promise<void>((resolve, reject) => {
         server.close((error) => (error ? reject(error) : resolve()));
