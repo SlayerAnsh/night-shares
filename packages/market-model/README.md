@@ -71,3 +71,9 @@ Past dates still report 14 hours remaining. Caps and guest tranches have a minim
 ## Resynchronizing
 
 Read the changed `model.js` and its dependencies in `shared.js`. Review formula changes, operation order, exported shapes and newly required property fields. Port each change into its corresponding small module without importing catalog data or introducing global time. Update focused tests for changed behavior. Run the VM parity suite against the new source, review every difference, then update the fingerprint assertion and this version note together. Keep the original mock files read only during this process.
+
+## Analytics
+
+`priceHistory(modelId, roomIndex, date, state)` returns deterministic fair and market price series. `hostTrackRecord(property)` returns host performance in basis points and a USD security hold. `nightAnalytics(state, book, history, modelId, date, hoursLeft, bookedBps)` returns estimated and annualized returns, risk score and level, volatility, sell-through, liquidity, daily change, exit value and refund.
+
+These pure calculations originate in `mock/v2/assets/trade.js`, not `model.js`, and are outside the model.js parity suite. Focused unit tests cover them. API mappers convert USD to micros and map results into protobuf messages.
