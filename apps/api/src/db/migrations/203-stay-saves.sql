@@ -1,0 +1,1 @@
+CREATE TABLE stay_saves (id TEXT PRIMARY KEY, snapshot TEXT NOT NULL);

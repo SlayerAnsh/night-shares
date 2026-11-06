@@ -13,6 +13,7 @@ export function createCheckIn(ports: Ports, repo: StayRepo) {
     if (saved.trip.checkOut < ports.clock.today())
       throw new DomainError("FAILED_PRECONDITION", "This stay has ended.");
     saved.trip.checkedIn = true;
+    repo.trips.set(id, saved);
     return structuredClone(saved.trip);
   };
 }

@@ -3,6 +3,7 @@ import { toMicros } from "@night-shares/market-model";
 import type { CreateBookingRequest } from "@night-shares/proto/stay/v1/stay_pb";
 import { TripSchema } from "@night-shares/proto/stay/v1/trip_pb";
 import type { Ports } from "../../../../container/ports";
+import { transaction } from "../../../../db/transaction";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { format } from "../../../../shared/night-key";
@@ -15,53 +16,61 @@ import { settlement } from "./settlement";
 
 export function createCreateBooking(ports: Ports, repo: StayRepo) {
   return async (input: CreateBookingRequest, user: User) => {
-    const lock = repo.locks.get(input.lockId);
-    if (
-      !lock ||
-      lock.userId !== user.id ||
-      lock.expiresAt <= ports.clock.now() ||
-      lock.busy ||
-      lock.tripId
-    )
-      throw new DomainError(
-        "FAILED_PRECONDITION",
-        "Quote lock is unavailable or expired.",
-      );
-    if (
-      !input.guestName.trim() ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.guestEmail)
-    )
-      throw new DomainError(
-        "INVALID_ARGUMENT",
-        "Provide guest name and email.",
-      );
-    lock.busy = true;
+    const { lock, value, current, paid, reservation } = transaction(
+      ports.db,
+      () => {
+        const lock = repo.locks.get(input.lockId);
+        if (
+          !lock ||
+          lock.userId !== user.id ||
+          lock.expiresAt <= ports.clock.now() ||
+          lock.busy ||
+          lock.tripId
+        )
+          throw new DomainError(
+            "FAILED_PRECONDITION",
+            "Quote lock is unavailable or expired.",
+          );
+        if (
+          !input.guestName.trim() ||
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.guestEmail)
+        )
+          throw new DomainError(
+            "INVALID_ARGUMENT",
+            "Provide guest name and email.",
+          );
+
+        const { value, dates } = selection(ports, lock.quote.selection);
+        const keys = dates.map((date) => format({ ...value, date }));
+        const current = keys.map((key) => ({
+          key,
+          route: routeNight(ports.inventory.get(key), value.rooms),
+        }));
+        const locked = lock.quote.total?.micros ?? 0n;
+        const total = current.reduce(
+          (sum, n) => sum + toMicros(n.route.total),
+          0n,
+        );
+        const paid = minMicros(total, locked);
+        if (lock.expiresAt <= ports.clock.now())
+          throw new DomainError(
+            "FAILED_PRECONDITION",
+            "Quote lock is unavailable or expired.",
+          );
+        const reservation = commitNights(
+          ports,
+          current,
+          value.rooms,
+          value.propertyId,
+          user.id,
+        );
+        lock.busy = true;
+        repo.locks.set(lock.id, lock);
+        return { lock, value, current, paid, reservation };
+      },
+    );
     let committed = false;
     try {
-      const { value, dates } = selection(ports, lock.quote.selection);
-      const keys = dates.map((date) => format({ ...value, date }));
-      const current = keys.map((key) => ({
-        key,
-        route: routeNight(ports.inventory.get(key), value.rooms),
-      }));
-      const locked = lock.quote.total?.micros ?? 0n;
-      const total = current.reduce(
-        (sum, n) => sum + toMicros(n.route.total),
-        0n,
-      );
-      const paid = minMicros(total, locked);
-      if (lock.expiresAt <= ports.clock.now())
-        throw new DomainError(
-          "FAILED_PRECONDITION",
-          "Quote lock is unavailable or expired.",
-        );
-      const reservation = commitNights(
-        ports,
-        current,
-        value.rooms,
-        value.propertyId,
-        user.id,
-      );
       // Split the locked charge and subsidy at the source, without relying on incoming funds.
       let buyerRemaining = paid;
       const legs: Parameters<typeof ports.walletProvider.settle>[0] = [];
@@ -88,7 +97,11 @@ export function createCreateBooking(ports: Ports, repo: StayRepo) {
       try {
         await ports.walletProvider.settle(legs);
       } catch (error) {
-        reservation.revert();
+        transaction(ports.db, () => {
+          reservation.revert();
+          lock.busy = false;
+          repo.locks.set(lock.id, lock);
+        });
         throw error;
       }
       committed = true;
@@ -110,19 +123,23 @@ export function createCreateBooking(ports: Ports, repo: StayRepo) {
         total: { micros: paid },
         fee: { micros: minMicros(fee, paid) },
       });
-      repo.trips.set(id, {
-        trip,
-        userId: user.id,
-        guestName: input.guestName,
-        guestEmail: input.guestEmail,
-        walletAddress: user.walletAddress,
-        paidAt: ports.clock.now(),
+      transaction(ports.db, () => {
+        repo.trips.set(id, {
+          trip,
+          userId: user.id,
+          guestName: input.guestName,
+          guestEmail: input.guestEmail,
+          walletAddress: user.walletAddress,
+          paidAt: ports.clock.now(),
+        });
+        lock.tripId = id;
+        repo.locks.set(lock.id, lock);
       });
-      lock.tripId = id;
       return structuredClone(trip);
     } finally {
       // A failed settlement must not replay inventory mutations on retry.
       lock.busy = committed && !lock.tripId;
+      repo.locks.set(lock.id, lock);
     }
   };
 }
