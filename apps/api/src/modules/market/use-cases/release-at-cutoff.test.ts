@@ -37,6 +37,7 @@ test("cutoff pays the same bid per holder, returns inventory and reruns idempote
   const otherBalance = await d.ports.walletProvider.balance(
     d.other.walletAddress,
   );
+  const rebateBefore = await d.ports.walletProvider.balance("rebate_pool");
   const perNight = toMicros(cutoffRefund(d.before.state).perNight);
   await releaseAtCutoff(d);
   expect(await d.ports.walletProvider.balance(d.user.walletAddress)).toBe(
@@ -44,6 +45,9 @@ test("cutoff pays the same bid per holder, returns inventory and reruns idempote
   );
   expect(await d.ports.walletProvider.balance(d.other.walletAddress)).toBe(
     otherBalance + mulTenths(perNight, 3),
+  );
+  expect(await d.ports.walletProvider.balance("rebate_pool")).toBe(
+    rebateBefore + toMicros(cutoffRefund(d.before.state).haircut),
   );
   const released = d.ports.inventory.get(d.key);
   expect(released).toMatchObject({

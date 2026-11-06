@@ -1,7 +1,6 @@
 import { create } from "@bufbuild/protobuf";
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
 import {
-  askFillProceeds,
   type BuyResult,
   capOf,
   routeBuy,
@@ -13,7 +12,6 @@ import { transaction } from "../../../../db/transaction";
 import type { User } from "../../../../ports/sessions/session-store";
 import { SYSTEM_ADDRESSES } from "../../../../ports/wallet-provider/wallet-provider";
 import { DomainError } from "../../../../shared/errors/domain-error";
-import { feePayments } from "../../../../shared/fee-payments";
 import { mulTenths } from "../../../../shared/money";
 import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyTraderAskFill } from "../../../inventory/mutations/apply-trader-ask-fill";
@@ -21,6 +19,7 @@ import { cutoffAt } from "../../cutoff";
 import { buyQuote } from "../../mappers/route";
 import { assertOpen, bookOf, type Deps, syncPosition } from "../context";
 import { revertFills } from "./revert-fills";
+import { settleBuy } from "./settle-buy";
 import { withSettlement } from "./with-settlement";
 export async function buy(
   deps: Deps,
@@ -110,7 +109,7 @@ async function executeBuy(
     };
   });
   try {
-    await settle(deps, user, key, result, marketMaker);
+    await settleBuy(deps, user, key, result, marketMaker, before.state);
   } catch (error) {
     transaction(ports.db, () => {
       ports.inventory.update(key, (current) =>
@@ -142,53 +141,4 @@ async function executeBuy(
     quote,
     executedAt: timestampFromMs(ports.clock.now()),
   });
-}
-async function settle(
-  { ports }: Deps,
-  user: User,
-  key: string,
-  result: BuyResult,
-  marketMaker: string,
-) {
-  const legs: Parameters<typeof ports.walletProvider.settle>[0] = [];
-  const transfer = (from: string, to: string, amount: bigint, memo: string) => {
-    if (amount > 0n) legs.push({ from, to, amount, memo });
-  };
-  let remaining = toMicros(result.gross);
-  for (const [index, fill] of result.fills.entries()) {
-    const gross =
-      index === result.fills.length - 1
-        ? remaining
-        : toMicros(askFillProceeds(fill.price, fill.take).gross);
-    remaining -= gross;
-    if (fill.src === "trader") {
-      const fee = toMicros(fill.sellerFee ?? 0);
-      transfer(
-        user.walletAddress,
-        fill.who === "mm-bot" ? marketMaker : (fill.who ?? marketMaker),
-        gross - fee,
-        "ask fill",
-      );
-      for (const payment of feePayments(gross, fee))
-        transfer(user.walletAddress, payment.to, payment.amount, "seller fee");
-    } else transfer(user.walletAddress, "pool", gross, "market buy");
-  }
-  for (const payment of feePayments(
-    toMicros(result.gross),
-    toMicros(result.fee),
-  ))
-    transfer(user.walletAddress, payment.to, payment.amount, "buyer fee");
-  await ports.walletProvider.settle(legs);
-  for (const fill of result.fills) {
-    if (fill.src === "trader") {
-      ports.activity.append({
-        nightKey: key,
-        propertyId: key.split(":")[0] ?? "",
-        kind: "ask_filled",
-        actor: "trader",
-        tenths: toTenths(fill.take),
-        priceMicros: toMicros(fill.price),
-      });
-    }
-  }
 }

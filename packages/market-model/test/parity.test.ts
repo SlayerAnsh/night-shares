@@ -8,8 +8,8 @@ const dates = Array.from({ length: 60 }, (_, i) =>
 );
 
 test("original model fingerprint and all exported constants match", () => {
-  expect(modelSha.slice(0, 12)).toBe("e3e2575c2d1f");
-  expect(Object.keys(original)).toHaveLength(32);
+  expect(modelSha.slice(0, 12)).toBe("fb6cebfd712e");
+  expect(Object.keys(original)).toHaveLength(35);
   expect("unsoldRefund" in port).toBe(false);
   expect("REFUND_AT_FAIR" in port).toBe(false);
   expect(shared.props).toHaveLength(6);
@@ -183,4 +183,13 @@ test("cutoff refunds match for empty, negligible, fractional and fully held inve
       const input = { F: 6000, k, S: 15, q: 6, held };
       compare(port.cutoffRefund(input), original.cutoffRefund(input));
     }
+});
+
+test("maker rebate matches at band boundaries and balance caps", () => {
+  for (const askPrice of [0, 95, 100, 105, 105.000001, 200])
+    for (const size of [0, 0.1, 1, 5])
+      for (const poolBalance of [undefined, -1, 0, 0.01, 1, 100]) {
+        const input = { askPrice, poolPrice: 100, size, poolBalance };
+        compare(port.makerRebate(input), original.makerRebate(input));
+      }
 });

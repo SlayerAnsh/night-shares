@@ -49,7 +49,7 @@ test("trader fill pays seller and treasury and reconciles seller holdings", asyn
   await buy(d, buyer, d.key, 2, toMicros(10));
   expect(
     (await d.ports.walletProvider.balance(d.user.walletAddress)) - before,
-  ).toBe(197400n);
+  ).toBe(198400n);
   expect(getPortfolio(d, d.user).holdings[0]?.size?.tenths).toBe(3);
   expect(getPortfolio(d, d.user).listings[0]?.size?.tenths).toBe(3);
 });
@@ -62,7 +62,7 @@ test("seeded market maker receives seller proceeds", async () => {
   const maker = SYSTEM_ADDRESSES.marketMaker;
   const before = await d.ports.walletProvider.balance(maker);
   await buy(d, d.user, d.key, 5, toMicros(10));
-  expect((await d.ports.walletProvider.balance(maker)) - before).toBe(493500n);
+  expect((await d.ports.walletProvider.balance(maker)) - before).toBe(496000n);
 });
 test("escrowed holdings still count toward the human cap", async () => {
   const d = await fixture();

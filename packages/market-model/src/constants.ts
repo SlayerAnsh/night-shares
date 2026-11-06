@@ -13,3 +13,5 @@ export const COVER_FUND = 0.001;
 export const PSTAR_BAND = [0.7, 2.5] as const;
 export const PSTAR_MAX_MOVE_PER_HOUR = 0.05;
 export const SLICE = 0.1;
+export const MAKER_REBATE = 0.005;
+export const REBATE_BAND = 0.05;

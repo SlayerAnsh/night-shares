@@ -9,6 +9,7 @@ export * from "./curve";
 export * from "./cutoff-refund";
 export * from "./dates";
 export * from "./fees";
+export * from "./maker-rebate";
 export * from "./night/night-state";
 export * from "./night/usual-rate";
 export * from "./offline-sale-cover";

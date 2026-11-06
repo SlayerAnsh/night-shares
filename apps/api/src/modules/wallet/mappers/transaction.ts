@@ -3,6 +3,9 @@ import { TransactionKind } from "@night-shares/proto/wallet/v1/transaction_pb";
 import type { WalletTransaction } from "../../../ports/wallet-provider/wallet-provider";
 
 const kinds: Record<string, TransactionKind> = {
+  rebate: TransactionKind.REBATE,
+  double_sale_refund: TransactionKind.DOUBLE_SALE_REFUND,
+  agent_funding: TransactionKind.AGENT_FUNDING,
   booking: TransactionKind.BOOKING,
   buy: TransactionKind.BUY,
   sell: TransactionKind.SELL,

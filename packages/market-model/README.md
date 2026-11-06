@@ -1,6 +1,6 @@
 # @night-shares/market-model
 
-Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `e3e2575c2d1f`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
+Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `fb6cebfd712e`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
 
 ## Public API
 
@@ -37,13 +37,13 @@ toTenths(roomNights: number): number
 fromTenths(tenths: number): number
 ```
 
-Constants: `FEE`, `HOST_FEE`, `PLATFORM_FEE`, `PRESETS`, `FLOOR_RATIO`, `RECALL_MARKUP`, `RECALL_MIN_MARKUP`, `GUEST_TRANCHE`, `CAP_PEAK`, `LATE_HOURS`, `LATE_MAX`, `COVER_FUND`, `PSTAR_BAND`, `PSTAR_MAX_MOVE_PER_HOUR`, `SLICE`.
+Constants: `MAKER_REBATE`, `REBATE_BAND`, `FEE`, `HOST_FEE`, `PLATFORM_FEE`, `PRESETS`, `FLOOR_RATIO`, `RECALL_MARKUP`, `RECALL_MIN_MARKUP`, `GUEST_TRANCHE`, `CAP_PEAK`, `LATE_HOURS`, `LATE_MAX`, `COVER_FUND`, `PSTAR_BAND`, `PSTAR_MAX_MOVE_PER_HOUR`, `SLICE`.
 
 Types: `RateProperty`, `NightProperty`, `NightStateInput`, `NightState`, `PayoutInput`, `CutoffRefundInput`, `TraderAsk`, `PoolAsk`, `TraderLevel`, `Ask`, `Bid`, `BookInput`, `Book`, `Fill`, `BuyResult`.
 
 `RateProperty` contains only `{ id, base, phase }`. `NightProperty` adds `rooms` and `roomTypes: { rateMultiplier: number }[]`. `NightStateInput` is `{ property, roomIndex, date, today }`. Both dates are valid `YYYY-MM-DD` calendar dates. Calendar arithmetic uses UTC fields to avoid depending on the process timezone. An out of range room index falls back to the first room type, but the supplied index still seeds randomness, matching the mock. Empty room types throw `TypeError`, as in the original.
 
-`BookInput` requires `{ F, k, S, q }` and optionally accepts `{ tranche, traderAsks, levels, hoursLeft }`. Trader asks contain `{ price, size, who? }`. `PayoutInput` and `CutoffRefundInput` require `{ F, k, S, q, held }`. `PayoutInput` also accepts an API extension, `cutoffPaid`, for settled cutoff refunds. `hostPayout` deducts that amount from gross and available proceeds; absent values preserve source parity. Public interfaces are defined in the source modules and exported from the package entry point.
+`BookInput` requires `{ F, k, S, q }` and optionally accepts `{ tranche, traderAsks, levels, hoursLeft }`. Trader asks contain `{ price, size, who? }`. `PayoutInput` and `CutoffRefundInput` require `{ F, k, S, q, held }`. `PayoutInput` also accepts an API extension, `cutoffPaid`, for settled cutoff refunds and rebate-pool haircuts. `hostPayout` deducts that amount from gross and available proceeds; absent values preserve source parity. Public interfaces are defined in the source modules and exported from the package entry point.
 
 Convert only at system boundaries. `toMicros` rounds the decimal representation of a finite USD value to six decimals, with ties away from zero; nonfinite values throw `RangeError`. `toTenths` rounds room nights to the nearest integer tenth, with ties away from zero. `fromTenths` divides an integer quantity by ten. Core math performs neither conversion.
 
@@ -63,11 +63,11 @@ Guests never pay above the recall cap: routing stops at the first ask priced abo
 
 ## Cutoff refunds
 
-`cutoffRefund({ F, k, S, q, held })` redeems unsold holdings against their pool reserve `L = cost(F, k, S, q - held, q)`. It returns `avgBid = L / held`, `perNight = avgBid * (1 - LATE_MAX)`, `total = L * (1 - LATE_MAX)` and `haircut = L * LATE_MAX`. The 30% haircut stays with the pool. All fields are zero unless `held > 1e-9`, preserving the source guard.
+`cutoffRefund({ F, k, S, q, held })` redeems unsold holdings against their pool reserve `L = cost(F, k, S, q - held, q)`. It returns `avgBid = L / held`, `perNight = avgBid * (1 - LATE_MAX)`, `total = L * (1 - LATE_MAX)` and `haircut = L * LATE_MAX`. The 30% haircut transfers to the rebate pool, never the host. All fields are zero unless `held > 1e-9`, preserving the source guard.
 
 For `F: 6000`, `k: 1.2`, `S: 15`, `q: 6` and `held: 4`, results rounded to cents are `avgBid: 8298.07`, `perNight: 5808.65`, `total: 23234.59` and `haircut: 9957.68`. Calculations remain unrounded internally.
 
-The source exposes 32 exports. The legacy parked-ask refund and its constant have been removed. For `offlineSaleRefund`, callers pass the pool bid as `pstar`.
+The source exposes 35 exports. The legacy parked-ask refund and its constant have been removed. For `offlineSaleRefund`, callers pass the pool bid as `pstar`.
 
 ## Offline double sale cover
 
@@ -92,3 +92,8 @@ Read the changed `model.js` and its dependencies in `shared.js`. Review formula 
 `priceHistory(modelId, roomIndex, date, state)` returns deterministic fair and market price series. `hostTrackRecord(property)` returns host performance in basis points. `nightAnalytics(state, book, history, modelId, date, hoursLeft, bookedBps)` returns estimated and annualized returns, risk score and level, volatility, sell-through, liquidity, daily change, exit value and refund.
 
 These pure calculations originate in `mock/v2/assets/trade.js`, not `model.js`, and are outside the model.js parity suite. Focused unit tests cover them. API mappers convert USD to micros and map results into protobuf messages.
+
+
+## Maker rebates
+
+`makerRebate({ askPrice, poolPrice, size, poolBalance = Infinity })` pays 0.5% of ask notional when the ask is at or below 105% of the pool price. Payment is capped by the nonnegative pool balance. The API converts the result to micros and caps it against the exact ledger balance. Late sell-back fees above the base `FEE` fund this pool; the base fee keeps its existing cover fund and treasury split. Cutoff haircuts also fund this pool. `MakerRebateInput` describes the arguments.

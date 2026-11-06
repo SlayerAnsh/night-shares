@@ -70,6 +70,12 @@ async function releaseNight(deps: Deps, key: string) {
       amount: mulTenths(perNight, remaining),
       memo: "cutoff refund",
     });
+    legs.push({
+      from: "pool",
+      to: SYSTEM_ADDRESSES.rebatePool,
+      amount: toMicros(cutoffRefund(before.state).haircut),
+      memo: "cutoff haircut",
+    });
     ports.inventory.update(key, (record) => ({
       ...record,
       released: true,

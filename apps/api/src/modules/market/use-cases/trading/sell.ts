@@ -79,13 +79,15 @@ async function executeSell(
           amount: quote.total?.micros ?? 0n,
           memo: "sell back",
         },
-        ...feePayments(quote.gross?.micros ?? 0n, quote.fee?.micros ?? 0n).map(
-          (payment) => ({
-            from: "pool",
-            ...payment,
-            memo: "sell-back fee",
-          }),
-        ),
+        ...feePayments(
+          quote.gross?.micros ?? 0n,
+          quote.fee?.micros ?? 0n,
+          true,
+        ).map((payment) => ({
+          from: "pool",
+          ...payment,
+          memo: "sell-back fee",
+        })),
       ].filter((leg) => leg.amount > 0n),
     );
   } catch (error) {

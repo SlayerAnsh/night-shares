@@ -38,6 +38,7 @@ test("sell back funds cover from gross notional while preserving net payout", as
   const d = await fixture();
   await buy(d, d.user, d.key, 5, 10n ** 12n);
   const wallet = d.ports.walletProvider;
+  const rebate = await wallet.balance(SYSTEM_ADDRESSES.rebatePool);
   const seller = await wallet.balance(d.user.walletAddress);
   const pool = await wallet.balance(SYSTEM_ADDRESSES.pool);
   const treasury = await wallet.balance(SYSTEM_ADDRESSES.treasury);
@@ -45,13 +46,17 @@ test("sell back funds cover from gross notional while preserving net payout", as
   const result = await sell(d, d.user, d.key, 5, 0n);
   const gross = result.quote?.gross?.micros ?? 0n;
   const fee = result.quote?.fee?.micros ?? 0n;
+  const base = (gross * 13000n + 500000n) / 1000000n;
   const cover = (gross + 500n) / 1000n;
   expect((await wallet.balance(SYSTEM_ADDRESSES.coverFund)) - fund).toBe(cover);
   expect((await wallet.balance(SYSTEM_ADDRESSES.treasury)) - treasury).toBe(
-    fee - cover,
+    base - cover,
   );
   expect((await wallet.balance(d.user.walletAddress)) - seller).toBe(
     result.quote?.total?.micros ?? 0n,
+  );
+  expect(await wallet.balance(SYSTEM_ADDRESSES.rebatePool)).toBe(
+    rebate + fee - base,
   );
   expect(pool - (await wallet.balance(SYSTEM_ADDRESSES.pool))).toBe(gross);
 });

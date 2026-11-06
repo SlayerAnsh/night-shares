@@ -13,9 +13,10 @@ test("fund rounds to micros while treasury receives the exact remainder", () => 
 });
 
 test("late sell-back fees still contribute only 0.1 percent of notional", () => {
-  expect(feePayments(100000000n, 30000000n)).toEqual([
+  expect(feePayments(100000000n, 30000000n, true)).toEqual([
     { to: "cover_fund", amount: 100000n },
-    { to: "treasury", amount: 29900000n },
+    { to: "treasury", amount: 1200000n },
+    { to: "rebate_pool", amount: 28700000n },
   ]);
 });
 

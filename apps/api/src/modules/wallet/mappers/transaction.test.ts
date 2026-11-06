@@ -38,3 +38,23 @@ test("maps incoming deposits and preserves unknown memos", () => {
     description: "custom",
   });
 });
+
+for (const [memo, kind] of [
+  ["rebate:maker", TransactionKind.REBATE],
+  ["double_sale_refund:night", TransactionKind.DOUBLE_SALE_REFUND],
+  ["agent_funding:order", TransactionKind.AGENT_FUNDING],
+] as const) {
+  test(`maps ${memo} to its wallet kind`, () => {
+    expect(
+      toTransaction({
+        id: "tx",
+        from: "pool",
+        to: "maker",
+        amount: 12n,
+        at: 0,
+        direction: "in",
+        memo,
+      }),
+    ).toMatchObject({ kind, amount: { micros: 12n } });
+  });
+}
