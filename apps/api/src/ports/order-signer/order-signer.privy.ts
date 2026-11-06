@@ -12,6 +12,7 @@ import type { AsyncOrderSigner } from "./order-signer";
 export function createPrivyOrderSigner(deps: {
   db: Database;
   custody: WalletCustody;
+  anvil?: boolean;
 }): AsyncOrderSigner {
   return {
     async signCustodial(maker: string, digest: string, typedDataJson: string) {
@@ -23,7 +24,9 @@ export function createPrivyOrderSigner(deps: {
         );
       const wallet = deps.db
         .query<{ walletId: string }, [string]>(
-          "SELECT wallet_id AS walletId FROM wallet_custody WHERE provider = 'privy' AND lower(address) = lower(?)",
+          deps.anvil
+            ? "SELECT wallet_id AS walletId FROM anvil_wallets WHERE lower(address) = lower(?)"
+            : "SELECT wallet_id AS walletId FROM wallet_custody WHERE provider = 'privy' AND lower(address) = lower(?)",
         )
         .get(maker);
       if (!wallet)

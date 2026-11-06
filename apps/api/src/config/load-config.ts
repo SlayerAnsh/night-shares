@@ -1,8 +1,13 @@
+import { assertOrderDomain } from "../modules/market/orders/typed-data";
 import {
   type AgentPassConfig,
   agentPassConfig,
 } from "../ports/agent-pass/config";
 import { assertMockSecurity } from "../ports/agent-pass/mock-security";
+import {
+  type ArcDeployment,
+  loadDeployment,
+} from "../ports/arc-deployment/arc-deployment";
 import { chainConfig } from "../ports/chain-status/config";
 import { parseDate } from "../shared/dates";
 import { ARC_NETWORKS } from "./arc-networks";
@@ -12,11 +17,15 @@ export type Config = Partial<ServerConfig> &
     chainLimits?: string;
     chainPaused?: boolean;
     agentApprovalThreshold?: bigint;
-    walletCustody?: "mock" | "privy";
+    walletCustody?: "mock" | "privy" | "anvil";
     privyAppId?: string;
     privyAppSecret?: string;
     privyAuthorizationKey?: string;
-    arcNetwork?: "mainnet" | "testnet";
+    arcNetwork?: "mainnet" | "testnet" | "fork";
+    arcDeployment?: ArcDeployment;
+    chainStatus?: "mock" | "onchain";
+    forkFaucet?: boolean;
+    forkAttesterKey?: () => `0x${string}`;
     arcRpcUrl?: string;
     orderChainId?: number;
     orderVerifyingContract?: string;
@@ -44,8 +53,12 @@ export function loadConfig(
   env: Record<string, string | undefined> = process.env,
 ): Config {
   const walletCustody = env.WALLET_CUSTODY ?? "mock";
-  if (walletCustody !== "mock" && walletCustody !== "privy")
-    throw new Error("WALLET_CUSTODY must be mock or privy.");
+  if (
+    walletCustody !== "mock" &&
+    walletCustody !== "privy" &&
+    walletCustody !== "anvil"
+  )
+    throw new Error("WALLET_CUSTODY must be mock, privy or anvil.");
   const privyAppId = env.PRIVY_APP_ID?.trim();
   const privyAppSecret = env.PRIVY_APP_SECRET?.trim();
   if (walletCustody === "privy" && (!privyAppId || !privyAppSecret))
@@ -53,8 +66,33 @@ export function loadConfig(
       "PRIVY_APP_ID and PRIVY_APP_SECRET are required in privy mode.",
     );
   const arcNetwork = env.ARC_NETWORK ?? "mainnet";
-  if (arcNetwork !== "mainnet" && arcNetwork !== "testnet")
-    throw new Error("ARC_NETWORK must be mainnet or testnet.");
+  if (
+    arcNetwork !== "mainnet" &&
+    arcNetwork !== "testnet" &&
+    arcNetwork !== "fork"
+  )
+    throw new Error("ARC_NETWORK must be mainnet, testnet or fork.");
+  if (walletCustody === "anvil" && arcNetwork !== "fork")
+    throw new Error("WALLET_CUSTODY=anvil requires ARC_NETWORK=fork.");
+  const arcDeployment = loadDeployment(arcNetwork, env.ARC_DEPLOYMENT_FILE);
+  const chainStatus =
+    env.CHAIN_STATUS ?? (arcNetwork === "fork" ? "onchain" : "mock");
+  if (chainStatus !== "mock" && chainStatus !== "onchain")
+    throw new Error("CHAIN_STATUS must be onchain or mock.");
+  if (chainStatus === "onchain" && !arcDeployment)
+    throw new Error("CHAIN_STATUS=onchain requires ARC_DEPLOYMENT_FILE.");
+  const faucet = env.FORK_FAUCET ?? "false";
+  if (faucet !== "true" && faucet !== "false")
+    throw new Error("FORK_FAUCET must be true or false.");
+  if (faucet === "true" && arcNetwork !== "fork")
+    throw new Error("FORK_FAUCET requires ARC_NETWORK=fork.");
+  const key = arcNetwork === "fork" ? env.FORK_ATTESTER_KEY?.trim() : undefined;
+  if (key && !/^0x[0-9a-fA-F]{64}$/.test(key))
+    throw new Error("FORK_ATTESTER_KEY must be a 32-byte private key.");
+  // Keep secret material inside a closure so config serialization cannot expose it.
+  const forkAttesterKey = key
+    ? Object.assign(() => key as `0x${string}`, { toJSON: () => "[REDACTED]" })
+    : undefined;
   const arcRpcUrl = env.ARC_RPC_URL ?? ARC_NETWORKS[arcNetwork].rpcUrl;
   try {
     const url = new URL(arcRpcUrl);
@@ -74,9 +112,18 @@ export function loadConfig(
     throw new Error("ORDER_CHAIN_ID must be a positive safe integer.");
   const orderVerifyingContract =
     env.ORDER_VERIFYING_CONTRACT ??
+    arcDeployment?.TradeRouter ??
     "0x0000000000000000000000000000000000000000";
   if (!/^0x[0-9a-fA-F]{40}$/.test(orderVerifyingContract))
     throw new Error("ORDER_VERIFYING_CONTRACT must be an Ethereum address.");
+  if (arcDeployment)
+    assertOrderDomain(
+      {
+        chainId: orderChainId,
+        verifyingContract: orderVerifyingContract as `0x${string}`,
+      },
+      arcDeployment.EIP712Domain,
+    );
   const rawDevTagIssuer = env.DEV_TAG_ISSUER ?? "false";
   if (rawDevTagIssuer !== "true" && rawDevTagIssuer !== "false")
     throw new Error("DEV_TAG_ISSUER must be true or false.");
@@ -185,6 +232,10 @@ export function loadConfig(
     privyAppSecret,
     privyAuthorizationKey: env.PRIVY_AUTHORIZATION_KEY?.trim() || undefined,
     arcNetwork,
+    arcDeployment,
+    chainStatus,
+    forkFaucet: faucet === "true",
+    forkAttesterKey,
     arcRpcUrl,
     orderChainId,
     orderVerifyingContract,

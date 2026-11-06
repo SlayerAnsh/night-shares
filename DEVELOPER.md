@@ -179,3 +179,39 @@ The web service uses `API_URL=http://api:8787` for server-side calls and browser
 Operational defaults and all configuration keys are documented in `apps/api/README.md` and `apps/api/.env.example`. Compose environment values do not automatically load that example file. Set overrides explicitly under the API service's environment configuration. Keep `stop_grace_period` longer than `SHUTDOWN_TIMEOUT_MS` (defaults: 15 seconds and 10 seconds). On termination, the API drains requests and scheduler work before closing SQLite, or exits with code 1 if the deadline expires. Configure trusted forwarding only behind an ingress that sanitizes forwarded headers. The included web proxy shares one IP quota for its users.
 
 Container execution and network e2e checks require a host with Docker and permission to bind ports. The operations unit suite runs without listening sockets: `cd apps/api && bun test src/server`.
+
+## Arc fork
+
+Start the local chain from the repository root, then start the API:
+
+```sh
+docker compose -f docker-compose.chain.yml up
+# In another terminal, after deployment has produced 5042-fork.json:
+cd apps/api
+ARC_NETWORK=fork WALLET_CUSTODY=anvil bun run dev
+```
+
+The deployment file is generated per run and gitignored. Restart the API after redeployment. All fork addresses and contract ABIs come from this file. Mainnet loads `packages/contracts/deployments/5042.json` when present; without it the existing network constants remain available. Unset `ARC_NETWORK` retains mock development behavior.
+
+| Variable | Fork behavior |
+| --- | --- |
+| `ARC_NETWORK` | `fork` selects chain 5042. |
+| `ARC_RPC_URL` | Defaults to `http://127.0.0.1:8545`; use `http://chain:8545` inside Compose. |
+| `ARC_DEPLOYMENT_FILE` | Defaults to `packages/contracts/deployments/5042-fork.json`, resolved from the repository root, regardless of working directory. Missing or invalid files fail startup. |
+| `CHAIN_STATUS` | `onchain` by default on fork, otherwise `mock`. Reads `NightHook.paused()` and deployment `NightToken.paused()`. |
+| `WALLET_CUSTODY` | `anvil` is fork-only; default remains `mock`. |
+| `FORK_FAUCET` | Defaults to `false`. When `true`, first allocation requests 100 mock USDC using `mint(address,uint256)` from funded Anvil account 0 and waits for its receipt. |
+| `FORK_ATTESTER_KEY` | Optional Anvil account 9 key, read only on fork, retained behind a config accessor and redacted in JSON dumps. Supply outside committed files. |
+| `FORK_IT` | `1` enables the live read-only integration test. |
+
+Anvil custody uses the public test mnemonic and persists user and system derivation indices starting at 100 in the adapter-owned SQLite `anvil_wallets` table. Keep the database to retain assignments. These accounts sign EIP-712 locally; they are not automatically linked in HumanRegistry. The faucet records allocation before sending a transaction, so failed or interrupted minting is not retried automatically. Existing allocations are not funded retroactively when the faucet is enabled. No trade execution is implemented here.
+
+Pause snapshots expire after five seconds. Synchronous trading guards reject while the first or expired snapshot refreshes, and on RPC failure. Reads cover the deployment's demo NightToken, not dynamically discovered nights. Domain overrides must match deployment `EIP712Domain` exactly. Remove stale `ORDER_VERIFYING_CONTRACT` overrides when switching to fork.
+
+Validate from `apps/api`:
+
+```sh
+npx tsc --noEmit
+bun test
+FORK_IT=1 bun test src/ports/arc-deployment/fork.integration.test.ts
+```

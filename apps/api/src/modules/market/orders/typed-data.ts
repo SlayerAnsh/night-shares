@@ -55,3 +55,23 @@ export function orderTypedData(order: Order, domain: OrderDomain) {
     ),
   };
 }
+
+export function assertOrderDomain(
+  domain: OrderDomain,
+  deployed: OrderDomain & { name: string; version: string },
+) {
+  if (
+    deployed.name !== "NightShares" ||
+    deployed.version !== "1" ||
+    deployed.chainId !== domain.chainId ||
+    deployed.verifyingContract.toLowerCase() !==
+      domain.verifyingContract.toLowerCase() ||
+    Object.keys(deployed).some(
+      (key) =>
+        !["name", "version", "chainId", "verifyingContract"].includes(key),
+    )
+  )
+    throw new Error(
+      "Order typed-data domain does not match deployment EIP712Domain.",
+    );
+}

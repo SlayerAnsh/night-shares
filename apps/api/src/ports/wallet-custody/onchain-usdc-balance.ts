@@ -1,4 +1,5 @@
 import {
+  type Address,
   createPublicClient,
   defineChain,
   erc20Abi,
@@ -11,6 +12,7 @@ export function createOnchainUsdcBalance(
   network: keyof typeof ARC_NETWORKS,
   rpcUrl?: string,
   options: {
+    usdc?: Address;
     fetchFn?: (
       input: RequestInfo | URL,
       init?: RequestInit,
@@ -19,6 +21,9 @@ export function createOnchainUsdcBalance(
   } = {},
 ) {
   const config = ARC_NETWORKS[network];
+  const usdc = options.usdc ?? config.usdc;
+  if (!usdc)
+    throw new Error("Fork USDC balance requires deployment USDC address.");
   const client = createPublicClient({
     chain: defineChain({
       id: config.chainId,
@@ -40,7 +45,7 @@ export function createOnchainUsdcBalance(
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         return await client.readContract({
-          address: config.usdc,
+          address: usdc,
           abi: erc20Abi,
           functionName: "balanceOf",
           args: [address],

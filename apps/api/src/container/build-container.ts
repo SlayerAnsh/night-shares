@@ -10,7 +10,10 @@ import { createSqliteInventoryRepo } from "../modules/inventory/inventory-repo.s
 import { createMarketModule } from "../modules/market/module";
 import { signedInventory } from "../modules/market/orders/inventory";
 import { configureOrders } from "../modules/market/orders/settings";
-import { defaultDomain } from "../modules/market/orders/typed-data";
+import {
+  assertOrderDomain,
+  defaultDomain,
+} from "../modules/market/orders/typed-data";
 import { createStayModule } from "../modules/stay/module";
 import { createWalletModule } from "../modules/wallet/module";
 import { createSqliteActivityLog } from "../ports/activity/activity-log.sqlite";
@@ -19,6 +22,7 @@ import { configureAgentPass } from "../ports/agent-pass/settings";
 import { bookingReportFor } from "../ports/booking-report/booking-report.mock";
 import { configureChainStatus } from "../ports/chain-status/chain-status";
 import { createMockChainStatus } from "../ports/chain-status/chain-status.mock";
+import { createOnchainChainStatus } from "../ports/chain-status/chain-status.onchain";
 import { createMockChannelManager } from "../ports/channel-manager/channel-manager.mock";
 import { createMockClock } from "../ports/clock/clock.mock";
 import { createSystemClock } from "../ports/clock/clock.system";
@@ -33,6 +37,7 @@ import { createMockReceptionTag } from "../ports/reception-tag/reception-tag.moc
 import { createSqliteSessionStore } from "../ports/sessions/session-store.sqlite";
 import { createSqliteVerificationStore } from "../ports/verifications/verification-store.sqlite";
 import { createOnchainUsdcBalance } from "../ports/wallet-custody/onchain-usdc-balance";
+import { createAnvilWalletCustody } from "../ports/wallet-custody/wallet-custody.anvil";
 import { createMockWalletCustody } from "../ports/wallet-custody/wallet-custody.mock";
 import { createPrivyWalletCustody } from "../ports/wallet-custody/wallet-custody.privy";
 import { persistWalletCustody } from "../ports/wallet-custody/wallet-custody.sqlite";
@@ -49,6 +54,24 @@ export function buildContainer(config: Config) {
   assertMockSecurity(config);
   if (config.adapters !== "mock")
     throw new Error("Only mock adapters are available.");
+  if (config.walletCustody === "anvil" && config.arcNetwork !== "fork")
+    throw new Error("Anvil custody requires ARC_NETWORK=fork.");
+  if (config.arcNetwork === "fork" && !config.arcDeployment)
+    throw new Error("Fork requires ARC_DEPLOYMENT_FILE.");
+  if (config.arcDeployment)
+    assertOrderDomain(
+      {
+        chainId: config.orderChainId ?? config.arcDeployment.chainId,
+        verifyingContract: (config.orderVerifyingContract ??
+          config.arcDeployment.TradeRouter) as `0x${string}`,
+      },
+      config.arcDeployment.EIP712Domain,
+    );
+  const requireDeployment = () => {
+    if (!config.arcDeployment)
+      throw new Error("Onchain adapters require ARC_DEPLOYMENT_FILE.");
+    return config.arcDeployment;
+  };
   const custodyAdapter =
     config.walletCustody === "privy"
       ? createPrivyWalletCustody({
@@ -80,11 +103,20 @@ export function buildContainer(config: Config) {
     db,
   );
   const catalog = createMemoryCatalogRepo();
-  const custody = persistWalletCustody(
-    db,
-    config.walletCustody ?? "mock",
-    custodyAdapter,
-  );
+  const custody =
+    config.walletCustody === "anvil"
+      ? createAnvilWalletCustody({
+          db,
+          network: config.arcNetwork ?? "mainnet",
+          deployment: requireDeployment(),
+          rpcUrl: config.arcRpcUrl ?? ARC_NETWORKS.fork.rpcUrl,
+          faucet: config.forkFaucet,
+        })
+      : persistWalletCustody(
+          db,
+          config.walletCustody ?? "mock",
+          custodyAdapter,
+        );
   const walletProvider = createSqliteWalletProvider({
     db,
     ids,
@@ -96,6 +128,7 @@ export function buildContainer(config: Config) {
   walletProvider.onchainUsdcBalance = createOnchainUsdcBalance(
     network,
     config.arcRpcUrl,
+    { usdc: config.arcDeployment?.USDC },
   );
   const ports: Ports & { bookingReport: ReturnType<typeof bookingReportFor> } =
     {
@@ -135,11 +168,24 @@ export function buildContainer(config: Config) {
             }),
       channelManager: createMockChannelManager({ catalog, clock, ids }),
     };
-  if (config.walletCustody === "privy")
-    configureCustodialSigner(ports, createPrivyOrderSigner({ db, custody }));
+  if (config.walletCustody === "privy" || config.walletCustody === "anvil")
+    configureCustodialSigner(
+      ports,
+      createPrivyOrderSigner({
+        db,
+        custody,
+        anvil: config.walletCustody === "anvil",
+      }),
+    );
   configureChainStatus(
     ports,
-    createMockChainStatus(config.chainPaused),
+    config.chainStatus === "onchain"
+      ? createOnchainChainStatus(
+          requireDeployment(),
+          config.arcRpcUrl ??
+            ARC_NETWORKS[config.arcNetwork ?? "mainnet"].rpcUrl,
+        )
+      : createMockChainStatus(config.chainPaused),
     config.chainLimits === "mainnet",
     config.agentApprovalThreshold,
   );
@@ -153,6 +199,7 @@ export function buildContainer(config: Config) {
           ? ARC_NETWORKS[network].chainId
           : defaultDomain.chainId),
       verifyingContract: (config.orderVerifyingContract ??
+        config.arcDeployment?.TradeRouter ??
         defaultDomain.verifyingContract) as `0x${string}`,
     },
     signer: createMockOrderSigner(config.orderMockSecret),

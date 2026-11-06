@@ -5,6 +5,12 @@ const shared = {
   multicall3: "0xcA11bde05977b3631167028862bE2a173976CA11",
 } as const;
 export const ARC_NETWORKS = {
+  fork: {
+    chainId: 5042,
+    rpcUrl: "http://127.0.0.1:8545",
+    explorerUrl: "",
+    usdc: undefined,
+  },
   mainnet: {
     ...shared,
     chainId: 5042,
