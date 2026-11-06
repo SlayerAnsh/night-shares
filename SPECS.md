@@ -295,17 +295,18 @@ The 7th room costs 10,092 on chain against 10,095 exact. Tick spacing 1 (0.01%) 
 | `HostVault` | Owns the ladder positions, calls `PoolManager.unlock` directly (no position NFTs). Withdraw and stop selling |
 | `BookingRouter` | `buyAndRedeem(night, maxPrice)`: exact output 1.0 through the pool, burn in the same transaction |
 | `TradeRouter` | Buys and sells for traders. Fills signed trader asks and agent quotes cheapest first alongside the pool leg, matching `routeBuy` |
-| `Settlement` | Accepts reports signed by the API attester key. Double sale: redeems each affected token into the pool with no fee (the holder gets the pool bid), then pays a penalty of the same size from the host's pending payouts, then `CoverFund`, as host debt netted from future payouts. Cutoff: freezes the pool, redeems every outstanding token into the pool at the bid minus `lateFee(0)` (30%, shared pro rata, `cutoffRefund`), then removes all host positions and returns the rest to the host |
+| `Settlement` | Accepts reports signed by the API attester key. Double sale: redeems each affected token into the pool with no fee (the holder gets the pool bid), then pays a penalty of the same size from the host's pending payouts, then `CoverFund`, as host debt netted from future payouts. Cutoff: freezes the pool, redeems every outstanding token into the pool at the bid minus `lateFee(0)` (30%, shared pro rata, `cutoffRefund`), sends the 30% haircut to `RebatePool`, then removes all host positions and returns the unsold rooms and remaining USDC to the host |
 | `CoverFund` | Receives the cover share of every fee. Backs only the double sale penalty, never the holder's principal |
+| `RebatePool` | One pool for all nights, since a night's haircut arrives after its trading ends. Funded by the late fee above 1.3% and cutoff haircuts. `TradeRouter` and `BookingRouter` pay the maker `makerRebate` (0.5% of the fill) when a trader ask fills at or below 1.05× the pool's current price, read from the pool in the same transaction. No P*, no off chain input. Rebates exist only on fills, because resting asks are off chain signed orders. The rate stays below 2×`FEE`, so filling your own ask always loses money |
 | `HumanRegistry` | Wallet to World ID nullifier |
 
 ### Open decisions
 
 1. Quote parity: `market-model` prices on the exact exponential, the chain on the ladder (up to 0.03% apart per room). Recommended: switch `market-model` to ladder math so quotes match the chain to the micro.
 2. Recall at the cap: when a guest finds no fill under the recall strike, whose tokens are recalled and how. Needs a recall right in `NightToken`.
-3. The late fee above the base 1.3%: to the host (recommended, a late sell back leaves the host less time to resell) or to the cover fund.
+3. Decided: the late fee above the base 1.3% and the 30% cutoff haircut go to `RebatePool`, never the host. The host controls guest routing (own site, desk, rooms outside the allotment), so it must not earn when trader held nights go unsold. The host earns only fees and sales.
 4. Trader asks on chain: signed orders through `TradeRouter` (recommended first) or v4 range orders managed by the hook.
-5. Decided: the cutoff haircut is `lateFee(0)` = `LATE_MAX` (30%). Every unsold holder gets 70% of the average bid of the held reserve, `cutoffRefund` in `market-model` (for example q 6, h 4: L = 33,192, each room night gets 5,809, the pool keeps 9,958). The parked ask condition, `REFUND_AT_FAIR` and `unsoldRefund` are removed. How the haircut splits between host and fee shares follows decision 3.
+5. Decided: the cutoff haircut is `lateFee(0)` = `LATE_MAX` (30%). Every unsold holder gets 70% of the average bid of the held reserve, `cutoffRefund` in `market-model` (for example q 6, h 4: L = 33,192, each room night gets 5,809, the pool keeps 9,958). The parked ask condition, `REFUND_AT_FAIR` and `unsoldRefund` are removed. The haircut goes to `RebatePool` (decision 3).
 6. Double sale penalty size: 1× the pool bid (the cover order in `offlineSaleCover`, called with the pool bid in place of P*) or larger.
 7. Token order: `currency0` is the lower address. Either mine the `NightToken` CREATE2 salt to fix the order, or make the ladder math handle both.
 
