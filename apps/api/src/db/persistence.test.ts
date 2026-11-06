@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createMemoryCatalogRepo } from "../modules/catalog-data/catalog-repo.memory";
@@ -97,7 +97,13 @@ test("file database preserves inventory, activity, sessions and ledger across re
         action: "check_in",
       }),
     ).toBe(false);
-    expect(db.query("SELECT * FROM schema_migrations").all()).toHaveLength(5);
+    // Every migration file on disk is applied exactly once.
+    const files = readdirSync(new URL("./migrations", import.meta.url)).filter(
+      (name) => name.endsWith(".sql"),
+    );
+    expect(db.query("SELECT * FROM schema_migrations").all()).toHaveLength(
+      files.length,
+    );
     second.clock.advance(7 * 86400000);
     expect(second.sessions.get(token)).toBeUndefined();
   } finally {
