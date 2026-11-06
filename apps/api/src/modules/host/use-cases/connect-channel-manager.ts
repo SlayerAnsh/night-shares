@@ -1,3 +1,4 @@
+import { transaction } from "../../../db/transaction";
 import { DomainError } from "../../../shared/errors/domain-error";
 import type { HostDeps } from "./deps";
 export function createConnectChannelManager({ ports, repo }: HostDeps) {
@@ -16,10 +17,12 @@ export function createConnectChannelManager({ ports, repo }: HostDeps) {
       propertyId,
       pms: name,
     });
-    repo.claim(userId, propertyId);
-    repo
-      .connections(userId)
-      .set(propertyId, { pms: name, roomTypes: imported.roomTypes });
+    transaction(ports.db, () => {
+      repo.claim(userId, propertyId);
+      repo
+        .connections(userId)
+        .set(propertyId, { pms: name, roomTypes: imported.roomTypes });
+    });
     return { ...property, roomTypes: imported.roomTypes };
   };
 }
