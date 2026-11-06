@@ -7,7 +7,14 @@ export type WalletTransaction = {
   memo: string;
   direction: "in" | "out";
 };
+export type SettlementLeg = {
+  from: string;
+  to: string;
+  amount: bigint;
+  memo: string;
+};
 export interface WalletProvider {
+  settle(legs: SettlementLeg[]): Promise<string[]>;
   linkWallet(humanId: string): Promise<string>;
   balance(address: string): Promise<bigint>;
   transactions(address: string): Promise<WalletTransaction[]>;

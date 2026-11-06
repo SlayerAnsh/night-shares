@@ -10,6 +10,7 @@ import { createGetNight } from "./reporting/get-night";
 import { createGetPortfolio } from "./reporting/get-portfolio";
 export function createHostUseCases(deps: HostDeps) {
   return {
+    initialize: deps.repo.initialize,
     connectChannelManager: createConnectChannelManager(deps),
     openNights: createOpenNights(deps),
     previewOpenNights: createPreviewOpenNights(deps),

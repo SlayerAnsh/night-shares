@@ -29,7 +29,7 @@ test("withdraw increases wallet exactly once under concurrent requests", async (
 test("failed transfer restores payout and invalid amounts never transfer", async () => {
   const f = await setup(),
     before = f.use.getPayout(f.userId, "prop_velana");
-  f.ports.walletProvider.transfer = async () => {
+  f.ports.walletProvider.settle = async () => {
     throw new Error("provider unavailable");
   };
   await expect(f.use.withdraw(f.user, "prop_velana", 1n)).rejects.toThrow(

@@ -7,10 +7,10 @@ export function propertyOf(
 ) {
   const property = ports.catalog.get(propertyId);
   if (!property) throw new DomainError("NOT_FOUND", "Property not found.");
-  if (!repo.connections(userId).has(propertyId))
+  if (repo.owner(propertyId) !== userId)
     throw new DomainError(
-      "FAILED_PRECONDITION",
-      "Connect the channel manager first.",
+      "PERMISSION_DENIED",
+      "This property is managed by another host.",
     );
   return property;
 }

@@ -3,6 +3,11 @@ import { DomainError } from "../../shared/errors/domain-error";
 import type { Clock } from "../clock/clock";
 import type { IdGenerator } from "../ids/id-generator";
 import type { IdentityVerifier, VerificationLevel } from "./identity-verifier";
+export function mockSubjectFor(seed: string) {
+  return createHash("sha256")
+    .update(JSON.stringify([seed]))
+    .digest("hex");
+}
 export function createMockIdentityVerifier({
   clock,
   ids,
@@ -49,7 +54,11 @@ export function createMockIdentityVerifier({
       }
       const hash = (value: unknown) =>
         createHash("sha256").update(JSON.stringify(value)).digest("hex");
-      return { subject: hash([seed]), nullifier: hash([seed, action]), level };
+      return {
+        subject: mockSubjectFor(seed),
+        nullifier: hash([seed, action]),
+        level,
+      };
     },
   };
 }

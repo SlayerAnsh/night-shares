@@ -14,7 +14,6 @@ import { commitNights } from "./commit-nights";
 import { settlement } from "./settlement";
 
 export function createCreateBooking(ports: Ports, repo: StayRepo) {
-  const pendingUsers = new Set<string>();
   return async (input: CreateBookingRequest, user: User) => {
     const lock = repo.locks.get(input.lockId);
     if (
@@ -22,8 +21,7 @@ export function createCreateBooking(ports: Ports, repo: StayRepo) {
       lock.userId !== user.id ||
       lock.expiresAt <= ports.clock.now() ||
       lock.busy ||
-      lock.tripId ||
-      pendingUsers.has(user.id)
+      lock.tripId
     )
       throw new DomainError(
         "FAILED_PRECONDITION",
@@ -39,7 +37,6 @@ export function createCreateBooking(ports: Ports, repo: StayRepo) {
         "Provide guest name, email and payment method.",
       );
     lock.busy = true;
-    pendingUsers.add(user.id);
     let committed = false;
     try {
       const { value, dates } = selection(ports, lock.quote.selection);
@@ -56,53 +53,60 @@ export function createCreateBooking(ports: Ports, repo: StayRepo) {
         0n,
       );
       const charge = minMicros(initialTotal, locked);
-      if (
-        input.payMethod === PayMethod.USDC &&
-        (await ports.walletProvider.balance(user.walletAddress)) < charge
-      )
-        throw new DomainError("FAILED_PRECONDITION", "Not enough USDC.");
-      // Validate recipients before changing inventory, including the seeded market maker.
-      for (const to of new Set(
-        initial.flatMap((n) => settlement(n.route).map((p) => p.to)),
-      ))
-        await ports.walletProvider.balance(to);
       if (input.payMethod === PayMethod.CARD)
         await ports.onramp.chargeCard({
           amount: charge,
           address: user.walletAddress,
         });
-      const available = await ports.walletProvider.balance(user.walletAddress);
       const current = preview();
       const total = current.reduce(
         (sum, n) => sum + toMicros(n.route.total),
         0n,
       );
       const paid = minMicros(total, locked);
-      if (available < paid)
-        throw new DomainError("FAILED_PRECONDITION", "Not enough USDC.");
       if (lock.expiresAt <= ports.clock.now())
         throw new DomainError(
           "FAILED_PRECONDITION",
           "Quote lock is unavailable or expired.",
         );
-      commitNights(ports, current, value.rooms, value.propertyId, user.id);
+      const reservation = commitNights(
+        ports,
+        current,
+        value.rooms,
+        value.propertyId,
+        user.id,
+      );
+      // Split the locked charge and subsidy at the source, without relying on incoming funds.
+      let buyerRemaining = paid;
+      const legs: Parameters<typeof ports.walletProvider.settle>[0] = [];
+      for (const night of current) {
+        for (const payment of settlement(night.route)) {
+          const buyerAmount = minMicros(payment.amount, buyerRemaining);
+          buyerRemaining -= buyerAmount;
+          if (buyerAmount > 0n)
+            legs.push({
+              from: user.walletAddress,
+              to: payment.to,
+              amount: buyerAmount,
+              memo: "guest_booking",
+            });
+          if (payment.amount > buyerAmount)
+            legs.push({
+              from: "treasury",
+              to: payment.to,
+              amount: payment.amount - buyerAmount,
+              memo: "quote_lock_subsidy",
+            });
+        }
+      }
+      try {
+        await ports.walletProvider.settle(legs);
+      } catch (error) {
+        reservation.revert();
+        throw error;
+      }
       committed = true;
-      // The platform funds increases during the ten-minute lock; sellers receive full proceeds.
-      if (total > paid)
-        await ports.walletProvider.transfer(
-          "treasury",
-          user.walletAddress,
-          total - paid,
-          "quote_lock_subsidy",
-        );
-      for (const night of current)
-        for (const payment of settlement(night.route))
-          await ports.walletProvider.transfer(
-            user.walletAddress,
-            payment.to,
-            payment.amount,
-            "guest_booking",
-          );
+      reservation.publish();
       const id = ports.ids.next("bk");
       const { hotelRef } = await ports.channelManager.pushReservation({
         ...value,
@@ -134,7 +138,6 @@ export function createCreateBooking(ports: Ports, repo: StayRepo) {
     } finally {
       // A failed settlement must not replay inventory mutations on retry.
       lock.busy = committed && !lock.tripId;
-      pendingUsers.delete(user.id);
     }
   };
 }

@@ -1,6 +1,8 @@
 import { expect, test } from "bun:test";
 import { PayMethod } from "@night-shares/proto/stay/v1/trip_pb";
+import { routeNight } from "../../pricing/quote-night";
 import { bookingFixture } from "../../test-support/fixture";
+import { fillNight } from "./fill-night";
 
 test("USDC booking burns room nights, pays exact total and returns a private trip", async () => {
   const f = await bookingFixture();
@@ -120,4 +122,62 @@ test("concurrent attempts cannot consume the same lock twice", async () => {
   ]);
   expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
   expect(f.cases.listTrips(f.user.id).upcoming).toHaveLength(1);
+});
+
+test("parallel distinct locks with funds for one booking reserve only one stay", async () => {
+  const f = await bookingFixture();
+  const second = f.cases.lockQuote(
+    f.cases.quoteStay(f.selection).id,
+    f.user.id,
+  );
+  const before = f.ports.inventory.get(f.key);
+  const wallet = f.ports.walletProvider;
+  await wallet.transfer(
+    f.user.walletAddress,
+    "pool",
+    (await wallet.balance(f.user.walletAddress)) -
+      (f.quote.total?.micros ?? 0n),
+    "test funding",
+  );
+  const results = await Promise.all([
+    f.cases.createBooking(f.request, f.user).then(
+      () => true,
+      () => false,
+    ),
+    f.cases.createBooking({ ...f.request, lockId: second.id }, f.user).then(
+      () => true,
+      () => false,
+    ),
+  ]);
+  expect(results.filter(Boolean)).toHaveLength(1);
+  expect(f.ports.inventory.get(f.key).state.booked).toBe(
+    before.state.booked + 1,
+  );
+  expect(f.ports.inventory.get(f.key)).toEqual(
+    fillNight(before, routeNight(before, 1), 1),
+  );
+  expect(await wallet.balance(f.user.walletAddress)).toBe(0n);
+  expect(f.repo.trips.size).toBe(1);
+  expect(f.repo.locks.get(second.id)?.busy).toBe(false);
+  expect(f.ports.activity.list({ kinds: ["guest_booked"] })).toHaveLength(2);
+});
+
+test("failed card settlement restores nights and lock while retaining onramp credit", async () => {
+  const f = await bookingFixture();
+  const before = f.ports.inventory.get(f.key);
+  const wallet = f.ports.walletProvider;
+  const balance = await wallet.balance(f.user.walletAddress);
+  wallet.settle = async () => {
+    throw new Error("settlement failed");
+  };
+  await expect(
+    f.cases.createBooking({ ...f.request, payMethod: PayMethod.CARD }, f.user),
+  ).rejects.toThrow("settlement failed");
+  expect(f.ports.inventory.get(f.key)).toEqual(before);
+  expect(await wallet.balance(f.user.walletAddress)).toBe(
+    balance + (f.quote.total?.micros ?? 0n),
+  );
+  expect(f.repo.locks.get(f.lock.id)?.busy).toBe(false);
+  expect(f.repo.trips.size).toBe(0);
+  expect(f.ports.activity.list({ kinds: ["guest_booked"] })).toHaveLength(0);
 });

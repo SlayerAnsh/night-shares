@@ -5,6 +5,7 @@ import {
   ReleasePolicy,
 } from "@night-shares/proto/host/v1/opening_pb";
 import { buildContainer } from "../../../container/build-container";
+import { mockSubjectFor } from "../../../ports/identity-verifier/identity-verifier.mock";
 import { createMemoryHostRepo } from "../repo/host-repo.memory";
 import { createHostUseCases } from "./create-host-use-cases";
 export function fixture() {
@@ -14,6 +15,12 @@ export function fixture() {
     today: "2026-12-01",
   });
   const repo = createMemoryHostRepo(ports.catalog);
+  repo.initialize({
+    id: "usr_host",
+    humanId: mockSubjectFor("host"),
+    level: "orb",
+    walletAddress: "",
+  });
   const deps = { ports, repo };
   const selection = create(OpenNightsSelectionSchema, {
     propertyId: "prop_velana",

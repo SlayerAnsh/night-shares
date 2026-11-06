@@ -20,7 +20,7 @@ test("wallet linking is stable and card charges credit the same transfer balance
   expect(await wallet.balance(address)).toBe(fromUsd(12_490));
   await expect(
     wallet.transfer(address, "host", fromUsd(50_000), "buy"),
-  ).rejects.toThrow("Insufficient");
+  ).rejects.toThrow("Not enough USDC.");
   await expect(wallet.transfer(address, "missing", 1n, "buy")).rejects.toThrow(
     "Wallet not found",
   );
@@ -76,4 +76,26 @@ test("wallet history records credits and both transfer directions with isolated 
   const selfId = await wallet.transfer(alice, alice, 1n, "self");
   expect((await wallet.transactions(alice))[0]?.id).toBe(selfId);
   expect(await wallet.balance(alice)).toBe(fromUsd(12_480) + 10n);
+});
+
+test("settlement aggregates debits and rejects every leg without ledger changes", async () => {
+  const wallet = createMockWalletProvider({
+    ids: createMockIdGenerator(),
+    clock: createMockClock(0),
+  });
+  const from = await wallet.linkWallet("batch");
+  const before = await wallet.balance(from);
+  const pool = await wallet.balance("pool");
+  await expect(
+    wallet.settle([
+      { from, to: "pool", amount: before, memo: "first" },
+      { from, to: "treasury", amount: 1n, memo: "second" },
+    ]),
+  ).rejects.toMatchObject({
+    code: "FAILED_PRECONDITION",
+    message: "Not enough USDC.",
+  });
+  expect(await wallet.balance(from)).toBe(before);
+  expect(await wallet.balance("pool")).toBe(pool);
+  expect(await wallet.transactions(from)).toEqual([]);
 });

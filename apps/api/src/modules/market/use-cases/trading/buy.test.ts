@@ -87,3 +87,67 @@ test("one-micro ask skips rounded-zero fee transfers", async () => {
     before - (await d.ports.walletProvider.balance(buyer.walletAddress)),
   ).toBe(1n);
 });
+
+test("parallel buys spend one affordable buy and compensate the other", async () => {
+  const d = await fixture();
+  d.ports.inventory.update(d.key, (r) => ({
+    ...r,
+    state: { ...r.state, traderAsks: [] },
+  }));
+  const before = d.ports.inventory.get(d.key);
+  const cost = quoteBuy(d, d.key, 1, d.user).total?.micros ?? 0n;
+  const wallet = d.ports.walletProvider;
+  await wallet.transfer(
+    d.user.walletAddress,
+    "pool",
+    (await wallet.balance(d.user.walletAddress)) - cost,
+    "test funding",
+  );
+  const results = await Promise.all([
+    buy(d, d.user, d.key, 1, 10n ** 12n).then(
+      () => true,
+      () => false,
+    ),
+    buy(d, d.user, d.key, 1, 10n ** 12n).then(
+      () => true,
+      () => false,
+    ),
+  ]);
+  expect(results.filter(Boolean)).toHaveLength(1);
+  expect(d.ports.inventory.get(d.key).state.q).toBeCloseTo(
+    before.state.q + 0.1,
+  );
+  expect(d.ports.inventory.get(d.key).state.held).toBeCloseTo(
+    before.state.held + 0.1,
+  );
+  expect(d.repo.position(d.user.humanId, d.key).free).toBe(1);
+  expect(d.repo.position(d.user.humanId, d.key).average).toBe(cost * 10n);
+  expect(await wallet.balance(d.user.walletAddress)).toBe(0n);
+  expect(d.ports.activity.list({ kinds: ["trader_bought"] })).toHaveLength(1);
+});
+
+test("unfunded trader fill restores the ask without paying seller or fees", async () => {
+  const d = await fixture();
+  d.ports.inventory.update(d.key, (r) => ({
+    ...r,
+    state: { ...r.state, traderAsks: [{ who: "mm-bot", price: 1, size: 0.5 }] },
+  }));
+  const before = d.ports.inventory.get(d.key);
+  const wallet = d.ports.walletProvider;
+  await wallet.transfer(
+    d.user.walletAddress,
+    "pool",
+    await wallet.balance(d.user.walletAddress),
+    "test drain",
+  );
+  const maker = await wallet.balance(SYSTEM_ADDRESSES.marketMaker);
+  const treasury = await wallet.balance("treasury");
+  await expect(buy(d, d.user, d.key, 5, 10n ** 12n)).rejects.toThrow(
+    "Not enough USDC.",
+  );
+  expect(d.ports.inventory.get(d.key)).toEqual(before);
+  expect(d.repo.position(d.user.humanId, d.key).free).toBe(0);
+  expect(await wallet.balance(SYSTEM_ADDRESSES.marketMaker)).toBe(maker);
+  expect(await wallet.balance("treasury")).toBe(treasury);
+  expect(d.ports.activity.list({ kinds: ["ask_filled"] })).toHaveLength(0);
+});

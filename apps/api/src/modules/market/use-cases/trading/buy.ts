@@ -17,6 +17,7 @@ import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyTraderAskFill } from "../../../inventory/mutations/apply-trader-ask-fill";
 import { buyQuote } from "../../mappers/route";
 import { assertOpen, bookOf, type Deps, syncPosition } from "../context";
+import { revertFills } from "./revert-fills";
 export async function buy(
   deps: Deps,
   user: User,
@@ -25,11 +26,12 @@ export async function buy(
   max: bigint,
 ) {
   const { ports } = deps;
-  const balance = await ports.walletProvider.balance(user.walletAddress);
   const marketMaker = SYSTEM_ADDRESSES.marketMaker;
   let result: BuyResult | undefined;
   let used = 0;
+  let before = ports.inventory.get(key);
   const record = ports.inventory.update(key, (current) => {
+    before = current;
     assertOpen(ports, current);
     const position = syncPosition(deps, user, current);
     used = position.free + position.escrow;
@@ -44,8 +46,6 @@ export async function buy(
       );
     if ((quote.total?.micros ?? 0n) > max)
       throw new DomainError("FAILED_PRECONDITION", "Price moved.");
-    if ((quote.total?.micros ?? 0n) > balance)
-      throw new DomainError("FAILED_PRECONDITION", "Not enough USDC.");
     let next = current;
     for (const fill of result.fills) {
       if (fill.src === "pool") next = applyPoolBuy(next, toTenths(fill.take));
@@ -62,11 +62,28 @@ export async function buy(
     throw new DomainError("FAILED_PRECONDITION", "Trade could not execute.");
   const quote = buyQuote(record, size, result, used);
   const position = deps.repo.position(user.humanId, key);
+  const previousAverage = position.average;
   const total = quote.total?.micros ?? 0n;
   position.average =
     ((mulTenths(position.average, used) + total) * 10n) / BigInt(used + size);
   position.free += size;
-  await settle(deps, user, key, result, marketMaker);
+  try {
+    await settle(deps, user, key, result, marketMaker);
+  } catch (error) {
+    ports.inventory.update(key, (current) =>
+      revertFills(current, result as BuyResult, before),
+    );
+    const held = position.free + position.escrow;
+    const cost = mulTenths(position.average, held) - total;
+    position.free -= size;
+    position.average =
+      held === used + size
+        ? previousAverage
+        : held === size
+          ? 0n
+          : (cost * 10n) / BigInt(held - size);
+    throw error;
+  }
   ports.activity.append({
     nightKey: key,
     propertyId: record.propertyId,
@@ -89,8 +106,10 @@ async function settle(
   result: BuyResult,
   marketMaker: string,
 ) {
-  const transfer: typeof ports.walletProvider.transfer = async (...args) =>
-    args[2] === 0n ? "" : ports.walletProvider.transfer(...args);
+  const legs: Parameters<typeof ports.walletProvider.settle>[0] = [];
+  const transfer = (from: string, to: string, amount: bigint, memo: string) => {
+    if (amount > 0n) legs.push({ from, to, amount, memo });
+  };
   let remaining = toMicros(result.gross);
   for (const [index, fill] of result.fills.entries()) {
     const gross =
@@ -100,13 +119,19 @@ async function settle(
     remaining -= gross;
     if (fill.src === "trader") {
       const fee = toMicros(fill.sellerFee ?? 0);
-      await transfer(
+      transfer(
         user.walletAddress,
         fill.who === "mm-bot" ? marketMaker : (fill.who ?? marketMaker),
         gross - fee,
         "ask fill",
       );
-      await transfer(user.walletAddress, "treasury", fee, "seller fee");
+      transfer(user.walletAddress, "treasury", fee, "seller fee");
+    } else transfer(user.walletAddress, "pool", gross, "market buy");
+  }
+  transfer(user.walletAddress, "treasury", toMicros(result.fee), "buyer fee");
+  await ports.walletProvider.settle(legs);
+  for (const fill of result.fills) {
+    if (fill.src === "trader") {
       ports.activity.append({
         nightKey: key,
         propertyId: key.split(":")[0] ?? "",
@@ -115,12 +140,6 @@ async function settle(
         tenths: toTenths(fill.take),
         priceMicros: toMicros(fill.price),
       });
-    } else await transfer(user.walletAddress, "pool", gross, "market buy");
+    }
   }
-  await transfer(
-    user.walletAddress,
-    "treasury",
-    toMicros(result.fee),
-    "buyer fee",
-  );
 }

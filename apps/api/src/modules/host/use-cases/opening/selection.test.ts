@@ -16,5 +16,7 @@ test("host cannot open past dates or disconnected hotels", () => {
     "240 days",
   );
   f.selection.propertyId = "prop_machiya";
-  expect(() => f.use.openNights(f.userId, f.selection)).toThrow("Connect");
+  expect(() => f.use.openNights(f.userId, f.selection)).toThrow(
+    "This property is managed by another host.",
+  );
 });

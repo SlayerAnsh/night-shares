@@ -6,6 +6,7 @@ import {
 } from "@night-shares/proto/market/v1/book_pb";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
+import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyPoolSell } from "../../../inventory/mutations/apply-pool-sell";
 import { assertOpen, type Deps, realise, syncPosition } from "../context";
 import { quoteSell } from "./quote-sell";
@@ -17,7 +18,6 @@ export async function sell(
   min: bigint,
 ) {
   const { ports } = deps;
-  const balance = await ports.walletProvider.balance("pool");
   let quote: RouteQuote | undefined;
   const record = ports.inventory.update(key, (current) => {
     assertOpen(ports, current);
@@ -38,30 +38,41 @@ export async function sell(
       );
     if ((quote.total?.micros ?? 0n) < min)
       throw new DomainError("FAILED_PRECONDITION", "Price moved.");
-    if ((quote.gross?.micros ?? 0n) > balance)
-      throw new DomainError(
-        "FAILED_PRECONDITION",
-        "Pool cannot fund this sale.",
-      );
     return applyPoolSell(current, size);
   });
   if (!quote)
     throw new DomainError("FAILED_PRECONDITION", "Trade could not execute.");
   const position = deps.repo.position(user.humanId, key);
+  const previous = { ...position };
   position.free -= size;
   realise(position, size, quote.total?.micros ?? 0n);
-  await ports.walletProvider.transfer(
-    "pool",
-    user.walletAddress,
-    quote.total?.micros ?? 0n,
-    "sell back",
-  );
-  await ports.walletProvider.transfer(
-    "pool",
-    "treasury",
-    quote.fee?.micros ?? 0n,
-    "sell-back fee",
-  );
+  const reserved = { ...position };
+  try {
+    await ports.walletProvider.settle(
+      [
+        {
+          from: "pool",
+          to: user.walletAddress,
+          amount: quote.total?.micros ?? 0n,
+          memo: "sell back",
+        },
+        {
+          from: "pool",
+          to: "treasury",
+          amount: quote.fee?.micros ?? 0n,
+          memo: "sell-back fee",
+        },
+      ].filter((leg) => leg.amount > 0n),
+    );
+  } catch (error) {
+    ports.inventory.update(key, (current) => applyPoolBuy(current, size));
+    position.free += size;
+    position.realised += previous.realised - reserved.realised;
+    position.closed += previous.closed - reserved.closed;
+    position.wins += previous.wins - reserved.wins;
+    position.returns += previous.returns - reserved.returns;
+    throw error;
+  }
   ports.activity.append({
     nightKey: key,
     propertyId: record.propertyId,

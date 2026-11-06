@@ -12,7 +12,7 @@ test("night commit appends booking activity alongside inventory changes", () => 
     1,
     record.propertyId,
     "guest",
-  );
+  ).publish();
   expect(f.ports.inventory.get(f.key).state.booked).toBe(
     record.state.booked + 1,
   );

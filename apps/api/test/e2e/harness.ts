@@ -11,6 +11,7 @@ import {
   buildContainer,
   type Container,
 } from "../../src/container/build-container";
+import { mockSubjectFor } from "../../src/ports/identity-verifier/identity-verifier.mock";
 import { createServer } from "../../src/server/create-server";
 export async function createHarness(
   container: Container = buildContainer({
@@ -72,7 +73,8 @@ export async function createHarness(
     // Creates a session directly through the ports, without the World ID
     // flow. Use it in domain tests so they do not depend on identity.
     async signInAs(level: "device" | "orb", seed = "e2e") {
-      const humanId = `human_${seed}`;
+      // Same subject the mock World ID flow gives this seed.
+      const humanId = mockSubjectFor(seed);
       const user = {
         id: `usr_${seed}`,
         humanId,
