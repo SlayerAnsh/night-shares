@@ -6,8 +6,9 @@ import {
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { toProto } from "../../../../shared/night-key";
+import { agentWallets } from "../../repo/agent-wallets.sqlite";
+import { buyAgent } from "../agent/buy";
 import type { Deps } from "../context";
-import { buy } from "../trading/buy";
 import { quoteBuy } from "../trading/quote-buy";
 export async function createAgentOrder(
   deps: Deps,
@@ -27,19 +28,20 @@ export async function createAgentOrder(
   const total = quote.total?.micros ?? 0n;
   if (total > budget)
     throw new DomainError("FAILED_PRECONDITION", "Order exceeds budget.");
+  agentWallets(deps.ports.db).check(user, key, total);
   const order = create(AgentOrderSchema, {
     id: deps.ports.ids.next("ord"),
     night: toProto(key),
     size: { tenths: size },
     budget: { micros: budget },
     spent: { micros: 0n },
-    walletAddress: user.walletAddress,
+    walletAddress: agentWallets(deps.ports.db).get(user).address,
     status: AgentOrderStatus.PENDING,
     requiresVerification: total > 1_000_000_000n,
   });
   if (!order.requiresVerification) {
-    // The agent shares its human's wallet and position, including the cap.
-    const execution = await buy(
+    // Agent purchases share the human position and per-night cap.
+    const execution = await buyAgent(
       deps,
       user,
       key,

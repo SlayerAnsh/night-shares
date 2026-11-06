@@ -5,6 +5,26 @@
 import { MarketService } from "./market_pb";
 
 /**
+ * @generated from rpc night_shares.market.v1.MarketService.GetAgentWallet
+ */
+export const getAgentWallet = MarketService.method.getAgentWallet;
+
+/**
+ * @generated from rpc night_shares.market.v1.MarketService.FundAgentWallet
+ */
+export const fundAgentWallet = MarketService.method.fundAgentWallet;
+
+/**
+ * @generated from rpc night_shares.market.v1.MarketService.WithdrawAgentWallet
+ */
+export const withdrawAgentWallet = MarketService.method.withdrawAgentWallet;
+
+/**
+ * @generated from rpc night_shares.market.v1.MarketService.SetAgentBudget
+ */
+export const setAgentBudget = MarketService.method.setAgentBudget;
+
+/**
  * @generated from rpc night_shares.market.v1.MarketService.Discover
  */
 export const discover = MarketService.method.discover;

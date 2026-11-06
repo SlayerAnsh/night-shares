@@ -176,6 +176,76 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.market.v1.DiscoverResponse'
+  /night_shares.market.v1.MarketService/FundAgentWallet:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: FundAgentWallet
+      operationId: night_shares.market.v1.MarketService.FundAgentWallet
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.FundAgentWalletRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.AgentWalletResponse'
+  /night_shares.market.v1.MarketService/GetAgentWallet:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: GetAgentWallet
+      operationId: night_shares.market.v1.MarketService.GetAgentWallet
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.GetAgentWalletRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.AgentWalletResponse'
   /night_shares.market.v1.MarketService/GetBook:
     post:
       tags:
@@ -491,6 +561,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.market.v1.SellResponse'
+  /night_shares.market.v1.MarketService/SetAgentBudget:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: SetAgentBudget
+      operationId: night_shares.market.v1.MarketService.SetAgentBudget
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.SetAgentBudgetRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.AgentWalletResponse'
   /night_shares.market.v1.MarketService/ToggleWatch:
     post:
       tags:
@@ -526,6 +631,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.market.v1.ToggleWatchResponse'
+  /night_shares.market.v1.MarketService/WithdrawAgentWallet:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: WithdrawAgentWallet
+      operationId: night_shares.market.v1.MarketService.WithdrawAgentWallet
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.WithdrawAgentWalletRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.AgentWalletResponse'
 components:
   schemas:
     connect-protocol-version:
@@ -766,6 +906,45 @@ components:
         - AGENT_ORDER_STATUS_PENDING
         - AGENT_ORDER_STATUS_APPROVED
         - AGENT_ORDER_STATUS_EXECUTED
+    night_shares.market.v1.AgentWallet:
+      type: object
+      properties:
+        address:
+          type: string
+          title: address
+        balance:
+          title: balance
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        totalBudget:
+          title: total_budget
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        perOrderCap:
+          title: per_order_cap
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        spent:
+          title: spent
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        allowedNights:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+          title: allowed_nights
+        holdings:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.Holding'
+          title: holdings
+      title: AgentWallet
+      additionalProperties: false
+      description: Agent holdings are attributed purchases within the shared human position.
+    night_shares.market.v1.AgentWalletResponse:
+      type: object
+      properties:
+        wallet:
+          title: wallet
+          $ref: '#/components/schemas/night_shares.market.v1.AgentWallet'
+      title: AgentWalletResponse
+      additionalProperties: false
     night_shares.market.v1.ApproveAgentOrderRequest:
       type: object
       properties:
@@ -961,6 +1140,18 @@ components:
           title: ask_id
       title: Fill
       additionalProperties: false
+    night_shares.market.v1.FundAgentWalletRequest:
+      type: object
+      properties:
+        amount:
+          title: amount
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: FundAgentWalletRequest
+      additionalProperties: false
+    night_shares.market.v1.GetAgentWalletRequest:
+      type: object
+      title: GetAgentWalletRequest
+      additionalProperties: false
     night_shares.market.v1.GetBookRequest:
       type: object
       properties:
@@ -1060,6 +1251,9 @@ components:
           items:
             $ref: '#/components/schemas/night_shares.market.v1.AgentOrder'
           title: agent_orders
+        agentWallet:
+          title: agent_wallet
+          $ref: '#/components/schemas/night_shares.market.v1.AgentWallet'
       title: GetPortfolioResponse
       additionalProperties: false
     night_shares.market.v1.Holding:
@@ -1336,6 +1530,22 @@ components:
           $ref: '#/components/schemas/night_shares.market.v1.Execution'
       title: SellResponse
       additionalProperties: false
+    night_shares.market.v1.SetAgentBudgetRequest:
+      type: object
+      properties:
+        totalBudget:
+          title: total_budget
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        perOrderCap:
+          title: per_order_cap
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        allowedNights:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+          title: allowed_nights
+      title: SetAgentBudgetRequest
+      additionalProperties: false
     night_shares.market.v1.TapeActor:
       type: string
       title: TapeActor
@@ -1448,6 +1658,14 @@ components:
           title: realised_pnl
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
       title: TraderTrackRecord
+      additionalProperties: false
+    night_shares.market.v1.WithdrawAgentWalletRequest:
+      type: object
+      properties:
+        amount:
+          title: amount
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: WithdrawAgentWalletRequest
       additionalProperties: false
 security: []
 tags:

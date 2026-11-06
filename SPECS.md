@@ -193,6 +193,16 @@ Hosts lock nothing beyond the traded nights themselves. There is no bond or secu
 
 Not in the first cut (listed so it is not forgotten): release at cutoff with unsold refunds, background order flow simulation, offline double sale cover and payout netting in the API (the model function exists; detection and settlement do not).
 
+### Agent wallets
+
+Each Orb user has one mock agent ledger address, `agent:<userWallet>`, created lazily with zero balance. GetAgentWallet returns it. FundAgentWallet transfers the user's USDC to it with memo `agent_funding:agent`, wallet transaction kind AGENT_FUNDING (10), and activity `agent_wallet_funded`. WithdrawAgentWallet returns available funds to the user's wallet. Neither action resets spending. All transfers remain mock ledger settlements.
+
+SetAgentBudget sets a lifetime total spend cap and a per-order cap in bigint micro USDC. Both start at zero. An optional exact night allowlist uses `propertyId:roomTypeId:date`; empty allows all nights. This is the minimal night filter corresponding to the mock's hotel, room and date rules. Raising the total authorizes additional spending. Lowering it below already reserved or spent USDC fails. Zero pauses new orders.
+
+Every agent order pays from its agent address and checks actual quoted total, including fees, against its order budget, per-order cap and remaining total budget. Violations return FAILED_PRECONDITION. Inventory, the shared human position and budget spending are reserved synchronously in one SQLite transaction before wallet settlement. Settlement failure compensates all three synchronously. Concurrent requests share the human's order lock. Orders over 1,000 USDC stay pending until a user-bound VerifyAction token approves them. Approval rechecks current prices and budget. Successful fills append `agent_order_filled`.
+
+Portfolio includes agent balance, budget, spent total and agent purchase attribution. Holdings remain in the human's shared position, preserving the combined per-night cap and existing sale and cutoff behavior. Agent attribution is capped at the remaining human holding for each night, using executed agent purchase quantities. It is not a separate custody position or a realized cost basis. Sales and cutoff refunds follow the shared human position; lifetime spending does not reset after a sale or withdrawal.
+
 ## apps/web
 
 One Next.js (App Router) app. Stay, Host and Trade are separate product areas, each in its own route group with its own URL prefix and layout. They share one World ID session, like the mock. The first cut is logic only: real data flows on plain placeholder markup. Visual design follows the approved mock.
@@ -324,3 +334,11 @@ Steps 1 to 5 are done for every service, on mocks.
 4. In parallel, one per domain: identity and wallet, catalog and stay, market, host.
 5. End to end tests for every flow.
 6. Replace mocks with real adapters, one port at a time.
+
+## Double sale cover
+
+A neutral booking report port supplies offline double sale reports. Its mock adapter exposes `report(nightKey, rooms)` and retains stable report IDs for polling. A report closes the affected night and redeems every holder position, including listed tenths, at the current pool bid without a late fee. Reported rooms describe the incident; every outstanding position on that night is covered. Seeded mock market maker holdings receive the same redemption.
+
+The cover waterfall uses the night's reserve slice, then the property's pending payouts, then `cover_fund`. The equal size host penalty uses remaining pending payouts. Unpaid cover and penalty become property debt. Future withdrawals net that debt and repay the cover fund, including partial repayment when no net payout remains. Reservation, positions and debt change in one synchronous SQLite transaction before one atomic mock wallet settlement. Failure restores the reservation for retry. Completed report IDs cannot pay twice. Wallet and chain interactions remain mock.
+
+Host opening, editing and stopping push an inventory batch through the channel manager. Failed confirmation restores inventory and release policy, records `channel_push_failed`, and returns UNAVAILABLE with “The hotel system did not confirm. Nothing changed.”

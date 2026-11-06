@@ -2,8 +2,8 @@ import { AgentOrderStatus } from "@night-shares/proto/market/v1/portfolio_pb";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { fromProto } from "../../../../shared/night-key";
+import { buyAgent } from "../agent/buy";
 import type { Deps } from "../context";
-import { buy } from "../trading/buy";
 export async function approveAgentOrder(
   deps: Deps,
   user: User,
@@ -25,7 +25,7 @@ export async function approveAgentOrder(
       "PERMISSION_DENIED",
       "Fresh World ID verification required.",
     );
-  const execution = await buy(
+  const execution = await buyAgent(
     deps,
     user,
     fromProto(order.night),

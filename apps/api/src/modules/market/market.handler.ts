@@ -9,6 +9,8 @@ import { getPortfolio } from "./use-cases/account/get-portfolio";
 import { listWatch } from "./use-cases/account/list-watch";
 import { postAsk } from "./use-cases/account/post-ask";
 import { toggleWatch } from "./use-cases/account/toggle-watch";
+import { setAgentBudget } from "./use-cases/agent/set-budget";
+import { getAgentWallet, transferAgentWallet } from "./use-cases/agent/wallet";
 import { type Deps, nightKey, quantity } from "./use-cases/context";
 import { discover } from "./use-cases/queries/discover";
 import { getBook } from "./use-cases/queries/get-book";
@@ -94,7 +96,38 @@ export function createMarketHandler(
         cancelAsk(deps, user, r.askId),
       );
     },
-    getPortfolio: (_, ctx) => getPortfolio(deps, requireUser(ctx)),
+    getPortfolio: async (_, ctx) => {
+      const user = requireUser(ctx);
+      return {
+        ...getPortfolio(deps, user),
+        agentWallet: (await getAgentWallet(deps, user)).wallet,
+      };
+    },
+    getAgentWallet: (_, ctx) => getAgentWallet(deps, requireUser(ctx)),
+    fundAgentWallet: (r, ctx) => {
+      const user = requireUser(ctx);
+      return deps.repo.exclusive(user.humanId, () =>
+        transferAgentWallet(deps, user, money(r.amount)),
+      );
+    },
+    withdrawAgentWallet: (r, ctx) => {
+      const user = requireUser(ctx);
+      return deps.repo.exclusive(user.humanId, () =>
+        transferAgentWallet(deps, user, money(r.amount), true),
+      );
+    },
+    setAgentBudget: (r, ctx) => {
+      const user = requireUser(ctx);
+      return deps.repo.exclusive(user.humanId, () =>
+        setAgentBudget(
+          deps,
+          user,
+          money(r.totalBudget),
+          money(r.perOrderCap),
+          r.allowedNights.map(nightKey),
+        ),
+      );
+    },
     toggleWatch: (r, ctx) =>
       toggleWatch(deps, requireUser(ctx), nightKey(r.night)),
     listWatch: (_, ctx) => listWatch(deps, requireUser(ctx)),

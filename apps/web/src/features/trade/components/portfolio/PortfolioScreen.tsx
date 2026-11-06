@@ -2,6 +2,7 @@
 import { useRequireAccess } from "../../../../session/require-access";
 import { useAccount } from "../../hooks/use-account";
 import { money, nightHref, percent } from "../../model/market";
+import { AgentWalletPanel } from "../agent/AgentWalletPanel";
 import { AgentOrders } from "../shared/AgentOrders";
 import { Feedback } from "../shared/Feedback";
 import { Listings } from "../shared/Listings";
@@ -74,6 +75,7 @@ export function PortfolioScreen() {
         </>
       )}
       <Listings />
+      <AgentWalletPanel />
       <AgentOrders />
       <h2>Watchlist</h2>
       <Feedback error={a.watch.error?.message} />

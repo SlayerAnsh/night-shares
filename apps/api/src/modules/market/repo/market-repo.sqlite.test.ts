@@ -11,6 +11,7 @@ import { createAgentOrder } from "../use-cases/account/create-agent-order";
 import { getPortfolio } from "../use-cases/account/get-portfolio";
 import { postAsk } from "../use-cases/account/post-ask";
 import { toggleWatch } from "../use-cases/account/toggle-watch";
+import { fundFixtureAgent } from "../use-cases/agent/testing";
 import { buy } from "../use-cases/trading/buy";
 import { sell } from "../use-cases/trading/sell";
 import { createSqliteMarketRepo } from "./market-repo.sqlite";
@@ -43,6 +44,7 @@ test("market positions, listings, watchlist and agent orders survive restart", a
     await sell(deps, user, key, 1, 0n);
     postAsk(deps, user, key, 2, 500000000n);
     toggleWatch(deps, user, key);
+    await fundFixtureAgent({ ...deps, user });
     const pending = await createAgentOrder(
       deps,
       user,

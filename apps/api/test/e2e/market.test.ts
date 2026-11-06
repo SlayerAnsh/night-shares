@@ -86,6 +86,11 @@ test("buy rejects over-cap size and Device user", async () => {
 test("large agent order needs one-time verification token", async () => {
   const { clients, user } = await harness.signInAs("orb", "market_agent");
   const agentNight = { ...night, date: "2026-12-20" };
+  await clients.market.fundAgentWallet({ amount: { micros: 3000000000n } });
+  await clients.market.setAgentBudget({
+    totalBudget: { micros: 3000000000n },
+    perOrderCap: { micros: 3000000000n },
+  });
   const pending = await clients.market.createAgentOrder({
     night: agentNight,
     size: { tenths: 5 },

@@ -11,6 +11,18 @@ import "night_shares/market/v1/book.proto";
 import "night_shares/market/v1/portfolio.proto";
 
 service MarketService {
+  rpc GetAgentWallet(GetAgentWalletRequest) returns (AgentWalletResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc FundAgentWallet(FundAgentWalletRequest) returns (AgentWalletResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc WithdrawAgentWallet(WithdrawAgentWalletRequest) returns (AgentWalletResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc SetAgentBudget(SetAgentBudgetRequest) returns (AgentWalletResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
   rpc Discover(DiscoverRequest) returns (DiscoverResponse) {
     option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
   }
@@ -168,6 +180,7 @@ message GetPortfolioResponse {
   night_shares.common.v1.Usdc unrealised_pnl = 4;
   TraderTrackRecord track_record = 5;
   repeated AgentOrder agent_orders = 6;
+  AgentWallet agent_wallet = 7;
 }
 
 message ToggleWatchRequest {
@@ -202,4 +215,24 @@ message ApproveAgentOrderRequest {
 message ApproveAgentOrderResponse {
   AgentOrder order = 1;
   Execution execution = 2;
+}
+
+// Agent holdings are attributed purchases within the shared human position.
+message AgentWallet {
+  string address = 1;
+  night_shares.common.v1.Usdc balance = 2;
+  night_shares.common.v1.Usdc total_budget = 3;
+  night_shares.common.v1.Usdc per_order_cap = 4;
+  night_shares.common.v1.Usdc spent = 5;
+  repeated night_shares.common.v1.NightKey allowed_nights = 6;
+  repeated Holding holdings = 7;
+}
+message AgentWalletResponse { AgentWallet wallet = 1; }
+message GetAgentWalletRequest {}
+message FundAgentWalletRequest { night_shares.common.v1.Usdc amount = 1; }
+message WithdrawAgentWalletRequest { night_shares.common.v1.Usdc amount = 1; }
+message SetAgentBudgetRequest {
+  night_shares.common.v1.Usdc total_budget = 1;
+  night_shares.common.v1.Usdc per_order_cap = 2;
+  repeated night_shares.common.v1.NightKey allowed_nights = 3;
 }
