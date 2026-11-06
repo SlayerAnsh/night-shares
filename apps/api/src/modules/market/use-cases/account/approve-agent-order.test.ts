@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { AgentOrderStatus } from "@night-shares/proto/market/v1/portfolio_pb";
+import { configureAgentPass } from "../../../../ports/agent-pass/settings";
 import { fixture } from "../../testing/fixture";
 import { fundFixtureAgent } from "../agent/testing";
 import { approveAgentOrder } from "./approve-agent-order";
@@ -7,6 +8,7 @@ import { createAgentOrder } from "./create-agent-order";
 
 test("large order needs a user- and order-bound fresh token and executes only once", async () => {
   const d = await fixture();
+  configureAgentPass(d.ports, { agentApproval: "idkit" });
   await fundFixtureAgent(d);
   d.key = "prop_velana:rt_velana_0:2026-12-20";
   const { order } = await createAgentOrder(d, d.user, d.key, 5, 10000000000n);
@@ -37,6 +39,7 @@ test("large order needs a user- and order-bound fresh token and executes only on
 for (const resourceId of [undefined, "", "ord_other"]) {
   test(`approval rejects a token for resource ${String(resourceId)}`, async () => {
     const d = await fixture();
+    configureAgentPass(d.ports, { agentApproval: "idkit" });
     await fundFixtureAgent(d);
     d.key = "prop_velana:rt_velana_0:2026-12-20";
     const { order } = await createAgentOrder(d, d.user, d.key, 5, 10000000000n);

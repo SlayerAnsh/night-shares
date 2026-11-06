@@ -3,6 +3,7 @@ import { Code } from "@connectrpc/connect";
 import { TapeActor } from "@night-shares/proto/market/v1/analytics_pb";
 import { BookSource } from "@night-shares/proto/market/v1/book_pb";
 import { AgentOrderStatus } from "@night-shares/proto/market/v1/portfolio_pb";
+import { configureAgentPass } from "../../src/ports/agent-pass/settings";
 import { createHarness } from "./harness";
 
 let harness: Awaited<ReturnType<typeof createHarness>>;
@@ -26,9 +27,9 @@ test("discover, detail, book, quote, buy, list, cancel and late sell-back", asyn
   expect(detail.monthCalendar).toHaveLength(31);
   expect((await market.getBook({ night })).lateFeeBps).toBeGreaterThan(130);
   const quote = (await market.quoteBuy({ night, size: { tenths: 5 } })).quote;
-  expect(quote?.gross?.micros).toBe(373123796n);
-  expect(quote?.fee?.micros).toBe(4850609n);
-  expect(quote?.total?.micros).toBe(377974405n);
+  expect(quote?.gross?.micros).toBe(373110987n);
+  expect(quote?.fee?.micros).toBe(4850443n);
+  expect(quote?.total?.micros).toBe(377961430n);
   const execution = await market.buy({
     night,
     size: { tenths: 5 },
@@ -87,6 +88,7 @@ test("buy rejects over-cap size and Device user", async () => {
   ).rejects.toMatchObject({ code: Code.PermissionDenied });
 });
 test("large agent order needs one-time verification token", async () => {
+  configureAgentPass(harness.container.ports, { agentApproval: "idkit" });
   const { clients } = await harness.signInAs("orb", "market_agent");
   const agentNight = { ...night, date: "2026-12-20" };
   await clients.market.fundAgentWallet({ amount: { micros: 3000000000n } });

@@ -5,6 +5,16 @@
 import { MarketService } from "./market_pb";
 
 /**
+ * @generated from rpc night_shares.market.v1.MarketService.StartAgentCheckpoint
+ */
+export const startAgentCheckpoint = MarketService.method.startAgentCheckpoint;
+
+/**
+ * @generated from rpc night_shares.market.v1.MarketService.GetAgentCheckpoint
+ */
+export const getAgentCheckpoint = MarketService.method.getAgentCheckpoint;
+
+/**
  * @generated from rpc night_shares.market.v1.MarketService.ClaimCutoff
  */
 export const claimCutoff = MarketService.method.claimCutoff;

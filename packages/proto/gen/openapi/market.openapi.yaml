@@ -281,6 +281,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.market.v1.AgentWalletResponse'
+  /night_shares.market.v1.MarketService/GetAgentCheckpoint:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: GetAgentCheckpoint
+      operationId: night_shares.market.v1.MarketService.GetAgentCheckpoint
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.GetAgentCheckpointRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.GetAgentCheckpointResponse'
   /night_shares.market.v1.MarketService/GetAgentWallet:
     post:
       tags:
@@ -736,6 +771,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.market.v1.AgentWalletResponse'
+  /night_shares.market.v1.MarketService/StartAgentCheckpoint:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: StartAgentCheckpoint
+      operationId: night_shares.market.v1.MarketService.StartAgentCheckpoint
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.StartAgentCheckpointRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.StartAgentCheckpointResponse'
   /night_shares.market.v1.MarketService/ToggleWatch:
     post:
       tags:
@@ -1355,6 +1425,28 @@ components:
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
       title: FundAgentWalletRequest
       additionalProperties: false
+    night_shares.market.v1.GetAgentCheckpointRequest:
+      type: object
+      properties:
+        attemptId:
+          type: string
+          title: attempt_id
+      title: GetAgentCheckpointRequest
+      additionalProperties: false
+    night_shares.market.v1.GetAgentCheckpointResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          title: status
+        reason:
+          type: string
+          title: reason
+        orderId:
+          type: string
+          title: order_id
+      title: GetAgentCheckpointResponse
+      additionalProperties: false
     night_shares.market.v1.GetAgentWalletRequest:
       type: object
       title: GetAgentWalletRequest
@@ -1839,6 +1931,31 @@ components:
             $ref: '#/components/schemas/night_shares.common.v1.NightKey'
           title: allowed_nights
       title: SetAgentBudgetRequest
+      additionalProperties: false
+    night_shares.market.v1.StartAgentCheckpointRequest:
+      type: object
+      properties:
+        orderId:
+          type: string
+          title: order_id
+      title: StartAgentCheckpointRequest
+      additionalProperties: false
+    night_shares.market.v1.StartAgentCheckpointResponse:
+      type: object
+      properties:
+        authorizeUrl:
+          type: string
+          title: authorize_url
+        attemptId:
+          type: string
+          title: attempt_id
+        expiresAt:
+          title: expires_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        useIdkit:
+          type: boolean
+          title: use_idkit
+      title: StartAgentCheckpointResponse
       additionalProperties: false
     night_shares.market.v1.TapeActor:
       type: string

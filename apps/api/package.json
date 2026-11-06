@@ -16,6 +16,7 @@
     "@night-shares/market-model": "workspace:*",
     "@night-shares/proto": "workspace:*",
     "@worldcoin/idkit-core": "4.6.0",
+    "jose": "6.2.3",
     "viem": "^2.57.16"
   },
   "devDependencies": {

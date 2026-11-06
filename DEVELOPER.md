@@ -40,6 +40,14 @@ API settings come from `apps/api/src/config/load-config.ts` and `server-config.t
 | `PORT` | `8787` | API listener, integer 0 to 65535; 0 selects an ephemeral port |
 | `DB_PATH` | `./data/night-shares.db` | SQLite path, or `:memory:` for isolated tests |
 | `ADAPTERS` | `mock` | Only supported value; wallet and chain remain mock |
+| `AGENT_APPROVAL` | `agent-pass` | Human approval policy: `agent-pass` or explicit `idkit` fallback |
+| `AGENT_PASS_MODE` | `mock` | `mock` local Approve/Deny/Cancel page, or `oidc` official Agent Pass |
+| `AGENT_PASS_ISSUER` | `https://auth.world.org` | Discovery issuer; sandbox uses `https://sandbox.auth.world.org`. Use separate databases for mock, sandbox and production |
+| `AGENT_PASS_CLIENT_ID` | empty | Portal client ID, required for OIDC |
+| `AGENT_PASS_CLIENT_SECRET` | empty | Backend secret, required for OIDC with `client_secret_basic`; never expose to web or logs |
+| `AGENT_PASS_REDIRECT_URI` | `http://localhost:8787/agent-pass/callback` | Exact portal callback. OIDC requires `https://<public-api-host>/agent-pass/callback`, with the deployed API hostname substituted |
+| `AGENT_PASS_ACR` | `https://world.org/oidc/acr/orb` | Exact required Orb class; weaker classes fail startup |
+| `WEB_ORIGIN` | `http://localhost:3000` | Browser return origin. OIDC requires HTTPS. Returns to `/trade/portfolio?checkpoint=<status>` |
 | `ORDER_CHAIN_ID` | `5042002` | Positive EIP-712 domain chain ID |
 | `ORDER_VERIFYING_CONTRACT` | `0x0000000000000000000000000000000000000000` | EIP-712 verifying contract address |
 | `ORDER_MOCK_SECRET` | `night-shares-dev-order-secret` | HMAC-SHA256 secret for mock order signatures |

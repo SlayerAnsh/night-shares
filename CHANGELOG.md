@@ -4,6 +4,8 @@ All notable changes to this monorepo. Newest first.
 
 ## Unreleased
 
+- Agent Pass: fresh World ID OIDC checkpoints for large agent orders, atomic SQLite execution, mock failure paths and explicit IDKit fallback.
+
 - Security: Walk bans persist across all linked World ID enrollment nullifiers and aliases, including later credential upgrades and enrollment recovery.
 
 ### Added

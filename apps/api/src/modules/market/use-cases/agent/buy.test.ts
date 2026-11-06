@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { configureAgentPass } from "../../../../ports/agent-pass/settings";
 import { agentWallets } from "../../repo/agent-wallets.sqlite";
 import { createSqliteMarketRepo } from "../../repo/market-repo.sqlite";
 import { fixture } from "../../testing/fixture";
@@ -26,6 +27,7 @@ test("SQLite reservation rolls inventory and position back when actual cost exce
 
 test("approval rechecks budget after creation and leaves pending order unspent", async () => {
   const d = await fixture();
+  configureAgentPass(d.ports, { agentApproval: "idkit" });
   await fundFixtureAgent(d);
   d.key = "prop_velana:rt_velana_0:2026-12-20";
   const { order } = await createAgentOrder(d, d.user, d.key, 5, 10000000000n);
@@ -45,6 +47,7 @@ test("approval rechecks budget after creation and leaves pending order unspent",
 
 test("agent and human orders share the per-night ownership cap", async () => {
   const d = await fixture();
+  configureAgentPass(d.ports, { agentApproval: "idkit" });
   await fundFixtureAgent(d);
   const cap = quoteBuy(d, d.key, 1, d.user).cap;
   // The cap is checked from current inventory by both execution paths.

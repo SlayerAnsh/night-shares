@@ -11,6 +11,12 @@ import "night_shares/market/v1/book.proto";
 import "night_shares/market/v1/portfolio.proto";
 
 service MarketService {
+  rpc StartAgentCheckpoint(StartAgentCheckpointRequest) returns (StartAgentCheckpointResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc GetAgentCheckpoint(GetAgentCheckpointRequest) returns (GetAgentCheckpointResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
   rpc ClaimCutoff(ClaimCutoffRequest) returns (ClaimCutoffResponse) {
     option (night_shares.auth.v1.access) = ACCESS_ORB;
   }
@@ -286,3 +292,17 @@ message ClaimCutoffResponse {
 }
 message ListCutoffClaimsRequest {}
 message ListCutoffClaimsResponse { repeated CutoffClaim claims = 1; }
+
+message StartAgentCheckpointRequest { string order_id = 1; }
+message StartAgentCheckpointResponse {
+  string authorize_url = 1;
+  string attempt_id = 2;
+  google.protobuf.Timestamp expires_at = 3;
+  bool use_idkit = 4;
+}
+message GetAgentCheckpointRequest { string attempt_id = 1; }
+message GetAgentCheckpointResponse {
+  string status = 1;
+  string reason = 2;
+  string order_id = 3;
+}

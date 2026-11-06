@@ -15,7 +15,9 @@ import { getPortfolio } from "./use-cases/account/get-portfolio";
 import { listWatch } from "./use-cases/account/list-watch";
 import { postAsk } from "./use-cases/account/post-ask";
 import { toggleWatch } from "./use-cases/account/toggle-watch";
+import { getAgentCheckpoint } from "./use-cases/agent/get-checkpoint";
 import { setAgentBudget } from "./use-cases/agent/set-budget";
+import { startAgentCheckpoint } from "./use-cases/agent/start-checkpoint";
 import { getAgentWallet, transferAgentWallet } from "./use-cases/agent/wallet";
 import { type Deps, nightKey, quantity } from "./use-cases/context";
 import { discover } from "./use-cases/queries/discover";
@@ -163,6 +165,18 @@ export function createMarketHandler(
         ),
       );
     },
+    startAgentCheckpoint: (r, ctx) => {
+      const user = requireUser(ctx);
+      const token =
+        /^Bearer ([^\s]+)$/i.exec(
+          ctx.requestHeader.get("authorization") ?? "",
+        )?.[1] ?? "";
+      return deps.repo.exclusive(user.humanId, () =>
+        startAgentCheckpoint(deps, user, r.orderId, token),
+      );
+    },
+    getAgentCheckpoint: (r, ctx) =>
+      getAgentCheckpoint(deps, requireUser(ctx), r.attemptId),
     approveAgentOrder: (r, ctx) => {
       const user = requireUser(ctx);
       return deps.repo.exclusive(user.humanId, () =>

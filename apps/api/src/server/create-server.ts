@@ -1,6 +1,7 @@
 import { createServer as createHttpServer } from "node:http";
 import { loadServerConfig, type ServerConfig } from "../config/server-config";
 import type { Container } from "../container/build-container";
+import { createAgentPassRoute } from "./agent-pass-route";
 import { serveDocs } from "./docs/serve-docs";
 import { clientIp } from "./limits/client-ip";
 import { applyHttpLimits, rejectRequest } from "./limits/http-limits";
@@ -18,6 +19,7 @@ export function createServer(
   const limits = createRateLimits(config);
   const ready = createReadiness(container.ports.db);
   const rpc = createRpcHandler(container, config, logger, limits);
+  const agentPass = createAgentPassRoute(container);
   let draining = false;
   const pending = new Set<Promise<void>>();
   const server = createHttpServer((req, res) => {
@@ -100,6 +102,7 @@ export function createServer(
         await rpc.handle(path, req, res);
         return;
       }
+      if (await agentPass(req, res)) return;
       if (await serveDocs(req, res)) return;
       res.writeHead(404).end();
     };

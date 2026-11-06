@@ -29,6 +29,8 @@ test("market positions, listings, watchlist and agent orders survive restart", a
     today: "2026-12-01",
     dbPath: join(directory, "market.db"),
     ids: "random" as const,
+    // Exercises the IDKit fallback approval path.
+    agentApproval: "idkit" as const,
   };
   let { ports } = buildContainer(config);
   try {

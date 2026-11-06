@@ -13,6 +13,7 @@ import { defaultDomain } from "../modules/market/orders/typed-data";
 import { createStayModule } from "../modules/stay/module";
 import { createWalletModule } from "../modules/wallet/module";
 import { createSqliteActivityLog } from "../ports/activity/activity-log.sqlite";
+import { configureAgentPass } from "../ports/agent-pass/settings";
 import { bookingReportFor } from "../ports/booking-report/booking-report.mock";
 import { createMockChannelManager } from "../ports/channel-manager/channel-manager.mock";
 import { createMockClock } from "../ports/clock/clock.mock";
@@ -99,6 +100,7 @@ export function buildContainer(config: Config) {
             }),
       channelManager: createMockChannelManager({ catalog, clock, ids }),
     };
+  configureAgentPass(ports, config);
   configureOrders(ports, {
     domain: {
       chainId: config.orderChainId ?? defaultDomain.chainId,

@@ -1,28 +1,33 @@
+import {
+  type AgentPassConfig,
+  agentPassConfig,
+} from "../ports/agent-pass/config";
 import { parseDate } from "../shared/dates";
 import { loadServerConfig, type ServerConfig } from "./server-config";
-export type Config = Partial<ServerConfig> & {
-  orderChainId?: number;
-  orderVerifyingContract?: string;
-  orderMockSecret?: string;
-  devTagIssuer?: boolean;
-  receptionTagSecret?: string;
-  jobIntervalMs?: number;
-  worldIdMode?: "mock" | "world-id" | "cloud";
-  worldIdAppId?: string;
-  worldIdRpId?: string;
-  worldIdSigningKey?: string;
-  worldIdEnvironment?: "staging" | "production";
-  worldIdAllowLegacy?: boolean;
-  worldIdDeviceCredential?: "selfieCheck" | "proofOfHuman";
-  worldIdAction?: string;
-  worldIdVerifyUrl?: string;
-  port: number;
-  adapters: "mock";
-  today?: string;
-  dbPath?: string;
-  clock?: "system" | "mock";
-  ids?: "random" | "sequential";
-};
+export type Config = Partial<ServerConfig> &
+  AgentPassConfig & {
+    orderChainId?: number;
+    orderVerifyingContract?: string;
+    orderMockSecret?: string;
+    devTagIssuer?: boolean;
+    receptionTagSecret?: string;
+    jobIntervalMs?: number;
+    worldIdMode?: "mock" | "world-id" | "cloud";
+    worldIdAppId?: string;
+    worldIdRpId?: string;
+    worldIdSigningKey?: string;
+    worldIdEnvironment?: "staging" | "production";
+    worldIdAllowLegacy?: boolean;
+    worldIdDeviceCredential?: "selfieCheck" | "proofOfHuman";
+    worldIdAction?: string;
+    worldIdVerifyUrl?: string;
+    port: number;
+    adapters: "mock";
+    today?: string;
+    dbPath?: string;
+    clock?: "system" | "mock";
+    ids?: "random" | "sequential";
+  };
 export function loadConfig(
   env: Record<string, string | undefined> = process.env,
 ): Config {
@@ -128,6 +133,7 @@ export function loadConfig(
     throw new Error("DB_PATH must be a nonempty SQLite file path or :memory:.");
   return {
     ...loadServerConfig(env),
+    ...agentPassConfig(env),
     orderChainId,
     orderVerifyingContract,
     orderMockSecret: env.ORDER_MOCK_SECRET || undefined,

@@ -1,11 +1,24 @@
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import { Code } from "@connectrpc/connect";
 import { AgentOrderStatus } from "@night-shares/proto/market/v1/portfolio_pb";
+import { buildContainer } from "../../src/container/build-container";
 import { createHarness } from "./harness";
 
 let h: Awaited<ReturnType<typeof createHarness>>;
 beforeAll(async () => {
-  h = await createHarness();
+  // These flows cover the IDKit fallback; agent-pass.test.ts covers checkpoints.
+  h = await createHarness(
+    buildContainer({
+      port: 0,
+      adapters: "mock",
+      devTagIssuer: true,
+      dbPath: ":memory:",
+      clock: "mock",
+      ids: "sequential",
+      today: "2026-12-01",
+      agentApproval: "idkit",
+    }),
+  );
 });
 afterAll(async () => {
   await h?.close();

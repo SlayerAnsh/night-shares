@@ -1,4 +1,5 @@
 import { AgentOrderStatus } from "@night-shares/proto/market/v1/portfolio_pb";
+import { agentPassSettings } from "../../../../ports/agent-pass/settings";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { fromProto } from "../../../../shared/night-key";
@@ -10,6 +11,11 @@ export async function approveAgentOrder(
   id: string,
   token: string,
 ) {
+  if (agentPassSettings(deps.ports).config.agentApproval !== "idkit")
+    throw new DomainError(
+      "PERMISSION_DENIED",
+      "Use an Agent Pass checkpoint to approve this order.",
+    );
   const order = deps.repo.account(user.humanId).orders.get(id);
   if (!order?.night) throw new DomainError("NOT_FOUND", "Order not found.");
   if (order.status !== AgentOrderStatus.PENDING)
