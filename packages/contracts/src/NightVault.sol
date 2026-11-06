@@ -115,6 +115,18 @@ contract NightVault is INightVault {
         emit Swept(c.property, c.host, available, hostDebtNetted);
     }
 
+    /// @notice Settlement collects only the booking night's fully earned positions into pending.
+    function collectEarned(bytes32 night) external guard returns (uint256 amount) {
+        if (msg.sender != settlement) revert Unauthorized();
+        _known(night);
+        if (closed[night]) return 0;
+        NightConfig memory c = factory.config(night);
+        uint256 end = INightToken(factory.tokenOf(night)).burned() / 1e18;
+        if (end > nextRoom[night]) end = nextRoom[night];
+        (amount,) = abi.decode(_unlock(night, 0, end, 1), (uint256, uint256));
+        pending[c.property] += amount;
+    }
+
     function creditPending(bytes32 property, uint256 amount) external guard {
         if (factory.ownerOf(property) == address(0)) revert InvalidConfig();
         pending[property] += amount;

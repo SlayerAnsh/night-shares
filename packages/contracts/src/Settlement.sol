@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
+import {CreditLib} from "./libraries/CreditLib.sol";
 import {ISettlement} from "./interfaces/ISettlement.sol";
 import {INightToken} from "./interfaces/INightToken.sol";
 import {INightFactory} from "./interfaces/INightFactory.sol";
@@ -27,6 +28,10 @@ contract Settlement is ISettlement {
         entered = true;
         _;
         entered = false;
+    }
+    mapping(address => uint256) public credits;
+    function withdrawCredit(address recipient) external nonReentrant returns (uint256) {
+        return CreditLib.withdraw(credits, usdc, recipient);
     }
     address public immutable platform;
     address public immutable usdc;
@@ -98,6 +103,7 @@ contract Settlement is ISettlement {
         if (!registry.isVerified(r.guest) || registry.walkBanned(registry.humanIdOf(r.guest))) revert Unauthorized();
         address host = factory.ownerOf(r.property);
         if (host == address(0) || host != c.host) revert InvalidBooking();
+        vault.collectEarned(b.night);
         (uint256 pendingPaid, uint256 advance,) = FeeMath.walkPayout(r.paid, vault.pending(r.property));
         if (coverFund.balance() < advance) revert InsufficientCover();
         consumedReport[r.reportId] = true;
@@ -141,18 +147,18 @@ contract Settlement is ISettlement {
         remainingHeld[night] = held;
         cursor[night] = first;
         cutoffSettled[night] = true;
-        if (haircut != 0) SafeTransferLib.safeTransfer(usdc, rebatePool, haircut);
+        if (haircut != 0) CreditLib.pay(credits, usdc, rebatePool, haircut);
         // Vault removal uses a separate unlock after redemption has reconciled every delta.
         (uint256 hostProceeds,) = vault.releaseAtCutoff(night);
         token.burnVaultDust();
         token.burnCutoffInventory();
         uint256 debtPaid = hostProceeds < hostDebt[c.host] ? hostProceeds : hostDebt[c.host];
         hostDebt[c.host] -= debtPaid;
-        if (debtPaid != 0) SafeTransferLib.safeTransfer(usdc, address(coverFund), debtPaid);
-        if (hostProceeds > debtPaid) SafeTransferLib.safeTransfer(usdc, c.host, hostProceeds - debtPaid);
+        if (debtPaid != 0) CreditLib.pay(credits, usdc, address(coverFund), debtPaid);
+        if (hostProceeds > debtPaid) CreditLib.pay(credits, usdc, c.host, hostProceeds - debtPaid);
         factory.notifyCutoffSettled(night);
         settling[night] = false;
-        emit CutoffReleased(night, held, rate);
+        emit CutoffReleased(night, c.S - token.burned() - held, rate);
     }
 
     function unlockCallback(bytes calldata data) external returns (bytes memory) {
@@ -237,7 +243,7 @@ contract Settlement is ISettlement {
         if (remainingHeld[night] == 0) {
             uint256 residual = remainingReserve[night];
             remainingReserve[night] = 0;
-            if (residual != 0) SafeTransferLib.safeTransfer(usdc, rebatePool, residual);
+            if (residual != 0) CreditLib.pay(credits, usdc, rebatePool, residual);
         }
     }
 }

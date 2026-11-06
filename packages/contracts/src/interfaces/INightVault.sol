@@ -23,6 +23,7 @@ interface INightVault is INightTypes {
     /// @notice Anyone. Removes only full positions below P(b), credits pending, nets host debt, sends remainder to fixed host.
     function sweep(bytes32 night) external returns (uint256 amount, uint256 hostDebtNetted);
     /// @notice Anyone may fund pending payouts. Pulls amount of USDC from caller for a registered property.
+    function collectEarned(bytes32 night) external returns (uint256 amount);
     function creditPending(bytes32 property, uint256 amount) external;
     /// @notice Settlement only. Pays min(requested, pending) to the validated walked guest.
     function payPending(bytes32 property, address guest, uint256 requested) external returns (uint256 paid);

@@ -7,14 +7,14 @@ The ten production contracts form one system. `app/SPECS.md`, its Chain design s
 1. IDs are hashed on chain from the canonical strings. The night hash is `keccak256(propertyId:roomTypeId:YYYY-MM-DD)`. Property and room type hashes use their UTF-8 strings. Empty catalog components and colons in components are rejected. The date is validated, including leap years, and determines 15:00 UTC check-in. The string opening overload performs registration itself. The config-only overload requires a previously registered identity and validates every component against it.
 2. Property ownership is bound once by the current Settlement attester's EIP-712 `BindProperty(bytes32 property,address hostPayout,uint64 deadline)` signature under the factory domain. Anyone can relay it. Expired, reused, zero-payout and rebinding attempts revert. Only the bound payout address can open. It must have Orb verification and fewer than two accepted walk incidents. Historical debt and incidents remain keyed to this payout address.
 3. The exact order type string remains `Order(bytes32 night,uint256 size,uint256 price,uint64 expiry,uint256 nonce,address maker)`. Both routes use the TradeRouter NightShares version 1 domain and its maker nonces and digest-keyed fills. A maker signs a positive whole-tenth size. The router verifies signature, expiry, nonce, remaining fill and balance before its gated token pull. `cancelAll` increments the nonce for both routes. There is no maximum on-chain order lifetime; 24 hours is the client default.
-4. Ask cost is `ceil(qty * price / 1e18)`. The buyer pays this gross plus the separately rounded 1.3% fee. The maker receives gross, plus any independently funded rebate. This corrects the original router implementation's seller deduction. Recall retains its distinct rule: the guest pays X and the recalled holder receives X less 1.3%. Both routes consume asks alongside pool tenths in cheapest-first order. A pool tenth must fit entirely below the next supplied ask price or booking strike.
+4. Ask cost is `ceil(qty * price / 1e18)`. The buyer pays this gross plus the separately rounded 1.3% fee. The maker receives gross, plus any independently funded rebate. This corrects the original router implementation's seller deduction. Recall prefunds `ceil(X * missing / 1e18)`. Each holder receives the difference between successive cumulative rounded up strikes, less a half up 1.3% fee on that difference. The differences sum exactly to the prefunded strike. Failed holder payments become backed credits on NightToken. If either an ask maker or taker is the host payout address or shares the host humanId, the host fee share goes to RebatePool. Both routes consume asks alongside pool tenths in cheapest-first order. A pool tenth must fit entirely below the next supplied ask price or booking strike.
 5. Permit2 AllowanceTransfer is used only for taker USDC. Users first approve USDC to Permit2 and then grant a router-specific Permit2 allowance. No permit payload is embedded in router calls. Maker NightToken pulls use only the two fixed routers after order verification. Ordinary sells require the owner's normal ERC-20 allowance.
 6. Opening mints `S + D`, as explicitly required for integration. `NightPosition.room` is the single shared position calculation for token minting, vault inventory validation, seeding and hook validation. It rounds liquidity upward with a 100-token-wei cushion per room. Deposits exceed one room by at most `1e9` wei each. D is the sum of those excess deposits. `released + burned <= S` prevents this excluded rounding inventory from reaching users. D has no cap, holder-list or refund entitlement. Full S sellout in tenths is tested. This supersedes the earlier decision to mint only S, which could not support that sellout.
 7. Opening does not enable trading until all positions exist. The host adds contiguous half-open room ranges through the factory. Deployment clients use chunks of ten rooms. Contracts also support other contiguous chunk lengths up to S. The vault alone owns liquidity, with one room-index salt per position. Trading, repeated additions, donations and arbitrary liquidity providers cannot bypass the hook.
 8. The registry accepts attester-signed links and distinct relinks, consumes digests, enforces deadlines and preserves historical bans and verification provenance. Each NightToken caches a holder's humanId while that position is nonzero. Relinking does not move the live aggregate to a new identity. Later receives by that wallet continue under the cached identity until the wallet exits. New positions use the current registry identity. Caps sum those cached positions across wallets and equal `max(1e18, 30% of S)`.
-9. Cutoff freezes ordinary trading by timestamp even if nobody has settled yet. One permissionless settlement transaction freezes the holder list and snapshots aggregate custody in O(1), redeems the held reserve, transfers the half-up 30% haircut to RebatePool, stores the floored per-token rate, removes remaining positions, burns all excluded inventory and nets host debt before paying the host remainder. It performs no holder USDC transfers. Permissionless `pushBatch(night,n)` advances a cursor over the frozen list. Failed USDC payments remain claimable. `claim(night)` is available before, during and after batching; duplicate payments are prevented. Final pro-rata rounding remainder goes to RebatePool.
+9. Cutoff freezes ordinary trading by timestamp even if nobody has settled yet. One permissionless settlement transaction freezes the holder list and snapshots aggregate custody in O(1), redeems the held reserve, transfers the half-up 30% haircut to RebatePool, stores the floored per-token rate, removes remaining positions, burns all excluded inventory and nets host debt before paying the host remainder. It performs no holder USDC transfers. Permissionless `pushBatch(night,n)` advances a cursor over the frozen list. Failed USDC payments remain claimable. `claim(night)` is available before, during and after batching; duplicate payments are prevented. Final pro-rata rounding remainder goes to RebatePool. Host proceeds, debt repayments, the haircut and final rounding remainder use attempted transfers with backed credits on failure, so these recipients cannot block holder refunds. NightHook uses the same payment policy for all fee recipients. `CutoffReleased.roomsReturned` is `S - burned - held` in 1e18 units.
 10. Cutoff redemption stops at the first ladder boundary. Sweeping buffered positions and integer swap rounding can leave a tiny unconsumed token remainder. Settlement accepts it only when it is no larger than the original D, and burns it with returned cutoff inventory without increasing earned burns. The original held quantity remains the refund denominator, and every recovered USDC unit is included in the reserve. The integration regression exposes 824 token wei after a swept sellout and sellback. Larger shortfalls revert instead of hiding missing liquidity. No PoolManager currency credit is cleared or donated.
-11. WalkAttestation fields remain `{bytes32 reportId,bytes32 bookingId,bytes32 property,address guest,uint256 paid,bytes32 evidenceHash,uint64 reportedAt,uint64 deadline}` under the Settlement domain. A valid report matches a recorded booking, guest, property and complete paid amount. The attester certifies reception presence and absence of desk check-in. Reporting is within 24 hours of recorded check-in, before the signature deadline, and subject to identity verification, bans and both replay guards. Refunds draw from property pending payouts first, then CoverFund. Only the fund advance becomes host debt. Insufficient combined funding or failed payment reverts all bookkeeping. Two incidents block future opening.
+11. WalkAttestation fields remain `{bytes32 reportId,bytes32 bookingId,bytes32 property,address guest,uint256 paid,bytes32 evidenceHash,uint64 reportedAt,uint64 deadline}` under the Settlement domain. A valid report matches a recorded booking, guest, property and complete paid amount. The attester certifies reception presence and absence of desk check-in. Reporting is within 24 hours of recorded check-in, before the signature deadline, and subject to identity verification, bans and both replay guards. Before calculating the refund waterfall, Settlement calls `collectEarned` on the booking night. This removes its fully earned, unswept room positions below P(b) and adds the recovered USDC to property pending payouts without forwarding it to the host or netting existing debt. The loop is bounded by that night's seeded rooms, at most 100, and skips already removed positions. It does not scan other nights of the property. Closed nights collect zero. Refunds then draw from property pending payouts first, then CoverFund. Only the fund advance becomes host debt. Insufficient combined funding or failed payment reverts all bookkeeping. Two incidents block future opening.
 12. Preserve the complete field lists and indexing of Trade, Booked, Recalled, Swept, CutoffReleased, CutoffClaimed, WalkPaid and OrderCancelledAll in `INightTypes`. Preserve `bindProperty`, `linkWallet`, `buyAndRedeem`, `pushBatch`, `claim` and `claimable`. There is no deployment administrator who can replace endpoints, withdraw fund reserves, add arbitrary routers or change a curve.
 
 ## Deployment
@@ -34,7 +34,7 @@ The e2e environment uses chain ID 5042002, a freshly deployed real PoolManager, 
 | Factory.addLadderChunk | Bound host only. Vault unlocks PoolManager once for the chunk; hook validates every unique vault-owned position. |
 | Token transfers | Owners or approved spenders. Verify recipients, enforce cached human caps, maintain descending holder links and enforce released inventory. Fixed excluded endpoints are vault, manager, routers, Settlement and zero. |
 | Token.routerTransfer | Fixed TradeRouter or BookingRouter only. Routers perform signature and fill checks first. |
-| Token.setHints | Anyone may provide transaction-scoped validated list hints. Invalid hints fall back to traversal of at most 64 nodes. |
+| Token.setHints | Anyone may provide transaction-scoped validated list hints. Hints require live `inList` membership and reciprocal adjacency. Transfer counterparties cannot be hint neighbors. Invalid hints fall back to traversal of at most 64 nodes. |
 | TradeRouter.buy/sell | Orb trader only. Shared execution guard, timestamp and ladder gates. PoolManager unlock callback verifies caller and operation hash. Buys deliver exact token output; sells take exact token input through ordinary allowance. |
 | TradeRouter.fillBookingAsk | BookingRouter only, with taker equal to its active msgSender. TradeRouter owns verification, fills, maker pull, fees, rebate and Trade event. |
 | TradeRouter.cancelAll | Maker increments its own nonce outside active execution. |
@@ -43,6 +43,8 @@ The e2e environment uses chain ID 5042002, a freshly deployed real PoolManager, 
 | Token.recall | BookingRouter only, before cutoff, with prefunded strike USDC. Largest balance first, ascending address for ties. Emits Recalled. |
 | Token.burn | BookingRouter or Settlement only. Burns caller custody. Ordinary booking and void burns increase earned burns. Cutoff inventory helpers do not. |
 | Vault.sweep | Anyone. Remove only fully earned room positions below P(b), net Settlement debt through CoverFund, then pay bound host. Unremoved room positions remain collateral. |
+| Vault.collectEarned | Settlement only. Collect the booking night's fully earned unswept positions into property pending payouts. Closed nights return zero. |
+| Token/Hook/Settlement.withdrawCredit | Anyone retries payment to the specified credited recipient. No caller can redirect funds. A failed retry reverts and preserves the credit. |
 | Vault.creditPending | Anyone can transfer their own USDC into a known property's pending payouts. |
 | Vault.payPending | Settlement only. Pay the smaller of requested and pending. |
 | Settlement.reportWalk | Anyone relays an accepted attester signature. Registry and booking checks precede pending/fund transfers and incident/debt accounting. |
@@ -272,6 +274,9 @@ function tokenOf(bytes32) external view returns (address);
 ### NightToken
 
 ```solidity
+function credits(address recipient) external view returns (uint256);
+function withdrawCredit(address recipient) external returns (uint256);
+function inList(address holder) external view returns (bool);
 function S() external view returns (uint256);
 function X() external view returns (uint256);
 function allowance(address, address) external view returns (uint256);
@@ -319,6 +324,7 @@ function transferFrom(address from, address to, uint256 amount) external returns
 ### NightVault
 
 ```solidity
+function collectEarned(bytes32 night) external returns (uint256 amount);
 function addLadderChunk(bytes32 night, uint256 fromRoom, uint256 toRoom) external;
 function closed(bytes32) external view returns (bool);
 function closing(bytes32) external view returns (bool);
@@ -344,6 +350,8 @@ function usdc() external view returns (address);
 ### NightHook
 
 ```solidity
+function credits(address recipient) external view returns (uint256);
+function withdrawCredit(address recipient) external returns (uint256);
 function afterAddLiquidity(address, PoolKey, ModifyLiquidityParams, BalanceDelta, BalanceDelta, bytes) external pure returns (bytes4, BalanceDelta);
 function afterDonate(address, PoolKey, uint256, uint256, bytes) external pure returns (bytes4);
 function afterInitialize(address, PoolKey, uint160, int24) external pure returns (bytes4);
@@ -423,6 +431,8 @@ function usdc() external view returns (address);
 ### Settlement
 
 ```solidity
+function credits(address recipient) external view returns (uint256);
+function withdrawCredit(address recipient) external returns (uint256);
 function DOMAIN_SEPARATOR() external view returns (bytes32);
 function attester() external view returns (address);
 function bookingRouter() external view returns (IBookingRouter);
@@ -531,4 +541,8 @@ Deploy.s.sol uses only configured external dependencies and never deploys PoolMa
 
 Run `sh script/install-deps.sh`, then `forge test --offline` from this package. Use the separate `docker-compose.chain.yml` from the app directory for network integration. Run ForkFlowTest with `FORK_RPC=http://127.0.0.1:8545` only after deployment and seed complete. Keep frozen order and attestation fields, event layouts and public compatibility selectors unchanged. Test pause with money already held and verify successful cutoff and claim fallback, rather than checking only rejected entries. Record fork block, deployed addresses and test output when refreshing integration evidence. Contracts remain unaudited.
 
-Opening math is implemented by the immutable vault's pure `openingValues` function, using the shared NightPosition library. The factory enforces the returned cost against its immutable limit before deployment. This keeps factory runtime at 22,362 bytes without relaxing the EIP-170 code-size limit. The same library defines the public pool-cost quote and seeded positions. The completed mainnet fork verification, deployment addresses and evidence links are recorded in README.md.
+Opening math is implemented by the immutable vault's pure `openingValues` function, using the shared NightPosition library. The factory enforces the returned cost against its immutable limit before deployment. This keeps factory runtime below the EIP-170 code size limit without relaxing that limit. The same library defines the public pool-cost quote and seeded positions. The completed mainnet fork verification, deployment addresses and evidence links are recorded in README.md.
+
+## Recipient credits
+
+NightToken, NightHook and Settlement each expose `credits(address)` and `withdrawCredit(address)`. Credits are backed by USDC held at the contract that attempted the original payment. Withdrawals always pay the credited recipient and clear the balance before transferring under the contract's reentrancy guard. Anyone can retry a payment after a recipient is unblocked, including credits owed to CoverFund and RebatePool. A failed withdrawal reverts atomically. Credits remain separate from cutoff holder reserves and walk pending payouts.

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
+import {CreditLib} from "./libraries/CreditLib.sol";
 
 import {INightHook} from "./interfaces/INightHook.sol";
 import {INightFactory} from "./interfaces/INightFactory.sol";
@@ -192,14 +193,23 @@ contract NightHook is INightHook {
         NightConfig memory c = factory.config(night);
         uint256 human = registry.humanIdOf(user);
         uint256 rate = sell ? FeeMath.lateFee(int256(uint256(c.cutoff)) - int256(block.timestamp)) : 0.013e18;
-        return FeeMath.split(gross, rate, human != 0 && human == registry.humanIdOf(c.host));
+        return FeeMath.split(gross, rate, user == c.host || (human != 0 && human == registry.humanIdOf(c.host)));
+    }
+
+    mapping(address => uint256) public credits;
+
+    function withdrawCredit(address recipient) external returns (uint256 amount) {
+        if (busy) revert Reentrancy();
+        busy = true;
+        amount = CreditLib.withdraw(credits, usdc, recipient);
+        busy = false;
     }
 
     function _pay(bytes32 night, FeeMath.Split memory s) private {
-        if (s.host != 0) usdc.safeTransfer(factory.config(night).host, s.host);
-        if (s.platform != 0) usdc.safeTransfer(platform, s.platform);
-        if (s.cover != 0) usdc.safeTransfer(coverFund, s.cover);
-        if (s.rebate != 0) usdc.safeTransfer(rebatePool, s.rebate);
+        if (s.host != 0) CreditLib.pay(credits, usdc, factory.config(night).host, s.host);
+        if (s.platform != 0) CreditLib.pay(credits, usdc, platform, s.platform);
+        if (s.cover != 0) CreditLib.pay(credits, usdc, coverFund, s.cover);
+        if (s.rebate != 0) CreditLib.pay(credits, usdc, rebatePool, s.rebate);
     }
 
     function distributeFee(bytes32 night, address user, uint256 notional, bool)

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
+import {CreditLib} from "./libraries/CreditLib.sol";
 import {NightPosition} from "./libraries/NightPosition.sol";
 import {INightToken} from "./interfaces/INightToken.sol";
 import {INightFactory} from "./interfaces/INightFactory.sol";
@@ -24,6 +25,8 @@ contract NightToken is INightToken {
     uint256 public cap;
     uint64 public cutoff;
     uint256 public dustMinted;
+    mapping(address => uint256) public credits;
+    mapping(address => bool) public inList;
     address public head;
     uint256 public holderCount;
     mapping(address => uint256) private balances;
@@ -55,6 +58,10 @@ contract NightToken is INightToken {
         entered = true;
         _;
         entered = false;
+    }
+
+    function withdrawCredit(address recipient) external guard returns (uint256) {
+        return CreditLib.withdraw(credits, d.usdc, recipient);
     }
 
     function balanceOf(address account) external view returns (uint256) {
@@ -225,9 +232,9 @@ contract NightToken is INightToken {
         balances[to] += amount;
         if (!excluded[from]) {
             if (balances[from] == 0) delete cachedHuman[from];
-            else _insert(from);
+            else _insert(from, to);
         }
-        if (!excluded[to]) _insert(to);
+        if (!excluded[to]) _insert(to, from);
         emit Transfer(from, to, amount);
     }
 
@@ -236,7 +243,8 @@ contract NightToken is INightToken {
     }
 
     function _remove(address a) private {
-        if (balances[a] == 0) return;
+        if (!inList[a]) return;
+        inList[a] = false;
         address p = prev[a];
         address n = next[a];
         if (p == address(0)) head = n;
@@ -261,11 +269,11 @@ contract NightToken is INightToken {
 
     function _valid(address a, address p, address n) private view returns (bool) {
         return p != a && n != a
-            && (p == address(0) ? head == n : balances[p] != 0 && !excluded[p] && next[p] == n && _before(p, a))
-            && (n == address(0) || (balances[n] != 0 && !excluded[n] && prev[n] == p && _before(a, n)));
+            && (p == address(0) ? head == n : inList[p] && balances[p] != 0 && !excluded[p] && next[p] == n && _before(p, a))
+            && (n == address(0) || (inList[n] && balances[n] != 0 && !excluded[n] && prev[n] == p && _before(a, n)));
     }
 
-    function _insert(address a) private {
+    function _insert(address a, address counterparty) private {
         bytes32 slot = keccak256(abi.encode("NightToken.hint", a));
         address p;
         address n;
@@ -275,7 +283,7 @@ contract NightToken is INightToken {
             tstore(slot, 0)
             tstore(add(slot, 1), 0)
         }
-        if (!_valid(a, p, n)) {
+        if ((p != address(0) && p == counterparty) || (n != address(0) && n == counterparty) || !_valid(a, p, n)) {
             p = address(0);
             n = head;
             uint256 steps;
@@ -290,6 +298,7 @@ contract NightToken is INightToken {
         if (p == address(0)) head = a;
         else next[p] = a;
         if (n != address(0)) prev[n] = a;
+        inList[a] = true;
         holderCount++;
     }
 
@@ -338,18 +347,21 @@ contract NightToken is INightToken {
         if (msg.sender != d.bookingRouter) revert Unauthorized();
         if (block.timestamp >= cutoff) revert CutoffReached();
         if (qty == 0 || qty % 1e17 != 0) revert InvalidQuantity();
+        uint256 cumulative;
         while (qty != 0) {
             address h = head;
             if (h == address(0)) revert SoldOut();
             uint256 amount = balances[h] < qty ? balances[h] : qty;
-            uint256 gross = FeeMath.halfUp(X, amount, 1e18);
+            cumulative += amount;
+            uint256 aggregate = FullMath.mulDivRoundingUp(X, cumulative, 1e18);
+            uint256 gross = aggregate - grossPaid;
             uint256 fee = FeeMath.halfUp(gross, 130, 10000);
             _update(h, d.bookingRouter, amount);
             qty -= amount;
             grossPaid += gross;
             SafeTransferLib.safeTransfer(d.usdc, d.hook, fee);
             INightHook(d.hook).distributeFee(night, h, gross, true);
-            SafeTransferLib.safeTransfer(d.usdc, h, gross - fee);
+            CreditLib.pay(credits, d.usdc, h, gross - fee);
             emit Recalled(night, h, guest, amount, gross - fee);
         }
     }

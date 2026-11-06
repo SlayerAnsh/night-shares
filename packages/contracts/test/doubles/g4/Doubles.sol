@@ -61,6 +61,7 @@ contract BookingDouble is INightTypes {
 }
 
 contract TokenDouble {
+    uint256 public burned;
     mapping(address => uint256) private balances;
     mapping(address => mapping(address => uint256)) public allowance;
     mapping(address => uint256) public cutoffBalanceOf;
@@ -156,6 +157,8 @@ contract VaultDouble {
         liquidity = l;
         manager.unlock(abi.encode(l));
     }
+
+    function collectEarned(bytes32) external pure returns (uint256) { return 0; }
 
     function creditPending(bytes32 p, uint256 n) external {
         SafeTransferLib.safeTransferFrom(usdc, msg.sender, address(this), n);

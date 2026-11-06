@@ -118,12 +118,12 @@ contract FullFlowTest is Test, INightTypes {
         _conserved();
     }
 
-    function _sig(uint256 key, bytes32 digest) private pure returns (bytes memory) {
+    function _sig(uint256 key, bytes32 digest) internal pure returns (bytes memory) {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(key, digest);
         return abi.encodePacked(r, s, v);
     }
 
-    function _link(address a, uint256 human, bool orb) private {
+    function _link(address a, uint256 human, bool orb) internal {
         uint64 deadline = uint64(block.timestamp + 1 days);
         registry.linkWallet(
             human,
@@ -138,7 +138,7 @@ contract FullFlowTest is Test, INightTypes {
         registry.setOrb(human, orb);
     }
 
-    function _fund(address a) private {
+    function _fund(address a) internal {
         cash.mint(a, 10000000e6);
         minted += 10000000e6;
         vm.startPrank(a);
@@ -148,7 +148,7 @@ contract FullFlowTest is Test, INightTypes {
         vm.stopPrank();
     }
 
-    function _open(uint256 rooms, string memory room, string memory date) private {
+    function _open(uint256 rooms, string memory room, string memory date) internal {
         night = factory.registerNightIdentity("hotel", room, date);
         (,, uint64 checkIn) = factory.identities(night);
         c = NightConfig(
@@ -192,7 +192,7 @@ contract FullFlowTest is Test, INightTypes {
         assertEq(vault.nextRoom(night), rooms);
     }
 
-    function _conserved() private view {
+    function _conserved() internal view {
         uint256 total = cash.balanceOf(hookDeployer);
         for (uint256 i; i < accounts.length; ++i) {
             total += cash.balanceOf(accounts[i]);
@@ -212,19 +212,19 @@ contract FullFlowTest is Test, INightTypes {
         assertEq(cash.balanceOf(d.hook), 0, "hook cash stranded");
     }
 
-    function _buy(address a, uint256 qty) private returns (uint256 paid) {
+    function _buy(address a, uint256 qty) internal returns (uint256 paid) {
         vm.prank(a);
         paid = trade.buy(night, qty, 10000000e6, new Ask[](0), new Hint[](0), type(uint64).max);
         _conserved();
     }
 
-    function _ask(uint256 qty, uint256 price) private view returns (Ask[] memory asks) {
+    function _ask(uint256 qty, uint256 price) internal view returns (Ask[] memory asks) {
         asks = new Ask[](1);
         Order memory o = Order(night, qty, price, uint64(c.cutoff - 1), trade.nonces(maker), maker);
         asks[0] = Ask(o, _sig(MAKER_KEY, OrderLib.digest(trade.DOMAIN_SEPARATOR(), OrderLib.hash(o))), qty);
     }
 
-    function _price() private view returns (uint256) {
+    function _price() internal view returns (uint256) {
         PoolKey memory key = factory.poolKey(night);
         (uint160 sqrtPrice,,,) = StateLibrary.getSlot0(IPoolManager(address(manager)), key.toId());
         return FullMath.mulDiv(uint256(sqrtPrice) * sqrtPrice, 1e18, 1 << 192);
@@ -410,11 +410,19 @@ contract FullFlowTest is Test, INightTypes {
         vault.creditPending(c.property, pending);
         _conserved();
         vm.warp(c.checkIn);
+        // Quote the earned collection independently, then restore the unswept state.
+        uint256 snapshot = vm.snapshotState();
+        (uint256 earned,) = vault.sweep(night);
+        assertTrue(vm.revertToStateAndDelete(snapshot));
+        uint256 available = pending + earned;
+        uint256 firstPaid = booking.booking(firstBooking).paid;
+        uint256 expectedAdvance = firstPaid > available ? firstPaid - available : 0;
         uint256 fundBefore = cash.balanceOf(d.coverFund);
         _walk(firstBooking, 1);
-        assertEq(settlement.hostDebt(HOST), booking.booking(firstBooking).paid - pending);
+        assertEq(settlement.hostDebt(HOST), expectedAdvance);
         assertEq(fundBefore - cash.balanceOf(d.coverFund), settlement.hostDebt(HOST));
-        assertEq(vault.pending(c.property), 0);
+        assertEq(vault.pending(c.property), available > firstPaid ? available - firstPaid : 0);
+        assertTrue(vault.removed(night, 1));
         _walk(recallBooking, 2);
         assertEq(settlement.incidents(HOST), 2);
         bytes32 nextNight = factory.registerNightIdentity("hotel", "next", "2030-01-02");
@@ -427,9 +435,14 @@ contract FullFlowTest is Test, INightTypes {
         vm.prank(HOST);
         factory.openNight(next, bytes32(0));
         uint256 debt = settlement.hostDebt(HOST);
+        // Both earned positions were consumed by walk refunds. Fund a later pending payout to exercise debt netting.
+        uint256 laterPending = debt / 2;
+        cash.approve(d.vault, laterPending);
+        vault.creditPending(c.property, laterPending);
         vm.prank(address(0xDEAD));
         (, uint256 netted) = vault.sweep(night);
         assertGt(netted, 0);
+        assertEq(netted, laterPending);
         assertEq(settlement.hostDebt(HOST), debt - netted);
         assertFalse(vault.removed(night, 2));
         _conserved();

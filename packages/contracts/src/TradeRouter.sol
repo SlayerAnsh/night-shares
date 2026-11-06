@@ -364,7 +364,10 @@ contract TradeRouter is RouterCore, ITradeRouter {
         if (!prefunded) _pull(address(this), gross + fee);
         token.routerTransfer(order.maker, recipient, ask.qty);
         usdc.safeTransfer(address(hook), fee);
-        (uint256 actualFee, uint256 cover) = hook.distributeFee(order.night, activeUser, gross, false);
+        address host = factory.config(order.night).host;
+        uint256 makerHuman = registry.humanIdOf(order.maker);
+        bool hostMaker = order.maker == host || (makerHuman != 0 && makerHuman == registry.humanIdOf(host));
+        (uint256 actualFee, uint256 cover) = hook.distributeFee(order.night, hostMaker ? host : activeUser, gross, false);
         if (actualFee != fee) revert InvalidConfig();
         usdc.safeTransfer(order.maker, gross);
         uint256 rebate = rebatePool.payMaker(order.night, order.maker, order.price, ask.qty);

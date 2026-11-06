@@ -10,6 +10,9 @@ import {INightTypes} from "./INightTypes.sol";
 
 /// @notice Immutable dependencies and platform; attester; consumed report and booking IDs; evidence hashes; host debt and incidents keyed by bound host payout identity; cutoff state, remaining claims and refund rate. No discretionary settlement owner.
 interface ISettlement is INightTypes {
+    function credits(address recipient) external view returns (uint256);
+    function withdrawCredit(address recipient) external returns (uint256);
+
     function pushBatch(bytes32 night, uint256 n) external;
     error DuplicateReport();
     error InvalidBooking();

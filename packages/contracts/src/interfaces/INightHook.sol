@@ -15,6 +15,9 @@ import {BeforeSwapDelta} from "v4-core/src/types/BeforeSwapDelta.sol";
 
 /// @notice Immutable factory, vault, routers, Settlement and fee recipients; owner; pause state; per-pool config and seed state. No mutable router allowlist or fee parameters.
 interface INightHook is INightTypes, IHooks {
+    function credits(address recipient) external view returns (uint256);
+    function withdrawCredit(address recipient) external returns (uint256);
+
     error DonationForbidden();
     error UnsupportedCallback();
     event PauseChanged(bool paused);
