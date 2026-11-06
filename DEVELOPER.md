@@ -31,6 +31,69 @@ Run from `app/`:
 
 Run all four of `gen`, `check`, `typecheck` and `test` before you commit.
 
+## Environment and configuration
+
+API settings come from `apps/api/src/config/load-config.ts` and `server-config.ts`. Use `apps/api/.env.example` and `apps/web/.env.example` as local templates. Defaults below are loader defaults; `JOB_INTERVAL_MS` is supported even though it is absent from the API example.
+
+| Key | Default | Meaning |
+| --- | --- | --- |
+| `PORT` | `8787` | API listener, integer 0 to 65535; 0 selects an ephemeral port |
+| `DB_PATH` | `./data/night-shares.db` | SQLite path, or `:memory:` for isolated tests |
+| `ADAPTERS` | `mock` | Only supported value; wallet and chain remain mock |
+| `CLOCK` | `system` | `system` or settable `mock` clock |
+| `TODAY` | unset | Optional valid `YYYY-MM-DD`; overrides the system clock's calendar date, not its timestamp, or initializes mock time |
+| `IDS` | `random` | `random` or deterministic `sequential` IDs |
+| `JOB_INTERVAL_MS` | `60000` | Positive scheduler interval in milliseconds, at most 2147483647 |
+| `WORLD_ID_MODE` | `mock` | `mock` or `world-id`, independent of `ADAPTERS` |
+| `WORLD_ID_APP_ID` | empty | Required in `world-id` mode, matching `app_[a-zA-Z0-9_]+` |
+| `WORLD_ID_ACTION` | `night-shares-human` | Nonempty fixed action for sign-in and sensitive checks |
+| `WORLD_ID_VERIFY_URL` | `https://developer.world.org/api/v2/verify/{app_id}` | HTTPS verifier endpoint without embedded credentials |
+| `LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` or `silent` |
+| `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated exact HTTP(S) origins; no wildcard |
+| `TRUST_PROXY` | `false` | Enable forwarded address handling only for trusted socket peers |
+| `TRUSTED_PROXIES` | empty | Comma-separated IP addresses or CIDRs; empty trusts nobody |
+| `TRUSTED_PROXY_HOPS` | `1` | Select this entry from the right of `X-Forwarded-For` |
+| `RATE_LIMIT_ENABLED` | `true` | Enable per-process token buckets |
+| `RATE_LIMIT_PER_IP` | `120` | General IP bucket capacity |
+| `RATE_LIMIT_PER_USER` | `120` | Authenticated user bucket capacity |
+| `RATE_LIMIT_IDENTITY` | `10` | Additional IP/user capacity for StartSignIn, CompleteSignIn and VerifyAction |
+| `RATE_LIMIT_WINDOW_MS` | `60000` | Token bucket refill window |
+| `RATE_LIMIT_MAX_BUCKETS` | `10000` | Maximum tracked keys per limiter |
+| `MAX_REQUEST_BODY_BYTES` | `65536` | HTTP request body limit |
+| `CONNECT_READ_MAX_BYTES` | `65536` | Connect message read limit |
+| `REQUEST_TIMEOUT_MS` | `30000` | Request deadline |
+| `SHUTDOWN_TIMEOUT_MS` | `10000` | Request and job drain deadline before forced exit |
+| `API_URL` (web) | `http://localhost:8787` | Server-only API upstream for direct calls and browser RPC proxying |
+
+Server booleans accept only `true` or `false`. Server integer limits and timeouts must be positive integers at most 2147483647. Invalid config fails before listening. General IPv6 quotas group /64 prefixes; identity IP quotas group /48. Full bucket maps retain throttled entries and use a shared overflow bucket when no safe eviction is available.
+
+For real identity verification, set `WORLD_ID_MODE=world-id` and a valid app ID. The web receives mode, app ID, action and signal from API requests and uses IDKit automatically; no public web environment keys are required. The fixed action preserves the human identifier, while a `purpose:nonce` signal and single-use SQLite request prevent replay. Sensitive flows start with `StartVerifyAction`.
+
+`GET /healthz` reports liveness. `GET /readyz` checks SQLite access and all expected migrations. JSON logs cover requests and errors. SIGINT and SIGTERM stop new work, drain requests and jobs, then close SQLite; expiration of the shutdown deadline exits with code 1.
+
+## Scheduled jobs
+
+`apps/api/src/main.ts` starts the runner outside `NODE_ENV=test`. Each `JOB_INTERVAL_MS` tick runs `release-at-cutoff`, `double-sale`, then `host-sweep`. Cutoff releases cancel asks and settle refunds; report polling processes double sales; sweeps pay owners after debt netting. Concurrent ticks share the running promise. Job errors are collected while later jobs still run, and scheduled failures are logged.
+
+Tests can construct `createJobRunner` with `createJobRegistry(ports)`, advance `ports.clock` as a `MockClock`, then `await runner.tick()` without starting timers. See `apps/api/test/e2e/cutoff.test.ts`. `runner.stop()` clears the interval and waits for active work.
+
+## End to end tests
+
+From `app/`, run:
+
+```sh
+pnpm --filter @night-shares/api e2e
+```
+
+For one flow:
+
+```sh
+cd apps/api
+bun test test/e2e/cutoff.test.ts
+```
+
+The harness starts its own HTTP server on an ephemeral loopback port with in-memory SQLite, a mock clock, sequential IDs and mock adapters. No separately running API or external credentials are needed. The default harness disables rate limits and logs; ops tests override those settings. The host must permit listening sockets. Coverage includes identity, cutoff, recall, rebates, agent budgets, double-sale debt, hotel push compensation, host sweeps and operations.
+
 ## Calling the API by hand
 
 Connect speaks plain JSON over HTTP POST:

@@ -6,7 +6,14 @@ All notable changes to this monorepo. Newest first.
 
 ### Added
 
-- Chain design in `SPECS.md`: one Uniswap v4 pool per night, the host curve as a ladder of standard liquidity positions (pool does the pricing, hooks enforce policy and take fees in USDC), withdraw and stop selling as position removal, contract list and open decisions. Chainlink CRE dropped: on chain settlement is 1:1 redemption into the pool at the pool's bid, and double sale reports come from the API attester.
+- Automatic per-property host payout sweeps on every job tick, net of double-sale debt, with idempotent reservations and failure compensation.
+- Agent wallets with funding, withdrawals, lifetime and per-order budgets, optional night allowlists, and fresh World ID approval for orders over 1,000 USDC.
+- Double-sale cover through a neutral booking report port, with reserve, pending payout and cover fund settlement, host debt, and retry-safe report handling. Failed hotel inventory pushes restore changes and return UNAVAILABLE.
+- `rebate_pool` funding from late-fee excess and cutoff haircuts, with balance-capped 0.5% maker rebates for qualifying trader asks.
+- JSON logs, per-IP and per-user rate limits, request body and read limits, deadlines, configurable CORS, migration-aware `/readyz`, graceful shutdown, and API/web Docker images with Compose.
+- Scheduled cutoff release via `JOB_INTERVAL_MS`: cancel asks, refund holders atomically, record unsold rooms returned to the hotel, and reject trades and bookings on closed nights.
+- World ID cloud verifier and web IDKit login and action verification, selected with `WORLD_ID_MODE`; mock remains the default. Structured proofs use single-use SQLite request nonces and `StartVerifyAction`.
+- Chain design in `SPECS.md`: one Uniswap v4 pool per night, the host curve as a ladder of standard liquidity positions (pool does the pricing, hooks enforce policy and take fees in USDC), NightVault-owned positions and automatic host sweeps, contract list and open decisions. Chainlink CRE dropped: on chain settlement is 1:1 redemption into the pool at the pool's bid, and double sale reports come from the API attester.
 - All six services implemented on mocks (identity, wallet, catalog, stay, market, host) with unit and end to end tests.
 - Activity log, wallet transaction history and one time World ID action tokens as shared ports.
 - Market analytics (return, APY, risk, price history, host track record) as pure functions in `market-model`.
@@ -18,13 +25,27 @@ All notable changes to this monorepo. Newest first.
 
 ### Changed
 
+- Opened nights fix price, curve and room count; all rooms are recorded under `NightVault`.
+- Market model synced to `3d84c7b5d2cb`: guest recall uses actual trader holdings, largest holder first; `CAP_HUMAN` applies a 30% cap on every night across all wallets a human controls, including agents.
+- Hosts trade under the same rules, pay the full fee on their own nights, and route their host fee share to `rebate_pool`. Host holdings are public and host sell backs appear in analytics.
+- Cutoff payouts use `cutoffRefund`: holders receive 70% of their pro-rata held reserve and the 30% haircut funds `rebate_pool`.
 - Host bond and security hold removed (mock model.js 4b697be65422). A cover fund takes 0.1% of each trade's notional out of the existing fee, paid to the `cover_fund` address; user totals are unchanged. `market-model` adds `offlineSaleCover`, the double sale waterfall (reserve slice, pending payouts, cover fund). Removed proto fields are reserved.
 - Design tokens re-synced with the latest mock CSS: a trade theme scoped to `[data-app="trade"]` (light and dark), command palette and app switcher tokens, and breakpoints md 860 and lg 1100. Dark `--warn` now matches the mock (`#B87A0A`).
 - Market model, in both mock and port: guests never pay above the recall cap, distant nights never show negative inventory, rooms split exactly across room types, trader ask and recall fills charge the seller fee, and recall markups below 5% are rejected.
 
+### Removed
+
+- Host `StopSelling` and `Withdraw` RPCs and controls; removed protobuf fields are reserved. Automatic sweeps replace manual host payouts.
+- Reserved guest tranche, guest-only pool slices and `CAP_PEAK`; guests use recall and every night uses `CAP_HUMAN`.
+- `unsoldRefund` and `REFUND_AT_FAIR`; cutoff refunds no longer depend on parked ask prices.
+
 ### Security
 
-- Host ownership: only a property's owner can change its nights or withdraw its payout; withdrawals are tracked per property.
+- Host fee routing requires nonempty owner and human identities; empty identities cannot match a host. Host night recall previews are bounded by trader holdings.
+- Rate-limit eviction preserves throttled buckets, removes stale or fully refilled entries first, and shares a bounded overflow bucket when full. Identity IP quotas group IPv6 by /48; general IP quotas use /64.
+- Forwarded addresses require `TRUST_PROXY=true` and a socket peer in `TRUSTED_PROXIES`; `TRUSTED_PROXY_HOPS` selects from the right. No proxies are trusted by default, preventing spoofed quota bypass.
+- Early HTTP rejections close the socket after the response, preventing unread request framing from breaking subsequent requests with `HPE_INTERNAL` and 400 responses.
+- Host ownership: only a property's owner can open its nights; automatic payouts go to that owner and are tracked per property.
 - Payments settle all or nothing, and inventory and positions are reverted when settlement fails, so parallel requests cannot buy without paying or drain the pool.
 - World ID subject and per action nullifier are kept apart.
 - Session tokens are 256 bit random values stored only as SHA-256 hashes.

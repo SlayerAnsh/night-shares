@@ -1,6 +1,6 @@
 # Night Shares platform spec
 
-Night Shares turns hotel room nights into tradable units. Hosts offer nights, traders buy and sell them before the stay, guests book them through a normal checkout. Everyone signs in with World ID. Payments settle in USDC on Arc.
+Night Shares turns hotel room nights into tradable units. Hosts offer nights, traders buy and sell them before the stay, guests book them through a normal checkout. Everyone signs in with World ID. Payments currently settle through a mock USDC ledger; Arc settlement is planned.
 
 This document describes the backend and shared packages. The behaviour mirrors the approved static mock in `../mock/v2` (see its `README.md` and `assets/model.js`). When the mock changes its market model, `packages/market-model` is re-synced and this spec is updated.
 
@@ -15,8 +15,7 @@ Coding rules live in `STANDARDS.md`.
 ## Non-goals (for now)
 
 - Visual design of the web app. The Next.js app is built logic first; styling follows the approved mock.
-- Real chain, real World ID, real channel manager. They come later, one adapter at a time. The chain design is recorded below so the adapters have a target.
-- A database. Repositories are in memory and seeded on boot.
+- Real chain and real channel manager adapters. The chain design is recorded below so the adapters have a target. World ID cloud verification is available, with mock mode still the default.
 
 ## Layout
 
@@ -28,7 +27,7 @@ app/
   STANDARDS.md  SPECS.md  DEVELOPER.md  CHANGELOG.md
   apps/
     api/                  Bun + Connect server
-    web/                  Next.js (later)
+    web/                  Next.js Stay, Trade and Host app
   packages/
     tsconfig/             shared tsconfig presets
     proto/                .proto sources, buf config, generated code and OpenAPI
@@ -73,7 +72,8 @@ Auth column: the `access` option on each RPC.
 | CompleteSignIn | PUBLIC | Submit the World ID proof. Out: session token, user (human id, level, wallet address) |
 | GetSession | DEVICE | Current user |
 | SignOut | DEVICE | End session |
-| VerifyAction | DEVICE | Fresh World ID check for a sensitive action (check in, agent order over budget). Out: verification token |
+| StartVerifyAction | DEVICE | Begin a purpose-bound World ID request for a sensitive action |
+| VerifyAction | DEVICE | Complete a fresh check for check-in or an agent order over 1,000 USDC. Out: verification token |
 
 `humanId` is the per app nullifier from World ID. Night Shares never receives a name or photo. Sign in creates or links a USDC wallet through `WalletProvider`.
 
@@ -104,14 +104,16 @@ Auth column: the `access` option on each RPC.
 | --- | --- | --- |
 | Discover | PUBLIC | Night cards for the next 75 nights. Filters: city, sort (return, risk), value only, soon, watchlist |
 | GetNight | PUBLIC | Night detail: fair price, stats, risk, price history, host track record, month calendar |
-| GetBook | PUBLIC | Unified book: asks (pool slices and trader asks, guest only flagged), sell back bids with late fee, recall cap, fair price |
+| GetBook | PUBLIC | Unified book: asks (pool slices and trader asks, host holdings flagged), sell back bids with late fee, recall cap, fair price |
 | ListTape | PUBLIC | Last 40 prints |
-| QuoteBuy / QuoteSell | PUBLIC | Route preview: fills, average, fee, cap used, late fee, unsold refund |
-| Buy | ORB | Execute a buy. Enforces per human cap and guest tranche |
+| QuoteBuy / QuoteSell | PUBLIC | Route preview: fills, average, fee, cap used, late fee, cutoff refund |
+| Buy | ORB | Execute a buy. Enforces the combined per-human cap across controlled wallets |
 | Sell | ORB | Sell back to the pool with late fee |
 | PostAsk / CancelAsk | ORB | Park an ask. Warns past 2 times fair price or above recall cap |
 | GetPortfolio | ORB | Holdings, listings, realised and unrealised P&L, track record |
 | ToggleWatch / ListWatch | ORB | Watchlist |
+| GetAgentWallet / FundAgentWallet / WithdrawAgentWallet | ORB | Read, fund or withdraw the separate agent ledger balance |
+| SetAgentBudget | ORB | Set lifetime and per-order spend caps and an optional night allowlist |
 | CreateAgentOrder / ApproveAgentOrder | ORB | Agent wallet orders. Orders over 1,000 USDC need a VerifyAction token |
 
 ### host.v1.HostService
@@ -141,44 +143,47 @@ apps/api/src/
   main.ts                 boot: load config, build container, start server
   config/                 env parsing (ADAPTERS=mock by default, PORT)
   server/
-    create-server.ts      node:http + connectNodeAdapter, CORS, /docs, /healthz
+    create-server.ts      node:http + connectNodeAdapter, CORS, limits, /docs, /healthz, /readyz
     routes.ts             registers every service handler
     interceptors/         auth (reads the access option), errors
     docs/                 serves OpenAPI files and a Swagger UI page
   container/              composition root: picks adapters, builds services
+  db/                     SQLite migrations and transactions
+  jobs/                   cutoff release, double-sale polling, host sweeps
   shared/                 DomainError, money helpers, ids, dates
   ports/                  cross domain ports (one folder per port)
-    clock/  ids/  identity-verifier/  wallet-provider/  onramp/  channel-manager/
+    clock/  ids/  identity-verifier/  wallet-provider/  onramp/  channel-manager/  booking-report/
       <port>.ts           interface
       <port>.mock.ts      mock adapter
-  modules/<domain>/       identity, catalog, stay, market, host, wallet
+  modules/<domain>/       identity, catalog, stay, market, host, wallet, double-sale
     <domain>.handler.ts   proto <-> use case
     mappers/
     use-cases/            one file per use case, each with a test
-    repo/                 repository interface and in memory implementation
+    repo/                 repository interface and SQLite implementation
   seed/                   the six mock properties and their room types
 apps/api/test/e2e/        full flows through the generated Connect client
 ```
 
 ### Ports and their mocks
 
-| Port | Mock behaviour | Real adapter later |
+| Port | Local behaviour | Production integration |
 | --- | --- | --- |
 | `Clock` | settable time | system clock |
 | `IdGenerator` | counter based, prefixed | random ids |
-| `IdentityVerifier` | any proof with `mock:` prefix verifies; returns a stable nullifier per seed | World ID cloud verify |
-| `WalletProvider` | creates a fake address, keeps balances in memory, seeds 12,480 USDC | Arc USDC |
+| `IdentityVerifier` | `mock:<seed>:orb` or `mock:<seed>:device` proofs with single-use requests and a stable subject per seed | World ID cloud verify available through `WORLD_ID_MODE=world-id` |
+| `WalletProvider` | creates a fake address, keeps mock balances in SQLite, seeds 12,480 USDC | Arc USDC |
 | `Onramp` | card charge always succeeds, converts 1:1 | card onramp |
 | `ChannelManager` | returns room types and usual rates from seed, accepts reservation push and returns a hotel reference | Mews, Cloudbeds, SiteMinder |
-| `SessionStore` | 256 bit random tokens, stored by SHA-256 hash | persistent store |
-| `ActivityLog` | in memory list of night events (bookings, trades, asks, host changes) | database table or event stream |
-| `VerificationStore` | one time World ID action tokens, five minute expiry, bound to user and action | persistent store |
+| `SessionStore` | 256 bit random tokens, stored by SHA-256 hash in SQLite | SQLite |
+| `ActivityLog` | SQLite night events for bookings, trades, asks, host changes and jobs | SQLite |
+| `VerificationStore` | One-time SQLite action tokens, five-minute expiry, bound to user and action | SQLite |
+| `BookingReport` | Pollable mock reports with stable IDs | Attester or CRE adapter later |
 
-The identity verifier returns a stable per app `subject` (used as `humanId`) and a per action `nullifier`. World ID gives a different nullifier for every action, so only the subject can link a later check to the signed in human.
+The identity port separates `subject` (used as `humanId`) from `nullifier`. The cloud adapter uses one fixed World ID action for a stable human identifier and returns its verified nullifier in both fields. Each sign-in or sensitive check binds a `purpose:nonce` signal to a single-use SQLite request. Structured proofs, expected verification level, action and returned nullifier are checked. The web uses IDKit when the API selects real mode; mock remains the default.
 
 ### Money
 
-Every payment goes through `WalletProvider.settle(legs)`, which applies all legs or none. Each money path (buy, sell, booking, withdraw) first reserves inventory and position in one synchronous `inventory.update`, then settles, and reverts both if settlement fails. A real Arc adapter maps `settle` to one multi transfer transaction.
+Every payment goes through `WalletProvider.settle(legs)`, which applies all legs or none. Money paths reserve their inventory, positions, budgets or payout and debt state synchronously in SQLite before settlement, then compensate reservations if settlement fails. A real Arc adapter maps `settle` to one multi transfer transaction.
 
 ### Host ownership
 
@@ -186,11 +191,23 @@ Each property has one owner. The four seeded connected hotels (Velana, Ubud, Riv
 
 ### Market state
 
-Night state (allotment, pool position `q`, booked, held, trader asks) lives in the market repository. On boot it is seeded from `nightState` in `market-model`, so numbers match the mock. After boot, buys, sells and bookings change it.
+Night state (allotment, pool position `q`, booked, held, trader asks) lives in the market repository. SQLite persists it across restarts; initial state is seeded from `nightState` in `market-model`. Buys, sells, bookings and scheduled jobs update it.
 
-Hosts lock nothing beyond the traded nights themselves. There is no bond or security hold: the night's own escrowed reserve is the first collateral. A cover fund, fed by 0.1% of every trade's notional (carved out of the platform fee, so the 1.3% total fee is unchanged), backs offline double sales. Settlements pay that share to the `cover_fund` system address. `offlineSaleCover` in `market-model` defines the waterfall: the holder is made whole from the voided night's reserve slice by redeeming into the pool at its bid (Chain design below), and the host owes a penalty of the same size from pending payouts, then the cover fund; the host owes twice that price in total, and anything pending payouts cannot settle becomes host debt netted from future payouts. Track record limits how many rooms a new host can open.
+Hosts lock nothing beyond the traded nights themselves. There is no bond or security hold. A cover fund receives 0.1% of each trade's notional from the existing fee, leaving the 1.3% total unchanged. Offline double-sale reports and debt netting are implemented through the booking report port and scheduled jobs; see Double sale cover below.
 
-Not in the first cut (listed so it is not forgotten): release at cutoff with unsold refunds, background order flow simulation, offline double sale cover and payout netting in the API (the model function exists; detection and settlement do not).
+The model is pinned to `3d84c7b5d2cb`. `CAP_HUMAN` is 30% on every night, with `capOf(S) = max(1, 0.3 * S)`. The cap combines all wallets controlled by the human, including the agent wallet. There is no reserved guest tranche or guest-only pool slice. Guests fill pool and trader asks at or below the recall strike, then recall remaining trader holdings, largest holder first. Recalled holders receive the strike less 1.3%. Recall is capped by actual holdings remaining after ask fills, including in host night previews; exhausted supply is sold out.
+
+Hosts may trade their own nights under the same cap and full fee. Their 1% host fee share routes to `rebate_pool` on their own trades. Public night and book views expose host holdings and analytics flag host sell backs. Host identity matching requires nonempty owner and human identifiers.
+
+`rebate_pool` receives the late sell-back fee above the base fee, the 30% cutoff haircut and host self-trade fee shares. A trader ask at or below 105% of the pool price earns a 0.5% notional maker rebate, capped by available pool balance and paid in the same settlement. Cheaper asks qualify too.
+
+At cutoff, the release job cancels asks, clears holder positions and pays `cutoffRefund` atomically. Holders share 70% of the held reserve pro rata; 30% funds `rebate_pool`. The job records unbooked rooms as returned to the hotel. Failed settlements restore state for retry; completed releases cannot pay twice. Closed nights reject trades and bookings. This replaces the parked-ask `unsoldRefund` rule and `REFUND_AT_FAIR`. Background order flow simulation remains future work.
+
+### Operations and jobs
+
+The API provides JSON logs, per-process IP and user quotas, body and Connect read limits, request deadlines and configured CORS origins. Forwarded IPs require both `TRUST_PROXY=true` and an explicitly trusted socket peer; `TRUSTED_PROXY_HOPS` selects the address from the right. General IPv6 quotas group /64 prefixes and identity quotas group /48. Bucket eviction preserves throttled clients, with a shared overflow bucket when no safe eviction is possible. Early rejections close the socket after responding so unread framing cannot corrupt a later request.
+
+`/healthz` is liveness; `/readyz` checks SQLite access and applied migrations. The scheduler runs cutoff release, double-sale polling and host sweeps in that order every `JOB_INTERVAL_MS` (default 60000). Tests drive its `tick()` hook with a mock clock. Shutdown drains requests and jobs before closing SQLite, subject to `SHUTDOWN_TIMEOUT_MS`. API and web Dockerfiles and Compose are available; configuration and commands are in `DEVELOPER.md`.
 
 ### Agent wallets
 
@@ -219,7 +236,7 @@ apps/web/
   src/
     providers/                 query client, transport, session provider
     session/                   cookie, server actions (complete sign in, sign out), useSession, guards
-    world-id/                  WorldIdClient port, mock adapter (QR plus Simulate scan), IDKit adapter later
+    world-id/                  WorldIdClient port, mock adapter (QR plus Simulate scan), IDKit adapter for configured World ID mode
     features/<app>/            hooks and small components per app, grouped by screen
     shared/                    formatting (USDC micros, tenths, dates), nav helpers
 ```
@@ -338,6 +355,6 @@ Steps 1 to 5 are done for every service, on mocks.
 
 A neutral booking report port supplies offline double sale reports. Its mock adapter exposes `report(nightKey, rooms)` and retains stable report IDs for polling. A report closes the affected night and redeems every holder position, including listed tenths, at the current pool bid without a late fee. Reported rooms describe the incident; every outstanding position on that night is covered. Seeded mock market maker holdings receive the same redemption.
 
-The cover waterfall uses the night's reserve slice, then the property's pending payouts, then `cover_fund`. The equal size host penalty uses remaining pending payouts. Unpaid cover and penalty become property debt. Future withdrawals net that debt and repay the cover fund, including partial repayment when no net payout remains. Reservation, positions and debt change in one synchronous SQLite transaction before one atomic mock wallet settlement. Failure restores the reservation for retry. Completed report IDs cannot pay twice. Wallet and chain interactions remain mock.
+The cover waterfall uses the night's reserve slice, then the property's pending payouts, then `cover_fund`. The equal size host penalty uses remaining pending payouts. Unpaid cover and penalty become property debt. Future automatic host sweeps net that debt and repay the cover fund, including partial repayment when no net payout remains. Reservation, positions and debt change in one synchronous SQLite transaction before one atomic mock wallet settlement. Failure restores the reservation for retry. Completed report IDs cannot pay twice. Wallet and chain interactions remain mock.
 
-Host opening, editing and stopping push an inventory batch through the channel manager. Failed confirmation restores inventory and release policy, records `channel_push_failed`, and returns UNAVAILABLE with “The hotel system did not confirm. Nothing changed.”
+Host opening pushes an inventory batch through the channel manager. Opened nights reject changes to F, k or S; `StopSelling` and manual host `Withdraw` are removed, with protobuf fields reserved. Failed confirmation restores inventory and release policy, records `channel_push_failed`, and returns UNAVAILABLE with “The hotel system did not confirm. Nothing changed.”
