@@ -1,0 +1,38 @@
+.risk {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.risk i {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.low i {
+  background: var(--pos);
+}
+
+.medium i {
+  background: var(--warn);
+}
+
+.high i {
+  background: var(--neg);
+}
+
+.large {
+  gap: var(--sp-8);
+  font-size: var(--fs-22);
+  font-weight: var(--w6);
+}
+
+.large i {
+  width: 8px;
+  height: 8px;
+}

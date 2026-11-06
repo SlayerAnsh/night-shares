@@ -1,102 +1,88 @@
-import type { TapePrint } from "@night-shares/proto/market/v1/analytics_pb";
 import type { GetBookResponse } from "@night-shares/proto/market/v1/market_pb";
+import type { CSSProperties } from "react";
 import { formatRoomNights } from "../../../../shared/format";
-import { money, percent, sourceName } from "../../model/market";
+import { usd } from "../../model/display";
+import { percent, sourceName } from "../../model/market";
+import text from "../ui/text.module.css";
+import styles from "./book.module.css";
+import { bookRows } from "./book-rows";
+
+// Calm, tabular ladder. Depth is a subtle fill; picking a level fills the order box.
 export function OrderBook({
   book,
-  prints,
+  onPick,
 }: {
   book: GetBookResponse;
-  prints: TapePrint[];
+  onPick: (mode: "buy" | "sell", tenths: number) => void;
 }) {
+  const late = book.lateFeeBps > 0;
+  const rows = bookRows(book);
   return (
-    <section>
-      <h2>Order book</h2>
-      <p>
-        Fair price marker: {money(book.fairPrice)} · Recall cap:{" "}
-        {money(book.recallCap)} · Late fee: {percent(book.lateFeeBps)}
+    <>
+      <div className={styles.cols}>
+        <span>Price</span>
+        <span>Room nights</span>
+        <span>{late ? "Source or net" : "Source"}</span>
+      </div>
+      <div className={styles.book}>
+        {rows.map((row) => {
+          if (row.kind === "recall")
+            return (
+              <div key="recall" className={`${styles.mark} ${styles.recall}`}>
+                Guest price cap {usd(row.price)}
+              </div>
+            );
+          if (row.kind === "fair")
+            return (
+              <div key="fair" className={`${styles.mark} ${styles.fair}`}>
+                Fair {usd(row.price)}
+              </div>
+            );
+          if (row.kind === "spread")
+            return (
+              <div key="spread" className={styles.spread}>
+                <span>Spread</span>
+                <b className={text.num}>
+                  {row.spread === undefined ? "n/a" : usd(row.spread)}
+                </b>
+                <span className={styles.mid}>mid {usd(row.price)}</span>
+              </div>
+            );
+          const { level } = row;
+          const isAsk = row.kind === "ask";
+          const size = formatRoomNights(row.cumulative);
+          return (
+            <button
+              key={`${row.kind}-${level.askId}-${level.source}-${level.price?.micros}`}
+              type="button"
+              className={`${styles.row} ${isAsk ? styles.ask : styles.bid}`}
+              style={{ "--w": `${row.depth * 100}%` } as CSSProperties}
+              aria-label={`${isAsk ? "Buy" : "Sell"} ${size} room nights, ${isAsk ? "up" : "down"} to ${usd(level.price?.micros)}`}
+              onClick={() => onPick(isAsk ? "buy" : "sell", row.cumulative)}
+            >
+              <span className={`${styles.p} ${text.num}`}>
+                {usd(level.price?.micros)}
+              </span>
+              <span className={text.num}>
+                {formatRoomNights(level.size?.tenths ?? 0)}
+              </span>
+              <span className={styles.s}>
+                {isAsk
+                  ? sourceName(level.source)
+                  : late
+                    ? `net ${usd(level.net?.micros)}`
+                    : "Sell-back"}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <p className={styles.foot}>
+        Asks in red, sell-back bids in green at gross price. Selling back costs
+        a {late ? `late fee, now ${percent(book.lateFeeBps)}` : "fee"}. At the
+        guest price cap, guests can take held room nights back, largest holder
+        first.
       </p>
-      {(
-        [
-          ["Asks", book.asks],
-          ["Bids", book.bids],
-        ] as const
-      ).map(([label, rows]) => (
-        <table key={label}>
-          <caption>{label}</caption>
-          <thead>
-            <tr>
-              <th>Price</th>
-              <th>Room nights</th>
-              <th>Source</th>
-              <th>Net after late fee</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={`${row.askId}-${row.source}-${row.price?.micros}`}>
-                <td>
-                  {money(row.price)}
-                  {row.price?.micros === book.fairPrice?.micros
-                    ? " · Fair"
-                    : ""}
-                </td>
-                <td>{formatRoomNights(row.size?.tenths ?? 0)}</td>
-                <td>{sourceName(row.source)}</td>
-                <td>{label === "Bids" ? money(row.net) : "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ))}
-      <h2>Holders</h2>
-      <ul>
-        {book.holders.map((holder) => (
-          <li key={holder.walletAddress}>
-            {holder.walletAddress}
-            {holder.isHost ? " (Host)" : ""}:{" "}
-            {formatRoomNights(holder.size?.tenths ?? 0)}
-          </li>
-        ))}
-      </ul>
-      <p>
-        Each human may hold up to 30% of this night. Guests can recall holdings
-        at the recall cap.
-      </p>
-      <h2>Last prints</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Actor</th>
-            <th>Side</th>
-            <th>Price</th>
-            <th>Room nights</th>
-          </tr>
-        </thead>
-        <tbody>
-          {prints.map((print) => (
-            <tr key={print.id}>
-              <td>
-                {print.at
-                  ? new Date(Number(print.at.seconds) * 1000).toISOString()
-                  : "—"}
-              </td>
-              <td>
-                {
-                  ["Unknown", "Guest", "Trader", "You", "Sell-back", "Agent"][
-                    print.actor
-                  ]
-                }
-              </td>
-              <td>{print.side === 1 ? "Buy" : "Sell"}</td>
-              <td>{money(print.price)}</td>
-              <td>{formatRoomNights(print.size?.tenths ?? 0)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {!prints.length && <p>No trades yet.</p>}
-    </section>
+    </>
   );
 }

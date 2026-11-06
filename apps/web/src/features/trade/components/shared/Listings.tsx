@@ -3,8 +3,16 @@ import type { NightKey } from "@night-shares/proto/common/v1/night_pb";
 import Link from "next/link";
 import { formatRoomNights } from "../../../../shared/format";
 import { useAccount } from "../../hooks/use-account";
-import { money, nightHref } from "../../model/market";
+import { shortDate, usd } from "../../model/display";
+import { nightHref } from "../../model/market";
+import { Button, buttonClass } from "../ui/Button";
+import { Empty } from "../ui/Empty";
+import { Section } from "../ui/Section";
+import text from "../ui/text.module.css";
 import { Feedback } from "./Feedback";
+import styles from "./lists.module.css";
+
+// Room nights you offered for sale. Guests and traders can buy them until release.
 export function Listings({
   night,
 }: {
@@ -18,33 +26,56 @@ export function Listings({
         !night || (ask.night && nightHref(ask.night) === nightHref(night)),
     ) ?? [];
   return (
-    <section>
-      <h2>Your listings</h2>
+    <Section
+      id={night ? "h-lst-night" : "h-lst"}
+      title={night ? "Your listings on this night" : "Open listings"}
+      line={`${rows.length ? `${rows.length} ${rows.length === 1 ? "listing" : "listings"}. ` : ""}Guests and traders can buy them until release.`}
+      plain={!!night}
+    >
       <Feedback
         error={account.portfolio.error?.message || account.actions.error}
         notice={account.actions.notice}
       />
-      {!rows.length && <p>No listings.</p>}
-      <ul>
-        {rows.map((ask) => (
-          <li key={ask.id}>
-            {ask.night && (
-              <Link href={`${nightHref(ask.night)}?mode=ask`}>
-                {ask.night.date} · {ask.night.roomTypeId}
-              </Link>
-            )}{" "}
-            · {formatRoomNights(ask.size?.tenths ?? 0)} room nights at{" "}
-            {money(ask.price)}{" "}
-            <button
-              type="button"
-              disabled={account.actions.pending}
-              onClick={() => void account.cancel(ask.id)}
-            >
-              Cancel ask
-            </button>
-          </li>
-        ))}
-      </ul>
-    </section>
+      {rows.length ? (
+        <div className={styles.lists}>
+          {rows.map((ask) => (
+            <div key={ask.id} className={styles.lst}>
+              <div>
+                {ask.night && (
+                  <>
+                    <b>{ask.night.propertyId}</b>{" "}
+                    <span className={text.muted}>
+                      {ask.night.roomTypeId}, {shortDate(ask.night.date)}
+                    </span>
+                  </>
+                )}
+                <span className={`${styles.q} ${text.num}`}>
+                  {formatRoomNights(ask.size?.tenths ?? 0)} rn at{" "}
+                  {usd(ask.price?.micros, 2)}
+                </span>
+              </div>
+              <div className={styles.acts}>
+                {ask.night && (
+                  <Link
+                    className={buttonClass()}
+                    href={`${nightHref(ask.night)}?mode=ask`}
+                  >
+                    Edit
+                  </Link>
+                )}
+                <Button
+                  disabled={account.actions.pending}
+                  onClick={() => void account.cancel(ask.id)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Empty>Nothing listed.</Empty>
+      )}
+    </Section>
   );
 }

@@ -1,0 +1,166 @@
+.figs {
+  margin-bottom: calc(var(--sp-24) * 2);
+}
+
+.head,
+.row {
+  display: grid;
+  grid-template-columns: minmax(230px, 2.6fr) 0.45fr 0.75fr 0.7fr 0.7fr 0.7fr 0.7fr 0.75fr 0.8fr;
+  gap: var(--sp-12);
+  align-items: center;
+  padding: 0 var(--sp-4);
+}
+
+.head {
+  height: 36px;
+  border-bottom: 1px solid var(--line-2);
+  font-size: var(--fs-12-5);
+  color: var(--muted);
+}
+
+.row {
+  min-height: 52px;
+  border-bottom: 1px solid var(--line);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.row:hover {
+  background: var(--surface-2);
+}
+
+.head > span:nth-child(n + 2),
+.row > span:nth-child(n + 2) {
+  text-align: right;
+  justify-self: end;
+}
+
+.lab {
+  display: none;
+  font-style: normal;
+  font-family: var(--sans);
+  letter-spacing: 0;
+  color: var(--muted);
+  margin-right: var(--sp-2);
+}
+
+.mkt {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-10);
+  min-width: 0;
+}
+
+.name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 var(--sp-10);
+  min-width: 0;
+}
+
+.name b {
+  white-space: nowrap;
+}
+
+.name span {
+  color: var(--muted);
+  font-size: var(--fs-13);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mkt svg {
+  margin-left: auto;
+}
+
+.kvs4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--sp-32);
+  margin: 0;
+}
+
+.kvs4 > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+.kvs4 dt {
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+}
+
+.kvs4 dd {
+  margin: 0;
+  font-size: var(--fs-17);
+  font-weight: var(--w6);
+}
+
+@media (max-width: 1100px) {
+  .head,
+  .row {
+    grid-template-columns: minmax(160px, 2.2fr) 0.45fr 0.8fr 0.7fr 0.7fr 0.65fr 0.7fr;
+  }
+  .head > span:nth-child(n + 8),
+  .row > span:nth-child(n + 8) {
+    display: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .kvs4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: var(--sp-16);
+  }
+}
+
+/* Phone: market and value, then held and P&L */
+@media (max-width: 720px) {
+  .head {
+    display: none;
+  }
+  .row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "mkt val" "held pnl";
+    row-gap: var(--sp-2);
+    column-gap: var(--sp-12);
+    padding: var(--sp-12) 0;
+  }
+  .row > span {
+    display: none;
+  }
+  .row > .mkt {
+    display: flex;
+    grid-area: mkt;
+  }
+  .mkt svg {
+    display: none;
+  }
+  .row > span:nth-child(2) {
+    display: block;
+    grid-area: held;
+    justify-self: start;
+    text-align: left;
+    font-size: var(--fs-13);
+    color: var(--muted);
+  }
+  .row > .value {
+    display: block;
+    grid-area: val;
+    font-weight: var(--w6);
+  }
+  .row > span:nth-child(5) {
+    display: block;
+    grid-area: pnl;
+    font-size: var(--fs-13);
+  }
+  .row > span:nth-child(2) .lab,
+  .row > span:nth-child(5) .lab {
+    display: inline;
+  }
+}

@@ -1,0 +1,15 @@
+.line {
+  margin: var(--sp-8) 0;
+  padding: var(--sp-2) 0 var(--sp-2) var(--sp-10);
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+  color: var(--ink);
+}
+
+.error {
+  border-left: 2px solid var(--neg);
+}
+
+.notice {
+  border-left: 2px solid var(--pos);
+}

@@ -1,0 +1,117 @@
+.chart {
+  position: relative;
+  width: 100%;
+}
+
+.chart svg {
+  display: block;
+  overflow: visible;
+  font-family: var(--sans);
+  font-size: var(--fs-11);
+}
+
+.chart:focus-visible {
+  outline-offset: 4px;
+}
+
+.grid {
+  stroke: var(--line);
+}
+
+.tick {
+  fill: var(--muted);
+  font-family: var(--mono);
+}
+
+.line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.75;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.fair {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.dot {
+  fill: var(--ink);
+}
+
+.guide {
+  stroke: var(--muted);
+  stroke-dasharray: 2 3;
+}
+
+.endKey {
+  fill: var(--muted);
+  font-size: var(--fs-11-5);
+}
+
+.endValue {
+  fill: var(--ink);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-medium);
+  font-family: var(--mono);
+}
+
+.endFair {
+  fill: var(--ink-2);
+}
+
+.empty {
+  display: grid;
+  place-items: center;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--fs-13);
+}
+
+.tip {
+  position: absolute;
+  top: -8px;
+  display: grid;
+  gap: var(--sp-2);
+  padding: var(--sp-8) var(--sp-10);
+  border-radius: var(--r);
+  background: var(--surface-3);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--fs-12-5);
+  color: var(--muted);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.tip > b {
+  color: var(--ink);
+  font-weight: var(--w6);
+}
+
+.tip span {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-16);
+}
+
+.tip span b {
+  color: var(--ink);
+  font-weight: var(--fw-medium);
+  font-family: var(--mono);
+}
+
+.spark {
+  flex: none;
+}
+
+.sparkPos {
+  color: var(--pos);
+}
+
+.sparkNeg {
+  color: var(--neg);
+}

@@ -1,0 +1,180 @@
+.head,
+.link {
+  display: grid;
+  grid-template-columns: minmax(190px, 2.2fr) 1fr 0.9fr 0.7fr 0.8fr 0.8fr 0.8fr 0.55fr;
+  gap: var(--sp-16);
+  align-items: center;
+  padding: 0 var(--sp-4);
+}
+
+.head {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: var(--z-sticky);
+  height: 36px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line-2);
+  font-size: var(--fs-12-5);
+  color: var(--muted);
+}
+
+.head > span:nth-child(n + 3),
+.link > span:nth-child(n + 3) {
+  text-align: right;
+  justify-self: end;
+}
+
+.head button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-4);
+  font-size: var(--fs-12-5);
+  color: var(--muted);
+}
+
+.head button:hover,
+.head button.on {
+  color: var(--ink);
+}
+
+.arrow {
+  font-style: normal;
+  font-size: var(--fs-8);
+}
+
+.row {
+  border-bottom: 1px solid var(--line);
+}
+
+.row:hover {
+  background: var(--surface-2);
+}
+
+.link {
+  min-height: 56px;
+}
+
+.mkt {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-10);
+  min-width: 0;
+}
+
+.mkt b {
+  font-size: var(--fs-14);
+  white-space: nowrap;
+}
+
+.mkt span {
+  color: var(--muted);
+  font-size: var(--fs-13);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.date {
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.price {
+  font-weight: var(--w6);
+}
+
+.price small {
+  display: block;
+  font-family: var(--sans);
+  font-size: var(--fs-11-5);
+  font-weight: var(--fw-regular);
+  line-height: 1.2;
+  color: var(--muted);
+}
+
+.lab {
+  display: none;
+  font-style: normal;
+  font-family: var(--sans);
+  letter-spacing: 0;
+  color: var(--muted);
+  margin-right: var(--sp-2);
+}
+
+@media (max-width: 1100px) {
+  .head,
+  .link {
+    grid-template-columns: minmax(170px, 2fr) 1fr 0.9fr 0.7fr 0.8fr 0.8fr 0.8fr;
+  }
+  .rel {
+    display: none;
+  }
+}
+
+/* Phone: two line rows, market and price, then date, 24h and ask vs fair */
+@media (max-width: 720px) {
+  .head {
+    display: flex;
+    justify-content: space-between;
+    padding: 0;
+  }
+  .head > span:not(.mkt):not(.price) {
+    display: none;
+  }
+  .link {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: "mkt mkt price" "date chg fair";
+    row-gap: var(--sp-2);
+    column-gap: var(--sp-12);
+    padding: var(--sp-12) 0;
+  }
+  .link .mkt {
+    grid-area: mkt;
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+  .link .price {
+    grid-area: price;
+  }
+  .link .price small {
+    display: none;
+  }
+  .link .date {
+    grid-area: date;
+    font-size: var(--fs-13);
+    color: var(--muted);
+  }
+  .link .chg {
+    grid-area: chg;
+    font-size: var(--fs-13);
+  }
+  .link .fair {
+    grid-area: fair;
+    font-size: var(--fs-13);
+  }
+  .link .ret,
+  .link .risk,
+  .link .rel {
+    display: none;
+  }
+  .link .chg .lab,
+  .link .fair .lab {
+    display: inline;
+  }
+}
+
+.more {
+  display: block;
+  height: 36px;
+  margin: var(--sp-20) auto 0;
+  padding: 0 var(--sp-16);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r);
+  font-size: var(--fs-13);
+  font-weight: var(--w6);
+  color: var(--ink);
+}
+
+.more:hover {
+  border-color: var(--ink-2);
+}

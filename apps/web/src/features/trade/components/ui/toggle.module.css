@@ -1,0 +1,14 @@
+.tog {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  height: 30px;
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.tog:hover,
+.on {
+  color: var(--ink);
+}

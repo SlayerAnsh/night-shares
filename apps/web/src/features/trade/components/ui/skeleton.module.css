@@ -1,0 +1,14 @@
+.wrap {
+  display: grid;
+  gap: var(--sp-12);
+  padding: var(--sp-6) 0;
+}
+
+.row {
+  display: block;
+  width: 100%;
+}
+
+.row:nth-child(even) {
+  width: 86%;
+}

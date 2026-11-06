@@ -1,10 +1,16 @@
 "use client";
+import { Field, Input } from "@night-shares/design-system";
 import type { NightKey } from "@night-shares/proto/common/v1/night_pb";
-import Link from "next/link";
-import { formatRoomNights } from "../../../../shared/format";
 import { useAgentOrders } from "../../hooks/use-agent-orders";
-import { money, nightHref } from "../../model/market";
+import { nightHref } from "../../model/market";
+import { Button } from "../ui/Button";
+import { Empty } from "../ui/Empty";
+import { Section } from "../ui/Section";
+import { AgentOrderRow } from "./AgentOrderRow";
 import { Feedback } from "./Feedback";
+import styles from "./lists.module.css";
+
+// Agent orders share your World ID limit. Large ones wait for fresh approval.
 export function AgentOrders({
   night,
 }: {
@@ -17,22 +23,22 @@ export function AgentOrders({
         !night || (order.night && nightHref(order.night) === nightHref(night)),
     ) ?? [];
   return (
-    <section>
-      <h2>Agent orders</h2>
-      <p>
-        You and all your agents share one World ID limit per night. Orders over
-        1,000 USDC need fresh World ID approval.
-      </p>
+    <Section
+      id={night ? "h-ao-night" : "h-ao"}
+      title="Agent orders"
+      line="You and all your agents share one World ID limit per night. Orders over 1,000 USDC need fresh World ID approval."
+      plain={!!night}
+    >
       {night && (
         <form
+          className={styles.form}
           onSubmit={(event) => {
             event.preventDefault();
             void a.submit();
           }}
         >
-          <label>
-            Room nights{" "}
-            <input
+          <Field label="Room nights">
+            <Input
               required
               type="number"
               min="0.1"
@@ -40,10 +46,9 @@ export function AgentOrders({
               value={a.size}
               onChange={(event) => a.update({ agentSize: event.target.value })}
             />
-          </label>
-          <label>
-            Budget, USDC{" "}
-            <input
+          </Field>
+          <Field label="Budget, USDC">
+            <Input
               required
               type="number"
               min="0.000001"
@@ -51,51 +56,42 @@ export function AgentOrders({
               value={a.budget}
               onChange={(event) => a.update({ budget: event.target.value })}
             />
-          </label>
-          <button
-            disabled={!a.valid || a.account.actions.pending}
+          </Field>
+          <Button
+            variant="primary"
             type="submit"
+            disabled={!a.valid || a.account.actions.pending}
           >
             Create agent order
-          </button>
+          </Button>
         </form>
       )}
-      <label>
-        World ID seed{" "}
-        <input
-          value={a.seed}
-          onChange={(event) => a.update({ seed: event.target.value })}
-        />
-      </label>
+      <div className={styles.form}>
+        <Field label="World ID seed" hint="Mock proof used to approve orders.">
+          <Input
+            value={a.seed}
+            onChange={(event) => a.update({ seed: event.target.value })}
+          />
+        </Field>
+      </div>
       <Feedback
         error={a.account.actions.error || a.account.portfolio.error?.message}
         notice={a.account.actions.notice}
       />
-      {!orders.length && <p>No agent orders yet.</p>}
-      <ul>
-        {orders.map((order) => (
-          <li key={order.id}>
-            {order.night && (
-              <Link href={nightHref(order.night)}>
-                {order.night.date} · {order.night.roomTypeId}
-              </Link>
-            )}{" "}
-            · {formatRoomNights(order.size?.tenths ?? 0)} room nights · Budget{" "}
-            {money(order.budget)} · Spent {money(order.spent)} ·{" "}
-            {["Unknown", "Pending", "Approved", "Executed"][order.status]}
-            <p>Agent wallet: {order.walletAddress}</p>
-            {order.status === 1 && (
-              <button
-                type="button"
-                disabled={a.account.actions.pending || !a.seed.trim()}
-                onClick={() => void a.approveOrder(order.id)}
-              >
-                Approve with World ID
-              </button>
-            )}
-          </li>
-        ))}
-      </ul>
-    </section>
+      {orders.length ? (
+        <div className={styles.lists}>
+          {orders.map((order) => (
+            <AgentOrderRow
+              key={order.id}
+              order={order}
+              canApprove={!a.account.actions.pending && !!a.seed.trim()}
+              onApprove={() => void a.approveOrder(order.id)}
+            />
+          ))}
+        </div>
+      ) : (
+        <Empty>No agent orders yet.</Empty>
+      )}
+    </Section>
   );
 }

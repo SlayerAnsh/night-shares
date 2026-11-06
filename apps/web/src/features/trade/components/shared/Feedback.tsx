@@ -1,3 +1,6 @@
+import styles from "./feedback.module.css";
+
+// Errors and confirmations as one quiet line with a coloured rule.
 export function Feedback({
   error,
   notice,
@@ -7,8 +10,16 @@ export function Feedback({
 }) {
   return (
     <>
-      {error && <p role="alert">{error}</p>}
-      {notice && <p role="status">{notice}</p>}
+      {error && (
+        <p role="alert" className={`${styles.line} ${styles.error}`}>
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p role="status" className={`${styles.line} ${styles.notice}`}>
+          {notice}
+        </p>
+      )}
     </>
   );
 }

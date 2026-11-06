@@ -1,0 +1,251 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-4);
+  margin: var(--sp-24) 0 var(--sp-16);
+  font-size: var(--fs-13);
+  color: var(--muted);
+}
+
+.back svg {
+  width: 14px;
+  height: 14px;
+}
+
+.back:hover {
+  color: var(--ink);
+}
+
+/* Header strip: title on its own line, the stats in one row below */
+.strip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-12);
+  padding-bottom: var(--sp-16);
+  border-bottom: 1px solid var(--line);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--fs-20);
+  font-weight: var(--w6);
+  letter-spacing: -0.01em;
+}
+
+.title b {
+  letter-spacing: 0.02em;
+}
+
+.hotel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-4) var(--sp-6);
+  margin: var(--sp-2) 0 0;
+  color: var(--muted);
+}
+
+.watch {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  margin-left: var(--sp-4);
+  padding: 0 var(--sp-8);
+  border-radius: var(--r);
+  font-size: var(--fs-12-5);
+  color: var(--muted);
+}
+
+.watch svg {
+  width: 12px;
+  height: 12px;
+}
+
+.watch:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+.watchOn {
+  color: var(--ink);
+}
+
+.verdict {
+  max-width: 96ch;
+  margin: var(--sp-12) 0 var(--sp-24);
+  font-size: var(--fs-14-5);
+  line-height: var(--lh-body);
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  column-gap: var(--sp-32);
+  align-items: start;
+}
+
+.main {
+  min-width: 0;
+}
+
+.ticket {
+  position: sticky;
+  top: calc(var(--nav-h) + var(--sp-16));
+  max-height: calc(100vh - var(--nav-h) - var(--sp-32));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.mkt {
+  display: grid;
+  grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+  grid-template-areas: "chart chart" "book tape";
+  gap: calc(var(--sp-24) * 2) var(--sp-32);
+}
+
+.chartC {
+  grid-area: chart;
+  min-width: 0;
+}
+
+.bookC {
+  grid-area: book;
+  min-width: 0;
+}
+
+.tapeC {
+  grid-area: tape;
+  min-width: 0;
+}
+
+.btToggle {
+  display: none;
+}
+
+.mkHd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-8) var(--sp-16);
+  padding-bottom: var(--sp-12);
+  margin-bottom: var(--sp-8);
+  border-bottom: 1px solid var(--line);
+}
+
+.mkHd h2 {
+  margin: 0;
+  font-size: var(--fs-15);
+  font-weight: var(--w6);
+}
+
+.mkHd > span {
+  font-size: var(--fs-12-5);
+  color: var(--muted);
+}
+
+.chartBox {
+  height: 440px;
+  margin-top: var(--sp-16);
+}
+
+.chartEmpty {
+  height: 220px;
+  margin-top: var(--sp-16);
+}
+
+.bar {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+}
+
+/* One column: chart, order box, book or trades, then the tabs */
+@media (max-width: 860px) {
+  .screen {
+    padding-bottom: 72px;
+  }
+  .layout {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .main,
+  .mkt {
+    display: contents;
+  }
+  .layout > *,
+  .mkt > * {
+    min-width: 0;
+  }
+  .chartC {
+    order: 1;
+  }
+  .ticket {
+    order: 2;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    margin: var(--sp-24) 0 var(--sp-8);
+  }
+  .btToggle {
+    display: block;
+    order: 3;
+    margin-top: var(--sp-24);
+  }
+  .bookC {
+    order: 4;
+    margin-top: var(--sp-16);
+  }
+  .tapeC {
+    order: 5;
+    margin-top: var(--sp-16);
+  }
+  .main > section:last-child {
+    order: 6;
+  }
+  .mkt[data-show="book"] .tapeC,
+  .mkt[data-show="trades"] .bookC {
+    display: none;
+  }
+  .chartBox {
+    height: 300px;
+  }
+  .bar:not([hidden]) {
+    position: fixed;
+    left: var(--sp-16);
+    right: var(--sp-16);
+    bottom: var(--sp-12);
+    z-index: var(--z-nav);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-10);
+    height: 48px;
+    padding: 0 var(--sp-16);
+    border-radius: var(--r-6);
+    background: var(--surface-3);
+    color: var(--ink);
+    font-size: var(--fs-14);
+    box-shadow: var(--shadow-lg);
+  }
+  .barGo {
+    margin-left: auto;
+    color: var(--pos);
+    font-size: var(--fs-13);
+    font-weight: var(--fw-medium);
+  }
+}
+
+@media (max-width: 720px) {
+  .back {
+    margin: var(--sp-16) 0 var(--sp-12);
+  }
+}

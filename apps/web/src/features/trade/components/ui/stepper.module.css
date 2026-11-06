@@ -1,0 +1,81 @@
+.label {
+  display: block;
+  margin-bottom: var(--sp-8);
+  font-size: var(--fs-13);
+  color: var(--muted);
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  gap: var(--sp-4);
+  align-items: center;
+}
+
+.step > button {
+  height: 40px;
+  border-radius: var(--r);
+  background: var(--surface-3);
+  color: var(--ink);
+  font-size: var(--fs-17);
+  line-height: 1;
+}
+
+.step > button:hover:not(:disabled) {
+  background: var(--line-2);
+}
+
+.field {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--sp-6);
+  height: 40px;
+  padding: 0 var(--sp-12);
+  border-radius: var(--r);
+  background: var(--bg);
+}
+
+.field:focus-within {
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.field input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  text-align: right;
+  font-size: var(--fs-17);
+  font-weight: var(--w6);
+  line-height: 38px;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.field input::-webkit-inner-spin-button,
+.field input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.field input:focus-visible {
+  outline: none;
+}
+
+.field span {
+  font-size: var(--fs-12-5);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.off {
+  opacity: 0.45;
+}
+
+.off button,
+.off input {
+  cursor: not-allowed;
+}

@@ -1,0 +1,67 @@
+/* Page frame for every trade screen (.tr in the mock). */
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--sp-32) calc(var(--sp-24) * 2);
+}
+
+.wide {
+  max-width: 1440px;
+}
+
+.head {
+  margin: calc(var(--sp-20) * 2) 0 var(--sp-32);
+}
+
+.head h1 {
+  margin: 0;
+  font-size: var(--fs-28);
+  line-height: var(--lh-snug);
+  letter-spacing: -0.01em;
+}
+
+.head p:not(.lead) {
+  margin: var(--sp-6) 0 0;
+  color: var(--muted);
+}
+
+.lead {
+  margin: var(--sp-8) 0 0;
+  max-width: 62ch;
+  font-size: var(--fs-17);
+  color: var(--ink);
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-8) var(--sp-20);
+  align-items: center;
+  margin-top: calc(var(--sp-24) * 2);
+  font-size: var(--fs-13);
+  color: var(--muted);
+}
+
+.foot a {
+  color: var(--pos);
+  font-weight: var(--fw-medium);
+}
+
+.foot a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 0 var(--sp-16) var(--sp-32);
+  }
+  .head {
+    margin: var(--sp-24) 0 var(--sp-16);
+  }
+  .head h1 {
+    font-size: var(--fs-24);
+  }
+  .lead {
+    font-size: var(--fs-16);
+  }
+}

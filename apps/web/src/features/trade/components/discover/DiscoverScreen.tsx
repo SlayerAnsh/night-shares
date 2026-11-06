@@ -1,59 +1,64 @@
 "use client";
+import { useAllMarkets } from "../../hooks/use-all-markets";
 import { useDiscover } from "../../hooks/use-discover";
 import { Feedback } from "../shared/Feedback";
-import { NightCards } from "../shared/NightCards";
+import { MarketTable } from "../shared/MarketTable";
+import page from "../shared/page.module.css";
+import { Button } from "../ui/Button";
+import { Empty } from "../ui/Empty";
+import { Skeleton } from "../ui/Skeleton";
+import { DiscoverFilters } from "./DiscoverFilters";
+import { DiscoverOverview } from "./DiscoverOverview";
+import { DiscoverSummary } from "./DiscoverSummary";
+
 export function DiscoverScreen() {
   const { filters, query, gated, change, signIn } = useDiscover();
+  const all = useAllMarkets();
+  const cities = all.cities.length ? all.cities.length : 0;
   return (
-    <>
-      <h1>Discover</h1>
-      <form onSubmit={(event) => event.preventDefault()}>
-        <label>
-          City{" "}
-          <input
-            value={filters.city}
-            onChange={(event) => change("city", event.target.value)}
-          />
-        </label>{" "}
-        <label>
-          Sort{" "}
-          <select
-            value={filters.sort === 2 ? "risk" : "return"}
-            onChange={(event) => change("sort", event.target.value)}
-          >
-            <option value="return">Est. return</option>
-            <option value="risk">Risk</option>
-          </select>
-        </label>
-        {[
-          ["value", "Below fair price", filters.valueOnly],
-          ["soon", "Releases soon", filters.soon],
-          ["watchlist", "Watchlist", filters.watchlist],
-        ].map(([key, label, checked]) => (
-          <label key={String(key)}>
-            {" "}
-            <input
-              type="checkbox"
-              checked={Boolean(checked)}
-              onChange={(event) =>
-                change(String(key), event.target.checked ? "1" : "")
-              }
-            />
-            {label}
-          </label>
-        ))}
-      </form>
+    <div className={page.page}>
+      <header className={page.head}>
+        <h1>Markets</h1>
+        <p>
+          {all.nights.length
+            ? `${all.nights.length} markets in ${cities} ${cities === 1 ? "city" : "cities"}. `
+            : ""}
+          Each market is one room type on one night.
+        </p>
+      </header>
+      <DiscoverOverview nights={all.nights} loading={all.query.isPending} />
+      <DiscoverFilters filters={filters} cities={all.cities} change={change} />
       {gated ? (
-        <button type="button" onClick={signIn}>
-          Sign in with World ID to see your watchlist
-        </button>
+        <Empty>
+          Your watchlist needs World ID.{" "}
+          <Button variant="primary" onClick={signIn}>
+            Sign in with World ID to see your watchlist
+          </Button>
+        </Empty>
       ) : (
         <>
-          {query.isPending && <p>Loading nights…</p>}
           <Feedback error={query.error?.message} />
-          {query.data && <NightCards nights={query.data.nights} />}
+          {query.isPending && <Skeleton label="Loading markets" />}
+          {query.data && (
+            <>
+              <DiscoverSummary nights={query.data.nights} />
+              <MarketTable
+                nights={query.data.nights}
+                sort={filters.sort === 2 ? "risk" : "return"}
+                onSort={(sort) => change("sort", sort === "risk" ? "risk" : "")}
+                empty={
+                  filters.watchlist
+                    ? "No starred nights here yet. Open a market and press Watch."
+                    : "Nothing matches these filters."
+                }
+              />
+            </>
+          )}
         </>
       )}
-    </>
+      <p className={page.foot}>
+        Market making bots use the quote API, not this page.
+      </p>
+    </div>
   );
 }

@@ -1,0 +1,49 @@
+/* Shared text roles for the trade screens: tabular numbers and change tones. */
+.num {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  letter-spacing: -0.01em;
+}
+
+/* Display sized numbers use Inter tabular figures, mono stays for tables. */
+.fig {
+  font-family: var(--sans);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings:
+    "tnum" 1,
+    "cv11" 1;
+  letter-spacing: -0.02em;
+}
+
+.pos {
+  color: var(--pos);
+}
+
+.neg {
+  color: var(--neg);
+}
+
+.flat,
+.muted {
+  color: var(--muted);
+}
+
+.warn {
+  color: var(--warn);
+}
+
+.mono {
+  font-family: var(--mono);
+  font-size: var(--fs-12-5);
+  word-break: break-all;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

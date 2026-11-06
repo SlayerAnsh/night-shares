@@ -1,0 +1,156 @@
+.head {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--sp-8);
+}
+
+.head b {
+  font-size: var(--fs-13);
+  font-weight: var(--fw-regular);
+  color: var(--ink-2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  column-gap: var(--sp-6);
+}
+
+.dow {
+  padding: 0 var(--sp-6) var(--sp-6);
+  margin-bottom: var(--sp-4);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+.cell {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--sp-4);
+  align-items: baseline;
+  min-width: 0;
+  padding: var(--sp-6) var(--sp-6) var(--sp-10);
+  border-radius: var(--r-4);
+  font-variant-numeric: tabular-nums;
+}
+
+.cell span {
+  font-size: var(--fs-11-5);
+  color: var(--muted);
+}
+
+.cell b {
+  justify-self: end;
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+
+.cell small {
+  grid-column: 1 / -1;
+  justify-self: end;
+  font-size: var(--fs-11-5);
+}
+
+a.cell:hover {
+  background: var(--surface-2);
+}
+
+.on,
+a.on:hover {
+  background: var(--surface-3);
+}
+
+.off {
+  opacity: 0.35;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-6) var(--sp-20);
+  margin: var(--sp-12) 0 0;
+  font-size: var(--fs-12-5);
+  color: var(--muted);
+}
+
+.legend b {
+  font-weight: var(--fw-medium);
+}
+
+.om {
+  margin-top: var(--sp-32);
+  border-top: 1px solid var(--line);
+}
+
+.om h3 {
+  margin: var(--sp-12) 0 var(--sp-8);
+  font-size: var(--fs-13);
+  font-weight: var(--w6);
+}
+
+.omSub {
+  margin-left: var(--sp-8);
+  font-weight: var(--fw-regular);
+  color: var(--muted);
+}
+
+.omRow {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+  gap: var(--sp-16);
+  align-items: baseline;
+  padding: var(--sp-8) 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-13);
+}
+
+.omRow:hover {
+  background: var(--surface-2);
+}
+
+.omRow > span {
+  text-align: right;
+}
+
+.omRow i {
+  font-style: normal;
+  font-family: var(--sans);
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+@media (max-width: 720px) {
+  .grid {
+    column-gap: var(--sp-2);
+  }
+  .dow {
+    padding: 0 0 var(--sp-6);
+    text-align: center;
+    font-size: var(--fs-11);
+  }
+  .cell {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: var(--sp-4) 1px var(--sp-8);
+    text-align: center;
+  }
+  .cell b {
+    justify-self: center;
+    font-size: var(--fs-11-5);
+  }
+  .cell small {
+    justify-self: center;
+    font-size: var(--fs-10-5);
+  }
+  .cell span {
+    font-size: var(--fs-10-5);
+  }
+  .omRow {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    row-gap: var(--sp-2);
+  }
+  .omRow > b {
+    grid-column: 1 / -1;
+  }
+}
