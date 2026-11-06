@@ -101,6 +101,7 @@ test("approval rechecks changed budget and high-value order requires verificatio
   const { token } = h.container.ports.verifications.issue({
     userId: user.id,
     action: "approve_agent_order",
+    resourceId: order.id,
   });
   await expect(
     m.approveAgentOrder({ orderId: order.id, verificationToken: token }),

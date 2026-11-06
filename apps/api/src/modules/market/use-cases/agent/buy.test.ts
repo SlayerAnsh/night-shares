@@ -34,6 +34,7 @@ test("approval rechecks budget after creation and leaves pending order unspent",
   const { token } = d.ports.verifications.issue({
     userId: d.user.id,
     action: "approve_agent_order",
+    resourceId: order.id,
   });
   await expect(approveAgentOrder(d, d.user, order.id, token)).rejects.toThrow(
     "agent budget",

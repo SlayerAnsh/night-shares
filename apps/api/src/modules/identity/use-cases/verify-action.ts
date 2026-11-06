@@ -23,6 +23,10 @@ export function createVerifyAction(
         "PERMISSION_DENIED",
         "The proof must belong to your signed-in World ID.",
       );
-    return deps.verifications.issue({ userId: user.id, action });
+    return deps.verifications.issue({
+      userId: user.id,
+      action,
+      resourceId: verified.resourceId,
+    });
   };
 }

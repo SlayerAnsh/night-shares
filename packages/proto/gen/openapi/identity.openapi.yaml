@@ -388,6 +388,14 @@ components:
         - oneOf:
             - type: object
               properties:
+                idkitResultJson:
+                  type: string
+                  title: idkit_result_json
+              title: idkit_result_json
+              required:
+                - idkitResultJson
+            - type: object
+              properties:
                 mockProof:
                   type: string
                   title: mock_proof
@@ -413,6 +421,9 @@ components:
         user:
           title: user
           $ref: '#/components/schemas/night_shares.identity.v1.User'
+        sessionId:
+          type: string
+          title: session_id
       title: CompleteSignInResponse
       additionalProperties: false
     night_shares.identity.v1.GetSessionRequest:
@@ -441,6 +452,9 @@ components:
         level:
           title: level
           $ref: '#/components/schemas/night_shares.identity.v1.VerificationLevel'
+        sessionId:
+          type: string
+          title: session_id
       title: StartSignInRequest
       additionalProperties: false
     night_shares.identity.v1.StartSignInResponse:
@@ -467,6 +481,9 @@ components:
         mode:
           title: mode
           $ref: '#/components/schemas/night_shares.identity.v1.WorldIdMode'
+        context:
+          title: context
+          $ref: '#/components/schemas/night_shares.identity.v1.WorldIdRequest'
       title: StartSignInResponse
       additionalProperties: false
     night_shares.identity.v1.StartVerifyActionRequest:
@@ -475,6 +492,9 @@ components:
         action:
           type: string
           title: action
+        resourceId:
+          type: string
+          title: resource_id
       title: StartVerifyActionRequest
       additionalProperties: false
     night_shares.identity.v1.StartVerifyActionResponse:
@@ -498,6 +518,9 @@ components:
         mode:
           title: mode
           $ref: '#/components/schemas/night_shares.identity.v1.WorldIdMode'
+        context:
+          title: context
+          $ref: '#/components/schemas/night_shares.identity.v1.WorldIdRequest'
       title: StartVerifyActionResponse
       additionalProperties: false
     night_shares.identity.v1.User:
@@ -537,6 +560,14 @@ components:
         - oneOf:
             - type: object
               properties:
+                idkitResultJson:
+                  type: string
+                  title: idkit_result_json
+              title: idkit_result_json
+              required:
+                - idkitResultJson
+            - type: object
+              properties:
                 mockProof:
                   type: string
                   title: mock_proof
@@ -571,7 +602,7 @@ components:
         - WORLD_ID_MODE_UNSPECIFIED
         - WORLD_ID_MODE_MOCK
         - WORLD_ID_MODE_WORLD_ID
-      description: One fixed cloud action keeps the nullifier stable across purposes.
+      description: Enrollment uses a fixed action; sensitive actions use their own scope.
     night_shares.identity.v1.WorldIdProof:
       type: object
       properties:
@@ -589,6 +620,48 @@ components:
           title: verification_level
       title: WorldIdProof
       additionalProperties: false
+    night_shares.identity.v1.WorldIdRequest:
+      type: object
+      properties:
+        rpId:
+          type: string
+          title: rp_id
+        nonce:
+          type: string
+          title: nonce
+        createdAt:
+          type:
+            - integer
+            - string
+          title: created_at
+          format: int64
+        expiresAt:
+          type:
+            - integer
+            - string
+          title: expires_at
+          format: int64
+        signature:
+          type: string
+          title: signature
+        sessionId:
+          type: string
+          title: session_id
+        environment:
+          type: string
+          title: environment
+        allowLegacy:
+          type: boolean
+          title: allow_legacy
+        credential:
+          type: string
+          title: credential
+        continuity:
+          title: continuity
+          $ref: '#/components/schemas/night_shares.identity.v1.WorldIdRequest'
+      title: WorldIdRequest
+      additionalProperties: false
+      description: JSON preserves the complete vendor result without discarding credential fields.
 security: []
 tags:
   - name: night_shares.identity.v1.IdentityService

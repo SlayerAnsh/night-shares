@@ -12,7 +12,14 @@ export function createCheckIn(ports: Ports, repo: StayRepo) {
         "FAILED_PRECONDITION",
         "This booking has a walk report.",
       );
-    if (!ports.verifications.consume({ token, userId, action: "check_in" }))
+    if (
+      !ports.verifications.consume({
+        token,
+        userId,
+        action: "check_in",
+        resourceId: id,
+      })
+    )
       throw new DomainError(
         "PERMISSION_DENIED",
         "Verify your identity to check in.",

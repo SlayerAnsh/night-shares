@@ -69,6 +69,7 @@ test("market positions, listings, watchlist and agent orders survive restart", a
     const token = ports.verifications.issue({
       userId: user.id,
       action: "approve_agent_order",
+      resourceId: pending.order.id,
     }).token;
     await approveAgentOrder(deps, user, pending.order.id, token);
     cancelAsk(deps, user, `${key}|${user.walletAddress}`);

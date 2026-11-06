@@ -18,10 +18,14 @@ export function useVerifyAction() {
   async function mutateAsync(input: {
     action: "check_in" | "approve_agent_order";
     proof: string;
+    resourceId?: string;
   }) {
     setPending(true);
     try {
-      const request = await start.mutateAsync({ action: input.action });
+      const request = await start.mutateAsync({
+        action: input.action,
+        resourceId: input.resourceId,
+      });
       const submit = (proof: CompleteSignInRequest["proof"]) =>
         verify.mutateAsync({
           action: input.action,

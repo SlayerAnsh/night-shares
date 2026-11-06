@@ -77,12 +77,17 @@ export function buildContainer(config: Config) {
       inventory: createSqliteInventoryRepo({ db, catalog, clock }),
       sessions: createSqliteSessionStore({ db, clock }),
       identityVerifier:
-        config.worldIdMode === "world-id"
+        config.worldIdMode === "world-id" || config.worldIdMode === "cloud"
           ? createWorldIdIdentityVerifier({
               db,
               clock,
               ids,
               appId: config.worldIdAppId ?? "",
+              rpId: config.worldIdRpId,
+              signingKey: config.worldIdSigningKey,
+              environment: config.worldIdEnvironment,
+              allowLegacy: config.worldIdAllowLegacy,
+              deviceCredential: config.worldIdDeviceCredential,
               action: config.worldIdAction,
               verifyUrl: config.worldIdVerifyUrl,
             })

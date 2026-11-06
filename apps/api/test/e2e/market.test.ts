@@ -87,7 +87,7 @@ test("buy rejects over-cap size and Device user", async () => {
   ).rejects.toMatchObject({ code: Code.PermissionDenied });
 });
 test("large agent order needs one-time verification token", async () => {
-  const { clients, user } = await harness.signInAs("orb", "market_agent");
+  const { clients } = await harness.signInAs("orb", "market_agent");
   const agentNight = { ...night, date: "2026-12-20" };
   await clients.market.fundAgentWallet({ amount: { micros: 3000000000n } });
   await clients.market.setAgentBudget({
@@ -103,9 +103,31 @@ test("large agent order needs one-time verification token", async () => {
   await expect(
     clients.market.approveAgentOrder({ orderId: pending.order?.id }),
   ).rejects.toMatchObject({ code: Code.PermissionDenied });
-  const { token } = harness.container.ports.verifications.issue({
-    userId: user.id,
+  for (const resourceId of [undefined, "wrong_resource"]) {
+    const request = await clients.identity.startVerifyAction({
+      action: "approve_agent_order",
+      resourceId,
+    });
+    const verified = await clients.identity.verifyAction({
+      action: "approve_agent_order",
+      requestId: request.requestId,
+      proof: { case: "mockProof", value: "mock:market_agent:orb" },
+    });
+    await expect(
+      clients.market.approveAgentOrder({
+        orderId: pending.order?.id,
+        verificationToken: verified.verificationToken,
+      }),
+    ).rejects.toThrow("Fresh World ID");
+  }
+  const request = await clients.identity.startVerifyAction({
     action: "approve_agent_order",
+    resourceId: pending.order?.id,
+  });
+  const { verificationToken: token } = await clients.identity.verifyAction({
+    action: "approve_agent_order",
+    requestId: request.requestId,
+    proof: { case: "mockProof", value: "mock:market_agent:orb" },
   });
   const approved = await clients.market.approveAgentOrder({
     orderId: pending.order?.id,

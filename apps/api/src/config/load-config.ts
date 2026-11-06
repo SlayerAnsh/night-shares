@@ -7,8 +7,13 @@ export type Config = Partial<ServerConfig> & {
   devTagIssuer?: boolean;
   receptionTagSecret?: string;
   jobIntervalMs?: number;
-  worldIdMode?: "mock" | "world-id";
+  worldIdMode?: "mock" | "world-id" | "cloud";
   worldIdAppId?: string;
+  worldIdRpId?: string;
+  worldIdSigningKey?: string;
+  worldIdEnvironment?: "staging" | "production";
+  worldIdAllowLegacy?: boolean;
+  worldIdDeviceCredential?: "selfieCheck" | "proofOfHuman";
   worldIdAction?: string;
   worldIdVerifyUrl?: string;
   port: number;
@@ -48,17 +53,50 @@ export function loadConfig(
   )
     throw new Error("JOB_INTERVAL_MS must be a positive timer interval.");
   const worldIdMode = env.WORLD_ID_MODE ?? "mock";
-  if (worldIdMode !== "mock" && worldIdMode !== "world-id")
-    throw new Error("WORLD_ID_MODE must be mock or world-id.");
+  if (
+    worldIdMode !== "mock" &&
+    worldIdMode !== "world-id" &&
+    worldIdMode !== "cloud"
+  )
+    throw new Error(
+      "WORLD_ID_MODE must be mock or cloud (world-id is an alias).",
+    );
   const worldIdAppId = env.WORLD_ID_APP_ID ?? "";
-  if (worldIdMode === "world-id" && !/^app_[a-zA-Z0-9_]+$/.test(worldIdAppId))
+  if (worldIdMode !== "mock" && !/^app_[a-zA-Z0-9_]+$/.test(worldIdAppId))
     throw new Error("WORLD_ID_APP_ID must be a valid app ID in world-id mode.");
-  const worldIdAction = env.WORLD_ID_ACTION ?? "night-shares-human";
+  const worldIdRpId = env.WORLD_ID_RP_ID ?? "";
+  const worldIdSigningKey = env.WORLD_ID_SIGNING_KEY ?? "";
+  if (worldIdMode !== "mock" && !/^rp_[a-zA-Z0-9_]+$/.test(worldIdRpId))
+    throw new Error("WORLD_ID_RP_ID is required in cloud mode.");
+  if (
+    worldIdMode !== "mock" &&
+    !/^(0x)?[0-9a-fA-F]{64}$/.test(worldIdSigningKey)
+  )
+    throw new Error(
+      "WORLD_ID_SIGNING_KEY must be a 32-byte private key in cloud mode.",
+    );
+  const worldIdEnvironment = env.WORLD_ID_ENVIRONMENT ?? "staging";
+  if (worldIdEnvironment !== "staging" && worldIdEnvironment !== "production")
+    throw new Error("WORLD_ID_ENVIRONMENT must be staging or production.");
+  const legacy = env.WORLD_ID_ALLOW_LEGACY ?? "true";
+  if (legacy !== "true" && legacy !== "false")
+    throw new Error("WORLD_ID_ALLOW_LEGACY must be true or false.");
+  const worldIdAllowLegacy = legacy === "true";
+  const worldIdDeviceCredential =
+    env.WORLD_ID_DEVICE_CREDENTIAL ?? "selfieCheck";
+  if (
+    worldIdDeviceCredential !== "selfieCheck" &&
+    worldIdDeviceCredential !== "proofOfHuman"
+  )
+    throw new Error(
+      "WORLD_ID_DEVICE_CREDENTIAL must be selfieCheck or proofOfHuman.",
+    );
+  const worldIdAction = env.WORLD_ID_ENROLL_ACTION ?? "night-shares-enroll";
   if (!worldIdAction.trim())
-    throw new Error("WORLD_ID_ACTION must not be empty.");
+    throw new Error("WORLD_ID_ENROLL_ACTION must not be empty.");
   const worldIdVerifyUrl =
     env.WORLD_ID_VERIFY_URL ??
-    "https://developer.world.org/api/v2/verify/{app_id}";
+    "https://developer.world.org/api/v4/verify/{rp_id}";
   try {
     const url = new URL(worldIdVerifyUrl.replace("{app_id}", "app_test"));
     if (url.protocol !== "https:" || url.username || url.password)
@@ -97,6 +135,11 @@ export function loadConfig(
     devTagIssuer,
     jobIntervalMs,
     worldIdMode,
+    worldIdRpId,
+    worldIdSigningKey,
+    worldIdEnvironment,
+    worldIdAllowLegacy,
+    worldIdDeviceCredential,
     worldIdAppId,
     worldIdAction,
     worldIdVerifyUrl,

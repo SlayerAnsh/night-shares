@@ -35,6 +35,7 @@ export function useAgentOrders(
       async () => {
         const result = await verify.mutateAsync({
           action: "approve_agent_order",
+          resourceId: orderId,
           proof: `mock:${seed}:orb`,
         });
         await approve.mutateAsync({

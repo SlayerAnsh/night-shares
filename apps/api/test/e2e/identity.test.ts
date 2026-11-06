@@ -65,7 +65,10 @@ test("Device cannot call an Orb RPC; upgrading preserves the user and enables ac
   expect(orb.user?.level).toBe(VerificationLevel.ORB);
   await orb.clients.market.listWatch({});
   const again = await h.signIn("device", "upgrade");
-  expect(again.user?.level).toBe(VerificationLevel.ORB);
+  expect(again.user?.level).toBe(VerificationLevel.DEVICE);
+  await expect(again.clients.market.listWatch({})).rejects.toMatchObject({
+    code: Code.PermissionDenied,
+  });
 });
 
 test("bad proofs are Unauthenticated and unknown action names are InvalidArgument", async () => {
@@ -113,4 +116,64 @@ test("sign-out revokes only its bearer token", async () => {
   expect((await second.clients.identity.getSession({})).user?.id).toBe(
     first.user?.id,
   );
+});
+
+test("mock cancel and reject create no session; retry succeeds", async () => {
+  const h = await createHarness();
+  harness = h;
+  for (const outcome of ["cancel", "reject"]) {
+    const request = await h.clients.identity.startSignIn({
+      level: VerificationLevel.DEVICE,
+    });
+    await expect(
+      h.clients.identity.completeSignIn({
+        requestId: request.requestId,
+        proof: { case: "mockProof", value: `mock:${outcome}` },
+      }),
+    ).rejects.toMatchObject({ code: Code.Unauthenticated });
+  }
+  expect(
+    h.container.ports.db.query("SELECT * FROM sessions").all(),
+  ).toHaveLength(0);
+  expect((await h.signIn("device")).user).toBeDefined();
+});
+
+test("mock action replay with a fresh nonce fails for the same order", async () => {
+  const h = await createHarness();
+  harness = h;
+  const session = await h.signIn("orb");
+  for (const attempt of [1, 2]) {
+    const request = await session.clients.identity.startVerifyAction({
+      action: "approve_agent_order",
+      resourceId: "ord_replay",
+    });
+    const result = session.clients.identity.verifyAction({
+      requestId: request.requestId,
+      action: "approve_agent_order",
+      proof: { case: "mockProof", value: "mock:e2e:orb" },
+    });
+    if (attempt === 1) expect((await result).verificationToken).not.toBe("");
+    else
+      await expect(result).rejects.toMatchObject({
+        code: Code.Unauthenticated,
+      });
+  }
+});
+
+test("re-enrollment and returning sessions keep one human and wallet", async () => {
+  const h = await createHarness();
+  harness = h;
+  const first = await h.signIn("orb", "recover");
+  const recovered = await h.signIn("orb", "recover");
+  expect(recovered.user).toEqual(first.user);
+  expect(recovered.sessionId).not.toBe(first.sessionId);
+  expect((await h.signIn("orb", "recover", first.sessionId)).user).toEqual(
+    first.user,
+  );
+  expect(
+    h.container.ports.db.query("SELECT * FROM identity_users").all(),
+  ).toHaveLength(1);
+  expect(
+    h.container.ports.db.query("SELECT * FROM world_id_sessions").all(),
+  ).toHaveLength(2);
 });

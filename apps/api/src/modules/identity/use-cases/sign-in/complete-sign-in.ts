@@ -34,7 +34,11 @@ export function createCompleteSignIn(
       pending.delete(humanId);
     }
   }
-  return async (input: { requestId: string; proof: IdentityProof }) => {
+  return async (input: {
+    requestId: string;
+    proof: IdentityProof;
+    userId?: string;
+  }) => {
     if (!input.requestId.trim())
       throw new DomainError(
         "INVALID_ARGUMENT",
@@ -48,6 +52,11 @@ export function createCompleteSignIn(
     const user = deps.repo.get(found.humanId) ?? found;
     if (verified.level === "orb") user.level = "orb";
     deps.repo.save(user);
-    return { sessionToken: deps.sessions.create(user), user };
+    const sessionUser = { ...user, level: verified.level };
+    return {
+      sessionToken: deps.sessions.create(sessionUser),
+      user: sessionUser,
+      sessionId: verified.sessionId ?? "",
+    };
   };
 }

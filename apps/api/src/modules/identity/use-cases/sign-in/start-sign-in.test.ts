@@ -9,12 +9,12 @@ test("starts a request for the selected level with clock-based expiry", async ()
     clock: createMockClock(1000),
     ids: createMockIdGenerator(),
   });
-  expect(await createStartSignIn({ identityVerifier })("orb")).toEqual({
+  expect(await createStartSignIn({ identityVerifier })("orb")).toMatchObject({
     requestId: "wid_0001",
     qrPayload: "mock-world-id:wid_0001:orb",
     expiresAt: 301000,
     appId: "",
-    action: "night-shares-human",
+    action: "night-shares-enroll",
     signal: "sign_in:nonce_0001",
     mode: 1,
   });

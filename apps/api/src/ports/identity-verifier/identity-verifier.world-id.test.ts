@@ -1,144 +1,138 @@
-import { afterEach, expect, mock, test } from "bun:test";
-import { openDatabase } from "../../db/open-database";
-import { createMockClock } from "../clock/clock.mock";
-import { createMockIdGenerator } from "../ids/id-generator.mock";
+import { expect, test } from "bun:test";
 import { createWorldIdIdentityVerifier } from "./identity-verifier.world-id";
-import { signalHash } from "./signal-hash";
+import { enrollment, jsonProof, setupWorldId } from "./world-id-test-fixture";
 
-const databases: ReturnType<typeof openDatabase>[] = [];
-afterEach(() => {
-  for (const db of databases.splice(0)) db.close();
-});
-const proof = {
-  merkleRoot: "0xroot",
-  nullifierHash: "0xhuman",
-  proof: "0xproof",
-  verificationLevel: "orb",
-};
-// Response shapes from https://docs.world.org/api-reference/developer-portal/verify-legacy.
-const success = {
-  success: true,
-  action: "night-shares-human",
-  nullifier_hash: proof.nullifierHash,
-  created_at: "2023-02-18T11:20:39.530041+00:00",
-};
-function setup(
-  response: () => Promise<Response> = async () => Response.json(success),
-) {
-  const db = openDatabase(":memory:");
-  databases.push(db);
-  const clock = createMockClock(0);
-  const fetcher = mock((_url: string | URL | Request, _options?: RequestInit) =>
-    response(),
-  );
-  const deps = {
-    db,
-    clock,
-    ids: createMockIdGenerator(),
-    appId: "app_test",
-    fetch: fetcher as unknown as typeof fetch,
-  };
-  return { ...deps, fetcher, verifier: createWorldIdIdentityVerifier(deps) };
-}
-test("cloud body binds the exact signal and returns the fixed-action nullifier as subject", async () => {
-  const s = setup();
-  const request = await s.verifier.startRequest("orb");
-  expect(request.signal).toBe("sign_in:nonce_0001");
-  const result = await s.verifier.verifyProof({
-    requestId: request.requestId,
-    proof,
-    action: "sign_in",
-  });
-  expect(result).toEqual({
-    subject: proof.nullifierHash,
-    nullifier: proof.nullifierHash,
-    level: "orb",
-  });
-  expect(s.fetcher.mock.calls[0]?.[0]).toBe(
-    "https://developer.world.org/api/v2/verify/app_test",
-  );
-  const options = s.fetcher.mock.calls[0]?.[1];
-  expect(JSON.parse(String(options?.body))).toEqual({
-    merkle_root: proof.merkleRoot,
-    nullifier_hash: proof.nullifierHash,
-    proof: proof.proof,
-    verification_level: "orb",
-    action: "night-shares-human",
-    signal_hash: signalHash(request.signal),
-  });
-  expect(options?.signal).toBeInstanceOf(AbortSignal);
-  const second = await s.verifier.startRequest("device", "check_in", "usr_1");
-  expect(
-    await s.verifier.verifyProof({
-      requestId: second.requestId,
-      proof,
-      action: "check_in",
-      userId: "usr_1",
-    }),
-  ).toEqual(result);
-});
-test("nonce survives adapter recreation and cannot replay concurrently", async () => {
-  const s = setup();
-  const { requestId } = await s.verifier.startRequest("orb");
-  const restarted = createWorldIdIdentityVerifier(s);
-  const input = { requestId, proof, action: "sign_in" };
-  const results = await Promise.allSettled([
-    restarted.verifyProof(input),
-    s.verifier.verifyProof(input),
-  ]);
-  expect(results.map((result) => result.status)).toEqual([
-    "fulfilled",
-    "rejected",
-  ]);
-  expect(s.fetcher).toHaveBeenCalledTimes(1);
-});
-test("wrong purpose, wrong user, expired, mock and insufficient-level proofs never reach cloud", async () => {
-  const s = setup();
-  for (const variant of ["purpose", "user", "expired", "mock", "level"]) {
-    const request = await s.verifier.startRequest("orb", "check_in", "usr_1");
-    if (variant === "expired") s.clock.advance(300_000);
-    await expect(
-      s.verifier.verifyProof({
-        requestId: request.requestId,
-        action: variant === "purpose" ? "sign_in" : "check_in",
-        userId: variant === "user" ? "usr_2" : "usr_1",
-        proof:
-          variant === "mock"
-            ? "mock:alice:orb"
-            : {
-                ...proof,
-                verificationLevel: variant === "level" ? "device" : "orb",
-              },
-      }),
-    ).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
+test("v4 forwards the complete result and normalizes the fixed enrollment nullifier", async () => {
+  const s = setupWorldId();
+  try {
+    const request = await s.verifier.startRequest("orb");
+    const payload = enrollment(request);
+    const result = await s.verifier.verifyProof({
+      requestId: request.requestId,
+      action: "sign_in",
+      proof: jsonProof(payload),
+    });
+    expect(result).toEqual({
+      subject: "66",
+      nullifier: "66",
+      level: "orb",
+      sessionId: "session_alice",
+    });
+    expect(s.fetcher.mock.calls[0]?.[0]).toBe(
+      "https://developer.world.org/api/v4/verify/rp_test",
+    );
+    expect(s.fetcher.mock.calls[0]?.[1]?.body).toBe(JSON.stringify(payload));
+    expect(request.context?.signature).toMatch(/^0x/);
+    expect(request.context?.allowLegacy).toBe(false);
+  } finally {
+    s.db.close();
   }
-  expect(s.fetcher).not.toHaveBeenCalled();
 });
-test("provider rejection, malformed response, mismatched identity and network failures are plain authentication errors", async () => {
-  for (const respond of [
-    async () =>
-      Response.json(
-        { code: "invalid_proof", detail: "private provider detail" },
-        { status: 400 },
-      ),
+
+test("re-enrollment with a new session keeps the same human and both linked sessions", async () => {
+  const s = setupWorldId();
+  try {
+    for (const [nullifier, session] of [
+      ["0x0042", "session_old"],
+      ["66", "session_new"],
+    ]) {
+      const request = await s.verifier.startRequest("orb");
+      const verified = await s.verifier.verifyProof({
+        requestId: request.requestId,
+        action: "sign_in",
+        proof: jsonProof(enrollment(request, nullifier, session)),
+      });
+      expect(verified.subject).toBe("66");
+    }
+    expect(s.db.query("SELECT * FROM world_id_enrollments").all()).toHaveLength(
+      1,
+    );
+    expect(s.db.query("SELECT * FROM world_id_sessions").all()).toHaveLength(2);
+  } finally {
+    s.db.close();
+  }
+});
+
+test("request survives recreation and concurrent replay reaches the provider once", async () => {
+  const s = setupWorldId();
+  try {
+    const request = await s.verifier.startRequest("orb");
+    const input = {
+      requestId: request.requestId,
+      action: "sign_in",
+      proof: jsonProof(enrollment(request)),
+    };
+    const results = await Promise.allSettled([
+      createWorldIdIdentityVerifier(s).verifyProof(input),
+      s.verifier.verifyProof(input),
+    ]);
+    expect(results.map((result) => result.status)).toEqual([
+      "fulfilled",
+      "rejected",
+    ]);
+    expect(s.fetcher).toHaveBeenCalledTimes(1);
+  } finally {
+    s.db.close();
+  }
+});
+
+test("wrong nonce, environment, action, credential and signal fail before provider", async () => {
+  const s = setupWorldId();
+  try {
+    for (const variant of [
+      "nonce",
+      "environment",
+      "action",
+      "level",
+      "signal",
+    ]) {
+      const request = await s.verifier.startRequest("orb");
+      const payload = enrollment(request);
+      const item = payload.responses[0];
+      if (!item) throw new Error("Missing fixture response");
+      if (variant === "level") item.identifier = "selfie";
+      else if (variant === "signal") item.signal_hash = "0x123";
+      else if (variant === "nonce") payload.nonce = "other";
+      else if (variant === "environment") payload.environment = "production";
+      else payload.action = "other";
+      await expect(
+        s.verifier.verifyProof({
+          requestId: request.requestId,
+          action: "sign_in",
+          proof: jsonProof(payload),
+        }),
+      ).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
+    }
+    expect(s.fetcher).not.toHaveBeenCalled();
+  } finally {
+    s.db.close();
+  }
+});
+
+test("provider errors, malformed responses and environment mismatch cannot authenticate", async () => {
+  for (const response of [
+    async () => Response.json({ code: "nullifier_replayed" }, { status: 400 }),
     async () => new Response("invalid JSON"),
-    async () => Response.json({ ...success, nullifier_hash: "other" }),
-    async () => Response.json({ ...success, action: "other" }),
-    async () => Response.json({ success: false }),
+    async () => Response.json({ success: true, environment: "production" }),
     async () => {
-      throw new Error("secret proof in upstream error");
+      throw new Error("private proof material");
     },
   ]) {
-    const s = setup(respond);
-    const { requestId } = await s.verifier.startRequest("orb");
-    const input = { requestId, proof, action: "sign_in" };
-    await expect(s.verifier.verifyProof(input)).rejects.toMatchObject({
-      code: "UNAUTHENTICATED",
-      message: "World ID verification failed. Please start a new request.",
-    });
-    await expect(s.verifier.verifyProof(input)).rejects.toThrow(
-      "invalid or expired",
-    );
-    expect(s.fetcher).toHaveBeenCalledTimes(1);
+    const s = setupWorldId(response);
+    try {
+      const request = await s.verifier.startRequest("orb");
+      await expect(
+        s.verifier.verifyProof({
+          requestId: request.requestId,
+          action: "sign_in",
+          proof: jsonProof(enrollment(request)),
+        }),
+      ).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
+      expect(s.db.query("SELECT * FROM world_id_sessions").all()).toHaveLength(
+        0,
+      );
+    } finally {
+      s.db.close();
+    }
   }
 });

@@ -69,8 +69,9 @@ export async function createHarness(
     baseUrl,
     clients,
     clientsFor,
-    async signIn(level: "device" | "orb", seed = "e2e") {
+    async signIn(level: "device" | "orb", seed = "e2e", sessionId?: string) {
       const request = await clients.identity.startSignIn({
+        sessionId,
         level:
           level === "orb" ? VerificationLevel.ORB : VerificationLevel.DEVICE,
       });

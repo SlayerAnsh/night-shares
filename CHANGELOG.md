@@ -31,6 +31,7 @@ All notable changes to this monorepo. Newest first.
 
 ### Changed
 
+- World ID 4.0: IDKit 4.6.0, server signed `rp_context`, proofs verified at `/api/v4/verify/{rp_id}`. Stay trust moments use Selfie Check and Trade, Host and agent approvals use Proof of Human. `humanId` is the uniqueness nullifier of the fixed enrollment action `night-shares-enroll`, stable across re-login and session resets; session IDs only link returning logins, and a Selfie to Orb upgrade keeps one user. Per action proofs (`check_in:<bookingId>`, `approve_agent_order:<orderId>`) are one time and bound to their booking or order. The mock client can simulate cancel and reject.
 - Every NightToken quantity is a whole tenth of a room night: a shared guard converts model floats to integer tenths (tolerating float drift only), buys, sells, quotes, agent orders, partial fills, recall, cutoff and openings reject or floor non tenth amounts, and migration 340 makes SQLite reject fractional positions and ask sizes.
 - `GetPriceCalendar` returns every night in the window; sold out or closed nights carry `is_sold_out` instead of failing the whole request.
 - Opened nights fix price, curve and room count; all rooms are recorded under `NightVault`.

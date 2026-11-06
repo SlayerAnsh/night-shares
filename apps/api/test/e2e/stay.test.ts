@@ -49,9 +49,31 @@ test("search, quote, lock, USDC booking, receipt, trips and verified check-in", 
     const receipt = await clients.stay.getReceipt({ tripId: trip?.id });
     expect(receipt.receipt?.walletAddress).toBe(user.walletAddress);
     expect(receipt.receipt?.trip).not.toHaveProperty("guestName");
-    const { token } = h.container.ports.verifications.issue({
-      userId: user.id,
+    for (const resourceId of [undefined, "wrong_resource"]) {
+      const request = await clients.identity.startVerifyAction({
+        action: "check_in",
+        resourceId,
+      });
+      const verified = await clients.identity.verifyAction({
+        action: "check_in",
+        requestId: request.requestId,
+        proof: { case: "mockProof", value: "mock:e2e:device" },
+      });
+      await expect(
+        clients.stay.checkIn({
+          tripId: trip?.id,
+          verificationToken: verified.verificationToken,
+        }),
+      ).rejects.toThrow("Verify your identity");
+    }
+    const request = await clients.identity.startVerifyAction({
       action: "check_in",
+      resourceId: trip?.id,
+    });
+    const { verificationToken: token } = await clients.identity.verifyAction({
+      action: "check_in",
+      requestId: request.requestId,
+      proof: { case: "mockProof", value: "mock:e2e:device" },
     });
     expect(
       (

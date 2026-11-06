@@ -1,7 +1,7 @@
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
 import type { ServiceImpl } from "@connectrpc/connect";
 import type { IdentityService } from "@night-shares/proto/identity/v1/identity_pb";
-import { requireUser } from "../../server/auth-context";
+import { optionalUser, requireUser } from "../../server/auth-context";
 import { fromAction, fromLevel, toUser } from "./mappers/identity";
 import { fromProof } from "./mappers/proof";
 import { getSession } from "./use-cases/session/get-session";
@@ -18,23 +18,33 @@ export function createIdentityHandler(cases: {
   verifyAction: ReturnType<typeof createVerifyAction>;
 }): ServiceImpl<typeof IdentityService> {
   return {
-    async startSignIn(req) {
-      const result = await cases.startSignIn(fromLevel(req.level));
+    async startSignIn(req, ctx) {
+      const result = await cases.startSignIn(
+        fromLevel(req.level),
+        req.sessionId || undefined,
+        optionalUser(ctx)?.id,
+      );
       return { ...result, expiresAt: timestampFromMs(result.expiresAt) };
     },
     async startVerifyAction(req, ctx) {
       const result = await cases.startVerifyAction(
         requireUser(ctx),
         fromAction(req.action),
+        req.resourceId,
       );
       return { ...result, expiresAt: timestampFromMs(result.expiresAt) };
     },
-    async completeSignIn(req) {
+    async completeSignIn(req, ctx) {
       const result = await cases.completeSignIn({
+        userId: optionalUser(ctx)?.id,
         requestId: req.requestId,
         proof: fromProof(req.proof),
       });
-      return { sessionToken: result.sessionToken, user: toUser(result.user) };
+      return {
+        sessionToken: result.sessionToken,
+        user: toUser(result.user),
+        sessionId: result.sessionId,
+      };
     },
     getSession(_req, ctx) {
       return { user: toUser(getSession(requireUser(ctx))) };

@@ -4,7 +4,11 @@
 export type VerifiedAction = "check_in" | "approve_agent_order";
 
 export interface VerificationStore {
-  issue(input: { userId: string; action: VerifiedAction }): {
+  issue(input: {
+    userId: string;
+    action: VerifiedAction;
+    resourceId?: string;
+  }): {
     token: string;
     expiresAt: number;
   };
@@ -14,5 +18,6 @@ export interface VerificationStore {
     token: string;
     userId: string;
     action: VerifiedAction;
+    resourceId?: string;
   }): boolean;
 }

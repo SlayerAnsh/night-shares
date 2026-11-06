@@ -29,6 +29,7 @@ service IdentityService {
 
 message StartSignInRequest {
   VerificationLevel level = 1;
+  string session_id = 2;
 }
 
 message StartSignInResponse {
@@ -39,6 +40,7 @@ message StartSignInResponse {
   string action = 5;
   string signal = 6;
   WorldIdMode mode = 7;
+  WorldIdRequest context = 8;
 }
 
 message CompleteSignInRequest {
@@ -48,12 +50,14 @@ message CompleteSignInRequest {
   oneof proof {
     string mock_proof = 3;
     WorldIdProof world_id = 4;
+    string idkit_result_json = 6;
   }
 }
 
 message CompleteSignInResponse {
   string session_token = 1;
   User user = 2;
+  string session_id = 3;
 }
 
 message GetSessionRequest {}
@@ -74,6 +78,7 @@ message VerifyActionRequest {
   oneof proof {
     string mock_proof = 3;
     WorldIdProof world_id = 4;
+    string idkit_result_json = 6;
   }
 }
 
@@ -82,7 +87,7 @@ message VerifyActionResponse {
   google.protobuf.Timestamp expires_at = 2;
 }
 
-// One fixed cloud action keeps the nullifier stable across purposes.
+// Enrollment uses a fixed action; sensitive actions use their own scope.
 enum WorldIdMode {
   WORLD_ID_MODE_UNSPECIFIED = 0;
   WORLD_ID_MODE_MOCK = 1;
@@ -98,6 +103,7 @@ message WorldIdProof {
 
 message StartVerifyActionRequest {
   string action = 1;
+  string resource_id = 2;
 }
 
 message StartVerifyActionResponse {
@@ -107,4 +113,19 @@ message StartVerifyActionResponse {
   string signal = 4;
   google.protobuf.Timestamp expires_at = 5;
   WorldIdMode mode = 6;
+  WorldIdRequest context = 7;
+}
+
+// JSON preserves the complete vendor result without discarding credential fields.
+message WorldIdRequest {
+  string rp_id = 1;
+  string nonce = 2;
+  int64 created_at = 3;
+  int64 expires_at = 4;
+  string signature = 5;
+  string session_id = 6;
+  string environment = 7;
+  bool allow_legacy = 8;
+  string credential = 9;
+  WorldIdRequest continuity = 10;
 }

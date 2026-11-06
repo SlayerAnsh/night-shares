@@ -42,3 +42,22 @@ test("a token expires after five minutes", () => {
     false,
   );
 });
+
+test("resource-bound tokens cannot authorize another order or an unbound consumer", () => {
+  const { store } = setup();
+  for (const resourceId of [undefined, "ord_other", "ord_1"]) {
+    const { token } = store.issue({
+      userId: "usr_1",
+      action: "approve_agent_order",
+      resourceId: "ord_1",
+    });
+    expect(
+      store.consume({
+        token,
+        userId: "usr_1",
+        action: "approve_agent_order",
+        resourceId,
+      }),
+    ).toBe(resourceId === "ord_1");
+  }
+});

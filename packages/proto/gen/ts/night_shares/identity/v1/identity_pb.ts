@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file night_shares/identity/v1/identity.proto.
  */
 export const file_night_shares_identity_v1_identity: GenFile = /*@__PURE__*/
-  fileDesc("CiduaWdodF9zaGFyZXMvaWRlbnRpdHkvdjEvaWRlbnRpdHkucHJvdG8SGG5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MSJQChJTdGFydFNpZ25JblJlcXVlc3QSOgoFbGV2ZWwYASABKA4yKy5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuVmVyaWZpY2F0aW9uTGV2ZWwi0gEKE1N0YXJ0U2lnbkluUmVzcG9uc2USEgoKcmVxdWVzdF9pZBgBIAEoCRISCgpxcl9wYXlsb2FkGAIgASgJEi4KCmV4cGlyZXNfYXQYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg4KBmFwcF9pZBgEIAEoCRIOCgZhY3Rpb24YBSABKAkSDgoGc2lnbmFsGAYgASgJEjMKBG1vZGUYByABKA4yJS5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuV29ybGRJZE1vZGUikwEKFUNvbXBsZXRlU2lnbkluUmVxdWVzdBISCgpyZXF1ZXN0X2lkGAEgASgJEhQKCm1vY2tfcHJvb2YYAyABKAlIABI6Cgh3b3JsZF9pZBgEIAEoCzImLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5Xb3JsZElkUHJvb2ZIAEIHCgVwcm9vZkoECAIQA1IFcHJvb2YiXQoWQ29tcGxldGVTaWduSW5SZXNwb25zZRIVCg1zZXNzaW9uX3Rva2VuGAEgASgJEiwKBHVzZXIYAiABKAsyHi5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuVXNlciITChFHZXRTZXNzaW9uUmVxdWVzdCJCChJHZXRTZXNzaW9uUmVzcG9uc2USLAoEdXNlchgBIAEoCzIeLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5Vc2VyIhAKDlNpZ25PdXRSZXF1ZXN0IhEKD1NpZ25PdXRSZXNwb25zZSKhAQoTVmVyaWZ5QWN0aW9uUmVxdWVzdBIOCgZhY3Rpb24YASABKAkSEgoKcmVxdWVzdF9pZBgFIAEoCRIUCgptb2NrX3Byb29mGAMgASgJSAASOgoId29ybGRfaWQYBCABKAsyJi5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuV29ybGRJZFByb29mSABCBwoFcHJvb2ZKBAgCEANSBXByb29mImIKFFZlcmlmeUFjdGlvblJlc3BvbnNlEhoKEnZlcmlmaWNhdGlvbl90b2tlbhgBIAEoCRIuCgpleHBpcmVzX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCJmCgxXb3JsZElkUHJvb2YSEwoLbWVya2xlX3Jvb3QYASABKAkSFgoObnVsbGlmaWVyX2hhc2gYAiABKAkSDQoFcHJvb2YYAyABKAkSGgoSdmVyaWZpY2F0aW9uX2xldmVsGAQgASgJIioKGFN0YXJ0VmVyaWZ5QWN0aW9uUmVxdWVzdBIOCgZhY3Rpb24YASABKAkixAEKGVN0YXJ0VmVyaWZ5QWN0aW9uUmVzcG9uc2USEgoKcmVxdWVzdF9pZBgBIAEoCRIOCgZhcHBfaWQYAiABKAkSDgoGYWN0aW9uGAMgASgJEg4KBnNpZ25hbBgEIAEoCRIuCgpleHBpcmVzX2F0GAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIzCgRtb2RlGAYgASgOMiUubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLldvcmxkSWRNb2RlKmAKC1dvcmxkSWRNb2RlEh0KGVdPUkxEX0lEX01PREVfVU5TUEVDSUZJRUQQABIWChJXT1JMRF9JRF9NT0RFX01PQ0sQARIaChZXT1JMRF9JRF9NT0RFX1dPUkxEX0lEEAIyzQUKD0lkZW50aXR5U2VydmljZRJwCgtTdGFydFNpZ25JbhIsLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5TdGFydFNpZ25JblJlcXVlc3QaLS5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuU3RhcnRTaWduSW5SZXNwb25zZSIEiLUYARJ5Cg5Db21wbGV0ZVNpZ25JbhIvLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5Db21wbGV0ZVNpZ25JblJlcXVlc3QaMC5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuQ29tcGxldGVTaWduSW5SZXNwb25zZSIEiLUYARJtCgpHZXRTZXNzaW9uEisubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLkdldFNlc3Npb25SZXF1ZXN0GiwubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLkdldFNlc3Npb25SZXNwb25zZSIEiLUYAhJkCgdTaWduT3V0EigubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlNpZ25PdXRSZXF1ZXN0GikubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlNpZ25PdXRSZXNwb25zZSIEiLUYAhKCAQoRU3RhcnRWZXJpZnlBY3Rpb24SMi5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuU3RhcnRWZXJpZnlBY3Rpb25SZXF1ZXN0GjMubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlN0YXJ0VmVyaWZ5QWN0aW9uUmVzcG9uc2UiBIi1GAIScwoMVmVyaWZ5QWN0aW9uEi0ubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlZlcmlmeUFjdGlvblJlcXVlc3QaLi5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuVmVyaWZ5QWN0aW9uUmVzcG9uc2UiBIi1GAJiBnByb3RvMw", [file_google_protobuf_timestamp, file_night_shares_auth_v1_access, file_night_shares_identity_v1_user]);
+  fileDesc("CiduaWdodF9zaGFyZXMvaWRlbnRpdHkvdjEvaWRlbnRpdHkucHJvdG8SGG5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MSJkChJTdGFydFNpZ25JblJlcXVlc3QSOgoFbGV2ZWwYASABKA4yKy5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuVmVyaWZpY2F0aW9uTGV2ZWwSEgoKc2Vzc2lvbl9pZBgCIAEoCSKNAgoTU3RhcnRTaWduSW5SZXNwb25zZRISCgpyZXF1ZXN0X2lkGAEgASgJEhIKCnFyX3BheWxvYWQYAiABKAkSLgoKZXhwaXJlc19hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASDgoGYXBwX2lkGAQgASgJEg4KBmFjdGlvbhgFIAEoCRIOCgZzaWduYWwYBiABKAkSMwoEbW9kZRgHIAEoDjIlLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5Xb3JsZElkTW9kZRI5Cgdjb250ZXh0GAggASgLMigubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLldvcmxkSWRSZXF1ZXN0IrABChVDb21wbGV0ZVNpZ25JblJlcXVlc3QSEgoKcmVxdWVzdF9pZBgBIAEoCRIUCgptb2NrX3Byb29mGAMgASgJSAASOgoId29ybGRfaWQYBCABKAsyJi5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuV29ybGRJZFByb29mSAASGwoRaWRraXRfcmVzdWx0X2pzb24YBiABKAlIAEIHCgVwcm9vZkoECAIQA1IFcHJvb2YicQoWQ29tcGxldGVTaWduSW5SZXNwb25zZRIVCg1zZXNzaW9uX3Rva2VuGAEgASgJEiwKBHVzZXIYAiABKAsyHi5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuVXNlchISCgpzZXNzaW9uX2lkGAMgASgJIhMKEUdldFNlc3Npb25SZXF1ZXN0IkIKEkdldFNlc3Npb25SZXNwb25zZRIsCgR1c2VyGAEgASgLMh4ubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlVzZXIiEAoOU2lnbk91dFJlcXVlc3QiEQoPU2lnbk91dFJlc3BvbnNlIr4BChNWZXJpZnlBY3Rpb25SZXF1ZXN0Eg4KBmFjdGlvbhgBIAEoCRISCgpyZXF1ZXN0X2lkGAUgASgJEhQKCm1vY2tfcHJvb2YYAyABKAlIABI6Cgh3b3JsZF9pZBgEIAEoCzImLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5Xb3JsZElkUHJvb2ZIABIbChFpZGtpdF9yZXN1bHRfanNvbhgGIAEoCUgAQgcKBXByb29mSgQIAhADUgVwcm9vZiJiChRWZXJpZnlBY3Rpb25SZXNwb25zZRIaChJ2ZXJpZmljYXRpb25fdG9rZW4YASABKAkSLgoKZXhwaXJlc19hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiZgoMV29ybGRJZFByb29mEhMKC21lcmtsZV9yb290GAEgASgJEhYKDm51bGxpZmllcl9oYXNoGAIgASgJEg0KBXByb29mGAMgASgJEhoKEnZlcmlmaWNhdGlvbl9sZXZlbBgEIAEoCSI/ChhTdGFydFZlcmlmeUFjdGlvblJlcXVlc3QSDgoGYWN0aW9uGAEgASgJEhMKC3Jlc291cmNlX2lkGAIgASgJIv8BChlTdGFydFZlcmlmeUFjdGlvblJlc3BvbnNlEhIKCnJlcXVlc3RfaWQYASABKAkSDgoGYXBwX2lkGAIgASgJEg4KBmFjdGlvbhgDIAEoCRIOCgZzaWduYWwYBCABKAkSLgoKZXhwaXJlc19hdBgFIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASMwoEbW9kZRgGIAEoDjIlLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5Xb3JsZElkTW9kZRI5Cgdjb250ZXh0GAcgASgLMigubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLldvcmxkSWRSZXF1ZXN0IvoBCg5Xb3JsZElkUmVxdWVzdBINCgVycF9pZBgBIAEoCRINCgVub25jZRgCIAEoCRISCgpjcmVhdGVkX2F0GAMgASgDEhIKCmV4cGlyZXNfYXQYBCABKAMSEQoJc2lnbmF0dXJlGAUgASgJEhIKCnNlc3Npb25faWQYBiABKAkSEwoLZW52aXJvbm1lbnQYByABKAkSFAoMYWxsb3dfbGVnYWN5GAggASgIEhIKCmNyZWRlbnRpYWwYCSABKAkSPAoKY29udGludWl0eRgKIAEoCzIoLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5Xb3JsZElkUmVxdWVzdCpgCgtXb3JsZElkTW9kZRIdChlXT1JMRF9JRF9NT0RFX1VOU1BFQ0lGSUVEEAASFgoSV09STERfSURfTU9ERV9NT0NLEAESGgoWV09STERfSURfTU9ERV9XT1JMRF9JRBACMs0FCg9JZGVudGl0eVNlcnZpY2UScAoLU3RhcnRTaWduSW4SLC5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuU3RhcnRTaWduSW5SZXF1ZXN0Gi0ubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlN0YXJ0U2lnbkluUmVzcG9uc2UiBIi1GAESeQoOQ29tcGxldGVTaWduSW4SLy5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuQ29tcGxldGVTaWduSW5SZXF1ZXN0GjAubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLkNvbXBsZXRlU2lnbkluUmVzcG9uc2UiBIi1GAESbQoKR2V0U2Vzc2lvbhIrLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5HZXRTZXNzaW9uUmVxdWVzdBosLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5HZXRTZXNzaW9uUmVzcG9uc2UiBIi1GAISZAoHU2lnbk91dBIoLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5TaWduT3V0UmVxdWVzdBopLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5TaWduT3V0UmVzcG9uc2UiBIi1GAISggEKEVN0YXJ0VmVyaWZ5QWN0aW9uEjIubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlN0YXJ0VmVyaWZ5QWN0aW9uUmVxdWVzdBozLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5TdGFydFZlcmlmeUFjdGlvblJlc3BvbnNlIgSItRgCEnMKDFZlcmlmeUFjdGlvbhItLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5WZXJpZnlBY3Rpb25SZXF1ZXN0Gi4ubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlZlcmlmeUFjdGlvblJlc3BvbnNlIgSItRgCYgZwcm90bzM", [file_google_protobuf_timestamp, file_night_shares_auth_v1_access, file_night_shares_identity_v1_user]);
 
 /**
  * @generated from message night_shares.identity.v1.StartSignInRequest
@@ -25,6 +25,11 @@ export type StartSignInRequest = Message<"night_shares.identity.v1.StartSignInRe
    * @generated from field: night_shares.identity.v1.VerificationLevel level = 1;
    */
   level: VerificationLevel;
+
+  /**
+   * @generated from field: string session_id = 2;
+   */
+  sessionId: string;
 };
 
 /**
@@ -72,6 +77,11 @@ export type StartSignInResponse = Message<"night_shares.identity.v1.StartSignInR
    * @generated from field: night_shares.identity.v1.WorldIdMode mode = 7;
    */
   mode: WorldIdMode;
+
+  /**
+   * @generated from field: night_shares.identity.v1.WorldIdRequest context = 8;
+   */
+  context?: WorldIdRequest | undefined;
 };
 
 /**
@@ -105,6 +115,12 @@ export type CompleteSignInRequest = Message<"night_shares.identity.v1.CompleteSi
      */
     value: WorldIdProof;
     case: "worldId";
+  } | {
+    /**
+     * @generated from field: string idkit_result_json = 6;
+     */
+    value: string;
+    case: "idkitResultJson";
   } | { case: undefined; value?: undefined };
 };
 
@@ -128,6 +144,11 @@ export type CompleteSignInResponse = Message<"night_shares.identity.v1.CompleteS
    * @generated from field: night_shares.identity.v1.User user = 2;
    */
   user?: User | undefined;
+
+  /**
+   * @generated from field: string session_id = 3;
+   */
+  sessionId: string;
 };
 
 /**
@@ -222,6 +243,12 @@ export type VerifyActionRequest = Message<"night_shares.identity.v1.VerifyAction
      */
     value: WorldIdProof;
     case: "worldId";
+  } | {
+    /**
+     * @generated from field: string idkit_result_json = 6;
+     */
+    value: string;
+    case: "idkitResultJson";
   } | { case: undefined; value?: undefined };
 };
 
@@ -294,6 +321,11 @@ export type StartVerifyActionRequest = Message<"night_shares.identity.v1.StartVe
    * @generated from field: string action = 1;
    */
   action: string;
+
+  /**
+   * @generated from field: string resource_id = 2;
+   */
+  resourceId: string;
 };
 
 /**
@@ -336,6 +368,11 @@ export type StartVerifyActionResponse = Message<"night_shares.identity.v1.StartV
    * @generated from field: night_shares.identity.v1.WorldIdMode mode = 6;
    */
   mode: WorldIdMode;
+
+  /**
+   * @generated from field: night_shares.identity.v1.WorldIdRequest context = 7;
+   */
+  context?: WorldIdRequest | undefined;
 };
 
 /**
@@ -346,7 +383,71 @@ export const StartVerifyActionResponseSchema: GenMessage<StartVerifyActionRespon
   messageDesc(file_night_shares_identity_v1_identity, 12);
 
 /**
- * One fixed cloud action keeps the nullifier stable across purposes.
+ * JSON preserves the complete vendor result without discarding credential fields.
+ *
+ * @generated from message night_shares.identity.v1.WorldIdRequest
+ */
+export type WorldIdRequest = Message<"night_shares.identity.v1.WorldIdRequest"> & {
+  /**
+   * @generated from field: string rp_id = 1;
+   */
+  rpId: string;
+
+  /**
+   * @generated from field: string nonce = 2;
+   */
+  nonce: string;
+
+  /**
+   * @generated from field: int64 created_at = 3;
+   */
+  createdAt: bigint;
+
+  /**
+   * @generated from field: int64 expires_at = 4;
+   */
+  expiresAt: bigint;
+
+  /**
+   * @generated from field: string signature = 5;
+   */
+  signature: string;
+
+  /**
+   * @generated from field: string session_id = 6;
+   */
+  sessionId: string;
+
+  /**
+   * @generated from field: string environment = 7;
+   */
+  environment: string;
+
+  /**
+   * @generated from field: bool allow_legacy = 8;
+   */
+  allowLegacy: boolean;
+
+  /**
+   * @generated from field: string credential = 9;
+   */
+  credential: string;
+
+  /**
+   * @generated from field: night_shares.identity.v1.WorldIdRequest continuity = 10;
+   */
+  continuity?: WorldIdRequest | undefined;
+};
+
+/**
+ * Describes the message night_shares.identity.v1.WorldIdRequest.
+ * Use `create(WorldIdRequestSchema)` to create a new message.
+ */
+export const WorldIdRequestSchema: GenMessage<WorldIdRequest> = /*@__PURE__*/
+  messageDesc(file_night_shares_identity_v1_identity, 13);
+
+/**
+ * Enrollment uses a fixed action; sensitive actions use their own scope.
  *
  * @generated from enum night_shares.identity.v1.WorldIdMode
  */

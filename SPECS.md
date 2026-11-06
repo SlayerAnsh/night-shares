@@ -75,7 +75,7 @@ Auth column: the `access` option on each RPC.
 | StartVerifyAction | DEVICE | Begin a purpose-bound World ID request for a sensitive action |
 | VerifyAction | DEVICE | Complete a fresh check for check-in or an agent order over 1,000 USDC. Out: verification token |
 
-`humanId` is the per app nullifier from World ID. Night Shares never receives a name or photo. Sign in creates or links a USDC wallet through `WalletProvider`.
+`humanId` is the normalized decimal uniqueness nullifier of the fixed World ID enrollment action, never a session ID or session nullifier. Night Shares never receives a name or photo. Sign in creates or links a USDC wallet through `WalletProvider`.
 
 ### catalog.v1.CatalogService
 
@@ -184,7 +184,7 @@ apps/api/test/e2e/        full flows through the generated Connect client
 | --- | --- | --- |
 | `Clock` | settable time | system clock |
 | `IdGenerator` | counter based, prefixed | random ids |
-| `IdentityVerifier` | `mock:<seed>:orb` or `mock:<seed>:device` proofs with single-use requests and a stable subject per seed | World ID cloud verify available through `WORLD_ID_MODE=world-id` |
+| `IdentityVerifier` | `mock:<seed>:orb` or `mock:<seed>:device` proofs with single-use requests and a stable subject per seed | World ID cloud verify available through `WORLD_ID_MODE=cloud` |
 | `WalletProvider` | creates a fake address, keeps mock balances in SQLite, seeds 12,480 USDC | Arc USDC |
 | `Onramp` | card charge always succeeds, converts 1:1 | card onramp |
 | `ChannelManager` | returns room types and usual rates from seed, accepts reservation push and returns a hotel reference | Mews, Cloudbeds, SiteMinder |
@@ -193,7 +193,31 @@ apps/api/test/e2e/        full flows through the generated Connect client
 | `VerificationStore` | One-time SQLite action tokens, five-minute expiry, bound to user and action | SQLite |
 | `BookingReport` | Pollable mock reports with stable IDs | Attester or CRE adapter later |
 
-The identity port separates `subject` (used as `humanId`) from `nullifier`. The cloud adapter uses one fixed World ID action for a stable human identifier and returns its verified nullifier in both fields. Each sign-in or sensitive check binds a `purpose:nonce` signal to a single-use SQLite request. Structured proofs, expected verification level, action and returned nullifier are checked. The web uses IDKit when the API selects real mode; mock remains the default.
+The identity port separates the enrollment `subject` (used as `humanId`) from each proof's `nullifier`. IDKit 4.6.0 requests use backend-signed RP contexts, five-minute single-use request nonces, and complete-result JSON transport. The cloud adapter forwards each complete IDKit result unchanged to `POST /api/v4/verify/{rp_id}` and checks the configured environment, nonce, action, credential and signal. Mock remains the default and preserves existing seeded identifiers, with additional session and action-nullifier semantics.
+
+Enrollment uses the fixed `WORLD_ID_ENROLL_ACTION` (default `night-shares-enroll`) with `session_id: "create"`. Verified 256-bit nullifiers are stored as canonical unsigned decimal strings. Re-enrollment of an existing nullifier recovers the same human and adds the newly verified session to linked sessions; it never replaces previous sessions. Returning login proves the saved `session_id` using a fresh signed context without an action. A session ID is a continuity handle, not a uniqueness key. Session nullifier pairs are replay protection only. Browser storage retains a session handle per tier; application bearer tokens remain httpOnly cookies.
+
+World documentation guarantees action-scoped uniqueness for the same human, app and action, but does not promise identical nullifiers across Selfie and Orb credentials. The implementation does not assume equality. An authenticated Selfie account can link a new Orb enrollment with the same enrollment action. Its canonical `humanId` then becomes the Orb enrollment nullifier; user ID, wallet, linked sessions, aliases and walk bans are retained. This is a credential upgrade, not a login or session-reset identity rotation. Re-login and session recovery never change the canonical key. Conflicting existing Orb accounts cannot be silently merged. Trade requires an Orb session, so its 30% cap uses the Orb canonical key. A Selfie proof never creates an Orb application session merely because the account has an Orb alias.
+
+Sensitive action requests carry a booking or order `resource_id`, yielding `check_in:<bookingId>` or `approve_agent_order:<orderId>`. SQLite uniquely stores `(action, nullifier)`. Because action nullifiers cannot identify an account, cloud action verification additionally requires a proof of the account's saved World ID session. Both complete results are verified server-side before issuing a one-time application token. The action proof establishes action uniqueness; the session proof authorizes the signed-in account. The two proofs do not establish cross-credential nullifier equality. Cloud requests without a resource ID fail closed. Callers and token consumers must carry the same resource ID for end-to-end resource binding; integration of those out-of-scope consumers remains required.
+
+`WORLD_ID_ALLOW_LEGACY=true` is a temporary hackathon policy for Orb uniqueness actions. Session creation, enrollment with session creation, and returning login require v4 and always disable legacy proofs. The simulator uses `WORLD_ID_ENVIRONMENT=staging`; production must explicitly select `production`. Deprecated `deviceLegacy` is never requested.
+
+### World ID credential choice by trust moment
+
+Stay booking uses ACCESS_DEVICE mapped to `selfieCheck`. Camera liveness and facial similarity provide medium assurance with low friction, sufficient for a booking flow without tradable ownership. This is not Orb-level global uniqueness.
+
+Reception tap uses ACCESS_DEVICE mapped to `selfieCheck`. The authenticated guest identity combines with the separate reception tag proof of presence; requiring Orb would add friction without proving physical presence at the hotel.
+
+Walk reporting uses ACCESS_DEVICE mapped to `selfieCheck`. Booking ownership and a verified reception tap constrain reports; false-report bans follow the canonical enrollment identity through session resets and credential upgrades. Selfie remains medium assurance, so the stronger one-human guarantee of an Orb-backed ban applies once the identity has Orb enrollment.
+
+Trading uses ACCESS_ORB mapped to `proofOfHuman`. Orb-backed unique humanity is necessary for the 30% per-human cap and prevents new sessions from creating new trading identities.
+
+Host ownership uses ACCESS_ORB mapped to `proofOfHuman`. Orb-backed identity is appropriate for control of inventory and durable suspension after walk incidents. Host ownership remains linked to the same user and canonical human across session recovery.
+
+Agent approvals over 1,000 USDC use ACCESS_ORB mapped to `proofOfHuman`, plus per-order uniqueness and session continuity. The amount and delegated trading authority justify a fresh check with the strongest required identity assurance. Orb sessions also satisfy ACCESS_DEVICE; proto enum names remain unchanged.
+
+Sources: [IDKit integration](https://docs.world.org/world-id/idkit/integrate), [session proofs](https://docs.world.org/world-id/idkit/session-proofs), [credential configuration](https://docs.world.org/world-id/idkit/credentials), and [error codes](https://docs.world.org/world-id/idkit/error-codes).
 
 ### Money
 

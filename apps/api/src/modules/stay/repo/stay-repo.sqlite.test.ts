@@ -65,6 +65,7 @@ test("quotes, locks, checked-in trips, receipts and saves survive a file databas
     const { token } = f.ports.verifications.issue({
       userId: user.id,
       action: "check_in",
+      resourceId: trip.id,
     });
     f.cases.checkIn(trip.id, token, user.id);
     f.cases.toggleSave("prop_velana", user.id);

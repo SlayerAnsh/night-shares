@@ -8,12 +8,18 @@ export async function completeSignIn(
   requestId: string,
   proof: CompleteSignInRequest["proof"],
 ) {
-  const { client } = await identityServer();
-  const result = await client.completeSignIn({ requestId, proof });
+  const { client, options } = await identityServer();
+  const result = await client
+    .completeSignIn({ requestId, proof }, options)
+    .catch((error: unknown) => {
+      if (error instanceof ConnectError) return { error: error.rawMessage };
+      return { error: "Unable to verify World ID. Please retry." };
+    });
+  if ("error" in result) return result;
   if (!result.user || !result.sessionToken)
     throw new Error("Sign in returned no session.");
   (await cookies()).set({ ...sessionCookie, value: result.sessionToken });
-  return result.user;
+  return { user: result.user, sessionId: result.sessionId };
 }
 export async function signOut() {
   const { client, options } = await identityServer();

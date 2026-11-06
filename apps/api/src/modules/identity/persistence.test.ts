@@ -58,7 +58,10 @@ test("sign-in preserves user, Orb upgrade, wallet and sessions across restarts",
     expect(third.repo.get(orb.user.humanId)).toEqual(orb.user);
     expect(third.sessions.get(orb.sessionToken)).toEqual(orb.user);
     const relink = spyOn(third.walletProvider, "linkWallet");
-    expect((await third.signIn("device")).user).toEqual(orb.user);
+    expect((await third.signIn("device")).user).toEqual({
+      ...orb.user,
+      level: "device",
+    });
     expect(relink).not.toHaveBeenCalled();
   } finally {
     db.close();

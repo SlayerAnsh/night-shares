@@ -36,7 +36,7 @@ function setup() {
     clock,
   };
 }
-test("sign-in upgrades Device to Orb and never downgrades or relinks a wallet", async () => {
+test("sign-in links tiers without granting Orb access to a Selfie session", async () => {
   const s = setup(),
     link = spyOn(s.walletProvider, "linkWallet");
   const device = await s.signIn("device"),
@@ -44,7 +44,7 @@ test("sign-in upgrades Device to Orb and never downgrades or relinks a wallet", 
     again = await s.signIn("device");
   expect(device.user.level).toBe("device");
   expect(orb.user.level).toBe("orb");
-  expect(again.user).toEqual(orb.user);
+  expect(again.user).toEqual({ ...orb.user, level: "device" });
   expect(orb.user.id).toBe(device.user.id);
   expect(link).toHaveBeenCalledTimes(1);
   expect(s.sessions.get(orb.sessionToken)).toEqual(orb.user);
@@ -55,7 +55,7 @@ test("concurrent sign-ins share one user and wallet", async () => {
   const results = await Promise.all([s.signIn("orb"), s.signIn("device")]);
   expect(results[0]?.user.id).toBe(results[1]?.user.id);
   expect(link).toHaveBeenCalledTimes(1);
-  expect((await s.signIn("device")).user.level).toBe("orb");
+  expect((await s.signIn("device")).user.level).toBe("device");
 });
 test("invalid, expired and replayed proofs cannot create sessions", async () => {
   const s = setup();

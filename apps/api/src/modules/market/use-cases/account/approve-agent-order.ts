@@ -19,6 +19,7 @@ export async function approveAgentOrder(
       token,
       userId: user.id,
       action: "approve_agent_order",
+      resourceId: id,
     })
   )
     throw new DomainError(

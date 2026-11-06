@@ -48,10 +48,15 @@ API settings come from `apps/api/src/config/load-config.ts` and `server-config.t
 | `TODAY` | unset | Optional valid `YYYY-MM-DD`; overrides the system clock's calendar date, not its timestamp, or initializes mock time |
 | `IDS` | `random` | `random` or deterministic `sequential` IDs |
 | `JOB_INTERVAL_MS` | `60000` | Positive scheduler interval in milliseconds, at most 2147483647 |
-| `WORLD_ID_MODE` | `mock` | `mock` or `world-id`, independent of `ADAPTERS` |
-| `WORLD_ID_APP_ID` | empty | Required in `world-id` mode, matching `app_[a-zA-Z0-9_]+` |
-| `WORLD_ID_ACTION` | `night-shares-human` | Nonempty fixed action for sign-in and sensitive checks |
-| `WORLD_ID_VERIFY_URL` | `https://developer.world.org/api/v2/verify/{app_id}` | HTTPS verifier endpoint without embedded credentials |
+| `WORLD_ID_MODE` | `mock` | `mock` or `cloud`; `world-id` remains a compatibility alias |
+| `WORLD_ID_APP_ID` | empty | Developer Portal app ID, required in cloud mode |
+| `WORLD_ID_RP_ID` | empty | Registered `rp_...` ID, required in cloud mode |
+| `WORLD_ID_SIGNING_KEY` | empty | Server-only 32-byte hex signing key, required in cloud mode |
+| `WORLD_ID_ENROLL_ACTION` | `night-shares-enroll` | Fixed enrollment action. Changing it changes identity keys; do not rotate it casually |
+| `WORLD_ID_ENVIRONMENT` | `staging` | `staging` for the Simulator or `production`; verified response must match |
+| `WORLD_ID_ALLOW_LEGACY` | `true` | Temporary v3 Orb fallback for uniqueness actions; enrollment and session proofs always require v4 |
+| `WORLD_ID_DEVICE_CREDENTIAL` | `selfieCheck` | `selfieCheck` or stricter `proofOfHuman`; ORB always requires `proofOfHuman` |
+| `WORLD_ID_VERIFY_URL` | `https://developer.world.org/api/v4/verify/{rp_id}` | HTTPS endpoint receiving each complete IDKit result unchanged |
 | `LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` or `silent` |
 | `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated exact HTTP(S) origins; no wildcard |
 | `TRUST_PROXY` | `false` | Enable forwarded address handling only for trusted socket peers |

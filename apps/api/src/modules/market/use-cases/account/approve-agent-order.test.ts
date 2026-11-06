@@ -5,7 +5,7 @@ import { fundFixtureAgent } from "../agent/testing";
 import { approveAgentOrder } from "./approve-agent-order";
 import { createAgentOrder } from "./create-agent-order";
 
-test("large order needs a user-bound fresh token and executes only once", async () => {
+test("large order needs a user- and order-bound fresh token and executes only once", async () => {
   const d = await fixture();
   await fundFixtureAgent(d);
   d.key = "prop_velana:rt_velana_0:2026-12-20";
@@ -16,6 +16,7 @@ test("large order needs a user-bound fresh token and executes only once", async 
   const wrong = d.ports.verifications.issue({
     userId: "other",
     action: "approve_agent_order",
+    resourceId: order.id,
   });
   await expect(
     approveAgentOrder(d, d.user, order.id, wrong.token),
@@ -23,6 +24,7 @@ test("large order needs a user-bound fresh token and executes only once", async 
   const token = d.ports.verifications.issue({
     userId: d.user.id,
     action: "approve_agent_order",
+    resourceId: order.id,
   }).token;
   const response = await approveAgentOrder(d, d.user, order.id, token);
   expect(response.order.status).toBe(AgentOrderStatus.EXECUTED);
@@ -31,3 +33,24 @@ test("large order needs a user-bound fresh token and executes only once", async 
     "already executed",
   );
 });
+
+for (const resourceId of [undefined, "", "ord_other"]) {
+  test(`approval rejects a token for resource ${String(resourceId)}`, async () => {
+    const d = await fixture();
+    await fundFixtureAgent(d);
+    d.key = "prop_velana:rt_velana_0:2026-12-20";
+    const { order } = await createAgentOrder(d, d.user, d.key, 5, 10000000000n);
+    const before = structuredClone(order);
+    const inventory = d.ports.inventory.get(d.key);
+    const { token } = d.ports.verifications.issue({
+      userId: d.user.id,
+      action: "approve_agent_order",
+      resourceId,
+    });
+    await expect(approveAgentOrder(d, d.user, order.id, token)).rejects.toThrow(
+      "Fresh World ID",
+    );
+    expect(d.repo.account(d.user.humanId).orders.get(order.id)).toEqual(before);
+    expect(d.ports.inventory.get(d.key)).toEqual(inventory);
+  });
+}

@@ -56,6 +56,7 @@ export function useTripActions(tripId: string) {
     window.localStorage.setItem("ns-stay-checkin-seed", seed);
     const result = await verify.mutateAsync({
       action: "check_in",
+      resourceId: tripId,
       proof: `mock:${seed}:device`,
     });
     await check.mutateAsync({

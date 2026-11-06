@@ -14,6 +14,7 @@ test("verifies the requested scope and issues an expiring one-time token", async
   const verifyProof = mock(async () => ({
     subject: "alice",
     nullifier: "alice-check-in",
+    resourceId: "resource_1",
     level: "device" as const,
   }));
   const identityVerifier: IdentityVerifier = {
@@ -36,10 +37,20 @@ test("verifies the requested scope and issues an expiring one-time token", async
     });
     expect(result.expiresAt).toBe(301000);
     expect(
-      verifications.consume({ token: result.token, userId: user.id, action }),
+      verifications.consume({
+        token: result.token,
+        userId: user.id,
+        action,
+        resourceId: "resource_1",
+      }),
     ).toBe(true);
     expect(
-      verifications.consume({ token: result.token, userId: user.id, action }),
+      verifications.consume({
+        token: result.token,
+        userId: user.id,
+        action,
+        resourceId: "resource_1",
+      }),
     ).toBe(false);
   }
 });

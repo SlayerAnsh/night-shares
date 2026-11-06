@@ -28,7 +28,12 @@ export function useLogin(need: AccessLevel) {
     setStage("starting");
     setError("");
     try {
-      setRequest(await worldId.start(need));
+      setRequest(
+        await worldId.start(
+          need,
+          localStorage.getItem(`world-id-session:${need}`) ?? undefined,
+        ),
+      );
       setStage("scan");
     } catch (error) {
       setError(
@@ -37,17 +42,26 @@ export function useLogin(need: AccessLevel) {
       setStage("intro");
     }
   }
-  async function scan() {
+  async function scan(outcome: "success" | "cancel" | "reject" = "success") {
     if (!request) return;
     setStage("verifying");
     setError("");
     try {
-      const submit = (proof: CompleteSignInRequest["proof"]) =>
-        completeSignIn(request.requestId, proof);
+      const submit = async (proof: CompleteSignInRequest["proof"]) => {
+        const result = await completeSignIn(request.requestId, proof);
+        if ("error" in result) throw new Error(result.error);
+        if (result.sessionId)
+          localStorage.setItem(`world-id-session:${need}`, result.sessionId);
+        return result;
+      };
       if (request.mode === WorldIdMode.WORLD_ID) {
         await verifyWithIdkit(request, need, submit);
       } else if (request.mode === WorldIdMode.MOCK) {
-        await submit({ case: "mockProof", value: `mock:${seed}:${need}` });
+        await submit({
+          case: "mockProof",
+          value:
+            outcome === "success" ? `mock:${seed}:${need}` : `mock:${outcome}`,
+        });
       } else throw new Error("Unsupported World ID mode.");
       await session.refresh();
       setStage("success");
@@ -64,6 +78,8 @@ export function useLogin(need: AccessLevel) {
     setError("");
     try {
       await signOut();
+      localStorage.removeItem("world-id-session:device");
+      localStorage.removeItem("world-id-session:orb");
       await session.refresh();
       setRequest(null);
       setStage("intro");
@@ -87,5 +103,11 @@ export function useLogin(need: AccessLevel) {
     start,
     scan,
     switchAccount,
+    cancel: () => scan("cancel"),
+    reject: () => scan("reject"),
+    recover: async () => {
+      localStorage.removeItem(`world-id-session:${need}`);
+      await start();
+    },
   };
 }

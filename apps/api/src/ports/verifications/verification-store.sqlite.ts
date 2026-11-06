@@ -14,28 +14,34 @@ export function createSqliteVerificationStore({
   clock: Clock;
 }): VerificationStore {
   return {
-    issue({ userId, action }) {
+    issue({ userId, action, resourceId }) {
       const token = randomBytes(32).toString("base64url");
       const expiresAt = clock.now() + 5 * 60000;
       db.query(
-        "INSERT INTO verifications (token_hash, user_id, action, expires_at) VALUES (?, ?, ?, ?)",
-      ).run(hash(token), userId, action, expiresAt);
+        "INSERT INTO verifications (token_hash, user_id, action, expires_at, resource_id) VALUES (?, ?, ?, ?, ?)",
+      ).run(hash(token), userId, action, expiresAt, resourceId ?? "");
       return { token, expiresAt };
     },
-    consume({ token, userId, action }) {
+    consume({ token, userId, action, resourceId }) {
       return transaction(db, () => {
         const row = db
           .query<
-            { user_id: string; action: string; expires_at: bigint },
+            {
+              user_id: string;
+              action: string;
+              expires_at: bigint;
+              resource_id: string;
+            },
             [string]
           >(
-            "UPDATE verifications SET consumed = 1 WHERE token_hash = ? AND consumed = 0 RETURNING user_id, action, expires_at",
+            "UPDATE verifications SET consumed = 1 WHERE token_hash = ? AND consumed = 0 RETURNING user_id, action, expires_at, resource_id",
           )
           .get(hash(token));
         return (
           !!row &&
           row.user_id === userId &&
           row.action === action &&
+          row.resource_id === (resourceId ?? "") &&
           row.expires_at > clock.now()
         );
       });

@@ -18,7 +18,7 @@ test("action starts bind the signed-in user, purpose and required level", async 
   const start = createStartVerifyAction({ identityVerifier });
   for (const action of ["check_in", "approve_agent_order"] as const) {
     const request = await start(user, action);
-    expect(request.action).toBe("night-shares-human");
+    expect(request.action.startsWith(`${action}:`)).toBe(true);
     expect(request.signal.startsWith(`${action}:`)).toBe(true);
     const verifying = identityVerifier.verifyProof({
       requestId: request.requestId,

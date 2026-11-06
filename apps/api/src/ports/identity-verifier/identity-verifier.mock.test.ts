@@ -27,7 +27,9 @@ test("one action keeps the subject stable and every purpose requires a fresh req
     userId: "usr_alice",
     requestId: checkIn.requestId,
   };
-  expect(await verifier.verifyProof(input)).toEqual(first);
+  const action = await verifier.verifyProof(input);
+  expect(action.subject).toBe(first.subject);
+  expect(action.nullifier).not.toBe(first.nullifier);
   await expect(verifier.verifyProof(input)).rejects.toMatchObject({
     code: "UNAUTHENTICATED",
   });
@@ -65,4 +67,28 @@ test("failed proof burns its request and an Orb request rejects Device", async (
       action: "sign_in",
     }),
   ).rejects.toThrow();
+});
+
+test("mock cancellation and rejection consume requests without authenticating", async () => {
+  const verifier = createMockIdentityVerifier({
+    clock: createMockClock(0),
+    ids: createMockIdGenerator(),
+  });
+  for (const outcome of ["cancel", "reject"]) {
+    const request = await verifier.startRequest("device");
+    await expect(
+      verifier.verifyProof({
+        requestId: request.requestId,
+        action: "sign_in",
+        proof: `mock:${outcome}`,
+      }),
+    ).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
+    await expect(
+      verifier.verifyProof({
+        requestId: request.requestId,
+        action: "sign_in",
+        proof: "mock:alice:device",
+      }),
+    ).rejects.toThrow();
+  }
 });
