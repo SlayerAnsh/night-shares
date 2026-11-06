@@ -1,0 +1,45 @@
+version: v2
+clean: true
+plugins:
+  - local: protoc-gen-es
+    out: gen/ts
+    opt: target=ts
+  - local: protoc-gen-connect-query
+    out: gen/ts
+    opt: target=ts
+  - remote: buf.build/community/sudorandom-connect-openapi:v0.25.7
+    out: gen/openapi
+    opt:
+      - path=identity.openapi.yaml
+      - services=night_shares.identity.v1.IdentityService
+      - trim-unused-types
+  - remote: buf.build/community/sudorandom-connect-openapi:v0.25.7
+    out: gen/openapi
+    opt:
+      - path=catalog.openapi.yaml
+      - services=night_shares.catalog.v1.CatalogService
+      - trim-unused-types
+  - remote: buf.build/community/sudorandom-connect-openapi:v0.25.7
+    out: gen/openapi
+    opt:
+      - path=stay.openapi.yaml
+      - services=night_shares.stay.v1.StayService
+      - trim-unused-types
+  - remote: buf.build/community/sudorandom-connect-openapi:v0.25.7
+    out: gen/openapi
+    opt:
+      - path=market.openapi.yaml
+      - services=night_shares.market.v1.MarketService
+      - trim-unused-types
+  - remote: buf.build/community/sudorandom-connect-openapi:v0.25.7
+    out: gen/openapi
+    opt:
+      - path=host.openapi.yaml
+      - services=night_shares.host.v1.HostService
+      - trim-unused-types
+  - remote: buf.build/community/sudorandom-connect-openapi:v0.25.7
+    out: gen/openapi
+    opt:
+      - path=wallet.openapi.yaml
+      - services=night_shares.wallet.v1.WalletService
+      - trim-unused-types

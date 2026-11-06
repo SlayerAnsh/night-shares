@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package night_shares.catalog.v1;
+
+import "night_shares/auth/v1/access.proto";
+import "night_shares/catalog/v1/property.proto";
+
+service CatalogService {
+  rpc ListDestinations(ListDestinationsRequest) returns (ListDestinationsResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+  rpc SearchStays(SearchStaysRequest) returns (SearchStaysResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+  rpc GetProperty(GetPropertyRequest) returns (GetPropertyResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+}
+
+message ListDestinationsRequest {
+  string text = 1;
+}
+
+message ListDestinationsResponse {
+  repeated Destination destinations = 1;
+}
+
+message SearchStaysRequest {
+  string destination = 1;
+  string type = 2;
+  string sort = 3;
+  string check_in = 4;
+  string check_out = 5;
+  int32 adults = 6;
+  int32 kids = 7;
+  int32 rooms = 8;
+}
+
+message SearchStaysResponse {
+  repeated StayCard stays = 1;
+}
+
+message GetPropertyRequest {
+  string property_id = 1;
+}
+
+message GetPropertyResponse {
+  night_shares.catalog.v1.Property property = 1;
+}

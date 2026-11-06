@@ -1,0 +1,893 @@
+openapi: 3.1.0
+info: {}
+paths:
+  /night_shares.stay.v1.StayService/CheckIn:
+    post:
+      tags:
+        - night_shares.stay.v1.StayService
+      summary: CheckIn
+      operationId: night_shares.stay.v1.StayService.CheckIn
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.stay.v1.CheckInRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.stay.v1.CheckInResponse'
+  /night_shares.stay.v1.StayService/CreateBooking:
+    post:
+      tags:
+        - night_shares.stay.v1.StayService
+      summary: CreateBooking
+      operationId: night_shares.stay.v1.StayService.CreateBooking
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.stay.v1.CreateBookingRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.stay.v1.CreateBookingResponse'
+  /night_shares.stay.v1.StayService/GetPriceCalendar:
+    post:
+      tags:
+        - night_shares.stay.v1.StayService
+      summary: GetPriceCalendar
+      operationId: night_shares.stay.v1.StayService.GetPriceCalendar
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.stay.v1.GetPriceCalendarRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.stay.v1.GetPriceCalendarResponse'
+  /night_shares.stay.v1.StayService/GetReceipt:
+    post:
+      tags:
+        - night_shares.stay.v1.StayService
+      summary: GetReceipt
+      operationId: night_shares.stay.v1.StayService.GetReceipt
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.stay.v1.GetReceiptRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.stay.v1.GetReceiptResponse'
+  /night_shares.stay.v1.StayService/ListSaves:
+    post:
+      tags:
+        - night_shares.stay.v1.StayService
+      summary: ListSaves
+      operationId: night_shares.stay.v1.StayService.ListSaves
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.stay.v1.ListSavesRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.stay.v1.ListSavesResponse'
+  /night_shares.stay.v1.StayService/ListTrips:
+    post:
+      tags:
+        - night_shares.stay.v1.StayService
+      summary: ListTrips
+      operationId: night_shares.stay.v1.StayService.ListTrips
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.stay.v1.ListTripsRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.stay.v1.ListTripsResponse'
+  /night_shares.stay.v1.StayService/LockQuote:
+    post:
+      tags:
+        - night_shares.stay.v1.StayService
+      summary: LockQuote
+      operationId: night_shares.stay.v1.StayService.LockQuote
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.stay.v1.LockQuoteRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.stay.v1.LockQuoteResponse'
+  /night_shares.stay.v1.StayService/QuoteStay:
+    post:
+      tags:
+        - night_shares.stay.v1.StayService
+      summary: QuoteStay
+      operationId: night_shares.stay.v1.StayService.QuoteStay
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.stay.v1.QuoteStayRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.stay.v1.QuoteStayResponse'
+  /night_shares.stay.v1.StayService/ToggleSave:
+    post:
+      tags:
+        - night_shares.stay.v1.StayService
+      summary: ToggleSave
+      operationId: night_shares.stay.v1.StayService.ToggleSave
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.stay.v1.ToggleSaveRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.stay.v1.ToggleSaveResponse'
+components:
+  schemas:
+    connect-protocol-version:
+      type: number
+      title: Connect-Protocol-Version
+      enum:
+        - 1
+      description: Define the version of the Connect protocol
+      const: 1
+    connect-timeout-header:
+      type: number
+      title: Connect-Timeout-Ms
+      description: Define the timeout, in ms
+    connect.error:
+      type: object
+      properties:
+        code:
+          type: string
+          examples:
+            - not_found
+          enum:
+            - canceled
+            - unknown
+            - invalid_argument
+            - deadline_exceeded
+            - not_found
+            - already_exists
+            - permission_denied
+            - resource_exhausted
+            - failed_precondition
+            - aborted
+            - out_of_range
+            - unimplemented
+            - internal
+            - unavailable
+            - data_loss
+            - unauthenticated
+          description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+        message:
+          type: string
+          description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/connect.error_details.Any'
+          description: A list of messages that carry the error details. There is no limit on the number of messages.
+      title: Connect Error
+      additionalProperties: true
+      description: 'Error type returned by Connect: https://connectrpc.com/docs/go/errors/#http-representation'
+    connect.error_details.Any:
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'A URL that acts as a globally unique identifier for the type of the serialized message. For example: `type.googleapis.com/google.rpc.ErrorInfo`. This is used to determine the schema of the data in the `value` field and is the discriminator for the `debug` field.'
+        value:
+          type: string
+          format: binary
+          description: The Protobuf message, serialized as bytes and base64-encoded. The specific message type is identified by the `type` field.
+        debug:
+          oneOf:
+            - type: object
+              title: Any
+              additionalProperties: true
+              description: Detailed error information.
+          discriminator:
+            propertyName: type
+          title: Debug
+          description: Deserialized error detail payload. The 'type' field indicates the schema. This field is for easier debugging and should not be relied upon for application logic.
+      additionalProperties: true
+      description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message, with an additional debug field for ConnectRPC error details.
+    google.protobuf.Timestamp:
+      type: string
+      examples:
+        - "2023-01-15T01:30:15.01Z"
+        - "2024-12-25T12:00:00Z"
+      format: date-time
+      description: |-
+        A Timestamp represents a point in time independent of any time zone or local
+         calendar, encoded as a count of seconds and fractions of seconds at
+         nanosecond resolution. The count is relative to an epoch at UTC midnight on
+         January 1, 1970, in the proleptic Gregorian calendar which extends the
+         Gregorian calendar backwards to year one.
+
+         All minutes are 60 seconds long. Leap seconds are "smeared" so that no leap
+         second table is needed for interpretation, using a [24-hour linear
+         smear](https://developers.google.com/time/smear).
+
+         The range is from 0001-01-01T00:00:00Z to 9999-12-31T23:59:59.999999999Z. By
+         restricting to that range, we ensure that we can convert to and from [RFC
+         3339](https://www.ietf.org/rfc/rfc3339.txt) date strings.
+
+         # Examples
+
+         Example 1: Compute Timestamp from POSIX `time()`.
+
+             Timestamp timestamp;
+             timestamp.set_seconds(time(NULL));
+             timestamp.set_nanos(0);
+
+         Example 2: Compute Timestamp from POSIX `gettimeofday()`.
+
+             struct timeval tv;
+             gettimeofday(&tv, NULL);
+
+             Timestamp timestamp;
+             timestamp.set_seconds(tv.tv_sec);
+             timestamp.set_nanos(tv.tv_usec * 1000);
+
+         Example 3: Compute Timestamp from Win32 `GetSystemTimeAsFileTime()`.
+
+             FILETIME ft;
+             GetSystemTimeAsFileTime(&ft);
+             UINT64 ticks = (((UINT64)ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
+
+             // A Windows tick is 100 nanoseconds. Windows epoch 1601-01-01T00:00:00Z
+             // is 11644473600 seconds before Unix epoch 1970-01-01T00:00:00Z.
+             Timestamp timestamp;
+             timestamp.set_seconds((INT64) ((ticks / 10000000) - 11644473600LL));
+             timestamp.set_nanos((INT32) ((ticks % 10000000) * 100));
+
+         Example 4: Compute Timestamp from Java `System.currentTimeMillis()`.
+
+             long millis = System.currentTimeMillis();
+
+             Timestamp timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)
+                 .setNanos((int) ((millis % 1000) * 1000000)).build();
+
+         Example 5: Compute Timestamp from Java `Instant.now()`.
+
+             Instant now = Instant.now();
+
+             Timestamp timestamp =
+                 Timestamp.newBuilder().setSeconds(now.getEpochSecond())
+                     .setNanos(now.getNano()).build();
+
+         Example 6: Compute Timestamp from current time in Python.
+
+             timestamp = Timestamp()
+             timestamp.GetCurrentTime()
+
+         # JSON Mapping
+
+         In JSON format, the Timestamp type is encoded as a string in the
+         [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) format. That is, the
+         format is "{year}-{month}-{day}T{hour}:{min}:{sec}[.{frac_sec}]Z"
+         where {year} is always expressed using four digits while {month}, {day},
+         {hour}, {min}, and {sec} are zero-padded to two digits each. The fractional
+         seconds, which can go up to 9 digits (i.e. up to 1 nanosecond resolution),
+         are optional. The "Z" suffix indicates the timezone ("UTC"); the timezone
+         is required. A proto3 JSON serializer should always use UTC (as indicated by
+         "Z") when printing the Timestamp type and a proto3 JSON parser should be
+         able to accept both UTC and other timezones (as indicated by an offset).
+
+         For example, "2017-01-15T01:30:15.01Z" encodes 15.01 seconds past
+         01:30 UTC on January 15, 2017.
+
+         In JavaScript, one can convert a Date object to this format using the
+         standard
+         [toISOString()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString)
+         method. In Python, a standard `datetime.datetime` object can be converted
+         to this format using
+         [`strftime`](https://docs.python.org/2/library/time.html#time.strftime) with
+         the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in Java, one can use
+         the Joda Time's [`ISODateTimeFormat.dateTime()`](
+         http://joda-time.sourceforge.net/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime()
+         ) to obtain a formatter capable of generating timestamps in this format.
+    night_shares.catalog.v1.Property:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        code:
+          type: string
+          title: code
+        name:
+          type: string
+          title: name
+        city:
+          type: string
+          title: city
+        country:
+          type: string
+          title: country
+        type:
+          type: string
+          title: type
+        rating:
+          type: number
+          title: rating
+          format: double
+        reviews:
+          type: integer
+          title: reviews
+          format: int32
+        popular:
+          type: boolean
+          title: popular
+        photos:
+          type: array
+          items:
+            type: string
+          title: photos
+        blurb:
+          type: string
+          title: blurb
+        amenities:
+          type: array
+          items:
+            type: string
+          title: amenities
+        roomTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.catalog.v1.RoomType'
+          title: room_types
+      title: Property
+      additionalProperties: false
+    night_shares.catalog.v1.RoomType:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        name:
+          type: string
+          title: name
+        spec:
+          type: string
+          title: spec
+        rateMultiplier:
+          type: number
+          title: rate_multiplier
+          format: double
+      title: RoomType
+      additionalProperties: false
+    night_shares.common.v1.Usdc:
+      type: object
+      properties:
+        micros:
+          type:
+            - integer
+            - string
+          title: micros
+          format: int64
+      title: Usdc
+      additionalProperties: false
+    night_shares.stay.v1.CheckInRequest:
+      type: object
+      properties:
+        tripId:
+          type: string
+          title: trip_id
+        verificationToken:
+          type: string
+          title: verification_token
+      title: CheckInRequest
+      additionalProperties: false
+    night_shares.stay.v1.CheckInResponse:
+      type: object
+      properties:
+        trip:
+          title: trip
+          $ref: '#/components/schemas/night_shares.stay.v1.Trip'
+      title: CheckInResponse
+      additionalProperties: false
+    night_shares.stay.v1.CreateBookingRequest:
+      type: object
+      properties:
+        lockId:
+          type: string
+          title: lock_id
+        guestName:
+          type: string
+          title: guest_name
+        guestEmail:
+          type: string
+          title: guest_email
+        payMethod:
+          title: pay_method
+          $ref: '#/components/schemas/night_shares.stay.v1.PayMethod'
+      title: CreateBookingRequest
+      additionalProperties: false
+    night_shares.stay.v1.CreateBookingResponse:
+      type: object
+      properties:
+        trip:
+          title: trip
+          $ref: '#/components/schemas/night_shares.stay.v1.Trip'
+      title: CreateBookingResponse
+      additionalProperties: false
+    night_shares.stay.v1.GetPriceCalendarRequest:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+        roomTypeId:
+          type: string
+          title: room_type_id
+        startDate:
+          type: string
+          title: start_date
+        endDate:
+          type: string
+          title: end_date
+      title: GetPriceCalendarRequest
+      additionalProperties: false
+    night_shares.stay.v1.GetPriceCalendarResponse:
+      type: object
+      properties:
+        nights:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.stay.v1.NightPrice'
+          title: nights
+      title: GetPriceCalendarResponse
+      additionalProperties: false
+    night_shares.stay.v1.GetReceiptRequest:
+      type: object
+      properties:
+        tripId:
+          type: string
+          title: trip_id
+      title: GetReceiptRequest
+      additionalProperties: false
+    night_shares.stay.v1.GetReceiptResponse:
+      type: object
+      properties:
+        receipt:
+          title: receipt
+          $ref: '#/components/schemas/night_shares.stay.v1.Receipt'
+      title: GetReceiptResponse
+      additionalProperties: false
+    night_shares.stay.v1.ListSavesRequest:
+      type: object
+      title: ListSavesRequest
+      additionalProperties: false
+    night_shares.stay.v1.ListSavesResponse:
+      type: object
+      properties:
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.catalog.v1.Property'
+          title: properties
+      title: ListSavesResponse
+      additionalProperties: false
+    night_shares.stay.v1.ListTripsRequest:
+      type: object
+      title: ListTripsRequest
+      additionalProperties: false
+    night_shares.stay.v1.ListTripsResponse:
+      type: object
+      properties:
+        upcoming:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.stay.v1.Trip'
+          title: upcoming
+        past:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.stay.v1.Trip'
+          title: past
+      title: ListTripsResponse
+      additionalProperties: false
+    night_shares.stay.v1.LockQuoteRequest:
+      type: object
+      properties:
+        quoteId:
+          type: string
+          title: quote_id
+      title: LockQuoteRequest
+      additionalProperties: false
+    night_shares.stay.v1.LockQuoteResponse:
+      type: object
+      properties:
+        lockId:
+          type: string
+          title: lock_id
+        expiresAt:
+          title: expires_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+      title: LockQuoteResponse
+      additionalProperties: false
+    night_shares.stay.v1.NightPrice:
+      type: object
+      properties:
+        date:
+          type: string
+          title: date
+        price:
+          title: price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        source:
+          title: source
+          $ref: '#/components/schemas/night_shares.stay.v1.PriceSource'
+        usualRate:
+          title: usual_rate
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: NightPrice
+      additionalProperties: false
+    night_shares.stay.v1.PayMethod:
+      type: string
+      title: PayMethod
+      enum:
+        - PAY_METHOD_UNSPECIFIED
+        - PAY_METHOD_USDC
+        - PAY_METHOD_CARD
+    night_shares.stay.v1.PriceSource:
+      type: string
+      title: PriceSource
+      enum:
+        - PRICE_SOURCE_UNSPECIFIED
+        - PRICE_SOURCE_HOTEL
+        - PRICE_SOURCE_TRADER
+        - PRICE_SOURCE_RECALL_CAP
+    night_shares.stay.v1.QuoteStayRequest:
+      type: object
+      properties:
+        selection:
+          title: selection
+          $ref: '#/components/schemas/night_shares.stay.v1.StaySelection'
+      title: QuoteStayRequest
+      additionalProperties: false
+    night_shares.stay.v1.QuoteStayResponse:
+      type: object
+      properties:
+        quote:
+          title: quote
+          $ref: '#/components/schemas/night_shares.stay.v1.StayQuote'
+      title: QuoteStayResponse
+      additionalProperties: false
+    night_shares.stay.v1.Receipt:
+      type: object
+      properties:
+        trip:
+          title: trip
+          $ref: '#/components/schemas/night_shares.stay.v1.Trip'
+        subtotal:
+          title: subtotal
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        walletAddress:
+          type: string
+          title: wallet_address
+        paidAt:
+          title: paid_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+      title: Receipt
+      additionalProperties: false
+    night_shares.stay.v1.StayQuote:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        selection:
+          title: selection
+          $ref: '#/components/schemas/night_shares.stay.v1.StaySelection'
+        total:
+          title: total
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        fee:
+          title: fee
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        nights:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.stay.v1.NightPrice'
+          title: nights
+        usualRate:
+          title: usual_rate
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: StayQuote
+      additionalProperties: false
+    night_shares.stay.v1.StaySelection:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+        roomTypeId:
+          type: string
+          title: room_type_id
+        checkIn:
+          type: string
+          title: check_in
+        checkOut:
+          type: string
+          title: check_out
+        adults:
+          type: integer
+          title: adults
+          format: int32
+        kids:
+          type: integer
+          title: kids
+          format: int32
+        rooms:
+          type: integer
+          title: rooms
+          format: int32
+      title: StaySelection
+      additionalProperties: false
+    night_shares.stay.v1.ToggleSaveRequest:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+      title: ToggleSaveRequest
+      additionalProperties: false
+    night_shares.stay.v1.ToggleSaveResponse:
+      type: object
+      properties:
+        isSaved:
+          type: boolean
+          title: is_saved
+      title: ToggleSaveResponse
+      additionalProperties: false
+    night_shares.stay.v1.Trip:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        ref:
+          type: string
+          title: ref
+        hotelRef:
+          type: string
+          title: hotel_ref
+        propertyId:
+          type: string
+          title: property_id
+        roomTypeId:
+          type: string
+          title: room_type_id
+        checkIn:
+          type: string
+          title: check_in
+        checkOut:
+          type: string
+          title: check_out
+        adults:
+          type: integer
+          title: adults
+          format: int32
+        kids:
+          type: integer
+          title: kids
+          format: int32
+        rooms:
+          type: integer
+          title: rooms
+          format: int32
+        total:
+          title: total
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        fee:
+          title: fee
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        payMethod:
+          title: pay_method
+          $ref: '#/components/schemas/night_shares.stay.v1.PayMethod'
+        checkedIn:
+          type: boolean
+          title: checked_in
+      title: Trip
+      additionalProperties: false
+security: []
+tags:
+  - name: night_shares.stay.v1.StayService

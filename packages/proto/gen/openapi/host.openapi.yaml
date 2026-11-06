@@ -1,0 +1,1061 @@
+openapi: 3.1.0
+info: {}
+paths:
+  /night_shares.host.v1.HostService/ConnectChannelManager:
+    post:
+      tags:
+        - night_shares.host.v1.HostService
+      summary: ConnectChannelManager
+      operationId: night_shares.host.v1.HostService.ConnectChannelManager
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.host.v1.ConnectChannelManagerRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.host.v1.ConnectChannelManagerResponse'
+  /night_shares.host.v1.HostService/GetHotel:
+    post:
+      tags:
+        - night_shares.host.v1.HostService
+      summary: GetHotel
+      operationId: night_shares.host.v1.HostService.GetHotel
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.host.v1.GetHotelRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.host.v1.GetHotelResponse'
+  /night_shares.host.v1.HostService/GetNight:
+    post:
+      tags:
+        - night_shares.host.v1.HostService
+      summary: GetNight
+      operationId: night_shares.host.v1.HostService.GetNight
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.host.v1.GetNightRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.host.v1.GetNightResponse'
+  /night_shares.host.v1.HostService/GetPayout:
+    post:
+      tags:
+        - night_shares.host.v1.HostService
+      summary: GetPayout
+      operationId: night_shares.host.v1.HostService.GetPayout
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.host.v1.GetPayoutRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.host.v1.GetPayoutResponse'
+  /night_shares.host.v1.HostService/GetPortfolio:
+    post:
+      tags:
+        - night_shares.host.v1.HostService
+      summary: GetPortfolio
+      operationId: night_shares.host.v1.HostService.GetPortfolio
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.host.v1.GetPortfolioRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.host.v1.GetPortfolioResponse'
+  /night_shares.host.v1.HostService/OpenNights:
+    post:
+      tags:
+        - night_shares.host.v1.HostService
+      summary: OpenNights
+      operationId: night_shares.host.v1.HostService.OpenNights
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.host.v1.OpenNightsRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.host.v1.OpenNightsResponse'
+  /night_shares.host.v1.HostService/PreviewOpenNights:
+    post:
+      tags:
+        - night_shares.host.v1.HostService
+      summary: PreviewOpenNights
+      operationId: night_shares.host.v1.HostService.PreviewOpenNights
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.host.v1.PreviewOpenNightsRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.host.v1.PreviewOpenNightsResponse'
+  /night_shares.host.v1.HostService/StopSelling:
+    post:
+      tags:
+        - night_shares.host.v1.HostService
+      summary: StopSelling
+      operationId: night_shares.host.v1.HostService.StopSelling
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.host.v1.StopSellingRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.host.v1.StopSellingResponse'
+  /night_shares.host.v1.HostService/Withdraw:
+    post:
+      tags:
+        - night_shares.host.v1.HostService
+      summary: Withdraw
+      operationId: night_shares.host.v1.HostService.Withdraw
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.host.v1.WithdrawRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.host.v1.WithdrawResponse'
+components:
+  schemas:
+    connect-protocol-version:
+      type: number
+      title: Connect-Protocol-Version
+      enum:
+        - 1
+      description: Define the version of the Connect protocol
+      const: 1
+    connect-timeout-header:
+      type: number
+      title: Connect-Timeout-Ms
+      description: Define the timeout, in ms
+    connect.error:
+      type: object
+      properties:
+        code:
+          type: string
+          examples:
+            - not_found
+          enum:
+            - canceled
+            - unknown
+            - invalid_argument
+            - deadline_exceeded
+            - not_found
+            - already_exists
+            - permission_denied
+            - resource_exhausted
+            - failed_precondition
+            - aborted
+            - out_of_range
+            - unimplemented
+            - internal
+            - unavailable
+            - data_loss
+            - unauthenticated
+          description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+        message:
+          type: string
+          description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/connect.error_details.Any'
+          description: A list of messages that carry the error details. There is no limit on the number of messages.
+      title: Connect Error
+      additionalProperties: true
+      description: 'Error type returned by Connect: https://connectrpc.com/docs/go/errors/#http-representation'
+    connect.error_details.Any:
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'A URL that acts as a globally unique identifier for the type of the serialized message. For example: `type.googleapis.com/google.rpc.ErrorInfo`. This is used to determine the schema of the data in the `value` field and is the discriminator for the `debug` field.'
+        value:
+          type: string
+          format: binary
+          description: The Protobuf message, serialized as bytes and base64-encoded. The specific message type is identified by the `type` field.
+        debug:
+          oneOf:
+            - type: object
+              title: Any
+              additionalProperties: true
+              description: Detailed error information.
+          discriminator:
+            propertyName: type
+          title: Debug
+          description: Deserialized error detail payload. The 'type' field indicates the schema. This field is for easier debugging and should not be relied upon for application logic.
+      additionalProperties: true
+      description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message, with an additional debug field for ConnectRPC error details.
+    google.protobuf.Timestamp:
+      type: string
+      examples:
+        - "2023-01-15T01:30:15.01Z"
+        - "2024-12-25T12:00:00Z"
+      format: date-time
+      description: |-
+        A Timestamp represents a point in time independent of any time zone or local
+         calendar, encoded as a count of seconds and fractions of seconds at
+         nanosecond resolution. The count is relative to an epoch at UTC midnight on
+         January 1, 1970, in the proleptic Gregorian calendar which extends the
+         Gregorian calendar backwards to year one.
+
+         All minutes are 60 seconds long. Leap seconds are "smeared" so that no leap
+         second table is needed for interpretation, using a [24-hour linear
+         smear](https://developers.google.com/time/smear).
+
+         The range is from 0001-01-01T00:00:00Z to 9999-12-31T23:59:59.999999999Z. By
+         restricting to that range, we ensure that we can convert to and from [RFC
+         3339](https://www.ietf.org/rfc/rfc3339.txt) date strings.
+
+         # Examples
+
+         Example 1: Compute Timestamp from POSIX `time()`.
+
+             Timestamp timestamp;
+             timestamp.set_seconds(time(NULL));
+             timestamp.set_nanos(0);
+
+         Example 2: Compute Timestamp from POSIX `gettimeofday()`.
+
+             struct timeval tv;
+             gettimeofday(&tv, NULL);
+
+             Timestamp timestamp;
+             timestamp.set_seconds(tv.tv_sec);
+             timestamp.set_nanos(tv.tv_usec * 1000);
+
+         Example 3: Compute Timestamp from Win32 `GetSystemTimeAsFileTime()`.
+
+             FILETIME ft;
+             GetSystemTimeAsFileTime(&ft);
+             UINT64 ticks = (((UINT64)ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
+
+             // A Windows tick is 100 nanoseconds. Windows epoch 1601-01-01T00:00:00Z
+             // is 11644473600 seconds before Unix epoch 1970-01-01T00:00:00Z.
+             Timestamp timestamp;
+             timestamp.set_seconds((INT64) ((ticks / 10000000) - 11644473600LL));
+             timestamp.set_nanos((INT32) ((ticks % 10000000) * 100));
+
+         Example 4: Compute Timestamp from Java `System.currentTimeMillis()`.
+
+             long millis = System.currentTimeMillis();
+
+             Timestamp timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)
+                 .setNanos((int) ((millis % 1000) * 1000000)).build();
+
+         Example 5: Compute Timestamp from Java `Instant.now()`.
+
+             Instant now = Instant.now();
+
+             Timestamp timestamp =
+                 Timestamp.newBuilder().setSeconds(now.getEpochSecond())
+                     .setNanos(now.getNano()).build();
+
+         Example 6: Compute Timestamp from current time in Python.
+
+             timestamp = Timestamp()
+             timestamp.GetCurrentTime()
+
+         # JSON Mapping
+
+         In JSON format, the Timestamp type is encoded as a string in the
+         [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) format. That is, the
+         format is "{year}-{month}-{day}T{hour}:{min}:{sec}[.{frac_sec}]Z"
+         where {year} is always expressed using four digits while {month}, {day},
+         {hour}, {min}, and {sec} are zero-padded to two digits each. The fractional
+         seconds, which can go up to 9 digits (i.e. up to 1 nanosecond resolution),
+         are optional. The "Z" suffix indicates the timezone ("UTC"); the timezone
+         is required. A proto3 JSON serializer should always use UTC (as indicated by
+         "Z") when printing the Timestamp type and a proto3 JSON parser should be
+         able to accept both UTC and other timezones (as indicated by an offset).
+
+         For example, "2017-01-15T01:30:15.01Z" encodes 15.01 seconds past
+         01:30 UTC on January 15, 2017.
+
+         In JavaScript, one can convert a Date object to this format using the
+         standard
+         [toISOString()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString)
+         method. In Python, a standard `datetime.datetime` object can be converted
+         to this format using
+         [`strftime`](https://docs.python.org/2/library/time.html#time.strftime) with
+         the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in Java, one can use
+         the Joda Time's [`ISODateTimeFormat.dateTime()`](
+         http://joda-time.sourceforge.net/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime()
+         ) to obtain a formatter capable of generating timestamps in this format.
+    night_shares.catalog.v1.Property:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        code:
+          type: string
+          title: code
+        name:
+          type: string
+          title: name
+        city:
+          type: string
+          title: city
+        country:
+          type: string
+          title: country
+        type:
+          type: string
+          title: type
+        rating:
+          type: number
+          title: rating
+          format: double
+        reviews:
+          type: integer
+          title: reviews
+          format: int32
+        popular:
+          type: boolean
+          title: popular
+        photos:
+          type: array
+          items:
+            type: string
+          title: photos
+        blurb:
+          type: string
+          title: blurb
+        amenities:
+          type: array
+          items:
+            type: string
+          title: amenities
+        roomTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.catalog.v1.RoomType'
+          title: room_types
+      title: Property
+      additionalProperties: false
+    night_shares.catalog.v1.RoomType:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        name:
+          type: string
+          title: name
+        spec:
+          type: string
+          title: spec
+        rateMultiplier:
+          type: number
+          title: rate_multiplier
+          format: double
+      title: RoomType
+      additionalProperties: false
+    night_shares.common.v1.NightKey:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+        roomTypeId:
+          type: string
+          title: room_type_id
+        date:
+          type: string
+          title: date
+      title: NightKey
+      additionalProperties: false
+      description: Dates use YYYY-MM-DD in the property local calendar.
+    night_shares.common.v1.RoomNights:
+      type: object
+      properties:
+        tenths:
+          type: integer
+          title: tenths
+          format: int32
+      title: RoomNights
+      additionalProperties: false
+      description: Quantities are integer tenths. Ten tenths equal one room night.
+    night_shares.common.v1.Usdc:
+      type: object
+      properties:
+        micros:
+          type:
+            - integer
+            - string
+          title: micros
+          format: int64
+      title: Usdc
+      additionalProperties: false
+    night_shares.host.v1.Activity:
+      type: object
+      properties:
+        at:
+          title: at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        kind:
+          type: string
+          title: kind
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        amount:
+          title: amount
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: Activity
+      additionalProperties: false
+    night_shares.host.v1.Alert:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+        date:
+          type: string
+          title: date
+        message:
+          type: string
+          title: message
+      title: Alert
+      additionalProperties: false
+    night_shares.host.v1.ConnectChannelManagerRequest:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+        pms:
+          title: pms
+          $ref: '#/components/schemas/night_shares.host.v1.Pms'
+      title: ConnectChannelManagerRequest
+      additionalProperties: false
+    night_shares.host.v1.ConnectChannelManagerResponse:
+      type: object
+      properties:
+        property:
+          title: property
+          $ref: '#/components/schemas/night_shares.catalog.v1.Property'
+      title: ConnectChannelManagerResponse
+      additionalProperties: false
+    night_shares.host.v1.DemandPreset:
+      type: string
+      title: DemandPreset
+      enum:
+        - DEMAND_PRESET_UNSPECIFIED
+        - DEMAND_PRESET_CALM
+        - DEMAND_PRESET_NORMAL
+        - DEMAND_PRESET_PEAK
+    night_shares.host.v1.GetHotelRequest:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+        month:
+          type: string
+          title: month
+      title: GetHotelRequest
+      additionalProperties: false
+    night_shares.host.v1.GetHotelResponse:
+      type: object
+      properties:
+        property:
+          title: property
+          $ref: '#/components/schemas/night_shares.catalog.v1.Property'
+        kpis:
+          title: kpis
+          $ref: '#/components/schemas/night_shares.host.v1.HostKpis'
+        monthGlance:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.host.v1.Occupancy'
+          title: month_glance
+        priceSeries:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.host.v1.HotelPricePoint'
+          title: price_series
+        calendar:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.host.v1.HostNight'
+          title: calendar
+      title: GetHotelResponse
+      additionalProperties: false
+    night_shares.host.v1.GetNightRequest:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+        date:
+          type: string
+          title: date
+      title: GetNightRequest
+      additionalProperties: false
+    night_shares.host.v1.GetNightResponse:
+      type: object
+      properties:
+        roomTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.host.v1.HostNight'
+          title: room_types
+        activity:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.host.v1.Activity'
+          title: activity
+        releaseTimeline:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.host.v1.ReleaseEvent'
+          title: release_timeline
+        payout:
+          title: payout
+          $ref: '#/components/schemas/night_shares.host.v1.Payout'
+      title: GetNightResponse
+      additionalProperties: false
+    night_shares.host.v1.GetPayoutRequest:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+      title: GetPayoutRequest
+      additionalProperties: false
+    night_shares.host.v1.GetPayoutResponse:
+      type: object
+      properties:
+        payout:
+          title: payout
+          $ref: '#/components/schemas/night_shares.host.v1.Payout'
+      title: GetPayoutResponse
+      additionalProperties: false
+    night_shares.host.v1.GetPortfolioRequest:
+      type: object
+      title: GetPortfolioRequest
+      additionalProperties: false
+    night_shares.host.v1.GetPortfolioResponse:
+      type: object
+      properties:
+        hotels:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.host.v1.HotelSummary'
+          title: hotels
+        kpis:
+          title: kpis
+          $ref: '#/components/schemas/night_shares.host.v1.HostKpis'
+        alerts:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.host.v1.Alert'
+          title: alerts
+        occupancy:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.host.v1.Occupancy'
+          title: occupancy
+      title: GetPortfolioResponse
+      additionalProperties: false
+    night_shares.host.v1.HostKpis:
+      type: object
+      properties:
+        revenue:
+          title: revenue
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        averageRate:
+          title: average_rate
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        occupancyBps:
+          type: integer
+          title: occupancy_bps
+          format: int32
+        availableNow:
+          title: available_now
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: HostKpis
+      additionalProperties: false
+    night_shares.host.v1.HostNight:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        allotment:
+          title: allotment
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        booked:
+          title: booked
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        held:
+          title: held
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        onSale:
+          title: on_sale
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        usualRate:
+          title: usual_rate
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        guestPrice:
+          title: guest_price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        demandPreset:
+          title: demand_preset
+          $ref: '#/components/schemas/night_shares.host.v1.DemandPreset'
+        releasePolicy:
+          title: release_policy
+          $ref: '#/components/schemas/night_shares.host.v1.ReleasePolicy'
+        isStopped:
+          type: boolean
+          title: is_stopped
+        releaseAt:
+          title: release_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        payout:
+          title: payout
+          $ref: '#/components/schemas/night_shares.host.v1.Payout'
+      title: HostNight
+      additionalProperties: false
+    night_shares.host.v1.HotelPricePoint:
+      type: object
+      properties:
+        date:
+          type: string
+          title: date
+        guestPrice:
+          title: guest_price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        usualRate:
+          title: usual_rate
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: HotelPricePoint
+      additionalProperties: false
+    night_shares.host.v1.HotelSummary:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+        name:
+          type: string
+          title: name
+        city:
+          type: string
+          title: city
+        kpis:
+          title: kpis
+          $ref: '#/components/schemas/night_shares.host.v1.HostKpis'
+      title: HotelSummary
+      additionalProperties: false
+    night_shares.host.v1.Occupancy:
+      type: object
+      properties:
+        date:
+          type: string
+          title: date
+        allotment:
+          title: allotment
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        booked:
+          title: booked
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        held:
+          title: held
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        onSale:
+          title: on_sale
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+      title: Occupancy
+      additionalProperties: false
+    night_shares.host.v1.OpenNightPreview:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        allotment:
+          title: allotment
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        floor:
+          title: floor
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        lastRoomPrice:
+          title: last_room_price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        guestPriceCap:
+          title: guest_price_cap
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        minimumPayout:
+          title: minimum_payout
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        securityHold:
+          title: security_hold
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: OpenNightPreview
+      additionalProperties: false
+    night_shares.host.v1.OpenNightsRequest:
+      type: object
+      properties:
+        selection:
+          title: selection
+          $ref: '#/components/schemas/night_shares.host.v1.OpenNightsSelection'
+      title: OpenNightsRequest
+      additionalProperties: false
+    night_shares.host.v1.OpenNightsResponse:
+      type: object
+      properties:
+        nights:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.host.v1.HostNight'
+          title: nights
+      title: OpenNightsResponse
+      additionalProperties: false
+    night_shares.host.v1.OpenNightsSelection:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+        dates:
+          type: array
+          items:
+            type: string
+          title: dates
+        roomTypeIds:
+          type: array
+          items:
+            type: string
+          title: room_type_ids
+        allotmentPercent:
+          type: integer
+          title: allotment_percent
+          format: int32
+        demandPreset:
+          title: demand_preset
+          $ref: '#/components/schemas/night_shares.host.v1.DemandPreset'
+        releasePolicy:
+          title: release_policy
+          $ref: '#/components/schemas/night_shares.host.v1.ReleasePolicy'
+      title: OpenNightsSelection
+      additionalProperties: false
+    night_shares.host.v1.Payout:
+      type: object
+      properties:
+        availableNow:
+          title: available_now
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        heldForTraders:
+          title: held_for_traders
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        securityHold:
+          title: security_hold
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        securityHoldTarget:
+          title: security_hold_target
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        fees:
+          title: fees
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        gross:
+          title: gross
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: Payout
+      additionalProperties: false
+    night_shares.host.v1.Pms:
+      type: string
+      title: Pms
+      enum:
+        - PMS_UNSPECIFIED
+        - PMS_MEWS
+        - PMS_CLOUDBEDS
+        - PMS_SITE_MINDER
+    night_shares.host.v1.PreviewOpenNightsRequest:
+      type: object
+      properties:
+        selection:
+          title: selection
+          $ref: '#/components/schemas/night_shares.host.v1.OpenNightsSelection'
+      title: PreviewOpenNightsRequest
+      additionalProperties: false
+    night_shares.host.v1.PreviewOpenNightsResponse:
+      type: object
+      properties:
+        nights:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.host.v1.OpenNightPreview'
+          title: nights
+      title: PreviewOpenNightsResponse
+      additionalProperties: false
+    night_shares.host.v1.ReleaseEvent:
+      type: object
+      properties:
+        at:
+          title: at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        description:
+          type: string
+          title: description
+      title: ReleaseEvent
+      additionalProperties: false
+    night_shares.host.v1.ReleasePolicy:
+      type: string
+      title: ReleasePolicy
+      enum:
+        - RELEASE_POLICY_UNSPECIFIED
+        - RELEASE_POLICY_ARRIVAL_14
+        - RELEASE_POLICY_DAY_BEFORE_18
+        - RELEASE_POLICY_THREE_DAYS_BEFORE_12
+    night_shares.host.v1.StopSellingRequest:
+      type: object
+      properties:
+        nights:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+          title: nights
+      title: StopSellingRequest
+      additionalProperties: false
+    night_shares.host.v1.StopSellingResponse:
+      type: object
+      properties:
+        nights:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.host.v1.HostNight'
+          title: nights
+      title: StopSellingResponse
+      additionalProperties: false
+    night_shares.host.v1.WithdrawRequest:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+        amount:
+          title: amount
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: WithdrawRequest
+      additionalProperties: false
+    night_shares.host.v1.WithdrawResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          title: transaction_id
+        withdrawn:
+          title: withdrawn
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        payout:
+          title: payout
+          $ref: '#/components/schemas/night_shares.host.v1.Payout'
+      title: WithdrawResponse
+      additionalProperties: false
+security: []
+tags:
+  - name: night_shares.host.v1.HostService

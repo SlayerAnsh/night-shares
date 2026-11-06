@@ -1,0 +1,4 @@
+{
+  "extends": "@night-shares/tsconfig/library.json",
+  "include": ["gen/ts/**/*.ts"]
+}

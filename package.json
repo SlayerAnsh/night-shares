@@ -1,0 +1,15 @@
+{
+  "name": "night-shares",
+  "private": true,
+  "packageManager": "pnpm@10.20.0",
+  "scripts": {
+    "gen": "pnpm --filter @night-shares/proto gen",
+    "check": "biome check .",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.6",
+    "typescript": "5.9.3"
+  }
+}

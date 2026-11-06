@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package night_shares.common.v1;
+
+// Quantities are integer tenths. Ten tenths equal one room night.
+message RoomNights {
+  int32 tenths = 1;
+}
+
+// Dates use YYYY-MM-DD in the property local calendar.
+message NightKey {
+  string property_id = 1;
+  string room_type_id = 2;
+  string date = 3;
+}

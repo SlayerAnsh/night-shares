@@ -1,0 +1,374 @@
+openapi: 3.1.0
+info: {}
+paths:
+  /night_shares.catalog.v1.CatalogService/GetProperty:
+    post:
+      tags:
+        - night_shares.catalog.v1.CatalogService
+      summary: GetProperty
+      operationId: night_shares.catalog.v1.CatalogService.GetProperty
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.catalog.v1.GetPropertyRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.catalog.v1.GetPropertyResponse'
+  /night_shares.catalog.v1.CatalogService/ListDestinations:
+    post:
+      tags:
+        - night_shares.catalog.v1.CatalogService
+      summary: ListDestinations
+      operationId: night_shares.catalog.v1.CatalogService.ListDestinations
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.catalog.v1.ListDestinationsRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.catalog.v1.ListDestinationsResponse'
+  /night_shares.catalog.v1.CatalogService/SearchStays:
+    post:
+      tags:
+        - night_shares.catalog.v1.CatalogService
+      summary: SearchStays
+      operationId: night_shares.catalog.v1.CatalogService.SearchStays
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.catalog.v1.SearchStaysRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.catalog.v1.SearchStaysResponse'
+components:
+  schemas:
+    connect-protocol-version:
+      type: number
+      title: Connect-Protocol-Version
+      enum:
+        - 1
+      description: Define the version of the Connect protocol
+      const: 1
+    connect-timeout-header:
+      type: number
+      title: Connect-Timeout-Ms
+      description: Define the timeout, in ms
+    connect.error:
+      type: object
+      properties:
+        code:
+          type: string
+          examples:
+            - not_found
+          enum:
+            - canceled
+            - unknown
+            - invalid_argument
+            - deadline_exceeded
+            - not_found
+            - already_exists
+            - permission_denied
+            - resource_exhausted
+            - failed_precondition
+            - aborted
+            - out_of_range
+            - unimplemented
+            - internal
+            - unavailable
+            - data_loss
+            - unauthenticated
+          description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+        message:
+          type: string
+          description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/connect.error_details.Any'
+          description: A list of messages that carry the error details. There is no limit on the number of messages.
+      title: Connect Error
+      additionalProperties: true
+      description: 'Error type returned by Connect: https://connectrpc.com/docs/go/errors/#http-representation'
+    connect.error_details.Any:
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'A URL that acts as a globally unique identifier for the type of the serialized message. For example: `type.googleapis.com/google.rpc.ErrorInfo`. This is used to determine the schema of the data in the `value` field and is the discriminator for the `debug` field.'
+        value:
+          type: string
+          format: binary
+          description: The Protobuf message, serialized as bytes and base64-encoded. The specific message type is identified by the `type` field.
+        debug:
+          oneOf:
+            - type: object
+              title: Any
+              additionalProperties: true
+              description: Detailed error information.
+          discriminator:
+            propertyName: type
+          title: Debug
+          description: Deserialized error detail payload. The 'type' field indicates the schema. This field is for easier debugging and should not be relied upon for application logic.
+      additionalProperties: true
+      description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message, with an additional debug field for ConnectRPC error details.
+    night_shares.catalog.v1.Destination:
+      type: object
+      properties:
+        city:
+          type: string
+          title: city
+        country:
+          type: string
+          title: country
+        stayCount:
+          type: integer
+          title: stay_count
+          format: int32
+        fromPrice:
+          title: from_price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: Destination
+      additionalProperties: false
+    night_shares.catalog.v1.GetPropertyRequest:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+      title: GetPropertyRequest
+      additionalProperties: false
+    night_shares.catalog.v1.GetPropertyResponse:
+      type: object
+      properties:
+        property:
+          title: property
+          $ref: '#/components/schemas/night_shares.catalog.v1.Property'
+      title: GetPropertyResponse
+      additionalProperties: false
+    night_shares.catalog.v1.ListDestinationsRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          title: text
+      title: ListDestinationsRequest
+      additionalProperties: false
+    night_shares.catalog.v1.ListDestinationsResponse:
+      type: object
+      properties:
+        destinations:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.catalog.v1.Destination'
+          title: destinations
+      title: ListDestinationsResponse
+      additionalProperties: false
+    night_shares.catalog.v1.Property:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        code:
+          type: string
+          title: code
+        name:
+          type: string
+          title: name
+        city:
+          type: string
+          title: city
+        country:
+          type: string
+          title: country
+        type:
+          type: string
+          title: type
+        rating:
+          type: number
+          title: rating
+          format: double
+        reviews:
+          type: integer
+          title: reviews
+          format: int32
+        popular:
+          type: boolean
+          title: popular
+        photos:
+          type: array
+          items:
+            type: string
+          title: photos
+        blurb:
+          type: string
+          title: blurb
+        amenities:
+          type: array
+          items:
+            type: string
+          title: amenities
+        roomTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.catalog.v1.RoomType'
+          title: room_types
+      title: Property
+      additionalProperties: false
+    night_shares.catalog.v1.RoomType:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        name:
+          type: string
+          title: name
+        spec:
+          type: string
+          title: spec
+        rateMultiplier:
+          type: number
+          title: rate_multiplier
+          format: double
+      title: RoomType
+      additionalProperties: false
+    night_shares.catalog.v1.SearchStaysRequest:
+      type: object
+      properties:
+        destination:
+          type: string
+          title: destination
+        type:
+          type: string
+          title: type
+        sort:
+          type: string
+          title: sort
+        checkIn:
+          type: string
+          title: check_in
+        checkOut:
+          type: string
+          title: check_out
+        adults:
+          type: integer
+          title: adults
+          format: int32
+        kids:
+          type: integer
+          title: kids
+          format: int32
+        rooms:
+          type: integer
+          title: rooms
+          format: int32
+      title: SearchStaysRequest
+      additionalProperties: false
+    night_shares.catalog.v1.SearchStaysResponse:
+      type: object
+      properties:
+        stays:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.catalog.v1.StayCard'
+          title: stays
+      title: SearchStaysResponse
+      additionalProperties: false
+    night_shares.catalog.v1.StayCard:
+      type: object
+      properties:
+        property:
+          title: property
+          $ref: '#/components/schemas/night_shares.catalog.v1.Property'
+        total:
+          title: total
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        average:
+          title: average
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        isDeal:
+          type: boolean
+          title: is_deal
+      title: StayCard
+      additionalProperties: false
+    night_shares.common.v1.Usdc:
+      type: object
+      properties:
+        micros:
+          type:
+            - integer
+            - string
+          title: micros
+          format: int64
+      title: Usdc
+      additionalProperties: false
+security: []
+tags:
+  - name: night_shares.catalog.v1.CatalogService

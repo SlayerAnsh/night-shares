@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package night_shares.stay.v1;
+
+import "google/protobuf/timestamp.proto";
+import "night_shares/auth/v1/access.proto";
+import "night_shares/catalog/v1/property.proto";
+import "night_shares/stay/v1/trip.proto";
+
+service StayService {
+  rpc GetPriceCalendar(GetPriceCalendarRequest) returns (GetPriceCalendarResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+  rpc QuoteStay(QuoteStayRequest) returns (QuoteStayResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+  rpc LockQuote(LockQuoteRequest) returns (LockQuoteResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+  rpc CreateBooking(CreateBookingRequest) returns (CreateBookingResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+  rpc ListTrips(ListTripsRequest) returns (ListTripsResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+  rpc CheckIn(CheckInRequest) returns (CheckInResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+  rpc GetReceipt(GetReceiptRequest) returns (GetReceiptResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+  rpc ToggleSave(ToggleSaveRequest) returns (ToggleSaveResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+  rpc ListSaves(ListSavesRequest) returns (ListSavesResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+}
+
+message GetPriceCalendarRequest {
+  string property_id = 1;
+  string room_type_id = 2;
+  string start_date = 3;
+  string end_date = 4;
+}
+
+message GetPriceCalendarResponse {
+  repeated NightPrice nights = 1;
+}
+
+message QuoteStayRequest {
+  StaySelection selection = 1;
+}
+
+message QuoteStayResponse {
+  StayQuote quote = 1;
+}
+
+message LockQuoteRequest {
+  string quote_id = 1;
+}
+
+message LockQuoteResponse {
+  string lock_id = 1;
+  google.protobuf.Timestamp expires_at = 2;
+}
+
+message CreateBookingRequest {
+  string lock_id = 1;
+  string guest_name = 2;
+  string guest_email = 3;
+  PayMethod pay_method = 4;
+}
+
+message CreateBookingResponse {
+  Trip trip = 1;
+}
+
+message ListTripsRequest {}
+
+message ListTripsResponse {
+  repeated Trip upcoming = 1;
+  repeated Trip past = 2;
+}
+
+message CheckInRequest {
+  string trip_id = 1;
+  string verification_token = 2;
+}
+
+message CheckInResponse {
+  Trip trip = 1;
+}
+
+message GetReceiptRequest {
+  string trip_id = 1;
+}
+
+message GetReceiptResponse {
+  Receipt receipt = 1;
+}
+
+message ToggleSaveRequest {
+  string property_id = 1;
+}
+
+message ToggleSaveResponse {
+  bool is_saved = 1;
+}
+
+message ListSavesRequest {}
+
+message ListSavesResponse {
+  repeated night_shares.catalog.v1.Property properties = 1;
+}

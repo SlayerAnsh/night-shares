@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package night_shares.host.v1;
+
+import "night_shares/auth/v1/access.proto";
+import "night_shares/catalog/v1/property.proto";
+import "night_shares/common/v1/money.proto";
+import "night_shares/common/v1/night.proto";
+import "night_shares/host/v1/hotel.proto";
+import "night_shares/host/v1/opening.proto";
+
+service HostService {
+  rpc ConnectChannelManager(ConnectChannelManagerRequest) returns (ConnectChannelManagerResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc GetPortfolio(GetPortfolioRequest) returns (GetPortfolioResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc GetHotel(GetHotelRequest) returns (GetHotelResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc PreviewOpenNights(PreviewOpenNightsRequest) returns (PreviewOpenNightsResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc OpenNights(OpenNightsRequest) returns (OpenNightsResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc StopSelling(StopSellingRequest) returns (StopSellingResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc GetNight(GetNightRequest) returns (GetNightResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc GetPayout(GetPayoutRequest) returns (GetPayoutResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc Withdraw(WithdrawRequest) returns (WithdrawResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+}
+
+message ConnectChannelManagerRequest {
+  string property_id = 1;
+  Pms pms = 2;
+}
+
+message ConnectChannelManagerResponse {
+  night_shares.catalog.v1.Property property = 1;
+}
+
+message GetPortfolioRequest {}
+
+message GetPortfolioResponse {
+  repeated HotelSummary hotels = 1;
+  HostKpis kpis = 2;
+  repeated Alert alerts = 3;
+  repeated Occupancy occupancy = 4;
+}
+
+message GetHotelRequest {
+  string property_id = 1;
+  string month = 2;
+}
+
+message GetHotelResponse {
+  night_shares.catalog.v1.Property property = 1;
+  HostKpis kpis = 2;
+  repeated Occupancy month_glance = 3;
+  repeated HotelPricePoint price_series = 4;
+  repeated HostNight calendar = 5;
+}
+
+message PreviewOpenNightsRequest {
+  OpenNightsSelection selection = 1;
+}
+
+message PreviewOpenNightsResponse {
+  repeated OpenNightPreview nights = 1;
+}
+
+message OpenNightsRequest {
+  OpenNightsSelection selection = 1;
+}
+
+message OpenNightsResponse {
+  repeated HostNight nights = 1;
+}
+
+message StopSellingRequest {
+  repeated night_shares.common.v1.NightKey nights = 1;
+}
+
+message StopSellingResponse {
+  repeated HostNight nights = 1;
+}
+
+message GetNightRequest {
+  string property_id = 1;
+  string date = 2;
+}
+
+message GetNightResponse {
+  repeated HostNight room_types = 1;
+  repeated Activity activity = 2;
+  repeated ReleaseEvent release_timeline = 3;
+  Payout payout = 4;
+}
+
+message GetPayoutRequest {
+  string property_id = 1;
+}
+
+message GetPayoutResponse {
+  Payout payout = 1;
+}
+
+message WithdrawRequest {
+  string property_id = 1;
+  night_shares.common.v1.Usdc amount = 2;
+}
+
+message WithdrawResponse {
+  string transaction_id = 1;
+  night_shares.common.v1.Usdc withdrawn = 2;
+  Payout payout = 3;
+}

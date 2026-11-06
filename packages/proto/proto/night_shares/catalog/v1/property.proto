@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package night_shares.catalog.v1;
+
+import "night_shares/common/v1/money.proto";
+
+message RoomType {
+  string id = 1;
+  string name = 2;
+  string spec = 3;
+  double rate_multiplier = 4;
+}
+
+message Property {
+  string id = 1;
+  string code = 2;
+  string name = 3;
+  string city = 4;
+  string country = 5;
+  string type = 6;
+  double rating = 7;
+  int32 reviews = 8;
+  bool popular = 9;
+  repeated string photos = 10;
+  string blurb = 11;
+  repeated string amenities = 12;
+  repeated RoomType room_types = 13;
+}
+
+message Destination {
+  string city = 1;
+  string country = 2;
+  int32 stay_count = 3;
+  night_shares.common.v1.Usdc from_price = 4;
+}
+
+message StayCard {
+  night_shares.catalog.v1.Property property = 1;
+  night_shares.common.v1.Usdc total = 2;
+  night_shares.common.v1.Usdc average = 3;
+  bool is_deal = 4;
+}

@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package night_shares.identity.v1;
+
+import "google/protobuf/timestamp.proto";
+import "night_shares/auth/v1/access.proto";
+import "night_shares/identity/v1/user.proto";
+
+service IdentityService {
+  rpc StartSignIn(StartSignInRequest) returns (StartSignInResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+  rpc CompleteSignIn(CompleteSignInRequest) returns (CompleteSignInResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+  rpc GetSession(GetSessionRequest) returns (GetSessionResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+  rpc SignOut(SignOutRequest) returns (SignOutResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+  rpc VerifyAction(VerifyActionRequest) returns (VerifyActionResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+}
+
+message StartSignInRequest {
+  VerificationLevel level = 1;
+}
+
+message StartSignInResponse {
+  string request_id = 1;
+  string qr_payload = 2;
+  google.protobuf.Timestamp expires_at = 3;
+}
+
+message CompleteSignInRequest {
+  string request_id = 1;
+  string proof = 2;
+}
+
+message CompleteSignInResponse {
+  string session_token = 1;
+  User user = 2;
+}
+
+message GetSessionRequest {}
+
+message GetSessionResponse {
+  User user = 1;
+}
+
+message SignOutRequest {}
+
+message SignOutResponse {}
+
+message VerifyActionRequest {
+  string action = 1;
+  string proof = 2;
+}
+
+message VerifyActionResponse {
+  string verification_token = 1;
+  google.protobuf.Timestamp expires_at = 2;
+}

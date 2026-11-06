@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package night_shares.market.v1;
+
+import "google/protobuf/timestamp.proto";
+import "night_shares/common/v1/money.proto";
+import "night_shares/common/v1/night.proto";
+
+enum Risk {
+  RISK_UNSPECIFIED = 0;
+  RISK_LOW = 1;
+  RISK_MEDIUM = 2;
+  RISK_HIGH = 3;
+}
+
+enum TradeSide {
+  TRADE_SIDE_UNSPECIFIED = 0;
+  TRADE_SIDE_BUY = 1;
+  TRADE_SIDE_SELL = 2;
+}
+
+enum DiscoverSort {
+  DISCOVER_SORT_UNSPECIFIED = 0;
+  DISCOVER_SORT_RETURN = 1;
+  DISCOVER_SORT_RISK = 2;
+}
+
+message PricePoint {
+  google.protobuf.Timestamp at = 1;
+  night_shares.common.v1.Usdc price = 2;
+}
+
+message TrackRecord {
+  int32 nights_traded = 1;
+  int32 booked_bps = 2;
+  int32 unsold_bps = 3;
+  int32 average_return_bps = 4;
+  int32 profitable_bps = 5;
+  int32 refund_bps = 6;
+  int32 honoured_bps = 7;
+  int32 incidents = 8;
+  night_shares.common.v1.Usdc security_hold = 9;
+}
+
+message NightCard {
+  night_shares.common.v1.NightKey night = 1;
+  string property_name = 2;
+  string room_type_name = 3;
+  string city = 4;
+  night_shares.common.v1.Usdc price = 5;
+  night_shares.common.v1.Usdc fair_price = 6;
+  int32 estimated_return_bps = 7;
+  Risk risk = 8;
+  google.protobuf.Timestamp release_at = 9;
+  int32 change_bps = 10;
+}
+
+message NightStats {
+  int32 annualized_return_bps = 1;
+  int32 volatility_bps = 2;
+  int32 sell_through_bps = 3;
+  night_shares.common.v1.Usdc expected_exit = 4;
+  night_shares.common.v1.Usdc worst_refund = 5;
+  night_shares.common.v1.RoomNights buy_liquidity = 6;
+  night_shares.common.v1.RoomNights sell_liquidity = 7;
+}
+
+message TapePrint {
+  string id = 1;
+  night_shares.common.v1.Usdc price = 2;
+  night_shares.common.v1.RoomNights size = 3;
+  TradeSide side = 4;
+  google.protobuf.Timestamp at = 5;
+}

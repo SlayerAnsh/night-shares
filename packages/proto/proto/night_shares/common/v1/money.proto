@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package night_shares.common.v1;
+
+message Usdc {
+  int64 micros = 1;
+}

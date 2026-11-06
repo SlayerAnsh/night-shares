@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package night_shares.auth.v1;
+
+import "google/protobuf/descriptor.proto";
+
+enum Access {
+  ACCESS_UNSPECIFIED = 0;
+  ACCESS_PUBLIC = 1;
+  ACCESS_DEVICE = 2;
+  ACCESS_ORB = 3;
+}
+
+extend google.protobuf.MethodOptions {
+  Access access = 50001;
+}

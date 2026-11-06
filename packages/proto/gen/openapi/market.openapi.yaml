@@ -1,0 +1,1444 @@
+openapi: 3.1.0
+info: {}
+paths:
+  /night_shares.market.v1.MarketService/ApproveAgentOrder:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: ApproveAgentOrder
+      operationId: night_shares.market.v1.MarketService.ApproveAgentOrder
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.ApproveAgentOrderRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.ApproveAgentOrderResponse'
+  /night_shares.market.v1.MarketService/Buy:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: Buy
+      operationId: night_shares.market.v1.MarketService.Buy
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.BuyRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.BuyResponse'
+  /night_shares.market.v1.MarketService/CancelAsk:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: CancelAsk
+      operationId: night_shares.market.v1.MarketService.CancelAsk
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.CancelAskRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.CancelAskResponse'
+  /night_shares.market.v1.MarketService/CreateAgentOrder:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: CreateAgentOrder
+      operationId: night_shares.market.v1.MarketService.CreateAgentOrder
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.CreateAgentOrderRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.CreateAgentOrderResponse'
+  /night_shares.market.v1.MarketService/Discover:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: Discover
+      operationId: night_shares.market.v1.MarketService.Discover
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.DiscoverRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.DiscoverResponse'
+  /night_shares.market.v1.MarketService/GetBook:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: GetBook
+      operationId: night_shares.market.v1.MarketService.GetBook
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.GetBookRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.GetBookResponse'
+  /night_shares.market.v1.MarketService/GetNight:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: GetNight
+      operationId: night_shares.market.v1.MarketService.GetNight
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.GetNightRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.GetNightResponse'
+  /night_shares.market.v1.MarketService/GetPortfolio:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: GetPortfolio
+      operationId: night_shares.market.v1.MarketService.GetPortfolio
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.GetPortfolioRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.GetPortfolioResponse'
+  /night_shares.market.v1.MarketService/ListTape:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: ListTape
+      operationId: night_shares.market.v1.MarketService.ListTape
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.ListTapeRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.ListTapeResponse'
+  /night_shares.market.v1.MarketService/ListWatch:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: ListWatch
+      operationId: night_shares.market.v1.MarketService.ListWatch
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.ListWatchRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.ListWatchResponse'
+  /night_shares.market.v1.MarketService/PostAsk:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: PostAsk
+      operationId: night_shares.market.v1.MarketService.PostAsk
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.PostAskRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.PostAskResponse'
+  /night_shares.market.v1.MarketService/QuoteBuy:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: QuoteBuy
+      operationId: night_shares.market.v1.MarketService.QuoteBuy
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.QuoteBuyRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.QuoteBuyResponse'
+  /night_shares.market.v1.MarketService/QuoteSell:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: QuoteSell
+      operationId: night_shares.market.v1.MarketService.QuoteSell
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.QuoteSellRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.QuoteSellResponse'
+  /night_shares.market.v1.MarketService/Sell:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: Sell
+      operationId: night_shares.market.v1.MarketService.Sell
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.SellRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.SellResponse'
+  /night_shares.market.v1.MarketService/ToggleWatch:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: ToggleWatch
+      operationId: night_shares.market.v1.MarketService.ToggleWatch
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.ToggleWatchRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.ToggleWatchResponse'
+components:
+  schemas:
+    connect-protocol-version:
+      type: number
+      title: Connect-Protocol-Version
+      enum:
+        - 1
+      description: Define the version of the Connect protocol
+      const: 1
+    connect-timeout-header:
+      type: number
+      title: Connect-Timeout-Ms
+      description: Define the timeout, in ms
+    connect.error:
+      type: object
+      properties:
+        code:
+          type: string
+          examples:
+            - not_found
+          enum:
+            - canceled
+            - unknown
+            - invalid_argument
+            - deadline_exceeded
+            - not_found
+            - already_exists
+            - permission_denied
+            - resource_exhausted
+            - failed_precondition
+            - aborted
+            - out_of_range
+            - unimplemented
+            - internal
+            - unavailable
+            - data_loss
+            - unauthenticated
+          description: The status code, which should be an enum value of [google.rpc.Code][google.rpc.Code].
+        message:
+          type: string
+          description: A developer-facing error message, which should be in English. Any user-facing error message should be localized and sent in the [google.rpc.Status.details][google.rpc.Status.details] field, or localized by the client.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/connect.error_details.Any'
+          description: A list of messages that carry the error details. There is no limit on the number of messages.
+      title: Connect Error
+      additionalProperties: true
+      description: 'Error type returned by Connect: https://connectrpc.com/docs/go/errors/#http-representation'
+    connect.error_details.Any:
+      type: object
+      properties:
+        type:
+          type: string
+          description: 'A URL that acts as a globally unique identifier for the type of the serialized message. For example: `type.googleapis.com/google.rpc.ErrorInfo`. This is used to determine the schema of the data in the `value` field and is the discriminator for the `debug` field.'
+        value:
+          type: string
+          format: binary
+          description: The Protobuf message, serialized as bytes and base64-encoded. The specific message type is identified by the `type` field.
+        debug:
+          oneOf:
+            - type: object
+              title: Any
+              additionalProperties: true
+              description: Detailed error information.
+          discriminator:
+            propertyName: type
+          title: Debug
+          description: Deserialized error detail payload. The 'type' field indicates the schema. This field is for easier debugging and should not be relied upon for application logic.
+      additionalProperties: true
+      description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message, with an additional debug field for ConnectRPC error details.
+    google.protobuf.Timestamp:
+      type: string
+      examples:
+        - "2023-01-15T01:30:15.01Z"
+        - "2024-12-25T12:00:00Z"
+      format: date-time
+      description: |-
+        A Timestamp represents a point in time independent of any time zone or local
+         calendar, encoded as a count of seconds and fractions of seconds at
+         nanosecond resolution. The count is relative to an epoch at UTC midnight on
+         January 1, 1970, in the proleptic Gregorian calendar which extends the
+         Gregorian calendar backwards to year one.
+
+         All minutes are 60 seconds long. Leap seconds are "smeared" so that no leap
+         second table is needed for interpretation, using a [24-hour linear
+         smear](https://developers.google.com/time/smear).
+
+         The range is from 0001-01-01T00:00:00Z to 9999-12-31T23:59:59.999999999Z. By
+         restricting to that range, we ensure that we can convert to and from [RFC
+         3339](https://www.ietf.org/rfc/rfc3339.txt) date strings.
+
+         # Examples
+
+         Example 1: Compute Timestamp from POSIX `time()`.
+
+             Timestamp timestamp;
+             timestamp.set_seconds(time(NULL));
+             timestamp.set_nanos(0);
+
+         Example 2: Compute Timestamp from POSIX `gettimeofday()`.
+
+             struct timeval tv;
+             gettimeofday(&tv, NULL);
+
+             Timestamp timestamp;
+             timestamp.set_seconds(tv.tv_sec);
+             timestamp.set_nanos(tv.tv_usec * 1000);
+
+         Example 3: Compute Timestamp from Win32 `GetSystemTimeAsFileTime()`.
+
+             FILETIME ft;
+             GetSystemTimeAsFileTime(&ft);
+             UINT64 ticks = (((UINT64)ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
+
+             // A Windows tick is 100 nanoseconds. Windows epoch 1601-01-01T00:00:00Z
+             // is 11644473600 seconds before Unix epoch 1970-01-01T00:00:00Z.
+             Timestamp timestamp;
+             timestamp.set_seconds((INT64) ((ticks / 10000000) - 11644473600LL));
+             timestamp.set_nanos((INT32) ((ticks % 10000000) * 100));
+
+         Example 4: Compute Timestamp from Java `System.currentTimeMillis()`.
+
+             long millis = System.currentTimeMillis();
+
+             Timestamp timestamp = Timestamp.newBuilder().setSeconds(millis / 1000)
+                 .setNanos((int) ((millis % 1000) * 1000000)).build();
+
+         Example 5: Compute Timestamp from Java `Instant.now()`.
+
+             Instant now = Instant.now();
+
+             Timestamp timestamp =
+                 Timestamp.newBuilder().setSeconds(now.getEpochSecond())
+                     .setNanos(now.getNano()).build();
+
+         Example 6: Compute Timestamp from current time in Python.
+
+             timestamp = Timestamp()
+             timestamp.GetCurrentTime()
+
+         # JSON Mapping
+
+         In JSON format, the Timestamp type is encoded as a string in the
+         [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt) format. That is, the
+         format is "{year}-{month}-{day}T{hour}:{min}:{sec}[.{frac_sec}]Z"
+         where {year} is always expressed using four digits while {month}, {day},
+         {hour}, {min}, and {sec} are zero-padded to two digits each. The fractional
+         seconds, which can go up to 9 digits (i.e. up to 1 nanosecond resolution),
+         are optional. The "Z" suffix indicates the timezone ("UTC"); the timezone
+         is required. A proto3 JSON serializer should always use UTC (as indicated by
+         "Z") when printing the Timestamp type and a proto3 JSON parser should be
+         able to accept both UTC and other timezones (as indicated by an offset).
+
+         For example, "2017-01-15T01:30:15.01Z" encodes 15.01 seconds past
+         01:30 UTC on January 15, 2017.
+
+         In JavaScript, one can convert a Date object to this format using the
+         standard
+         [toISOString()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString)
+         method. In Python, a standard `datetime.datetime` object can be converted
+         to this format using
+         [`strftime`](https://docs.python.org/2/library/time.html#time.strftime) with
+         the time format spec '%Y-%m-%dT%H:%M:%S.%fZ'. Likewise, in Java, one can use
+         the Joda Time's [`ISODateTimeFormat.dateTime()`](
+         http://joda-time.sourceforge.net/apidocs/org/joda/time/format/ISODateTimeFormat.html#dateTime()
+         ) to obtain a formatter capable of generating timestamps in this format.
+    night_shares.common.v1.NightKey:
+      type: object
+      properties:
+        propertyId:
+          type: string
+          title: property_id
+        roomTypeId:
+          type: string
+          title: room_type_id
+        date:
+          type: string
+          title: date
+      title: NightKey
+      additionalProperties: false
+      description: Dates use YYYY-MM-DD in the property local calendar.
+    night_shares.common.v1.RoomNights:
+      type: object
+      properties:
+        tenths:
+          type: integer
+          title: tenths
+          format: int32
+      title: RoomNights
+      additionalProperties: false
+      description: Quantities are integer tenths. Ten tenths equal one room night.
+    night_shares.common.v1.Usdc:
+      type: object
+      properties:
+        micros:
+          type:
+            - integer
+            - string
+          title: micros
+          format: int64
+      title: Usdc
+      additionalProperties: false
+    night_shares.market.v1.AgentOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        budget:
+          title: budget
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        spent:
+          title: spent
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        walletAddress:
+          type: string
+          title: wallet_address
+        status:
+          title: status
+          $ref: '#/components/schemas/night_shares.market.v1.AgentOrderStatus'
+        requiresVerification:
+          type: boolean
+          title: requires_verification
+      title: AgentOrder
+      additionalProperties: false
+    night_shares.market.v1.AgentOrderStatus:
+      type: string
+      title: AgentOrderStatus
+      enum:
+        - AGENT_ORDER_STATUS_UNSPECIFIED
+        - AGENT_ORDER_STATUS_PENDING
+        - AGENT_ORDER_STATUS_APPROVED
+        - AGENT_ORDER_STATUS_EXECUTED
+    night_shares.market.v1.ApproveAgentOrderRequest:
+      type: object
+      properties:
+        orderId:
+          type: string
+          title: order_id
+        verificationToken:
+          type: string
+          title: verification_token
+      title: ApproveAgentOrderRequest
+      additionalProperties: false
+    night_shares.market.v1.ApproveAgentOrderResponse:
+      type: object
+      properties:
+        order:
+          title: order
+          $ref: '#/components/schemas/night_shares.market.v1.AgentOrder'
+        execution:
+          title: execution
+          $ref: '#/components/schemas/night_shares.market.v1.Execution'
+      title: ApproveAgentOrderResponse
+      additionalProperties: false
+    night_shares.market.v1.Ask:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        price:
+          title: price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: Ask
+      additionalProperties: false
+    night_shares.market.v1.BookLevel:
+      type: object
+      properties:
+        price:
+          title: price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        source:
+          title: source
+          $ref: '#/components/schemas/night_shares.market.v1.BookSource'
+        guestOnly:
+          type: boolean
+          title: guest_only
+        net:
+          title: net
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        askId:
+          type: string
+          title: ask_id
+      title: BookLevel
+      additionalProperties: false
+    night_shares.market.v1.BookSource:
+      type: string
+      title: BookSource
+      enum:
+        - BOOK_SOURCE_UNSPECIFIED
+        - BOOK_SOURCE_POOL
+        - BOOK_SOURCE_TRADER
+        - BOOK_SOURCE_RECALL
+        - BOOK_SOURCE_SELL_BACK
+    night_shares.market.v1.BuyRequest:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        maxTotal:
+          title: max_total
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: BuyRequest
+      additionalProperties: false
+    night_shares.market.v1.BuyResponse:
+      type: object
+      properties:
+        execution:
+          title: execution
+          $ref: '#/components/schemas/night_shares.market.v1.Execution'
+      title: BuyResponse
+      additionalProperties: false
+    night_shares.market.v1.CancelAskRequest:
+      type: object
+      properties:
+        askId:
+          type: string
+          title: ask_id
+      title: CancelAskRequest
+      additionalProperties: false
+    night_shares.market.v1.CancelAskResponse:
+      type: object
+      title: CancelAskResponse
+      additionalProperties: false
+    night_shares.market.v1.CreateAgentOrderRequest:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        budget:
+          title: budget
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: CreateAgentOrderRequest
+      additionalProperties: false
+    night_shares.market.v1.CreateAgentOrderResponse:
+      type: object
+      properties:
+        order:
+          title: order
+          $ref: '#/components/schemas/night_shares.market.v1.AgentOrder'
+      title: CreateAgentOrderResponse
+      additionalProperties: false
+    night_shares.market.v1.DiscoverRequest:
+      type: object
+      properties:
+        city:
+          type: string
+          title: city
+        sort:
+          title: sort
+          $ref: '#/components/schemas/night_shares.market.v1.DiscoverSort'
+        valueOnly:
+          type: boolean
+          title: value_only
+        soon:
+          type: boolean
+          title: soon
+        watchlist:
+          type: boolean
+          title: watchlist
+      title: DiscoverRequest
+      additionalProperties: false
+    night_shares.market.v1.DiscoverResponse:
+      type: object
+      properties:
+        nights:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.NightCard'
+          title: nights
+      title: DiscoverResponse
+      additionalProperties: false
+    night_shares.market.v1.DiscoverSort:
+      type: string
+      title: DiscoverSort
+      enum:
+        - DISCOVER_SORT_UNSPECIFIED
+        - DISCOVER_SORT_RETURN
+        - DISCOVER_SORT_RISK
+    night_shares.market.v1.Execution:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        quote:
+          title: quote
+          $ref: '#/components/schemas/night_shares.market.v1.RouteQuote'
+        executedAt:
+          title: executed_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+      title: Execution
+      additionalProperties: false
+    night_shares.market.v1.Fill:
+      type: object
+      properties:
+        price:
+          title: price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        source:
+          title: source
+          $ref: '#/components/schemas/night_shares.market.v1.BookSource'
+        askId:
+          type: string
+          title: ask_id
+      title: Fill
+      additionalProperties: false
+    night_shares.market.v1.GetBookRequest:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+      title: GetBookRequest
+      additionalProperties: false
+    night_shares.market.v1.GetBookResponse:
+      type: object
+      properties:
+        asks:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.BookLevel'
+          title: asks
+        bids:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.BookLevel'
+          title: bids
+        recallCap:
+          title: recall_cap
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        fairPrice:
+          title: fair_price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        lateFeeBps:
+          type: integer
+          title: late_fee_bps
+          format: int32
+        releaseAt:
+          title: release_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+      title: GetBookResponse
+      additionalProperties: false
+    night_shares.market.v1.GetNightRequest:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+      title: GetNightRequest
+      additionalProperties: false
+    night_shares.market.v1.GetNightResponse:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.market.v1.NightCard'
+        stats:
+          title: stats
+          $ref: '#/components/schemas/night_shares.market.v1.NightStats'
+        priceHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.PricePoint'
+          title: price_history
+        hostTrackRecord:
+          title: host_track_record
+          $ref: '#/components/schemas/night_shares.market.v1.TrackRecord'
+        monthCalendar:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.NightCard'
+          title: month_calendar
+      title: GetNightResponse
+      additionalProperties: false
+    night_shares.market.v1.GetPortfolioRequest:
+      type: object
+      title: GetPortfolioRequest
+      additionalProperties: false
+    night_shares.market.v1.GetPortfolioResponse:
+      type: object
+      properties:
+        holdings:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.Holding'
+          title: holdings
+        listings:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.Ask'
+          title: listings
+        realisedPnl:
+          title: realised_pnl
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        unrealisedPnl:
+          title: unrealised_pnl
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        trackRecord:
+          title: track_record
+          $ref: '#/components/schemas/night_shares.market.v1.TraderTrackRecord'
+        agentOrders:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.AgentOrder'
+          title: agent_orders
+      title: GetPortfolioResponse
+      additionalProperties: false
+    night_shares.market.v1.Holding:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        averageCost:
+          title: average_cost
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        value:
+          title: value
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        unrealisedPnl:
+          title: unrealised_pnl
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        unsoldRefund:
+          title: unsold_refund
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: Holding
+      additionalProperties: false
+    night_shares.market.v1.ListTapeRequest:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+      title: ListTapeRequest
+      additionalProperties: false
+    night_shares.market.v1.ListTapeResponse:
+      type: object
+      properties:
+        prints:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.TapePrint'
+          title: prints
+      title: ListTapeResponse
+      additionalProperties: false
+    night_shares.market.v1.ListWatchRequest:
+      type: object
+      title: ListWatchRequest
+      additionalProperties: false
+    night_shares.market.v1.ListWatchResponse:
+      type: object
+      properties:
+        nights:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.NightCard'
+          title: nights
+      title: ListWatchResponse
+      additionalProperties: false
+    night_shares.market.v1.NightCard:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        propertyName:
+          type: string
+          title: property_name
+        roomTypeName:
+          type: string
+          title: room_type_name
+        city:
+          type: string
+          title: city
+        price:
+          title: price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        fairPrice:
+          title: fair_price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        estimatedReturnBps:
+          type: integer
+          title: estimated_return_bps
+          format: int32
+        risk:
+          title: risk
+          $ref: '#/components/schemas/night_shares.market.v1.Risk'
+        releaseAt:
+          title: release_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        changeBps:
+          type: integer
+          title: change_bps
+          format: int32
+      title: NightCard
+      additionalProperties: false
+    night_shares.market.v1.NightStats:
+      type: object
+      properties:
+        annualizedReturnBps:
+          type: integer
+          title: annualized_return_bps
+          format: int32
+        volatilityBps:
+          type: integer
+          title: volatility_bps
+          format: int32
+        sellThroughBps:
+          type: integer
+          title: sell_through_bps
+          format: int32
+        expectedExit:
+          title: expected_exit
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        worstRefund:
+          title: worst_refund
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        buyLiquidity:
+          title: buy_liquidity
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        sellLiquidity:
+          title: sell_liquidity
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+      title: NightStats
+      additionalProperties: false
+    night_shares.market.v1.PostAskRequest:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        price:
+          title: price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: PostAskRequest
+      additionalProperties: false
+    night_shares.market.v1.PostAskResponse:
+      type: object
+      properties:
+        ask:
+          title: ask
+          $ref: '#/components/schemas/night_shares.market.v1.Ask'
+        isAboveTwiceFair:
+          type: boolean
+          title: is_above_twice_fair
+        isAboveRecallCap:
+          type: boolean
+          title: is_above_recall_cap
+      title: PostAskResponse
+      additionalProperties: false
+    night_shares.market.v1.PricePoint:
+      type: object
+      properties:
+        at:
+          title: at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        price:
+          title: price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: PricePoint
+      additionalProperties: false
+    night_shares.market.v1.QuoteBuyRequest:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+      title: QuoteBuyRequest
+      additionalProperties: false
+    night_shares.market.v1.QuoteBuyResponse:
+      type: object
+      properties:
+        quote:
+          title: quote
+          $ref: '#/components/schemas/night_shares.market.v1.RouteQuote'
+      title: QuoteBuyResponse
+      additionalProperties: false
+    night_shares.market.v1.QuoteSellRequest:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+      title: QuoteSellRequest
+      additionalProperties: false
+    night_shares.market.v1.QuoteSellResponse:
+      type: object
+      properties:
+        quote:
+          title: quote
+          $ref: '#/components/schemas/night_shares.market.v1.RouteQuote'
+      title: QuoteSellResponse
+      additionalProperties: false
+    night_shares.market.v1.Risk:
+      type: string
+      title: Risk
+      enum:
+        - RISK_UNSPECIFIED
+        - RISK_LOW
+        - RISK_MEDIUM
+        - RISK_HIGH
+    night_shares.market.v1.RouteQuote:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        requested:
+          title: requested
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        filled:
+          title: filled
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        fills:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.Fill'
+          title: fills
+        average:
+          title: average
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        gross:
+          title: gross
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        fee:
+          title: fee
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        total:
+          title: total
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        capUsed:
+          title: cap_used
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        cap:
+          title: cap
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        lateFee:
+          title: late_fee
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        unsoldRefund:
+          title: unsold_refund
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        releaseAt:
+          title: release_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+      title: RouteQuote
+      additionalProperties: false
+    night_shares.market.v1.SellRequest:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        minTotal:
+          title: min_total
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: SellRequest
+      additionalProperties: false
+    night_shares.market.v1.SellResponse:
+      type: object
+      properties:
+        execution:
+          title: execution
+          $ref: '#/components/schemas/night_shares.market.v1.Execution'
+      title: SellResponse
+      additionalProperties: false
+    night_shares.market.v1.TapePrint:
+      type: object
+      properties:
+        id:
+          type: string
+          title: id
+        price:
+          title: price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        side:
+          title: side
+          $ref: '#/components/schemas/night_shares.market.v1.TradeSide'
+        at:
+          title: at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+      title: TapePrint
+      additionalProperties: false
+    night_shares.market.v1.ToggleWatchRequest:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+      title: ToggleWatchRequest
+      additionalProperties: false
+    night_shares.market.v1.ToggleWatchResponse:
+      type: object
+      properties:
+        isWatched:
+          type: boolean
+          title: is_watched
+      title: ToggleWatchResponse
+      additionalProperties: false
+    night_shares.market.v1.TrackRecord:
+      type: object
+      properties:
+        nightsTraded:
+          type: integer
+          title: nights_traded
+          format: int32
+        bookedBps:
+          type: integer
+          title: booked_bps
+          format: int32
+        unsoldBps:
+          type: integer
+          title: unsold_bps
+          format: int32
+        averageReturnBps:
+          type: integer
+          title: average_return_bps
+          format: int32
+        profitableBps:
+          type: integer
+          title: profitable_bps
+          format: int32
+        refundBps:
+          type: integer
+          title: refund_bps
+          format: int32
+        honouredBps:
+          type: integer
+          title: honoured_bps
+          format: int32
+        incidents:
+          type: integer
+          title: incidents
+          format: int32
+        securityHold:
+          title: security_hold
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: TrackRecord
+      additionalProperties: false
+    night_shares.market.v1.TradeSide:
+      type: string
+      title: TradeSide
+      enum:
+        - TRADE_SIDE_UNSPECIFIED
+        - TRADE_SIDE_BUY
+        - TRADE_SIDE_SELL
+    night_shares.market.v1.TraderTrackRecord:
+      type: object
+      properties:
+        closedPositions:
+          type: integer
+          title: closed_positions
+          format: int32
+        profitableBps:
+          type: integer
+          title: profitable_bps
+          format: int32
+        averageReturnBps:
+          type: integer
+          title: average_return_bps
+          format: int32
+        realisedPnl:
+          title: realised_pnl
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: TraderTrackRecord
+      additionalProperties: false
+security: []
+tags:
+  - name: night_shares.market.v1.MarketService

@@ -1,0 +1,205 @@
+syntax = "proto3";
+
+package night_shares.market.v1;
+
+import "google/protobuf/timestamp.proto";
+import "night_shares/auth/v1/access.proto";
+import "night_shares/common/v1/money.proto";
+import "night_shares/common/v1/night.proto";
+import "night_shares/market/v1/analytics.proto";
+import "night_shares/market/v1/book.proto";
+import "night_shares/market/v1/portfolio.proto";
+
+service MarketService {
+  rpc Discover(DiscoverRequest) returns (DiscoverResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+  rpc GetNight(GetNightRequest) returns (GetNightResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+  rpc GetBook(GetBookRequest) returns (GetBookResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+  rpc ListTape(ListTapeRequest) returns (ListTapeResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+  rpc QuoteBuy(QuoteBuyRequest) returns (QuoteBuyResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+  rpc QuoteSell(QuoteSellRequest) returns (QuoteSellResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_PUBLIC;
+  }
+  rpc Buy(BuyRequest) returns (BuyResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc Sell(SellRequest) returns (SellResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc PostAsk(PostAskRequest) returns (PostAskResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc CancelAsk(CancelAskRequest) returns (CancelAskResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc GetPortfolio(GetPortfolioRequest) returns (GetPortfolioResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc ToggleWatch(ToggleWatchRequest) returns (ToggleWatchResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc ListWatch(ListWatchRequest) returns (ListWatchResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc CreateAgentOrder(CreateAgentOrderRequest) returns (CreateAgentOrderResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc ApproveAgentOrder(ApproveAgentOrderRequest) returns (ApproveAgentOrderResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+}
+
+message DiscoverRequest {
+  string city = 1;
+  DiscoverSort sort = 2;
+  bool value_only = 3;
+  bool soon = 4;
+  bool watchlist = 5;
+}
+
+message DiscoverResponse {
+  repeated NightCard nights = 1;
+}
+
+message GetNightRequest {
+  night_shares.common.v1.NightKey night = 1;
+}
+
+message GetNightResponse {
+  NightCard night = 1;
+  NightStats stats = 2;
+  repeated PricePoint price_history = 3;
+  TrackRecord host_track_record = 4;
+  repeated NightCard month_calendar = 5;
+}
+
+message GetBookRequest {
+  night_shares.common.v1.NightKey night = 1;
+}
+
+message GetBookResponse {
+  repeated BookLevel asks = 1;
+  repeated BookLevel bids = 2;
+  night_shares.common.v1.Usdc recall_cap = 3;
+  night_shares.common.v1.Usdc fair_price = 4;
+  int32 late_fee_bps = 5;
+  google.protobuf.Timestamp release_at = 6;
+}
+
+message ListTapeRequest {
+  night_shares.common.v1.NightKey night = 1;
+}
+
+message ListTapeResponse {
+  repeated TapePrint prints = 1;
+}
+
+message QuoteBuyRequest {
+  night_shares.common.v1.NightKey night = 1;
+  night_shares.common.v1.RoomNights size = 2;
+}
+
+message QuoteBuyResponse {
+  RouteQuote quote = 1;
+}
+
+message QuoteSellRequest {
+  night_shares.common.v1.NightKey night = 1;
+  night_shares.common.v1.RoomNights size = 2;
+}
+
+message QuoteSellResponse {
+  RouteQuote quote = 1;
+}
+
+message BuyRequest {
+  night_shares.common.v1.NightKey night = 1;
+  night_shares.common.v1.RoomNights size = 2;
+  night_shares.common.v1.Usdc max_total = 3;
+}
+
+message BuyResponse {
+  Execution execution = 1;
+}
+
+message SellRequest {
+  night_shares.common.v1.NightKey night = 1;
+  night_shares.common.v1.RoomNights size = 2;
+  night_shares.common.v1.Usdc min_total = 3;
+}
+
+message SellResponse {
+  Execution execution = 1;
+}
+
+message PostAskRequest {
+  night_shares.common.v1.NightKey night = 1;
+  night_shares.common.v1.RoomNights size = 2;
+  night_shares.common.v1.Usdc price = 3;
+}
+
+message PostAskResponse {
+  Ask ask = 1;
+  bool is_above_twice_fair = 2;
+  bool is_above_recall_cap = 3;
+}
+
+message CancelAskRequest {
+  string ask_id = 1;
+}
+
+message CancelAskResponse {}
+
+message GetPortfolioRequest {}
+
+message GetPortfolioResponse {
+  repeated Holding holdings = 1;
+  repeated Ask listings = 2;
+  night_shares.common.v1.Usdc realised_pnl = 3;
+  night_shares.common.v1.Usdc unrealised_pnl = 4;
+  TraderTrackRecord track_record = 5;
+  repeated AgentOrder agent_orders = 6;
+}
+
+message ToggleWatchRequest {
+  night_shares.common.v1.NightKey night = 1;
+}
+
+message ToggleWatchResponse {
+  bool is_watched = 1;
+}
+
+message ListWatchRequest {}
+
+message ListWatchResponse {
+  repeated NightCard nights = 1;
+}
+
+message CreateAgentOrderRequest {
+  night_shares.common.v1.NightKey night = 1;
+  night_shares.common.v1.RoomNights size = 2;
+  night_shares.common.v1.Usdc budget = 3;
+}
+
+message CreateAgentOrderResponse {
+  AgentOrder order = 1;
+}
+
+message ApproveAgentOrderRequest {
+  string order_id = 1;
+  string verification_token = 2;
+}
+
+message ApproveAgentOrderResponse {
+  AgentOrder order = 1;
+  Execution execution = 2;
+}

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package night_shares.wallet.v1;
+
+import "google/protobuf/timestamp.proto";
+import "night_shares/common/v1/money.proto";
+
+enum TransactionKind {
+  TRANSACTION_KIND_UNSPECIFIED = 0;
+  TRANSACTION_KIND_BOOKING = 1;
+  TRANSACTION_KIND_BUY = 2;
+  TRANSACTION_KIND_SELL = 3;
+  TRANSACTION_KIND_REFUND = 4;
+  TRANSACTION_KIND_WITHDRAWAL = 5;
+  TRANSACTION_KIND_FEE = 6;
+  TRANSACTION_KIND_DEPOSIT = 7;
+}
+
+message Transaction {
+  string id = 1;
+  TransactionKind kind = 2;
+  night_shares.common.v1.Usdc amount = 3;
+  google.protobuf.Timestamp at = 4;
+  string reference = 5;
+  string description = 6;
+}

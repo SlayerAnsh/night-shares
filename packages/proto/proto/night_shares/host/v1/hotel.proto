@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package night_shares.host.v1;
+
+import "google/protobuf/timestamp.proto";
+import "night_shares/common/v1/money.proto";
+import "night_shares/common/v1/night.proto";
+import "night_shares/host/v1/opening.proto";
+
+message Payout {
+  night_shares.common.v1.Usdc available_now = 1;
+  night_shares.common.v1.Usdc held_for_traders = 2;
+  night_shares.common.v1.Usdc security_hold = 3;
+  night_shares.common.v1.Usdc security_hold_target = 4;
+  night_shares.common.v1.Usdc fees = 5;
+  night_shares.common.v1.Usdc gross = 6;
+}
+
+message Occupancy {
+  string date = 1;
+  night_shares.common.v1.RoomNights allotment = 2;
+  night_shares.common.v1.RoomNights booked = 3;
+  night_shares.common.v1.RoomNights held = 4;
+  night_shares.common.v1.RoomNights on_sale = 5;
+}
+
+message HostKpis {
+  night_shares.common.v1.Usdc revenue = 1;
+  night_shares.common.v1.Usdc average_rate = 2;
+  int32 occupancy_bps = 3;
+  night_shares.common.v1.Usdc available_now = 4;
+}
+
+message HotelSummary {
+  string property_id = 1;
+  string name = 2;
+  string city = 3;
+  HostKpis kpis = 4;
+}
+
+message Alert {
+  string property_id = 1;
+  string date = 2;
+  string message = 3;
+}
+
+message HostNight {
+  night_shares.common.v1.NightKey night = 1;
+  night_shares.common.v1.RoomNights allotment = 2;
+  night_shares.common.v1.RoomNights booked = 3;
+  night_shares.common.v1.RoomNights held = 4;
+  night_shares.common.v1.RoomNights on_sale = 5;
+  night_shares.common.v1.Usdc usual_rate = 6;
+  night_shares.common.v1.Usdc guest_price = 7;
+  DemandPreset demand_preset = 8;
+  ReleasePolicy release_policy = 9;
+  bool is_stopped = 10;
+  google.protobuf.Timestamp release_at = 11;
+  Payout payout = 12;
+}
+
+message Activity {
+  google.protobuf.Timestamp at = 1;
+  string kind = 2;
+  night_shares.common.v1.RoomNights size = 3;
+  night_shares.common.v1.Usdc amount = 4;
+}
+
+message ReleaseEvent {
+  google.protobuf.Timestamp at = 1;
+  string description = 2;
+}
+
+message HotelPricePoint {
+  string date = 1;
+  night_shares.common.v1.Usdc guest_price = 2;
+  night_shares.common.v1.Usdc usual_rate = 3;
+}

@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package night_shares.host.v1;
+
+import "night_shares/common/v1/money.proto";
+import "night_shares/common/v1/night.proto";
+
+enum Pms {
+  PMS_UNSPECIFIED = 0;
+  PMS_MEWS = 1;
+  PMS_CLOUDBEDS = 2;
+  PMS_SITE_MINDER = 3;
+}
+
+enum DemandPreset {
+  DEMAND_PRESET_UNSPECIFIED = 0;
+  DEMAND_PRESET_CALM = 1;
+  DEMAND_PRESET_NORMAL = 2;
+  DEMAND_PRESET_PEAK = 3;
+}
+
+enum ReleasePolicy {
+  RELEASE_POLICY_UNSPECIFIED = 0;
+  RELEASE_POLICY_ARRIVAL_14 = 1;
+  RELEASE_POLICY_DAY_BEFORE_18 = 2;
+  RELEASE_POLICY_THREE_DAYS_BEFORE_12 = 3;
+}
+
+message OpenNightsSelection {
+  string property_id = 1;
+  repeated string dates = 2;
+  repeated string room_type_ids = 3;
+  int32 allotment_percent = 4;
+  DemandPreset demand_preset = 5;
+  ReleasePolicy release_policy = 6;
+}
+
+message OpenNightPreview {
+  night_shares.common.v1.NightKey night = 1;
+  night_shares.common.v1.RoomNights allotment = 2;
+  night_shares.common.v1.Usdc floor = 3;
+  night_shares.common.v1.Usdc last_room_price = 4;
+  night_shares.common.v1.Usdc guest_price_cap = 5;
+  night_shares.common.v1.Usdc minimum_payout = 6;
+  night_shares.common.v1.Usdc security_hold = 7;
+}

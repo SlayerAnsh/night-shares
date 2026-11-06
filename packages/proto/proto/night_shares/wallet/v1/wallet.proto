@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package night_shares.wallet.v1;
+
+import "night_shares/auth/v1/access.proto";
+import "night_shares/common/v1/money.proto";
+import "night_shares/wallet/v1/transaction.proto";
+
+service WalletService {
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+  rpc ListTransactions(ListTransactionsRequest) returns (ListTransactionsResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
+}
+
+message GetBalanceRequest {}
+
+message GetBalanceResponse {
+  night_shares.common.v1.Usdc balance = 1;
+  string wallet_address = 2;
+}
+
+message ListTransactionsRequest {}
+
+message ListTransactionsResponse {
+  repeated Transaction transactions = 1;
+}

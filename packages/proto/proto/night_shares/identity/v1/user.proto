@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package night_shares.identity.v1;
+
+enum VerificationLevel {
+  VERIFICATION_LEVEL_UNSPECIFIED = 0;
+  VERIFICATION_LEVEL_DEVICE = 1;
+  VERIFICATION_LEVEL_ORB = 2;
+}
+
+message User {
+  string id = 1;
+  string human_id = 2;
+  VerificationLevel level = 3;
+  string wallet_address = 4;
+}

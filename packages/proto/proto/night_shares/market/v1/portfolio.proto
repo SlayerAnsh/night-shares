@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package night_shares.market.v1;
+
+import "night_shares/common/v1/money.proto";
+import "night_shares/common/v1/night.proto";
+
+enum AgentOrderStatus {
+  AGENT_ORDER_STATUS_UNSPECIFIED = 0;
+  AGENT_ORDER_STATUS_PENDING = 1;
+  AGENT_ORDER_STATUS_APPROVED = 2;
+  AGENT_ORDER_STATUS_EXECUTED = 3;
+}
+
+message Holding {
+  night_shares.common.v1.NightKey night = 1;
+  night_shares.common.v1.RoomNights size = 2;
+  night_shares.common.v1.Usdc average_cost = 3;
+  night_shares.common.v1.Usdc value = 4;
+  night_shares.common.v1.Usdc unrealised_pnl = 5;
+  night_shares.common.v1.Usdc unsold_refund = 6;
+}
+
+message AgentOrder {
+  string id = 1;
+  night_shares.common.v1.NightKey night = 2;
+  night_shares.common.v1.RoomNights size = 3;
+  night_shares.common.v1.Usdc budget = 4;
+  night_shares.common.v1.Usdc spent = 5;
+  string wallet_address = 6;
+  AgentOrderStatus status = 7;
+  bool requires_verification = 8;
+}
+
+message TraderTrackRecord {
+  int32 closed_positions = 1;
+  int32 profitable_bps = 2;
+  int32 average_return_bps = 3;
+  night_shares.common.v1.Usdc realised_pnl = 4;
+}

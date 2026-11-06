@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package night_shares.market.v1;
+
+import "google/protobuf/timestamp.proto";
+import "night_shares/common/v1/money.proto";
+import "night_shares/common/v1/night.proto";
+
+enum BookSource {
+  BOOK_SOURCE_UNSPECIFIED = 0;
+  BOOK_SOURCE_POOL = 1;
+  BOOK_SOURCE_TRADER = 2;
+  BOOK_SOURCE_RECALL = 3;
+  BOOK_SOURCE_SELL_BACK = 4;
+}
+
+message BookLevel {
+  night_shares.common.v1.Usdc price = 1;
+  night_shares.common.v1.RoomNights size = 2;
+  BookSource source = 3;
+  bool guest_only = 4;
+  night_shares.common.v1.Usdc net = 5;
+  string ask_id = 6;
+}
+
+message Fill {
+  night_shares.common.v1.Usdc price = 1;
+  night_shares.common.v1.RoomNights size = 2;
+  BookSource source = 3;
+  string ask_id = 4;
+}
+
+message RouteQuote {
+  night_shares.common.v1.NightKey night = 1;
+  night_shares.common.v1.RoomNights requested = 2;
+  night_shares.common.v1.RoomNights filled = 3;
+  repeated Fill fills = 4;
+  night_shares.common.v1.Usdc average = 5;
+  night_shares.common.v1.Usdc gross = 6;
+  night_shares.common.v1.Usdc fee = 7;
+  night_shares.common.v1.Usdc total = 8;
+  night_shares.common.v1.RoomNights cap_used = 9;
+  night_shares.common.v1.RoomNights cap = 10;
+  night_shares.common.v1.Usdc late_fee = 11;
+  night_shares.common.v1.Usdc unsold_refund = 12;
+  google.protobuf.Timestamp release_at = 13;
+}
+
+message Ask {
+  string id = 1;
+  night_shares.common.v1.NightKey night = 2;
+  night_shares.common.v1.RoomNights size = 3;
+  night_shares.common.v1.Usdc price = 4;
+}
+
+message Execution {
+  string id = 1;
+  RouteQuote quote = 2;
+  google.protobuf.Timestamp executed_at = 3;
+}

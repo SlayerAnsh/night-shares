@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package night_shares.stay.v1;
+
+import "google/protobuf/timestamp.proto";
+import "night_shares/common/v1/money.proto";
+
+enum PayMethod {
+  PAY_METHOD_UNSPECIFIED = 0;
+  PAY_METHOD_USDC = 1;
+  PAY_METHOD_CARD = 2;
+}
+
+enum PriceSource {
+  PRICE_SOURCE_UNSPECIFIED = 0;
+  PRICE_SOURCE_HOTEL = 1;
+  PRICE_SOURCE_TRADER = 2;
+  PRICE_SOURCE_RECALL_CAP = 3;
+}
+
+message StaySelection {
+  string property_id = 1;
+  string room_type_id = 2;
+  string check_in = 3;
+  string check_out = 4;
+  int32 adults = 5;
+  int32 kids = 6;
+  int32 rooms = 7;
+}
+
+message Trip {
+  string id = 1;
+  string ref = 2;
+  string hotel_ref = 3;
+  string property_id = 4;
+  string room_type_id = 5;
+  string check_in = 6;
+  string check_out = 7;
+  int32 adults = 8;
+  int32 kids = 9;
+  int32 rooms = 10;
+  night_shares.common.v1.Usdc total = 11;
+  night_shares.common.v1.Usdc fee = 12;
+  PayMethod pay_method = 13;
+  bool checked_in = 14;
+}
+
+message NightPrice {
+  string date = 1;
+  night_shares.common.v1.Usdc price = 2;
+  PriceSource source = 3;
+  night_shares.common.v1.Usdc usual_rate = 4;
+}
+
+message StayQuote {
+  string id = 1;
+  StaySelection selection = 2;
+  night_shares.common.v1.Usdc total = 3;
+  night_shares.common.v1.Usdc fee = 4;
+  repeated NightPrice nights = 5;
+  night_shares.common.v1.Usdc usual_rate = 6;
+}
+
+message Receipt {
+  Trip trip = 1;
+  night_shares.common.v1.Usdc subtotal = 2;
+  string wallet_address = 3;
+  google.protobuf.Timestamp paid_at = 4;
+}
