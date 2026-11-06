@@ -8,7 +8,7 @@ const dates = Array.from({ length: 60 }, (_, i) =>
 );
 
 test("original model fingerprint and all exported constants match", () => {
-  expect(modelSha.slice(0, 12)).toBe("4b697be65422");
+  expect(modelSha.slice(0, 12)).toBe("7d071c4616d8");
   expect(shared.props).toHaveLength(6);
   expect(shared.today.getFullYear()).toBe(2026);
   expect(shared.today.getMonth()).toBe(11);
@@ -53,6 +53,7 @@ for (const property of shared.props) {
             );
           }
         compare(port.hostPayout(state), original.hostPayout(reference));
+        compare(port.cutoffRefund(state), original.cutoffRefund(reference));
         for (const hours of [-1, 0, 14, 36, 71.9, 72, state.hoursLeft]) {
           compare(port.lateFee(hours), original.lateFee(hours));
         }
@@ -184,5 +185,13 @@ test("host payout matches with empty, fully held and fully booked inventory", ()
     for (const held of [0, q / 2, q]) {
       const state = { F: 100, k: 0.6, S: 10, q, held };
       compare(port.hostPayout(state), original.hostPayout(state));
+    }
+});
+
+test("cutoff refunds match for empty, negligible, fractional and fully held inventory", () => {
+  for (const k of [0, 0.6, 1.2])
+    for (const held of [-1, 0, 1e-10, 1e-9, 2e-9, 0.1, 4, 6]) {
+      const input = { F: 6000, k, S: 15, q: 6, held };
+      compare(port.cutoffRefund(input), original.cutoffRefund(input));
     }
 });

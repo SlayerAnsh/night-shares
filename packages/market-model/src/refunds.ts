@@ -1,5 +1,6 @@
 import { REFUND_AT_FAIR } from "./constants";
 
+/** @deprecated Use cutoffRefund instead of the parked ask refund rule. */
 export function unsoldRefund(
   ask: number | null | undefined,
   pstar: number,
@@ -10,4 +11,5 @@ export function unsoldRefund(
   return REFUND_AT_FAIR * pstar * (2 - ask / pstar);
 }
 
+// For a double sale reported by the API attester, the holder gets the pool bid; pass that bid as pstar.
 export const offlineSaleRefund = (pstar: number): number => pstar;
