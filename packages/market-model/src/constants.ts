@@ -1,0 +1,15 @@
+export const FEE = 0.013;
+export const HOST_FEE = 0.01;
+export const PLATFORM_FEE = 0.003;
+export const PRESETS = { calm: 0.3, normal: 0.6, peak: 1.0 };
+export const FLOOR_RATIO = 0.85;
+export const RECALL_MARKUP = 0.25;
+export const GUEST_TRANCHE = 0.2;
+export const CAP_PEAK = 0.3;
+export const LATE_HOURS = 72;
+export const LATE_MAX = 0.3;
+export const BOND = 0.1;
+export const PSTAR_BAND = [0.7, 2.5] as const;
+export const PSTAR_MAX_MOVE_PER_HOUR = 0.05;
+export const REFUND_AT_FAIR = 0.5;
+export const SLICE = 0.1;
