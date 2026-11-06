@@ -171,6 +171,19 @@ apps/api/test/e2e/        full flows through the generated Connect client
 | `WalletProvider` | creates a fake address, keeps balances in memory, seeds 12,480 USDC | Arc USDC |
 | `Onramp` | card charge always succeeds, converts 1:1 | card onramp |
 | `ChannelManager` | returns room types and usual rates from seed, accepts reservation push and returns a hotel reference | Mews, Cloudbeds, SiteMinder |
+| `SessionStore` | 256 bit random tokens, stored by SHA-256 hash | persistent store |
+| `ActivityLog` | in memory list of night events (bookings, trades, asks, host changes) | database table or event stream |
+| `VerificationStore` | one time World ID action tokens, five minute expiry, bound to user and action | persistent store |
+
+The identity verifier returns a stable per app `subject` (used as `humanId`) and a per action `nullifier`. World ID gives a different nullifier for every action, so only the subject can link a later check to the signed in human.
+
+### Money
+
+Every payment goes through `WalletProvider.settle(legs)`, which applies all legs or none. Each money path (buy, sell, booking, withdraw) first reserves inventory and position in one synchronous `inventory.update`, then settles, and reverts both if settlement fails. A real Arc adapter maps `settle` to one multi transfer transaction.
+
+### Host ownership
+
+Each property has one owner. The four seeded connected hotels (Velana, Ubud, Rive, Alpen) belong to the demo host, who signs in with the mock proof `mock:host:orb`. Other hosts start with no hotels and can claim only unowned properties (Salinas, Machiya) through `ConnectChannelManager`. Every host RPC checks ownership, and withdrawals are tracked per property.
 
 ### Market state
 
@@ -194,6 +207,8 @@ apps/web/app/
 Data access uses the generated Connect Query hooks only.
 
 ## Build order
+
+Steps 1 to 5 are done for every service, on mocks.
 
 1. Workspace skeleton, tooling, `packages/tsconfig`.
 2. `packages/proto` with all services and working generation.
