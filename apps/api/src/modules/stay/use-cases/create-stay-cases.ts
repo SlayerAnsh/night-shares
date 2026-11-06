@@ -1,0 +1,24 @@
+import type { Ports } from "../../../container/ports";
+import type { StayRepo } from "../repo/stay-repo";
+import { createCreateBooking } from "./booking/create-booking";
+import { createGetPriceCalendar } from "./quotes/get-price-calendar";
+import { createLockQuote } from "./quotes/lock-quote";
+import { createQuoteStay } from "./quotes/quote-stay";
+import { createListSaves } from "./saves/list-saves";
+import { createToggleSave } from "./saves/toggle-save";
+import { createCheckIn } from "./trips/check-in";
+import { createGetReceipt } from "./trips/get-receipt";
+import { createListTrips } from "./trips/list-trips";
+export function createStayCases(ports: Ports, repo: StayRepo) {
+  return {
+    getPriceCalendar: createGetPriceCalendar(ports),
+    quoteStay: createQuoteStay(ports, repo),
+    lockQuote: createLockQuote(ports, repo),
+    createBooking: createCreateBooking(ports, repo),
+    listTrips: createListTrips(ports, repo),
+    checkIn: createCheckIn(ports, repo),
+    getReceipt: createGetReceipt(repo),
+    toggleSave: createToggleSave(ports, repo),
+    listSaves: createListSaves(ports, repo),
+  };
+}

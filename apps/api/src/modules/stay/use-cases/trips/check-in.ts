@@ -1,0 +1,18 @@
+import type { Ports } from "../../../../container/ports";
+import { DomainError } from "../../../../shared/errors/domain-error";
+import type { StayRepo } from "../../repo/stay-repo";
+import { getTrip } from "./get-trip";
+export function createCheckIn(ports: Ports, repo: StayRepo) {
+  return (id: string, token: string, userId: string) => {
+    const saved = getTrip(repo, id, userId);
+    if (!ports.verifications.consume({ token, userId, action: "check_in" }))
+      throw new DomainError(
+        "PERMISSION_DENIED",
+        "Verify your identity to check in.",
+      );
+    if (saved.trip.checkOut < ports.clock.today())
+      throw new DomainError("FAILED_PRECONDITION", "This stay has ended.");
+    saved.trip.checkedIn = true;
+    return structuredClone(saved.trip);
+  };
+}
