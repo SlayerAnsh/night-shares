@@ -3,10 +3,10 @@ import { cutoffRefund } from "./cutoff-refund";
 
 test("cutoff redeems held nights at their average pool bid less thirty percent", () => {
   const result = cutoffRefund({ F: 6000, k: 1.2, S: 15, q: 6, held: 4 });
-  expect(result.avgBid).toBeCloseTo(8295.85, 2);
-  expect(result.perNight).toBeCloseTo(5807.1, 2);
-  expect(result.total).toBeCloseTo(23228.39, 2);
-  expect(result.haircut).toBeCloseTo(9955.02, 2);
+  expect(result.avgBid).toBeCloseTo(8295.33, 2);
+  expect(result.perNight).toBeCloseTo(5806.73, 2);
+  expect(result.total).toBeCloseTo(23226.92, 2);
+  expect(result.haircut).toBeCloseTo(9954.39, 2);
 });
 
 test("empty and negligible holdings receive zero cutoff refund", () => {

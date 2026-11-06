@@ -6,14 +6,21 @@ import {
   RECALL_MIN_MARKUP,
 } from "./constants";
 
+const RAW_RATIO = 1e-12,
+  LN_TICK = Math.log(1.0001);
+
+const onTick = (p: number) =>
+  // biome-ignore lint/style/useExponentiationOperator: Preserve the frozen mock formula exactly.
+  Math.pow(1.0001, Math.floor(Math.log(p * RAW_RATIO) / LN_TICK)) / RAW_RATIO;
+
 const ideal = (F: number, k: number, S: number, q: number) =>
   F * Math.exp((k * q) / S);
 
 function room(F: number, k: number, S: number, i: number) {
   const lo = i,
     hi = Math.min(i + 1, S),
-    sa = Math.sqrt(ideal(F, k, S, lo)),
-    sb = Math.sqrt(ideal(F, k, S, hi));
+    sa = Math.sqrt(onTick(ideal(F, k, S, lo))),
+    sb = Math.sqrt(onTick(ideal(F, k, S, hi)));
   return { lo, hi, sa, L: (hi - lo) / (1 / sa - 1 / sb) };
 }
 

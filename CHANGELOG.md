@@ -33,6 +33,8 @@ All notable changes to this monorepo. Newest first.
 
 ### Changed
 
+- Market model synced to `53a8f129bd65`: ladder boundaries snap down to the Uniswap v4 tick grid using the raw USDC/NightToken decimal ratio; parity, quote expectations and ladder examples are re-pinned.
+
 - Web UI consolidated into `@night-shares/design-system`: new `Kpis`, `Icon`, `BackLink` and `Alert` primitives; `Segmented` takes number values and trade sizes, `Button` gains `text`, `Badge` gains `warn`, `Pill` gains status dots and a small size, `EmptyState` gains `plain`. Stay, Host and Trade use them instead of local copies. `AppShell` adds `layout` (`column`, `bleed`, `free`) and a transparent hero nav, so the Stay hero is full bleed without negative margins and Trade uses the shell too.
 - World ID 4.0: IDKit 4.6.0, server signed `rp_context`, proofs verified at `/api/v4/verify/{rp_id}`. Stay trust moments use Selfie Check and Trade, Host and agent approvals use Proof of Human. `humanId` is the uniqueness nullifier of the fixed enrollment action `night-shares-enroll`, stable across re-login and session resets; session IDs only link returning logins, and a Selfie to Orb upgrade keeps one user. Per action proofs (`check_in:<bookingId>`, `approve_agent_order:<orderId>`) are one time and bound to their booking or order. The mock client can simulate cancel and reject.
 - Every NightToken quantity is a whole tenth of a room night: a shared guard converts model floats to integer tenths (tolerating float drift only), buys, sells, quotes, agent orders, partial fills, recall, cutoff and openings reject or floor non tenth amounts, and migration 340 makes SQLite reject fractional positions and ask sizes.

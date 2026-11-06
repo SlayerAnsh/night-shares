@@ -1,6 +1,6 @@
 # @night-shares/market-model
 
-Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `b71a8bbf697d`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
+Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `53a8f129bd65`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
 
 ## Public API
 
@@ -66,15 +66,15 @@ Guests never pay above the recall cap: routing stops at the first ask priced abo
 
 `cutoffRefund({ F, k, S, q, held })` redeems unsold holdings against their pool reserve `L = cost(F, k, S, q - held, q)`. It returns `avgBid = L / held`, `perNight = avgBid * (1 - LATE_MAX)`, `total = L * (1 - LATE_MAX)` and `haircut = L * LATE_MAX`. The 30% haircut transfers to the rebate pool, never the host. All fields are zero unless `held > 1e-9`, preserving the source guard.
 
-For `F: 6000`, `k: 1.2`, `S: 15`, `q: 6` and `held: 4`, results rounded to cents are `avgBid: 8295.85`, `perNight: 5807.10`, `total: 23228.39` and `haircut: 9955.02`. Calculations remain unrounded internally.
+For `F: 6000`, `k: 1.2`, `S: 15`, `q: 6` and `held: 4`, results rounded to cents are `avgBid: 8295.33`, `perNight: 5806.73`, `total: 23226.92` and `haircut: 9954.39`. Calculations remain unrounded internally.
 
 The source exposes 35 exports. The legacy parked-ask refund, `offlineSaleRefund` and `offlineSaleCover` are removed.
 
 ## Ladder pricing
 
-`price` and `cost` follow one constant-liquidity v4 position per room. Internal `ideal(F, k, S, q)` is `F * exp(k * q / S)`. Each room spans that ideal price at its endpoints, with a partial last room when supply is fractional. `sqrtAt` computes the price within a position; `cost` sums liquidity times the change in square-root price across overlapping rooms. Reversed intervals negate cost; zero steepness charges `F * (b - a)`. `lastRoomPrice` and `recallStrike` retain their ideal endpoint formulas.
+`price` and `cost` follow one constant-liquidity v4 position per room. Internal `ideal(F, k, S, q)` is `F * exp(k * q / S)`. Each room snaps both ideal endpoint prices down to the Uniswap v4 tick grid, with a partial last room when supply is fractional. The internal constants are `RAW_RATIO = 1e-12` (raw USDC with 6 decimals per raw NightToken with 18 decimals) and `LN_TICK = Math.log(1.0001)`. The exact operation order is `Math.pow(1.0001, Math.floor(Math.log(p * RAW_RATIO) / LN_TICK)) / RAW_RATIO`, applied before each endpoint square root. For nonzero steepness, the floor itself snaps: `price(6000, 1.2, 15, 0) = 5999.7176` rounded to four decimals. `sqrtAt` computes the price within a position; `cost` sums liquidity times the change in square-root price across overlapping rooms. Reversed intervals negate cost; zero steepness charges `F * (b - a)`. `lastRoomPrice` and `recallStrike` retain their ideal endpoint formulas.
 
-For `F = 6000`, `k = 1.2`, `S = 15`, rounded costs are `cost(6, 7) = 10092` and `cost(0, 15) = 173962`. At `q = 6`, `held = 4`, host payout is `availableNow: 13009.85`, `heldForTraders: 33183.42`. Internal calculations preserve the mock's exact floating point operation order. Chain settlement remains mock.
+For `F = 6000`, `k = 1.2`, `S = 15`, rounded costs are `cost(6, 7) = 10091.428504` and `cost(0, 15) = 173950.751355`. The buyback difference `cost(6, 9) * 1.013 - cost(2, 5)` is `9427.148645` rounded to six decimals. At `q = 6`, `held = 4`, host payout is `availableNow: 13009.18`, `heldForTraders: 33181.31`. Internal calculations preserve the mock's exact floating point operation order. Chain settlement remains mock.
 
 ## Walked guest payouts
 

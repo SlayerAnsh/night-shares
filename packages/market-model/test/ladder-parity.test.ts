@@ -17,12 +17,12 @@ test("ladder matches within rooms, at boundaries and across partial final rooms"
 });
 
 test("frozen ladder example preserves costs and host reserve split", () => {
-  expect(cost(6000, 1.2, 15, 6, 7)).toBe(10092.16589819334);
-  expect(cost(6000, 1.2, 15, 0, 15)).toBe(173962.37552709514);
-  expect(price(6000, 1.2, 15, 15)).toBeCloseTo(19920.7, 2);
+  expect(cost(6000, 1.2, 15, 6, 7)).toBe(10091.428504195972);
+  expect(cost(6000, 1.2, 15, 0, 15)).toBe(173950.75135485636);
+  expect(price(6000, 1.2, 15, 15)).toBeCloseTo(19920.56, 2);
   expect(hostPayout({ F: 6000, k: 1.2, S: 15, q: 6, held: 4 })).toEqual({
-    gross: 46193.260976046266,
-    availableNow: 13009.845754630565,
-    heldForTraders: 33183.4152214157,
+    gross: 46190.48950195969,
+    availableNow: 13009.1803171731,
+    heldForTraders: 33181.30918478659,
   });
 });

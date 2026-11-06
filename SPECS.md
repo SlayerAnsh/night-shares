@@ -339,11 +339,11 @@ Why it matches the model: with continuous liquidity L(P) = 2S·√P / k, a v4 ra
 
 | Positions per night (F 6,000, k 1.2, S 15) | Worst room error | Full sell out |
 | --- | --- | --- |
-| 15 (one per room) | 0.027% | 173,962 vs 174,009 exact |
-| 5 | 0.24% | 173,592 |
-| 3 | 0.66% | 172,854 |
+| 15 (one per room) | 0.036% | 173,951 vs 174,009 exact |
+| 5 | 0.25% | 173,580 |
+| 3 | 0.67% | 172,844 |
 
-The 7th room costs 10,092 on chain against 10,095 exact. Tick spacing 1 (0.01%) keeps boundary rounding below that error. Sell back is an ordinary swap down the same ladder, so a round trip loses only fees, as in the model.
+The 7th room costs 10,091 on chain against 10,095 exact. Tick spacing 1 (0.01%) keeps boundary rounding below that error. Sell back is an ordinary swap down the same ladder, so a round trip loses only fees, as in the model.
 
 **Reserve and withdraw fall out of the pool.** USDC paid by buyers sits in the host's crossed positions, so the pool's USDC is the reserve R. Let b be the burned count (booked plus voided). Only h = q − b tokens exist outside the pool, so the price can never fall below P(b). The USDC in positions entirely below P(b) equals C(0, b) = R − L. `NightVault` sweeps those positions to the host automatically. b only grows: a guest booking moves q and b up by one, a trader buy moves q and h, a sell back moves both down, a recall moves b up and h down. Positions above the current price are never removed before cutoff.
 

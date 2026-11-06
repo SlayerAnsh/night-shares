@@ -17,7 +17,7 @@ test("flat curves charge floor per night and ladder costs add across rooms", () 
     10,
   );
   expect(lastRoomPrice(100, 0.6)).toBe(182.2118800390509);
-  expect(price(100, 0.6, 4, 4)).toBe(182.21188003905084);
+  expect(price(100, 0.6, 4, 4)).toBe(182.2068155651889);
   expect(recallStrike(100, 0)).toBe(125);
 });
 test("floors, human caps and fair bounds retain original rounding", () => {
@@ -37,4 +37,13 @@ test("recall markup rejects values below five percent and accepts the floor", ()
   }
   expect(recallStrike(100, 0, 0.05)).toBe(105);
   expect(recallStrike(100, 0)).toBe(125);
+});
+
+test("tick-snapped ladder pins room cost, sellout, buyback and starting price", () => {
+  expect(cost(6000, 1.2, 15, 6, 7)).toBeCloseTo(10091.428504, 6);
+  expect(cost(6000, 1.2, 15, 0, 15)).toBeCloseTo(173950.751355, 6);
+  expect(
+    cost(6000, 1.2, 15, 6, 9) * 1.013 - cost(6000, 1.2, 15, 2, 5),
+  ).toBeCloseTo(9427.148645, 6);
+  expect(price(6000, 1.2, 15, 0)).toBeCloseTo(5999.7176, 4);
 });
