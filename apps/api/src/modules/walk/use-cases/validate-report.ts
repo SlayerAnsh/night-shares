@@ -42,11 +42,18 @@ export function validateReport(
       "Report within 24 hours after check-in time.",
     );
   const tap = db
-    .query<{ tapped_at: bigint }, [string]>(
-      "SELECT tapped_at FROM reception_taps WHERE booking_id = ?",
+    .query<
+      { tapped_at: bigint; tag_uid: string | null; counter: bigint | null },
+      [string]
+    >(
+      "SELECT tapped_at, tag_uid, counter FROM reception_taps WHERE booking_id = ?",
     )
     .get(report.bookingId);
-  if (!tap || Number(tap.tapped_at) > report.reportedAt)
+  if (
+    !tap?.tag_uid ||
+    tap.counter === null ||
+    Number(tap.tapped_at) > report.reportedAt
+  )
     throw new DomainError(
       "FAILED_PRECONDITION",
       "Tap the reception tag before reporting a walked stay.",
@@ -56,5 +63,12 @@ export function validateReport(
       "FAILED_PRECONDITION",
       "A World ID desk check-in already exists for this booking.",
     );
-  return saved;
+  return {
+    ...saved,
+    tap: {
+      tagUid: tap.tag_uid,
+      counter: tap.counter,
+      tapAt: Number(tap.tapped_at),
+    },
+  };
 }

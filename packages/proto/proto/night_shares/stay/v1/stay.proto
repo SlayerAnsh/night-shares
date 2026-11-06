@@ -138,6 +138,7 @@ message ReportWalkRequest {
 message ReportWalkResponse {
   string report_id = 1;
   night_shares.common.v1.Usdc paid_to_guest = 2;
+  string evidence_hash = 3;
 }
 
 message IssueReceptionTagRequest {

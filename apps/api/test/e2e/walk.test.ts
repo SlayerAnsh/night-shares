@@ -1,9 +1,11 @@
 import { expect, test } from "bun:test";
+import { Code } from "@connectrpc/connect";
 import {
   DemandPreset,
   ReleasePolicy,
 } from "@night-shares/proto/host/v1/opening_pb";
 import { TransactionKind } from "@night-shares/proto/wallet/v1/transaction_pb";
+import { buildContainer } from "../../src/container/build-container";
 import { markWalkFalse } from "../../src/modules/walk/use-cases/mark-false";
 import type { MockClock } from "../../src/ports/clock/clock.mock";
 import { createHarness } from "./harness";
@@ -89,6 +91,7 @@ test("guest taps reception, reports walk, receives a full refund and host sees s
       const result = await guest.clients.stay.reportWalk({
         bookingId: trip.id,
       });
+      expect(result.evidenceHash).toMatch(/^[a-f0-9]{64}$/);
       expect(result.paidToGuest?.micros).toBe(trip.total?.micros ?? 0n);
       reports.push(result.reportId);
     }
@@ -138,6 +141,28 @@ test("guest taps reception, reports walk, receives a full refund and host sees s
     await expect(
       guest.clients.stay.reportWalk({ bookingId: trips[2]?.id }),
     ).rejects.toThrow("banned for this World ID");
+  } finally {
+    await h.close();
+  }
+});
+
+test("guest cannot self issue reception payloads when dev issuer is off", async () => {
+  const h = await createHarness(
+    buildContainer({
+      port: 0,
+      adapters: "mock",
+      dbPath: ":memory:",
+      clock: "mock",
+      ids: "sequential",
+      today: "2026-12-01",
+    }),
+  );
+  try {
+    const guest = await h.signInAs("device", "walk-disabled");
+    await expect(
+      guest.clients.stay.issueReceptionTag({ bookingId: "bk_test" }),
+    ).rejects.toMatchObject({ code: Code.FailedPrecondition });
+    expect(h.container.ports.issueReceptionTag).toBeUndefined();
   } finally {
     await h.close();
   }

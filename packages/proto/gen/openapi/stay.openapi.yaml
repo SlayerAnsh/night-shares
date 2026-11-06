@@ -896,6 +896,9 @@ components:
         paidToGuest:
           title: paid_to_guest
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        evidenceHash:
+          type: string
+          title: evidence_hash
       title: ReportWalkResponse
       additionalProperties: false
     night_shares.stay.v1.StayQuote:

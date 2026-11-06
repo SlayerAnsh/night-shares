@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import type { Config } from "../config/load-config";
 import { openDatabase } from "../db/open-database";
 import { createCatalogModule } from "../modules/catalog/module";
@@ -24,6 +25,8 @@ import { createSqliteWalletProvider } from "../ports/wallet-provider/wallet-prov
 import { parseDate } from "../shared/dates";
 import type { Ports } from "./ports";
 export function buildContainer(config: Config) {
+  if (config.devTagIssuer && config.adapters !== "mock")
+    throw new Error("DEV_TAG_ISSUER requires ADAPTERS=mock.");
   if (config.adapters !== "mock" && !config.receptionTagSecret?.trim())
     throw new Error(
       "RECEPTION_TAG_SECRET is required when ADAPTERS is not mock.",
@@ -46,7 +49,11 @@ export function buildContainer(config: Config) {
       ? createMockIdGenerator()
       : createRandomIdGenerator();
   const receptionTag = createMockReceptionTag(
-    config.receptionTagSecret?.trim() || "night-shares-dev-reception-secret",
+    config.receptionTagSecret?.trim() ||
+      (config.devTagIssuer
+        ? "night-shares-dev-reception-secret"
+        : randomBytes(32).toString("hex")),
+    db,
   );
   const catalog = createMemoryCatalogRepo();
   const walletProvider = createSqliteWalletProvider({ db, ids, clock });
@@ -54,7 +61,7 @@ export function buildContainer(config: Config) {
     {
       receptionTag,
       issueReceptionTag:
-        config.adapters === "mock" ? receptionTag.issueTagPayload : undefined,
+        config.devTagIssuer === true ? receptionTag.issueTagPayload : undefined,
       bookingReport: bookingReportFor({ db, ids }),
       db,
       clock,

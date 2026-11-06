@@ -12,7 +12,7 @@ test("two valid public incidents suspend openings; false reports do not count", 
   for (const id of ["one", "two"])
     f.ports.db
       .query(
-        "INSERT INTO walk_reports VALUES (?, ?, ?, ?, ?, 'done', 100, 100, 100)",
+        "INSERT INTO walk_reports (id, booking_id, property_id, human_id, reported_at, status, paid, from_pending, from_fund) VALUES (?, ?, ?, ?, ?, 'done', 100, 100, 100)",
       )
       .run(
         id,

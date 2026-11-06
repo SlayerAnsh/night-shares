@@ -11,6 +11,7 @@ export async function fixture(pending = 6000n) {
   const { ports } = buildContainer({
     port: 0,
     adapters: "mock",
+    devTagIssuer: true,
     dbPath: ":memory:",
     today: "2026-12-04",
   });

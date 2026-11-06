@@ -18,6 +18,7 @@ export async function createHarness(
   container: Container = buildContainer({
     port: 0,
     adapters: "mock",
+    devTagIssuer: true,
     dbPath: ":memory:",
     clock: "mock",
     ids: "sequential",

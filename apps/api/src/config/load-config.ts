@@ -1,6 +1,7 @@
 import { parseDate } from "../shared/dates";
 import { loadServerConfig, type ServerConfig } from "./server-config";
 export type Config = Partial<ServerConfig> & {
+  devTagIssuer?: boolean;
   receptionTagSecret?: string;
   jobIntervalMs?: number;
   worldIdMode?: "mock" | "world-id";
@@ -17,6 +18,12 @@ export type Config = Partial<ServerConfig> & {
 export function loadConfig(
   env: Record<string, string | undefined> = process.env,
 ): Config {
+  const rawDevTagIssuer = env.DEV_TAG_ISSUER ?? "false";
+  if (rawDevTagIssuer !== "true" && rawDevTagIssuer !== "false")
+    throw new Error("DEV_TAG_ISSUER must be true or false.");
+  const devTagIssuer = rawDevTagIssuer === "true";
+  if (devTagIssuer && (env.ADAPTERS ?? "mock") !== "mock")
+    throw new Error("DEV_TAG_ISSUER requires ADAPTERS=mock.");
   const receptionTagSecret = env.RECEPTION_TAG_SECRET?.trim() || undefined;
   if ((env.ADAPTERS ?? "mock") !== "mock" && !receptionTagSecret)
     throw new Error(
@@ -73,6 +80,7 @@ export function loadConfig(
   return {
     ...loadServerConfig(env),
     receptionTagSecret,
+    devTagIssuer,
     jobIntervalMs,
     worldIdMode,
     worldIdAppId,

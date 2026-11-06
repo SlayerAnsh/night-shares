@@ -4,5 +4,7 @@ export interface ReceptionTag {
     propertyId: string;
     bookingId: string;
     now: number;
-  }): { ok: true; tagId: string } | { ok: false; reason: string };
+  }):
+    | { ok: true; tagId: string; tagUid: string; counter: bigint }
+    | { ok: false; reason: string };
 }

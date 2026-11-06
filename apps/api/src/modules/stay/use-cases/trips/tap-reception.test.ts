@@ -1,9 +1,18 @@
 import { expect, test } from "bun:test";
+import { buildContainer as buildDemoContainer } from "../../../../container/build-container";
 import type { MockClock } from "../../../../ports/clock/clock.mock";
 import { tripFixture } from "../../test-support/fixture";
 
 test("tap rejects forged, stale, reused and other property payloads without recording presence", () => {
   const f = tripFixture();
+  const demo = buildDemoContainer({
+    port: 0,
+    adapters: "mock",
+    devTagIssuer: true,
+    dbPath: ":memory:",
+  });
+  f.ports.issueReceptionTag = demo.ports.issueReceptionTag;
+  f.ports.receptionTag = demo.ports.receptionTag;
   const clock = f.ports.clock as MockClock;
   const payload = f.cases.issueReceptionTag(f.trip.id, "guest").tagPayload;
   const other = f.ports.issueReceptionTag?.("prop_other", clock.now()) ?? "";

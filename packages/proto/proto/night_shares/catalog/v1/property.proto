@@ -46,4 +46,5 @@ message WalkIncident {
   string id = 1;
   google.protobuf.Timestamp reported_at = 2;
   bool is_false = 3;
+  string evidence_hash = 4;
 }

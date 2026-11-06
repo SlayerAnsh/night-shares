@@ -46,5 +46,9 @@ export async function handleReport(
       priceMicros: reserved.toGuest,
     });
   });
-  return { reportId: report.id, paidToGuest: { micros: reserved.toGuest } };
+  return {
+    reportId: report.id,
+    paidToGuest: { micros: reserved.toGuest },
+    evidenceHash: reserved.attestation.evidenceHash,
+  };
 }

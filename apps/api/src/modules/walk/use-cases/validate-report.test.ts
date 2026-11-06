@@ -85,3 +85,25 @@ test("future reports and taps after report time cannot establish presence", asyn
     "Tap the reception",
   );
 });
+
+test("historical tap needs fresh verified evidence before reporting", async () => {
+  const f = await fixture();
+  f.ports.db
+    .query(
+      "INSERT INTO reception_taps (booking_id, tag_id, tapped_at) VALUES (?, ?, ?)",
+    )
+    .run(f.trip.id, f.trip.propertyId, f.clock.now());
+  expect(() => validateReport(f.ports, f.repo, f.report)).toThrow(
+    "Tap the reception",
+  );
+  f.cases.tapReception(
+    f.trip.id,
+    f.cases.issueReceptionTag(f.trip.id, f.user.id).tagPayload,
+    f.user.id,
+  );
+  expect(validateReport(f.ports, f.repo, f.report).tap).toEqual({
+    tagUid: `mock:${f.trip.propertyId}`,
+    counter: 1n,
+    tapAt: f.clock.now(),
+  });
+});

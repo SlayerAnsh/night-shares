@@ -471,6 +471,9 @@ components:
         isFalse:
           type: boolean
           title: is_false
+        evidenceHash:
+          type: string
+          title: evidence_hash
       title: WalkIncident
       additionalProperties: false
     night_shares.common.v1.Usdc:

@@ -5,6 +5,7 @@ import { payoutOf } from "../../host/mappers/payout";
 import { createSqliteHostRepo } from "../../host/repo/host-repo.sqlite";
 import type { StayRepo } from "../../stay/repo/stay-repo";
 import { adjustCoverAccount, coverAccount } from "../repo/cover-accounts";
+import { tapEvidenceHash, type WalkAttestation } from "../walk-attestation";
 import { payoutLegs } from "./payout-legs";
 import { validateReport } from "./validate-report";
 
@@ -15,6 +16,14 @@ export function reserveReport(
 ) {
   const saved = validateReport(ports, repo, report);
   const propertyId = saved.trip.propertyId;
+  const attestation: WalkAttestation = {
+    reportId: report.id,
+    bookingId: report.bookingId,
+    propertyId,
+    humanId: report.humanId,
+    reportedAt: report.reportedAt,
+    evidenceHash: tapEvidenceHash(saved.tap, report.bookingId),
+  };
   if (
     ports.db
       .query(
@@ -51,7 +60,7 @@ export function reserveReport(
   const payout = payoutLegs(paid, pending, saved.walletAddress);
   ports.db
     .query(
-      "INSERT INTO walk_reports VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)",
+      "INSERT INTO walk_reports (id, booking_id, property_id, human_id, reported_at, status, paid, from_pending, from_fund, evidence_hash) VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?)",
     )
     .run(
       report.id,
@@ -62,7 +71,8 @@ export function reserveReport(
       paid,
       payout.fromPending,
       payout.fromFund,
+      attestation.evidenceHash,
     );
   adjustCoverAccount(ports.db, propertyId, payout.fromPending, payout.debt);
-  return { ...payout, propertyId, trip: saved.trip };
+  return { ...payout, propertyId, trip: saved.trip, attestation };
 }

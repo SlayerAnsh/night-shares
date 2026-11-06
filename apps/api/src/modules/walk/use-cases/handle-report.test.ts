@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { createHash } from "node:crypto";
 import { coverAccount } from "../repo/cover-accounts";
 import { walkIncidents } from "../repo/incidents";
 import { fixture } from "../testing/fixture";
@@ -17,6 +18,16 @@ test("walk settles once, preserves holders and night, and publishes an incident"
   const account = coverAccount(f.ports.db, f.trip.propertyId);
   const result = await handleReport(f.ports, f.report);
   expect(result.paidToGuest.micros).toBe(10000n);
+  const expectedHash = createHash("sha256")
+    .update(`mock:${f.trip.propertyId}|1|${f.clock.now()}|${f.trip.id}`)
+    .digest("hex");
+  expect(result.evidenceHash).toBe(expectedHash);
+  expect(
+    f.ports.db.query("SELECT evidence_hash FROM walk_reports").get(),
+  ).toEqual({ evidence_hash: expectedHash });
+  expect(walkIncidents(f.ports.db, f.trip.propertyId)[0]?.evidenceHash).toBe(
+    expectedHash,
+  );
   expect(await f.ports.walletProvider.balance(f.user.walletAddress)).toBe(
     before + 10000n,
   );

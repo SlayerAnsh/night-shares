@@ -8,7 +8,7 @@ export function createIssueReceptionTag(ports: Ports, repo: StayRepo) {
     if (!ports.issueReceptionTag)
       throw new DomainError(
         "FAILED_PRECONDITION",
-        "Reception tag issuance is available only in mock mode.",
+        "Reception tag issuance is available only with DEV_TAG_ISSUER=true in mock mode.",
       );
     const saved = getTrip(repo, bookingId, userId);
     return {
