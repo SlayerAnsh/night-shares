@@ -10,6 +10,8 @@ export function routeBuy(
   const fills: Fill[] = [];
   for (const l of bk.asks) {
     if (left <= 1e-9) break;
+    // Guests never pay above the recall cap. Asks are sorted, so stop here.
+    if (guest && l.price > bk.recall) break;
     if (l.guestOnly && !guest) continue;
     const take = Math.min(left, l.size);
     spend += take * l.price;

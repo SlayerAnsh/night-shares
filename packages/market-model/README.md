@@ -1,6 +1,6 @@
 # @night-shares/market-model
 
-Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `ce36c20b1f40`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
+Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `4bdc16badf85`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
 
 ## Public API
 
@@ -51,11 +51,13 @@ From this directory, run `bun test` and `pnpm typecheck`. From the workspace roo
 
 Parity tests load the unmodified sibling mock files through `node:vm`, with a minimal `window` shim and a fixed zero argument `Date` constructor. Today is `2026-12-01`. Catalog fixtures come only from the VM. The grid covers all six properties, both room types and 60 dates from December 1 through January 29: 720 states, usual rates, books and payouts, 5,760 routes across four quantities and both buyer modes, 5,040 late fees and 5,040 refunds. Numeric tolerance is absolute `1e-9`; object keys, arrays and nonnumeric values must also match. Additional tests cover every constant, curve helpers, deterministic random streams and 12 distant date fallback states. Focused unit tests sit beside implementation files.
 
+## Rules fixed in both mock and port
+
+Guests never pay above the recall cap: routing stops at the first ask priced above it and fills the rest at the cap. Traders are not capped. Night heat is clamped to zero and one, so distant dates never show negative inventory. Rooms split exactly across room types (nine rooms over two types become five and four).
+
 ## Preserved source behavior
 
-The routing comment claims a recall cap, but asks above that strike are consumed first. Recall supplies only a guest's remainder after available asks are consumed. The function assumes asks are already sorted.
-
-Distant dates can produce negative heat and negative `q`, booked and held values because the source clamps heat only at its upper bound. Odd room counts round up for each room type. Past dates still report 14 hours remaining. Caps and guest tranches have a minimum of one, even for zero supply. These behaviors remain unchanged.
+Past dates still report 14 hours remaining. Caps and guest tranches have a minimum of one, even for zero supply. The book assumes asks are sorted.
 
 ## Resynchronizing
 

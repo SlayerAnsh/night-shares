@@ -8,7 +8,7 @@ const dates = Array.from({ length: 60 }, (_, i) =>
 );
 
 test("original model fingerprint and all exported constants match", () => {
-  expect(modelSha.slice(0, 12)).toBe("ce36c20b1f40");
+  expect(modelSha.slice(0, 12)).toBe("4bdc16badf85");
   expect(shared.props).toHaveLength(6);
   expect(shared.today.getFullYear()).toBe(2026);
   expect(shared.today.getMonth()).toBe(11);
@@ -98,7 +98,7 @@ test("curve, fee and random helpers preserve exact source formulas", () => {
   }
 });
 
-test("far future inventory and fallback room index retain original oddities", () => {
+test("far future inventory stays non negative and fallback room index matches source", () => {
   for (const property of shared.props)
     for (const roomIndex of [-1, 9]) {
       const input = {
@@ -107,9 +107,31 @@ test("far future inventory and fallback room index retain original oddities", ()
         date: "2030-07-01",
         today: TODAY,
       };
+      const state = port.nightState(input);
       compare(
-        port.nightState(input),
+        state,
         original.nightState(property, roomIndex, shared.parse(input.date)),
       );
+      expect(state.q).toBeGreaterThanOrEqual(0);
+      expect(state.booked).toBeGreaterThanOrEqual(0);
+      expect(state.held).toBeGreaterThanOrEqual(0);
     }
+});
+
+test("room types split each property's rooms exactly", () => {
+  for (const property of shared.props) {
+    const input = propertyOf(property);
+    const total = input.roomTypes.reduce(
+      (sum, _type, roomIndex) =>
+        sum +
+        port.nightState({
+          property: input,
+          roomIndex,
+          date: TODAY,
+          today: TODAY,
+        }).S,
+      0,
+    );
+    expect(total).toBe(property.rooms);
+  }
 });

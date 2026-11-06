@@ -28,7 +28,12 @@ export function nightState({
   if (!rt)
     throw new TypeError("Cannot read properties of undefined (reading 'm')");
   const usualRate = Math.round(nightPrice(p, date) * rt.rateMultiplier);
-  const S = Math.max(1, Math.round(p.rooms / p.roomTypes.length));
+  // Split rooms exactly across room types; earlier types take the remainder.
+  const types = p.roomTypes.length;
+  const S = Math.max(
+    1,
+    Math.floor(p.rooms / types) + (roomIdx < p.rooms % types ? 1 : 0),
+  );
   const r = rng(hash(`v2${p.id}${roomIdx}${date}`));
   const dow = d.getUTCDay(),
     m = d.getUTCMonth(),
@@ -39,7 +44,11 @@ export function nightState({
     F = floorFromRate(usualRate);
   const tranche = trancheOf(S);
   const daysOut = Math.max(0, diffDays(today, date));
-  const heat = Math.min(1, (peak ? 0.75 : 0.35) + r() * 0.35 - daysOut / 400);
+  // Heat is clamped to [0, 1] so inventory never goes negative.
+  const heat = Math.max(
+    0,
+    Math.min(1, (peak ? 0.75 : 0.35) + r() * 0.35 - daysOut / 400),
+  );
   const q = Math.min(S - 0.1, Math.round(heat * S * 10) / 10);
   const booked = Math.min(q, Math.round(q * (0.4 + r() * 0.3) * 10) / 10);
   const held = Math.round((q - booked) * 10) / 10;
