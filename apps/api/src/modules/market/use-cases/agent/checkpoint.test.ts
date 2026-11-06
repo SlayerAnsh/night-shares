@@ -17,7 +17,7 @@ async function setup() {
   fixtures.push(d);
   return d;
 }
-test("fresh checkpoint commits order and identity once, including concurrent callbacks", async () => {
+test("fresh checkpoint commits order against linked identity once, including concurrent callbacks", async () => {
   const d = await setup();
   expect(d.order.status).toBe(AgentOrderStatus.PENDING);
   const results = await Promise.all([
@@ -61,7 +61,7 @@ for (const reason of [
     expect(await d.ports.walletProvider.balance(d.order.walletAddress)).toBe(
       balance,
     );
-    expect(d.store.link(d.user.id)).toBeNull();
+    expect(d.store.link(d.user.id)?.sub).toBe(`mock:${d.user.id}`);
     expect(
       d.ports.activity.list({ kinds: ["agent_order_filled"] }),
     ).toHaveLength(0);
@@ -84,6 +84,9 @@ test("wrong browser, state and session cannot authorize a checkpoint", async () 
 test("linked subject mismatch and identity already assigned elsewhere fail closed", async () => {
   for (const elsewhere of [false, true]) {
     const d = await setup();
+    d.ports.db
+      .query("DELETE FROM agent_pass_links WHERE user_id = ?")
+      .run(d.user.id);
     d.store.enroll(
       elsewhere ? "other" : d.user.id,
       d.config.agentPassIssuer,
@@ -101,7 +104,7 @@ test("changed budget or action snapshot requires new approval", async () => {
   expect(d.store.get(d.a.id)?.reason).toBe("mismatch");
   expect(agentWallets(d.ports.db).get(d.user).spent).toBe(0n);
 });
-test("settlement failure rolls back inventory, budget, order and new identity link", async () => {
+test("settlement failure rolls back inventory, budget and order, preserving identity link", async () => {
   const d = await setup();
   const before = d.ports.inventory.get(d.key);
   d.ports.db
@@ -113,7 +116,7 @@ test("settlement failure rolls back inventory, budget, order and new identity li
   expect(d.repo.account(d.user.humanId).orders.get(d.order.id)?.status).toBe(
     AgentOrderStatus.PENDING,
   );
-  expect(d.store.link(d.user.id)).toBeNull();
+  expect(d.store.link(d.user.id)?.sub).toBe(`mock:${d.user.id}`);
   expect(d.ports.activity.list({ kinds: ["agent_order_filled"] })).toHaveLength(
     0,
   );
@@ -133,7 +136,7 @@ test("failure after ledger writes rolls back the entire approval transaction", a
   const before = d.ports.inventory.get(d.key);
   const balance = await d.ports.walletProvider.balance(d.order.walletAddress);
   d.ports.db.exec(
-    "CREATE TRIGGER reject_link BEFORE INSERT ON agent_pass_links BEGIN SELECT RAISE(ABORT, 'Injected link failure'); END",
+    "CREATE TRIGGER reject_activity BEFORE INSERT ON activity WHEN NEW.kind = 'agent_order_filled' BEGIN SELECT RAISE(ABORT, 'Injected activity failure'); END",
   );
   expect(await completeAgentCheckpoint(d, d.callback)).toBe("denied");
   expect(await d.ports.walletProvider.balance(d.order.walletAddress)).toBe(

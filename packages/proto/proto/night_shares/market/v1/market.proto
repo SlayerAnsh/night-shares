@@ -3,6 +3,7 @@ syntax = "proto3";
 package night_shares.market.v1;
 
 import "google/protobuf/timestamp.proto";
+import "night_shares/identity/v1/identity.proto";
 import "night_shares/auth/v1/access.proto";
 import "night_shares/common/v1/money.proto";
 import "night_shares/common/v1/night.proto";
@@ -11,6 +12,9 @@ import "night_shares/market/v1/book.proto";
 import "night_shares/market/v1/portfolio.proto";
 
 service MarketService {
+  rpc LinkAgentPass(LinkAgentPassRequest) returns (LinkAgentPassResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
   rpc StartAgentCheckpoint(StartAgentCheckpointRequest) returns (StartAgentCheckpointResponse) {
     option (night_shares.auth.v1.access) = ACCESS_ORB;
   }
@@ -97,6 +101,7 @@ message DiscoverRequest {
 }
 
 message DiscoverResponse {
+  bool trading_paused = 2;
   repeated NightCard nights = 1;
 }
 
@@ -105,6 +110,7 @@ message GetNightRequest {
 }
 
 message GetNightResponse {
+  bool trading_paused = 6;
   NightCard night = 1;
   NightStats stats = 2;
   repeated PricePoint price_history = 3;
@@ -117,6 +123,7 @@ message GetBookRequest {
 }
 
 message GetBookResponse {
+  bool trading_paused = 8;
   repeated PublicHolder holders = 7;
   repeated BookLevel asks = 1;
   repeated BookLevel bids = 2;
@@ -259,6 +266,7 @@ message ApproveAgentOrderResponse {
 
 // Agent holdings are attributed purchases within the shared human position.
 message AgentWallet {
+  bool agent_pass_linked = 8;
   string address = 1;
   night_shares.common.v1.Usdc balance = 2;
   night_shares.common.v1.Usdc total_budget = 3;
@@ -278,7 +286,7 @@ message SetAgentBudgetRequest {
 }
 
 
-// Entitlements are fixed at release and paid only when the holder claims.
+// Entitlements are fixed at release, pushed in batches, and claimable as fallback.
 message CutoffClaim {
   night_shares.common.v1.NightKey night = 1;
   night_shares.common.v1.RoomNights size = 2;
@@ -305,4 +313,18 @@ message GetAgentCheckpointResponse {
   string status = 1;
   string reason = 2;
   string order_id = 3;
+}
+
+// An empty request starts a fresh Proof of Human action. Completion starts an
+// enrollment-only Agent Pass checkpoint; it never approves an order.
+message LinkAgentPassRequest {
+  string request_id = 1;
+  oneof proof {
+    string mock_proof = 2;
+    string idkit_result_json = 3;
+  }
+}
+message LinkAgentPassResponse {
+  night_shares.identity.v1.StartVerifyActionResponse verification = 1;
+  StartAgentCheckpointResponse checkpoint = 2;
 }

@@ -2,11 +2,16 @@ import {
   type AgentPassConfig,
   agentPassConfig,
 } from "../ports/agent-pass/config";
+import { assertMockSecurity } from "../ports/agent-pass/mock-security";
+import { chainConfig } from "../ports/chain-status/config";
 import { parseDate } from "../shared/dates";
 import { ARC_NETWORKS } from "./arc-networks";
 import { loadServerConfig, type ServerConfig } from "./server-config";
 export type Config = Partial<ServerConfig> &
   AgentPassConfig & {
+    chainLimits?: string;
+    chainPaused?: boolean;
+    agentApprovalThreshold?: bigint;
     walletCustody?: "mock" | "privy";
     privyAppId?: string;
     privyAppSecret?: string;
@@ -83,6 +88,13 @@ export function loadConfig(
     throw new Error(
       "RECEPTION_TAG_SECRET is required when ADAPTERS is not mock.",
     );
+  assertMockSecurity({
+    adapters: env.ADAPTERS,
+    worldIdMode: env.WORLD_ID_MODE,
+    walletCustody: env.WALLET_CUSTODY,
+    agentPassMode: env.AGENT_PASS_MODE,
+    agentApproval: env.AGENT_APPROVAL,
+  });
   const jobIntervalMs = Number(env.JOB_INTERVAL_MS ?? "60000");
   if (
     !Number.isSafeInteger(jobIntervalMs) ||
@@ -166,6 +178,7 @@ export function loadConfig(
     throw new Error("DB_PATH must be a nonempty SQLite file path or :memory:.");
   return {
     ...loadServerConfig(env),
+    ...chainConfig(env),
     ...agentPassConfig(env),
     walletCustody,
     privyAppId,

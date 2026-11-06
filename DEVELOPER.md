@@ -41,7 +41,7 @@ API settings come from `apps/api/src/config/load-config.ts` and `server-config.t
 | `DB_PATH` | `./data/night-shares.db` | SQLite path, or `:memory:` for isolated tests |
 | `ADAPTERS` | `mock` | Only supported value; wallet and chain remain mock |
 | `AGENT_APPROVAL` | `agent-pass` | Human approval policy: `agent-pass` or explicit `idkit` fallback |
-| `AGENT_PASS_MODE` | `mock` | `mock` local Approve/Deny/Cancel page, or `oidc` official Agent Pass |
+| `AGENT_PASS_MODE` | `mock` | `mock` local Approve/Deny/Cancel page only with ADAPTERS=mock, or `oidc` official Agent Pass. Other adapters require OIDC credentials or AGENT_APPROVAL=idkit with WORLD_ID_MODE=cloud |
 | `AGENT_PASS_ISSUER` | `https://auth.world.org` | Discovery issuer; sandbox uses `https://sandbox.auth.world.org`. Use separate databases for mock, sandbox and production |
 | `AGENT_PASS_CLIENT_ID` | empty | Portal client ID, required for OIDC |
 | `AGENT_PASS_CLIENT_SECRET` | empty | Backend secret, required for OIDC with `client_secret_basic`; never expose to web or logs |
@@ -52,6 +52,9 @@ API settings come from `apps/api/src/config/load-config.ts` and `server-config.t
 | `PRIVY_APP_ID` | empty | Server wallet app ID, required in Privy mode |
 | `PRIVY_APP_SECRET` | empty | Full-access backend secret, required in Privy mode; never log or expose to browsers |
 | `PRIVY_AUTHORIZATION_KEY` | unset | Optional server-only `wallet-auth:` P-256 private key; new wallets assign its public key as owner |
+| `CHAIN_LIMITS` | `mainnet` only when `ARC_NETWORK=mainnet` and `ADAPTERS=arc`, otherwise `off` | Explicit `mainnet` or `off`; mirror F <= 1 USDC, full ladder <= 50 USDC and 20 open nights. MAX_S=100 always applies |
+| `CHAIN_PAUSED` | `false` | Mock chain status, `true` or `false`; rejects trading, all bookings and new opens while exits remain available |
+| `AGENT_APPROVAL_THRESHOLD_USDC` | `10` with mainnet limits, otherwise `1000` | Explicit nonnegative USDC threshold, at most six decimal places |
 | `ARC_NETWORK` | `mainnet` | `mainnet` (5042) or `testnet` (5042002) |
 | `ARC_RPC_URL` | network RPC | Defaults to `https://rpc.mainnet.arc.io` or `https://rpc.testnet.arc.io` |
 | `ORDER_CHAIN_ID` | network chain ID | Positive EIP-712 domain chain ID; explicit overrides win |

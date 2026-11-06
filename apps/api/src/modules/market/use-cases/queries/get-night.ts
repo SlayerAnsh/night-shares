@@ -1,5 +1,6 @@
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
 import { toMicros } from "@night-shares/market-model";
+import { chainStatus } from "../../../../ports/chain-status/chain-status";
 import { addDays, parseDate } from "../../../../shared/dates";
 import { card } from "../../mappers/analytics/card";
 import { track } from "../../mappers/analytics/track";
@@ -26,6 +27,7 @@ export function getNight({ ports }: Deps, key: string) {
     );
   }
   return {
+    tradingPaused: chainStatus(ports).isPaused(key),
     night: data.card,
     stats: {
       ...data.stats,

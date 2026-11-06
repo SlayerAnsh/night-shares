@@ -1,5 +1,6 @@
 import { DiscoverSort } from "@night-shares/proto/market/v1/analytics_pb";
 import type { DiscoverRequest } from "@night-shares/proto/market/v1/market_pb";
+import { chainStatus } from "../../../../ports/chain-status/chain-status";
 import type { User } from "../../../../ports/sessions/session-store";
 import { addDays } from "../../../../shared/dates";
 import { card } from "../../mappers/analytics/card";
@@ -46,5 +47,5 @@ export function discover(
       ? a.risk - b.risk || b.estimatedReturnBps - a.estimatedReturnBps
       : b.estimatedReturnBps - a.estimatedReturnBps,
   );
-  return { nights };
+  return { nights, tradingPaused: chainStatus(deps.ports).isPaused() };
 }

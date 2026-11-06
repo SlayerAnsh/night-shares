@@ -5,13 +5,15 @@ All notable changes to this monorepo. Newest first.
 
 ## Unreleased
 
+- Mirror mainnet factory limits and trading pause, configure agent approval thresholds, require separate canonical Agent Pass enrollment, reject mock security with real adapters, and push cutoff payouts in batches with claim fallback.
+
 - Agent Pass: fresh World ID OIDC checkpoints for large agent orders, atomic SQLite execution, mock failure paths and explicit IDKit fallback.
 
 - Security: Walk bans persist across all linked World ID enrollment nullifiers and aliases, including later credential upgrades and enrollment recovery.
 
 ### Added
 
-- Cutoff pull claims: persisted entitlements, cutoff_claims escrow, Orb ClaimCutoff and ListCutoffClaims RPCs, unclaimed portfolio amounts, and claim activity. Holder payouts occur only on claim.
+- Cutoff payouts: persisted entitlements, cutoff_claims escrow, Orb ClaimCutoff and ListCutoffClaims RPCs, unclaimed portfolio amounts, and claim activity. Holder payouts are pushed in batches of up to 100 per night per job tick, with ClaimCutoff as an idempotent fallback and compensation on failure.
 - Host allotments are capped at 100 rooms per night and room type. Portfolio and hotel availableNow consistently show unswept earnings, with regression coverage after automatic sweeps.
 
 - Signed trader asks: EIP-712 orders (`PrepareAsk`, signed `PostAsk`, `CancelAllAsks`) with per maker nonces, 24 hour default expiry, no escrow, and fills limited to the maker's current holding. The order encoding matches the contracts package (token base units, uint64 seconds, Keccak-256 night key). An `OrderSigner` port has a mock HMAC adapter; mock mode signs custodially when no signature is sent.

@@ -1,5 +1,6 @@
 import { type BuyResult, toMicros } from "@night-shares/market-model";
 import type { Ports } from "../../../../container/ports";
+import { assertTrading } from "../../../../ports/chain-status/chain-status";
 import { toWholeTenths } from "../../../../shared/tenths";
 import { revertFills } from "../../../market/use-cases/trading/revert-fills";
 import { routeNight } from "../../pricing/quote-night";
@@ -13,6 +14,7 @@ export function commitNights(
   propertyId: string,
   userId: string,
 ) {
+  for (const night of nights) assertTrading(ports, night.key);
   // Validate every night before the synchronous commit loop; no awaits separate updates.
   for (const night of nights)
     fillNight(ports.inventory.get(night.key), night.route, rooms);

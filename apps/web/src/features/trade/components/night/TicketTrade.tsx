@@ -13,9 +13,11 @@ const QUICK = ["0.5", "1", "2"];
 export function TicketTrade({
   ticket: t,
   signedIn,
+  tradingPaused = false,
 }: {
   ticket: ReturnType<typeof useTicket>;
   signedIn: boolean;
+  tradingPaused?: boolean;
 }) {
   const isSell = t.mode === "sell";
   const tenths = parseTenths(t.amount);
@@ -60,7 +62,9 @@ export function TicketTrade({
         block
         className={styles.go}
         type="submit"
-        disabled={signedIn && (!t.valid || t.actions.pending)}
+        disabled={
+          tradingPaused || (signedIn && (!t.valid || t.actions.pending))
+        }
       >
         {label}
       </Button>

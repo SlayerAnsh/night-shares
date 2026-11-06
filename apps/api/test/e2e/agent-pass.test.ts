@@ -8,6 +8,38 @@ async function setup() {
   const h = await createHarness();
   const session = await h.signInAs("orb", "checkpoint");
   const m = session.clients.market;
+  // The ephemeral test listener substitutes only the origin of the configured callback.
+  const local = (href: string) => {
+    const u = new URL(href);
+    return `${h.baseUrl}${u.pathname}${u.search}`;
+  };
+  const handoff = async (authorizeUrl: string) => {
+    const begin = await fetch(local(authorizeUrl), { redirect: "manual" });
+    expect(begin.status).toBe(303);
+    const cookie = begin.headers.get("set-cookie")?.split(";")[0] ?? "";
+    const authorize = begin.headers.get("location") ?? "";
+    expect(
+      (await fetch(local(authorize), { headers: { cookie } })).status,
+    ).toBe(200);
+    const state = new URL(authorize).searchParams.get("state") ?? "";
+    return async (query: string) =>
+      fetch(`${h.baseUrl}/agent-pass/callback?state=${state}&${query}`, {
+        headers: { cookie },
+        redirect: "manual",
+      });
+  };
+  const link = await m.linkAgentPass({});
+  expect(link.verification?.action).toBe(`link_agent_pass:${session.user.id}`);
+  const enrollment = await m.linkAgentPass({
+    requestId: link.verification?.requestId,
+    proof: { case: "mockProof", value: "mock:checkpoint:orb" },
+  });
+  if (!enrollment.checkpoint) throw new Error("Missing enrollment checkpoint");
+  const completeLink = await handoff(enrollment.checkpoint.authorizeUrl);
+  expect(
+    (await completeLink("code=approve")).headers.get("location"),
+  ).toContain("checkpoint=approved");
+  expect((await m.getAgentWallet({})).wallet?.agentPassLinked).toBe(true);
   await m.fundAgentWallet({ amount: { micros: 5_000_000_000n } });
   await m.setAgentBudget({
     totalBudget: { micros: 5_000_000_000n },
@@ -24,24 +56,7 @@ async function setup() {
   });
   if (!order) throw new Error("Missing order");
   const start = await m.startAgentCheckpoint({ orderId: order.id });
-  // The ephemeral test listener substitutes only the origin of the configured callback.
-  const local = (href: string) => {
-    const u = new URL(href);
-    return `${h.baseUrl}${u.pathname}${u.search}`;
-  };
-  const begin = await fetch(local(start.authorizeUrl), { redirect: "manual" });
-  expect(begin.status).toBe(303);
-  const cookie = begin.headers.get("set-cookie")?.split(";")[0] ?? "";
-  const authorize = begin.headers.get("location") ?? "";
-  expect((await fetch(local(authorize), { headers: { cookie } })).status).toBe(
-    200,
-  );
-  const state = new URL(authorize).searchParams.get("state") ?? "";
-  const callback = async (query: string) =>
-    fetch(`${h.baseUrl}/agent-pass/callback?state=${state}&${query}`, {
-      headers: { cookie },
-      redirect: "manual",
-    });
+  const callback = await handoff(start.authorizeUrl);
   return { h, m, order, start, callback, session, local };
 }
 test("mock HTTP handoff, fresh completion and backend validation run protected action once", async () => {
@@ -78,12 +93,14 @@ for (const outcome of ["denied", "cancelled", "expired", "mismatch"]) {
     try {
       if (outcome === "expired")
         (d.h.container.ports.clock as MockClock).advance(600_000);
-      if (outcome === "mismatch")
-        agentPassSettings(d.h.container.ports).store.enroll(
-          d.session.user.id,
-          "https://auth.world.org",
-          "different-subject",
-        );
+      if (outcome === "mismatch") {
+        const { adapter } = agentPassSettings(d.h.container.ports);
+        const complete = adapter.completeCheckpoint;
+        adapter.completeCheckpoint = async (input) => ({
+          ...(await complete(input)),
+          sub: "different-subject",
+        });
+      }
       const query =
         outcome === "denied"
           ? "error=access_denied"

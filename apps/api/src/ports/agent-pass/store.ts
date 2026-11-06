@@ -48,7 +48,7 @@ export function checkpointStore(db: Database, clock: Clock, ids: IdGenerator) {
         status: "pending",
         reason: "",
         claimed: false,
-        allowEnrollment: !input.worldSub,
+        allowEnrollment: false,
       };
       save(a);
       return a;

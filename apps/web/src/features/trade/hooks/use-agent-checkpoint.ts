@@ -20,7 +20,9 @@ export function useAgentCheckpoint() {
     return "Unable to confirm checkpoint status. Review your order before retrying.";
   const status = result.data?.status;
   if (status === "used")
-    return "World ID approval completed. The agent order executed.";
+    return result.data?.orderId
+      ? "World ID approval completed. The agent order executed."
+      : "World ID Agent Pass linked. Orders still require separate approval.";
   if (status === "denied")
     return `World ID approval denied (${result.data?.reason}). The order remains blocked.`;
   if (status === "cancelled")

@@ -4,6 +4,7 @@ import {
   type StaySelection,
 } from "@night-shares/proto/stay/v1/trip_pb";
 import type { Ports } from "../../../../container/ports";
+import { chainStatus } from "../../../../ports/chain-status/chain-status";
 import { quoteNight } from "../../pricing/quote-night";
 import { selection } from "../../pricing/selection";
 import type { StayRepo } from "../../repo/stay-repo";
@@ -14,6 +15,11 @@ export function createQuoteStay(ports: Ports, repo: StayRepo) {
       quoteNight(ports, value.propertyId, value.roomTypeId, date, value.rooms),
     );
     const quote = create(StayQuoteSchema, {
+      tradingPaused: dates.some((date) =>
+        chainStatus(ports).isPaused(
+          `${value.propertyId}:${value.roomTypeId}:${date}`,
+        ),
+      ),
       id: ports.ids.next("quote"),
       selection: value,
       nights,

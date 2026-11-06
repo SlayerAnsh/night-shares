@@ -1,7 +1,9 @@
 import { DomainError } from "../../shared/errors/domain-error";
 import { toWholeTenths } from "../../shared/tenths";
 
-export const MAX_S = 100;
+import { MAX_S } from "./chain-limits";
+
+export { MAX_S } from "./chain-limits";
 
 export function assertMaxSupply(tenths: number) {
   if (tenths > toWholeTenths(MAX_S))

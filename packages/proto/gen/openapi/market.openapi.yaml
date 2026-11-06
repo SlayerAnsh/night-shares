@@ -456,6 +456,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.market.v1.GetPortfolioResponse'
+  /night_shares.market.v1.MarketService/LinkAgentPass:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: LinkAgentPass
+      operationId: night_shares.market.v1.MarketService.LinkAgentPass
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.LinkAgentPassRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.LinkAgentPassResponse'
   /night_shares.market.v1.MarketService/ListCutoffClaims:
     post:
       tags:
@@ -1079,6 +1114,82 @@ components:
           format: int64
       title: Usdc
       additionalProperties: false
+    night_shares.identity.v1.StartVerifyActionResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          title: request_id
+        appId:
+          type: string
+          title: app_id
+        action:
+          type: string
+          title: action
+        signal:
+          type: string
+          title: signal
+        expiresAt:
+          title: expires_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        mode:
+          title: mode
+          $ref: '#/components/schemas/night_shares.identity.v1.WorldIdMode'
+        context:
+          title: context
+          $ref: '#/components/schemas/night_shares.identity.v1.WorldIdRequest'
+      title: StartVerifyActionResponse
+      additionalProperties: false
+    night_shares.identity.v1.WorldIdMode:
+      type: string
+      title: WorldIdMode
+      enum:
+        - WORLD_ID_MODE_UNSPECIFIED
+        - WORLD_ID_MODE_MOCK
+        - WORLD_ID_MODE_WORLD_ID
+      description: Enrollment uses a fixed action; sensitive actions use their own scope.
+    night_shares.identity.v1.WorldIdRequest:
+      type: object
+      properties:
+        rpId:
+          type: string
+          title: rp_id
+        nonce:
+          type: string
+          title: nonce
+        createdAt:
+          type:
+            - integer
+            - string
+          title: created_at
+          format: int64
+        expiresAt:
+          type:
+            - integer
+            - string
+          title: expires_at
+          format: int64
+        signature:
+          type: string
+          title: signature
+        sessionId:
+          type: string
+          title: session_id
+        environment:
+          type: string
+          title: environment
+        allowLegacy:
+          type: boolean
+          title: allow_legacy
+        credential:
+          type: string
+          title: credential
+        continuity:
+          title: continuity
+          $ref: '#/components/schemas/night_shares.identity.v1.WorldIdRequest'
+      title: WorldIdRequest
+      additionalProperties: false
+      description: JSON preserves the complete vendor result without discarding credential fields.
     night_shares.market.v1.AgentOrder:
       type: object
       properties:
@@ -1119,6 +1230,9 @@ components:
     night_shares.market.v1.AgentWallet:
       type: object
       properties:
+        agentPassLinked:
+          type: boolean
+          title: agent_pass_linked
         address:
           type: string
           title: address
@@ -1348,7 +1462,7 @@ components:
           $ref: '#/components/schemas/google.protobuf.Timestamp'
       title: CutoffClaim
       additionalProperties: false
-      description: Entitlements are fixed at release and paid only when the holder claims.
+      description: Entitlements are fixed at release, pushed in batches, and claimable as fallback.
     night_shares.market.v1.DiscoverRequest:
       type: object
       properties:
@@ -1372,6 +1486,9 @@ components:
     night_shares.market.v1.DiscoverResponse:
       type: object
       properties:
+        tradingPaused:
+          type: boolean
+          title: trading_paused
         nights:
           type: array
           items:
@@ -1462,6 +1579,9 @@ components:
     night_shares.market.v1.GetBookResponse:
       type: object
       properties:
+        tradingPaused:
+          type: boolean
+          title: trading_paused
         holders:
           type: array
           items:
@@ -1503,6 +1623,9 @@ components:
     night_shares.market.v1.GetNightResponse:
       type: object
       properties:
+        tradingPaused:
+          type: boolean
+          title: trading_paused
         night:
           title: night
           $ref: '#/components/schemas/night_shares.market.v1.NightCard'
@@ -1588,6 +1711,46 @@ components:
           title: unsold_refund
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
       title: Holding
+      additionalProperties: false
+    night_shares.market.v1.LinkAgentPassRequest:
+      type: object
+      allOf:
+        - properties:
+            requestId:
+              type: string
+              title: request_id
+        - oneOf:
+            - type: object
+              properties:
+                idkitResultJson:
+                  type: string
+                  title: idkit_result_json
+              title: idkit_result_json
+              required:
+                - idkitResultJson
+            - type: object
+              properties:
+                mockProof:
+                  type: string
+                  title: mock_proof
+              title: mock_proof
+              required:
+                - mockProof
+      title: LinkAgentPassRequest
+      additionalProperties: false
+      description: |-
+        An empty request starts a fresh Proof of Human action. Completion starts an
+         enrollment-only Agent Pass checkpoint; it never approves an order.
+    night_shares.market.v1.LinkAgentPassResponse:
+      type: object
+      properties:
+        verification:
+          title: verification
+          $ref: '#/components/schemas/night_shares.identity.v1.StartVerifyActionResponse'
+        checkpoint:
+          title: checkpoint
+          $ref: '#/components/schemas/night_shares.market.v1.StartAgentCheckpointResponse'
+      title: LinkAgentPassResponse
       additionalProperties: false
     night_shares.market.v1.ListCutoffClaimsRequest:
       type: object

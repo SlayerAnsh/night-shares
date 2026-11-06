@@ -1,4 +1,5 @@
 import type { Ports } from "../../container/ports";
+import { DomainError } from "../../shared/errors/domain-error";
 import type { AgentPass } from "./agent-pass";
 import { createMockAgentPass } from "./agent-pass.mock";
 import { createOidcAgentPass } from "./agent-pass.oidc";
@@ -8,6 +9,8 @@ import { checkpointStore } from "./store";
 const settings = new WeakMap<Ports, ReturnType<typeof configureAgentPass>>();
 export function configureAgentPass(ports: Ports, config: AgentPassConfig) {
   const c = agentPassConfig({
+    ADAPTERS: config.adapters,
+    WORLD_ID_MODE: config.worldIdMode,
     AGENT_APPROVAL: config.agentApproval,
     AGENT_PASS_MODE: config.agentPassMode,
     AGENT_PASS_ISSUER: config.agentPassIssuer,
@@ -20,7 +23,22 @@ export function configureAgentPass(ports: Ports, config: AgentPassConfig) {
   const store = checkpointStore(ports.db, ports.clock, ports.ids);
   const adapter: AgentPass =
     c.agentPassMode === "mock"
-      ? createMockAgentPass(store, c.agentPassIssuer)
+      ? c.adapters === "mock"
+        ? createMockAgentPass(store, c.agentPassIssuer)
+        : {
+            startCheckpoint: async () => {
+              throw new DomainError(
+                "FAILED_PRECONDITION",
+                "Agent Pass is disabled; use IDKit approval.",
+              );
+            },
+            completeCheckpoint: async () => {
+              throw new DomainError(
+                "FAILED_PRECONDITION",
+                "Agent Pass is disabled; use IDKit approval.",
+              );
+            },
+          }
       : createOidcAgentPass({
           store,
           clock: ports.clock,

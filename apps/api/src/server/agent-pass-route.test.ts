@@ -46,6 +46,8 @@ test("HTTP route binds browser handoff, blocks copied callbacks and rejects repl
       10_000_000_000n,
     );
     const token = ports.sessions.create(user);
+    const settings = agentPassSettings(ports);
+    settings.store.enroll(user.id, settings.config.agentPassIssuer, `mock:${user.id}`);
     const start = await startAgentCheckpoint(d, user, order.id, token);
     const url = new URL(start.authorizeUrl ?? "");
     const begin = await call(url.pathname + url.search);

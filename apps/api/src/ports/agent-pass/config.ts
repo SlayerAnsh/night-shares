@@ -1,4 +1,6 @@
 export type AgentPassConfig = {
+  adapters?: string;
+  worldIdMode?: "mock" | "world-id" | "cloud";
   agentApproval?: "agent-pass" | "idkit";
   agentPassMode?: "mock" | "oidc";
   agentPassIssuer?: string;
@@ -15,7 +17,16 @@ export function agentPassConfig(env: Record<string, string | undefined>) {
     throw new Error("AGENT_APPROVAL must be agent-pass or idkit.");
   if (agentPassMode !== "mock" && agentPassMode !== "oidc")
     throw new Error("AGENT_PASS_MODE must be mock or oidc.");
+  if (
+    (env.ADAPTERS ?? "mock") !== "mock" &&
+    agentPassMode === "mock" &&
+    !(agentApproval === "idkit" && env.WORLD_ID_MODE === "cloud")
+  )
+    throw new Error(
+      "AGENT_PASS_MODE=mock requires ADAPTERS=mock; use oidc with credentials or AGENT_APPROVAL=idkit with WORLD_ID_MODE=cloud.",
+    );
   const result = {
+    adapters: env.ADAPTERS ?? "mock",
     agentApproval,
     agentPassMode,
     agentPassIssuer: env.AGENT_PASS_ISSUER ?? "https://auth.world.org",

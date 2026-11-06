@@ -1,6 +1,7 @@
 import { create } from "@bufbuild/protobuf";
 import { AgentWalletSchema } from "@night-shares/proto/market/v1/market_pb";
 import { AgentOrderStatus } from "@night-shares/proto/market/v1/portfolio_pb";
+import { agentPassSettings } from "../../../../ports/agent-pass/settings";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { fromProto, toProto } from "../../../../shared/night-key";
@@ -26,6 +27,7 @@ export async function getAgentWallet(deps: Deps, user: User) {
   });
   return {
     wallet: create(AgentWalletSchema, {
+      agentPassLinked: !!agentPassSettings(deps.ports).store.link(user.id),
       address: b.address,
       balance: { micros: await deps.ports.walletProvider.balance(b.address) },
       totalBudget: { micros: b.total },

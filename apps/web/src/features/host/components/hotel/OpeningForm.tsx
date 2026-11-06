@@ -1,6 +1,15 @@
 "use client";
-import { buttonClass, cx, Icon, Spinner } from "@night-shares/design-system";
+import { useQuery } from "@connectrpc/connect-query";
+import {
+  Alert,
+  Badge,
+  buttonClass,
+  cx,
+  Icon,
+  Spinner,
+} from "@night-shares/design-system";
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
+import { discover } from "@night-shares/proto/market/v1/market-MarketService_connectquery";
 import { useEffect } from "react";
 import type { useOpening } from "../../hooks/use-opening";
 import { addDays, dayMonth, shortNight } from "../../model/calendar";
@@ -36,6 +45,8 @@ export function OpeningForm({
   rateFor: (roomTypeId: string) => bigint | undefined;
   onClose: () => void;
 }) {
+  const status = useQuery(discover, { soon: true }, { refetchInterval: 15000 });
+  const paused = status.data?.tradingPaused ?? false;
   const pending = o.open.isPending;
   const dates = [...o.dates].sort();
   useEffect(() => {
@@ -67,13 +78,18 @@ export function OpeningForm({
           <Icon name="close" size={16} />
         </button>
       </div>
+      {paused && (
+        <Alert>
+          <Badge>Trading paused</Badge>
+        </Alert>
+      )}
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          o.openSelected();
+          if (!paused) o.openSelected();
         }}
       >
-        <fieldset className={styles.sec} disabled={pending}>
+        <fieldset className={styles.sec} disabled={pending || paused}>
           <h3>Open nights</h3>
           <p className={styles.help}>
             Room types and usual rates come from your channel manager.
@@ -99,6 +115,7 @@ export function OpeningForm({
               type="submit"
               className={buttonClass({ variant: "primary" })}
               disabled={
+                paused ||
                 pending ||
                 !o.valid ||
                 !o.preview.isSuccess ||

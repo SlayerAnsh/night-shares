@@ -15,8 +15,13 @@ export async function checkpointFixture() {
     10_000_000_000n,
   );
   const token = d.ports.sessions.create(d.user);
-  const started = await startAgentCheckpoint(d, d.user, order.id, token);
   const settings = agentPassSettings(d.ports);
+  settings.store.enroll(
+    d.user.id,
+    settings.config.agentPassIssuer,
+    `mock:${d.user.id}`,
+  );
+  const started = await startAgentCheckpoint(d, d.user, order.id, token);
   const a = settings.store.get(started.attemptId ?? "");
   if (!a) throw new Error("Missing attempt");
   a.browser = "test-browser";

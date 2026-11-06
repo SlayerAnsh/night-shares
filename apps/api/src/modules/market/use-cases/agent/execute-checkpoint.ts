@@ -36,8 +36,6 @@ export function executeCheckpoint(
       ports.sessions.get(a.sessionToken ?? "")?.id !== user.id
     )
       throw new CheckpointFailure("mismatch");
-    if (checkpointSnapshot(deps, user, a.orderId, a.expiresAt) !== a.snapshot)
-      throw new CheckpointFailure("mismatch");
     const linked = store.link(user.id);
     const owner = store.owner(result.iss, result.sub);
     if (
@@ -46,6 +44,19 @@ export function executeCheckpoint(
       (owner && owner !== user.id)
     )
       throw new CheckpointFailure("access_denied");
+    if (a.allowEnrollment) {
+      if (a.orderId || linked) throw new CheckpointFailure("access_denied");
+      store.enroll(user.id, result.iss, result.sub);
+      a.status = "used";
+      a.sessionToken = undefined;
+      a.verifier = "";
+      a.nonce = "";
+      a.browser = undefined;
+      store.save(a);
+      return "approved";
+    }
+    if (checkpointSnapshot(deps, user, a.orderId, a.expiresAt) !== a.snapshot)
+      throw new CheckpointFailure("mismatch");
     const order = deps.repo.account(user.humanId).orders.get(a.orderId);
     if (!order?.night) throw new CheckpointFailure("mismatch");
     const key = fromProto(order.night);
@@ -86,7 +97,6 @@ export function executeCheckpoint(
       tenths: order.size?.tenths ?? 0,
       priceMicros: toMicros(r.result.avg),
     });
-    if (!linked) store.enroll(user.id, result.iss, result.sub);
     a.status = "used";
     a.reason = "";
     a.verifier = "";

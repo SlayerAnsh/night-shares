@@ -1,6 +1,7 @@
 import { askFillProceeds, book, toMicros } from "@night-shares/market-model";
 import type { Ports } from "../../../container/ports";
 import { transaction } from "../../../db/transaction";
+import { assertTrading } from "../../../ports/chain-status/chain-status";
 import type { User } from "../../../ports/sessions/session-store";
 import { DomainError } from "../../../shared/errors/domain-error";
 import { mulTenths } from "../../../shared/money";
@@ -83,6 +84,7 @@ export function syncPosition(
   });
 }
 export function assertOpen(ports: Ports, record: NightRecord) {
+  assertTrading(ports, record.key);
   if (record.released)
     throw new DomainError("FAILED_PRECONDITION", "This night has closed.");
   if (record.stopped || hoursLeft(ports, record) <= 0)

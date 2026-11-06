@@ -1,5 +1,6 @@
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
 import { lateFee, toMicros } from "@night-shares/market-model";
+import { chainStatus } from "../../../../ports/chain-status/chain-status";
 import { toWholeTenths } from "../../../../shared/tenths";
 import { source } from "../../mappers/route";
 import {
@@ -15,6 +16,7 @@ export function getBook(deps: Deps, key: string) {
   const record = ports.inventory.get(key),
     bk = bookOf(ports, record);
   return {
+    tradingPaused: chainStatus(ports).isPaused(key),
     holders: repo
       .holders(key)
       .map((user) => {

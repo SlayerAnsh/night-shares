@@ -17,17 +17,17 @@ export async function claimCutoff(deps: Deps, user: User, key: string) {
     );
     if (!row)
       throw new DomainError("NOT_FOUND", "No cutoff claim for this night.");
-    if (row.claimed_at !== null) return row;
     if (row.busy)
       throw new DomainError(
         "FAILED_PRECONDITION",
         "This cutoff claim is settling.",
       );
+    if (row.claimed_at !== null) return row;
     ports.db
       .query(
-        "UPDATE market_cutoff_claims SET busy = 1 WHERE night_key = ? AND human_id = ?",
+        "UPDATE market_cutoff_claims SET busy = 1, claimed_at = ? WHERE night_key = ? AND human_id = ?",
       )
-      .run(key, user.humanId);
+      .run(ports.clock.now(), key, user.humanId);
     return row;
   });
   if (row.claimed_at !== null)
@@ -49,7 +49,7 @@ export async function claimCutoff(deps: Deps, user: User, key: string) {
     transaction(ports.db, () => {
       ports.db
         .query(
-          "UPDATE market_cutoff_claims SET busy = 0 WHERE night_key = ? AND human_id = ?",
+          "UPDATE market_cutoff_claims SET busy = 0, claimed_at = NULL WHERE night_key = ? AND human_id = ?",
         )
         .run(key, user.humanId);
     });

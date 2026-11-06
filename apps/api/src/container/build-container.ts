@@ -14,8 +14,11 @@ import { defaultDomain } from "../modules/market/orders/typed-data";
 import { createStayModule } from "../modules/stay/module";
 import { createWalletModule } from "../modules/wallet/module";
 import { createSqliteActivityLog } from "../ports/activity/activity-log.sqlite";
+import { assertMockSecurity } from "../ports/agent-pass/mock-security";
 import { configureAgentPass } from "../ports/agent-pass/settings";
 import { bookingReportFor } from "../ports/booking-report/booking-report.mock";
+import { configureChainStatus } from "../ports/chain-status/chain-status";
+import { createMockChainStatus } from "../ports/chain-status/chain-status.mock";
 import { createMockChannelManager } from "../ports/channel-manager/channel-manager.mock";
 import { createMockClock } from "../ports/clock/clock.mock";
 import { createSystemClock } from "../ports/clock/clock.system";
@@ -43,6 +46,7 @@ export function buildContainer(config: Config) {
     throw new Error(
       "RECEPTION_TAG_SECRET is required when ADAPTERS is not mock.",
     );
+  assertMockSecurity(config);
   if (config.adapters !== "mock")
     throw new Error("Only mock adapters are available.");
   const custodyAdapter =
@@ -133,6 +137,12 @@ export function buildContainer(config: Config) {
     };
   if (config.walletCustody === "privy")
     configureCustodialSigner(ports, createPrivyOrderSigner({ db, custody }));
+  configureChainStatus(
+    ports,
+    createMockChainStatus(config.chainPaused),
+    config.chainLimits === "mainnet",
+    config.agentApprovalThreshold,
+  );
   configureAgentPass(ports, config);
   configureOrders(ports, {
     domain: {

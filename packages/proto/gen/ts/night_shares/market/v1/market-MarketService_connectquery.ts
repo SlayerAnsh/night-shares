@@ -5,6 +5,11 @@
 import { MarketService } from "./market_pb";
 
 /**
+ * @generated from rpc night_shares.market.v1.MarketService.LinkAgentPass
+ */
+export const linkAgentPass = MarketService.method.linkAgentPass;
+
+/**
  * @generated from rpc night_shares.market.v1.MarketService.StartAgentCheckpoint
  */
 export const startAgentCheckpoint = MarketService.method.startAgentCheckpoint;

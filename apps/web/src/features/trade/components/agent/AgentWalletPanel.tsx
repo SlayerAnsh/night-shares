@@ -1,7 +1,8 @@
 "use client";
-import { EmptyState, Kpis } from "@night-shares/design-system";
+import { Button, EmptyState, Kpis } from "@night-shares/design-system";
 import Link from "next/link";
 import { formatRoomNights } from "../../../../shared/format";
+import { useAgentLink } from "../../hooks/use-agent-link";
 import { useAgentWallet } from "../../hooks/use-agent-wallet";
 import { shortDate, usd } from "../../model/display";
 import { nightHref } from "../../model/market";
@@ -15,6 +16,7 @@ import styles from "./agent.module.css";
 
 // Agent wallet linked to your World ID: figures, holdings, then the controls.
 export function AgentWalletPanel() {
+  const enrollment = useAgentLink();
   const agent = useAgentWallet();
   const w = agent.wallet.data?.wallet;
   const budget = w?.totalBudget?.micros ?? 0n;
@@ -31,6 +33,15 @@ export function AgentWalletPanel() {
       )}
       {w && (
         <>
+          {!w.agentPassLinked && (
+            <Button
+              disabled={enrollment.pending}
+              onClick={() => void enrollment.link()}
+            >
+              Link World ID Agent Pass
+            </Button>
+          )}
+          <Feedback error={enrollment.error} />
           <p className={styles.address}>
             <span className={text.muted}>Address</span>{" "}
             <span className={text.mono}>{w.address}</span>

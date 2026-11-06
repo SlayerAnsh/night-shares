@@ -2,7 +2,7 @@ import type { Ports } from "../../../container/ports";
 import type { IdentityProof } from "../../../ports/identity-verifier/identity-verifier";
 import type { User } from "../../../ports/sessions/session-store";
 import type { VerifiedAction } from "../../../ports/verifications/verification-store";
-import { DomainError } from "../../../shared/errors/domain-error";
+import { verifyCanonicalAction } from "./verify-canonical-action";
 export function createVerifyAction(
   deps: Pick<Ports, "identityVerifier" | "verifications">,
 ) {
@@ -12,17 +12,13 @@ export function createVerifyAction(
     proof: IdentityProof,
     requestId?: string,
   ) => {
-    const verified = await deps.identityVerifier.verifyProof({
-      proof,
+    const verified = await verifyCanonicalAction(
+      deps,
+      user,
       action,
+      proof,
       requestId,
-      userId: user.id,
-    });
-    if (verified.subject !== user.humanId)
-      throw new DomainError(
-        "PERMISSION_DENIED",
-        "The proof must belong to your signed-in World ID.",
-      );
+    );
     return deps.verifications.issue({
       userId: user.id,
       action,

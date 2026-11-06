@@ -3,6 +3,7 @@ export type ActivityKind =
   | "cutoff_refund"
   | "cutoff_claimable"
   | "cutoff_claimed"
+  | "cutoff_pushed"
   | "guest_booked"
   | "trader_bought"
   | "trader_sold_back"

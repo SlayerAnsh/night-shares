@@ -3,6 +3,7 @@ import {
   AgentOrderSchema,
   AgentOrderStatus,
 } from "@night-shares/proto/market/v1/portfolio_pb";
+import { approvalThreshold } from "../../../../ports/chain-status/chain-status";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { toProto } from "../../../../shared/night-key";
@@ -25,6 +26,7 @@ export async function createAgentOrder(
       "FAILED_PRECONDITION",
       "Not enough trader liquidity.",
     );
+  const threshold = approvalThreshold(deps.ports);
   const total = quote.total?.micros ?? 0n;
   if (total > budget)
     throw new DomainError("FAILED_PRECONDITION", "Order exceeds budget.");
@@ -37,7 +39,7 @@ export async function createAgentOrder(
     spent: { micros: 0n },
     walletAddress: agentWallets(deps.ports.db).get(user).address,
     status: AgentOrderStatus.PENDING,
-    requiresVerification: total > 1_000_000_000n,
+    requiresVerification: total > threshold,
   });
   if (!order.requiresVerification) {
     // Agent purchases share the human position and per-night cap.
@@ -46,7 +48,7 @@ export async function createAgentOrder(
       user,
       key,
       size,
-      budget < 1_000_000_000n ? budget : 1_000_000_000n,
+      budget < threshold ? budget : threshold,
     );
     order.status = AgentOrderStatus.EXECUTED;
     order.spent = execution.quote?.total;

@@ -15,10 +15,12 @@ export function Ticket({
   night,
   fair,
   cap,
+  tradingPaused = false,
 }: {
   night: Pick<NightKey, "propertyId" | "roomTypeId" | "date">;
   fair?: bigint;
   cap?: bigint;
+  tradingPaused?: boolean;
 }) {
   const t = useTicket(night);
   const { level } = useSession();
@@ -29,6 +31,7 @@ export function Ticket({
       className={styles.body}
       onSubmit={(event) => {
         event.preventDefault();
+        if (tradingPaused) return;
         if (!signedIn) {
           access.require("trade", "orb");
           return;
@@ -49,7 +52,11 @@ export function Ticket({
       {t.mode === "ask" ? (
         <TicketAsk ticket={t} fair={fair} cap={cap} signedIn={signedIn} />
       ) : (
-        <TicketTrade ticket={t} signedIn={signedIn} />
+        <TicketTrade
+          ticket={t}
+          signedIn={signedIn}
+          tradingPaused={tradingPaused}
+        />
       )}
       <Feedback error={t.actions.error} notice={t.actions.notice} />
       {signedIn && <TicketPosition night={night} />}

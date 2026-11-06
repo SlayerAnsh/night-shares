@@ -72,14 +72,14 @@ test("CORS permits the frontend origin and its Connect preflight", async () => {
   );
 });
 
-test("all 55 RPCs are registered and authenticated sessions reach every stub", async () => {
+test("all 56 RPCs are registered and authenticated sessions reach every stub", async () => {
   const token = h.container.ports.sessions.create({
     id: "usr_all",
     humanId: "all",
     level: "orb",
     walletAddress: "mock",
   });
-  let count = 0;
+  const methods: string[] = [];
   for (const { service } of Object.values(h.container.modules)) {
     for (const method of service.methods) {
       const response = await fetch(
@@ -98,8 +98,9 @@ test("all 55 RPCs are registered and authenticated sessions reach every stub", a
         code: "unimplemented",
         message: "not built yet",
       });
-      count++;
+      methods.push(method.name);
     }
   }
-  expect(count).toBe(55);
+  expect(methods).toHaveLength(56);
+  expect(methods).toContain("LinkAgentPass");
 });

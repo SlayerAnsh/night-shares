@@ -907,6 +907,9 @@ components:
     night_shares.stay.v1.StayQuote:
       type: object
       properties:
+        tradingPaused:
+          type: boolean
+          title: trading_paused
         id:
           type: string
           title: id

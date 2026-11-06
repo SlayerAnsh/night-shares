@@ -1,5 +1,10 @@
 "use client";
-import { BackLink, EmptyState } from "@night-shares/design-system";
+import {
+  Alert,
+  BackLink,
+  Badge,
+  EmptyState,
+} from "@night-shares/design-system";
 import Link from "next/link";
 import { useNight } from "../../hooks/use-night";
 import { useUrlState } from "../../hooks/use-url-state";
@@ -52,6 +57,11 @@ function NightContent({
   return (
     <div className={`${page.page} ${page.wide} ${styles.screen}`}>
       <MarketsLink />
+      {(state.detail.data?.tradingPaused || state.book.data?.tradingPaused) && (
+        <Alert>
+          <Badge>Trading paused</Badge>
+        </Alert>
+      )}
       {card ? (
         <NightHeader
           card={card}
@@ -97,6 +107,9 @@ function NightContent({
         >
           <Ticket
             night={night}
+            tradingPaused={
+              state.detail.data?.tradingPaused || state.book.data?.tradingPaused
+            }
             fair={fair}
             cap={state.book.data?.recallCap?.micros}
           />

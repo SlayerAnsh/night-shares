@@ -1,12 +1,22 @@
-import { floorFromRate, WALK_SUSPEND_AFTER } from "@night-shares/market-model";
+import {
+  floorFromRate,
+  PRESETS,
+  WALK_SUSPEND_AFTER,
+} from "@night-shares/market-model";
 import type { OpenNightsSelection } from "@night-shares/proto/host/v1/opening_pb";
+import {
+  assertTrading,
+  chainLimits,
+} from "../../../../ports/chain-status/chain-status";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { toWholeTenths } from "../../../../shared/tenths";
 import { editAllotment } from "../../../inventory/mutations/edit-allotment";
 import { openAllotment } from "../../../inventory/mutations/open-allotment";
 import { walkIncidents } from "../../../walk/repo/incidents";
+import { assertChainPrices } from "../../chain-limits";
 import { mapNight } from "../../mappers/night";
 import { assertMaxSupply } from "../../max-s";
+import { assertOpenNightLimit } from "../../open-night-limit";
 import type { HostDeps } from "../deps";
 import { pushChange } from "./push-change";
 import { selectNights } from "./selection";
@@ -15,7 +25,9 @@ const NIGHT_VAULT = "night_vault";
 
 export function createOpenNights(deps: HostDeps) {
   return (userId: string, selection?: OpenNightsSelection) => {
+    assertTrading(deps.ports);
     const plans = selectNights(deps, userId, selection);
+    for (const { record } of plans) assertTrading(deps.ports, record.key);
     if (
       plans.some(
         ({ record }) =>
@@ -32,8 +44,13 @@ export function createOpenNights(deps: HostDeps) {
       deps,
       plans.map(({ record }) => record.key),
       userId,
-      (publish) =>
-        plans.map(({ record, preset, tenths, releasePolicy }) => {
+      (publish) => {
+        if (chainLimits(deps.ports))
+          assertOpenNightLimit(
+            deps.ports,
+            plans.map(({ record }) => record.key),
+          );
+        return plans.map(({ record, preset, tenths, releasePolicy }) => {
           let edited = false;
           const updated = deps.ports.inventory.update(record.key, (current) => {
             edited = current.openedAt > 0;
@@ -43,12 +60,22 @@ export function createOpenNights(deps: HostDeps) {
                 toWholeTenths(current.state.booked + current.state.held),
               ),
               preset,
-              floor: floorFromRate(current.state.usualRate),
+              floor: chainLimits(deps.ports)
+                ? current.state.F
+                : floorFromRate(current.state.usualRate),
             };
             assertMaxSupply(edit.tenths);
-            return edited
+            if (chainLimits(deps.ports))
+              assertChainPrices({
+                F: edit.floor,
+                k: PRESETS[preset],
+                S: edit.tenths / 10,
+              });
+            const next = edited
               ? editAllotment(current, edit)
               : openAllotment(current, edit, deps.ports.clock.now());
+            if (chainLimits(deps.ports)) assertChainPrices(next.state);
+            return next;
           });
           publish.push(() => {
             deps.ports.db
@@ -69,7 +96,8 @@ export function createOpenNights(deps: HostDeps) {
             }),
           );
           return mapNight(updated, deps.repo);
-        }),
+        });
+      },
     );
   };
 }

@@ -16,6 +16,7 @@ import { listWatch } from "./use-cases/account/list-watch";
 import { postAskWithCustody } from "./use-cases/account/post-ask";
 import { toggleWatch } from "./use-cases/account/toggle-watch";
 import { getAgentCheckpoint } from "./use-cases/agent/get-checkpoint";
+import { linkAgentPass } from "./use-cases/agent/link-agent-pass";
 import { setAgentBudget } from "./use-cases/agent/set-budget";
 import { startAgentCheckpoint } from "./use-cases/agent/start-checkpoint";
 import { getAgentWallet, transferAgentWallet } from "./use-cases/agent/wallet";
@@ -41,6 +42,15 @@ export function createMarketHandler(
   deps: Deps,
 ): ServiceImpl<typeof MarketService> {
   return {
+    linkAgentPass: (r, ctx) =>
+      linkAgentPass(
+        deps,
+        requireUser(ctx),
+        r,
+        /^Bearer ([^\s]+)$/i.exec(
+          ctx.requestHeader.get("authorization") ?? "",
+        )?.[1] ?? "",
+      ),
     claimCutoff: (r, ctx) =>
       claimCutoff(deps, requireUser(ctx), nightKey(r.night)),
     listCutoffClaims: (_, ctx) => listCutoffClaims(deps, requireUser(ctx)),

@@ -56,7 +56,8 @@ export function createAgentPassRoute(container: Container) {
         ?.slice(cookieName.length + 1) ?? "";
     if (
       url.pathname === "/agent-pass/mock" &&
-      config.agentPassMode === "mock"
+      config.agentPassMode === "mock" &&
+      config.adapters === "mock"
     ) {
       const a = store.byState(url.searchParams.get("state") ?? "");
       if (!a || !browser || browser !== a.browser || a.status !== "pending") {
