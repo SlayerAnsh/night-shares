@@ -22,4 +22,5 @@ export const SYSTEM_ADDRESSES = {
   treasury: "treasury",
   pool: "pool",
   host: "host",
+  marketMaker: "market_maker",
 } as const;

@@ -8,5 +8,15 @@ export interface IdentityVerifier {
     requestId?: string;
     proof: string;
     action: string;
-  }): Promise<{ nullifier: string; level: VerificationLevel }>;
+  }): Promise<VerifiedProof>;
 }
+
+// subject: stable per app id for one human (like the World ID OIDC `sub`).
+// Use it to recognise the same person across sign in and later checks.
+// nullifier: per action id; World ID gives a different one for each action,
+// so it proves "this human did this action once", not who the human is.
+export type VerifiedProof = {
+  subject: string;
+  nullifier: string;
+  level: VerificationLevel;
+};

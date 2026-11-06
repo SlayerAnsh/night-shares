@@ -17,9 +17,9 @@ test("mock proofs bind nullifiers to seed and action; requests expire and cannot
       action: "signin",
     }),
   ).toMatchObject({ nullifier: first.nullifier });
-  expect(
-    (await verifier.verifyProof({ proof, action: "checkin" })).nullifier,
-  ).not.toBe(first.nullifier);
+  const checkIn = await verifier.verifyProof({ proof, action: "checkin" });
+  expect(checkIn.nullifier).not.toBe(first.nullifier);
+  expect(checkIn.subject).toBe(first.subject);
   await expect(
     verifier.verifyProof({ proof: "mock:broken", action: "signin" }),
   ).rejects.toThrow();

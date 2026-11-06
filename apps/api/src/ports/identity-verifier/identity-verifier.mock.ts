@@ -47,10 +47,9 @@ export function createMockIdentityVerifier({
           );
         requests.delete(requestId);
       }
-      const nullifier = createHash("sha256")
-        .update(JSON.stringify([seed, action]))
-        .digest("hex");
-      return { nullifier, level };
+      const hash = (value: unknown) =>
+        createHash("sha256").update(JSON.stringify(value)).digest("hex");
+      return { subject: hash([seed]), nullifier: hash([seed, action]), level };
     },
   };
 }
