@@ -1,9 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
+import {IRouterCore} from "./IRouterCore.sol";
+import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
+import {INightHook} from "./INightHook.sol";
+import {INightFactory} from "./INightFactory.sol";
+import {IHumanRegistry} from "./IHumanRegistry.sol";
+import {IAllowanceTransfer} from "permit2/src/interfaces/IAllowanceTransfer.sol";
 import {INightTypes} from "./INightTypes.sol";
 
 /// @notice Immutable dependencies; active msgSender; guard; TradeRouter-owned shared verification, nonces and fills; monotonically generated booking IDs and booking records.
-interface IBookingRouter is INightTypes {
+interface IBookingRouter is INightTypes, IRouterCore {
     /// @notice Both routers use this TradeRouter domain, nonce space and filled accounting.
     /// @dev Ask fills call its restricted fillBookingAsk in the same atomic execution.
     function tradeRouter() external view returns (address);
@@ -23,4 +29,7 @@ interface IBookingRouter is INightTypes {
     function msgSender() external view returns (address);
     /// @notice PoolManager only inside active unlock. Burns only after token custody is received and all deltas settle.
     function unlockCallback(bytes calldata data) external returns (bytes memory);
+
+    // Public dependency and accounting views expose the complete implementation ABI.
+    function bookingCount() external view returns (uint256);
 }

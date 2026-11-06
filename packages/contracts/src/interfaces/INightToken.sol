@@ -4,6 +4,21 @@ import {INightTypes} from "./INightTypes.sol";
 
 /// @notice ERC-20 balances and allowances; one time initialization; immutable night, S and X; burned count; human aggregate balances; descending holder links, size and transient insertion hints. Excluded endpoints are fixed at initialization.
 interface INightToken is INightTypes {
+    function seedPosition(uint256 i)
+        external
+        view
+        returns (int24 lower, int24 upper, uint128 liquidity, uint256 deposit);
+    function dustMinted() external view returns (uint256);
+    function released() external view returns (uint256);
+    function snapshotAtCutoff() external returns (uint256 held, address first);
+    function cutoffBalanceOf(address holder) external view returns (uint256);
+    function cutoffNext(address holder) external view returns (address);
+    function burnCutoffInventory() external returns (uint256);
+    // Compatibility entry points share the same immutable snapshot.
+    function collectAllAtCutoff() external returns (uint256);
+    function snapshotBalance(address holder) external view returns (uint256);
+    function burnCutoffRemainder() external returns (uint256);
+
     error CapExceeded(uint256 humanId, uint256 balance, uint256 cap);
     error UnverifiedHuman(address wallet);
     error InvalidHint();
@@ -11,7 +26,7 @@ interface INightToken is INightTypes {
     error AlreadyInitialized();
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
-    /// @notice Factory only, once. Mints exactly S to NightVault for chunked ladder seeding. Endpoints come from factory dependencies.
+    /// @notice Factory only, once. Mints exactly S + D to NightVault for chunked ladder seeding. Endpoints come from factory dependencies.
     function initialize(bytes32 night) external;
     /// @notice Public ERC-20 metadata.
     function name() external view returns (string memory);
@@ -19,7 +34,7 @@ interface INightToken is INightTypes {
     function symbol() external view returns (string memory);
     /// @notice Always 18.
     function decimals() external pure returns (uint8);
-    /// @notice Public live supply, never above S.
+    /// @notice Public live supply, initially S + D.
     function totalSupply() external view returns (uint256);
     /// @notice Public balance. Nonexcluded holder balances are multiples of 1e17; vault/manager dust is exempt.
     function balanceOf(address account) external view returns (uint256);
@@ -50,7 +65,7 @@ interface INightToken is INightTypes {
     function night() external view returns (bytes32);
     /// @notice Public cumulative burns, used to authorize earned position removal.
     function burned() external view returns (uint256);
-    /// @notice Public aggregate across every wallet of a human.
+    /// @notice Public aggregate by cached position identity across wallets. Relinks preserve live aggregates.
     function humanBalance(uint256 humanId) external view returns (uint256);
     /// @notice Public maximum human balance, max(1e18, 30% of S).
     function cap() external view returns (uint256);
@@ -64,4 +79,13 @@ interface INightToken is INightTypes {
     function holderCount() external view returns (uint256);
     /// @notice Public fixed exclusion: vault, manager, routers, Settlement and zero are outside cap and list.
     function excluded(address account) external view returns (bool);
+
+    // Public dependency and accounting views expose the complete implementation ABI.
+    function S() external view returns (uint256);
+    function X() external view returns (uint256);
+    function cachedHuman(address) external view returns (uint256);
+    function cutoff() external view returns (uint64);
+    function cutoffCollected() external view returns (bool);
+    function factory() external view returns (address);
+    function held() external view returns (uint256);
 }

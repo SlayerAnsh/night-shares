@@ -1,9 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
+import {IRouterCore} from "./IRouterCore.sol";
+import {IRebatePool} from "./IRebatePool.sol";
+import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
+import {INightHook} from "./INightHook.sol";
+import {INightFactory} from "./INightFactory.sol";
+import {IHumanRegistry} from "./IHumanRegistry.sol";
+import {IAllowanceTransfer} from "permit2/src/interfaces/IAllowanceTransfer.sol";
 import {INightTypes} from "./INightTypes.sol";
 
 /// @notice Immutable dependencies; active msgSender; reentrancy guard; per-maker nonce; cumulative fill quantity per order digest. No admin.
-interface ITradeRouter is INightTypes {
+interface ITradeRouter is INightTypes, IRouterCore {
     error InvalidNonce();
     error Overfilled();
     /// @notice Immutable BookingRouter only, during its active booking/void execution.
@@ -40,4 +47,8 @@ interface ITradeRouter is INightTypes {
     function msgSender() external view returns (address);
     /// @notice PoolManager only during an active router unlock; settles negative deltas and takes positive deltas.
     function unlockCallback(bytes calldata data) external returns (bytes memory);
+
+    // Public dependency and accounting views expose the complete implementation ABI.
+    function bookingRouter() external view returns (address);
+    function rebatePool() external view returns (IRebatePool);
 }

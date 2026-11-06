@@ -1,9 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
+import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
+import {INightVault} from "./INightVault.sol";
+import {INightFactory} from "./INightFactory.sol";
+import {IHumanRegistry} from "./IHumanRegistry.sol";
+import {ICoverFund} from "./ICoverFund.sol";
+import {IBookingRouter} from "./IBookingRouter.sol";
 import {INightTypes} from "./INightTypes.sol";
 
 /// @notice Immutable dependencies and platform; attester; consumed report and booking IDs; evidence hashes; host debt and incidents keyed by bound host payout identity; cutoff state, remaining claims and refund rate. No discretionary settlement owner.
 interface ISettlement is INightTypes {
+    function pushBatch(bytes32 night, uint256 n) external;
     error DuplicateReport();
     error InvalidBooking();
     error InsufficientCover();
@@ -43,4 +50,21 @@ interface ISettlement is INightTypes {
     function DOMAIN_SEPARATOR() external view returns (bytes32);
     /// @notice PoolManager only inside active cutoff unlock. Fixed Settlement address is the only post-cutoff swap exception.
     function unlockCallback(bytes calldata data) external returns (bytes memory);
+
+    // Public dependency and accounting views expose the complete implementation ABI.
+    function bookingRouter() external view returns (IBookingRouter);
+    function claimed(bytes32, address) external view returns (bool);
+    function consumedReport(bytes32) external view returns (bool);
+    function coverFund() external view returns (ICoverFund);
+    function cursor(bytes32) external view returns (address);
+    function factory() external view returns (INightFactory);
+    function manager() external view returns (IPoolManager);
+    function platform() external view returns (address);
+    function rebatePool() external view returns (address);
+    function refundPerNight(bytes32) external view returns (uint256);
+    function registry() external view returns (IHumanRegistry);
+    function remainingHeld(bytes32) external view returns (uint256);
+    function remainingReserve(bytes32) external view returns (uint256);
+    function usdc() external view returns (address);
+    function vault() external view returns (INightVault);
 }

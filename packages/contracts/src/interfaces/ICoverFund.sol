@@ -10,4 +10,8 @@ interface ICoverFund is INightTypes {
     function deposit(uint256 amount) external;
     /// @notice Public available USDC.
     function balance() external view returns (uint256);
+
+    // Public dependency and accounting views expose the complete implementation ABI.
+    function settlement() external view returns (address);
+    function usdc() external view returns (address);
 }

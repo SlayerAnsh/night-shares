@@ -10,6 +10,12 @@ contract MockUSDC {
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
+    mapping(address => bool) public blacklisted;
+
+    function setBlacklisted(address account, bool value) external {
+        blacklisted[account] = value;
+    }
+
     event Transfer(address indexed from, address indexed to, uint256 amount);
     event Approval(address indexed owner, address indexed spender, uint256 amount);
 
@@ -37,6 +43,7 @@ contract MockUSDC {
     }
 
     function _move(address from, address to, uint256 amount) internal {
+        require(!blacklisted[from] && !blacklisted[to], "USDC blacklisted");
         balanceOf[from] -= amount;
         balanceOf[to] += amount;
         emit Transfer(from, to, amount);

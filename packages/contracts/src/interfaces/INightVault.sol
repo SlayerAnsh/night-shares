@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
+import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
+import {INightFactory} from "./INightFactory.sol";
 import {INightTypes} from "./INightTypes.sol";
 
 /// @notice Immutable manager and endpoints; per-night positions, seeded state, removed ranges, closing flag; pending USDC per property. No administrator.
 interface INightVault is INightTypes {
+    function requiredInventory(NightConfig calldata config) external pure returns (uint256);
     error AlreadySeeded();
     error UnearnedPosition();
     /// @notice Factory only, once. Initializes position bookkeeping without enabling trading.
@@ -29,4 +32,13 @@ interface INightVault is INightTypes {
     function closing(bytes32 night) external view returns (bool);
     /// @notice PoolManager only during an active vault unlock. Settles all deltas before returning.
     function unlockCallback(bytes calldata data) external returns (bytes memory);
+
+    // Public dependency and accounting views expose the complete implementation ABI.
+    function closed(bytes32) external view returns (bool);
+    function factory() external view returns (INightFactory);
+    function manager() external view returns (IPoolManager);
+    function opened(bytes32) external view returns (bool);
+    function removed(bytes32, uint256) external view returns (bool);
+    function settlement() external view returns (address);
+    function usdc() external view returns (address);
 }

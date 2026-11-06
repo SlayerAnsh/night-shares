@@ -20,8 +20,8 @@ interface IHumanRegistry is INightTypes {
     function linkWallet(uint256 humanId, address wallet, uint64 deadline, bytes calldata sig) external;
     /// @notice Anyone relays a distinct attester-signed relink; consume the digest against replay.
     /// @dev RelinkWallet(uint256 humanId,address wallet,uint64 deadline), registry domain.
-    /// Must migrate all live token aggregates and check the new cap atomically, or reject
-    /// wallets with live holdings. A relink must not erase identity bans or upgrade verification.
+    /// Live NightToken positions retain their cached humanId until the wallet exits.
+    /// A relink must not erase identity bans or upgrade verification.
     function relinkWallet(uint256 humanId, address wallet, uint64 deadline, bytes calldata sig) external;
     /// @notice Attester only. Records Device/Orb verification from the enrollment proof.
     function setOrb(uint256 humanId, bool orb) external;
@@ -31,4 +31,8 @@ interface IHumanRegistry is INightTypes {
     function isOrb(address wallet) external view returns (bool);
     function isVerified(address wallet) external view returns (bool);
     function walkBanned(uint256 humanId) external view returns (bool);
+
+    // Public dependency and accounting views expose the complete implementation ABI.
+    function consumed(bytes32) external view returns (bool);
+    function owner() external view returns (address);
 }

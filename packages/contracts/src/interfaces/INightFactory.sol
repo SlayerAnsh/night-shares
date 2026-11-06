@@ -6,6 +6,17 @@ import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 /// @notice Immutable deployment dependencies; night configs, token addresses, pool keys and property owners. Property ownership is bound by an attester signature, never by the first opener.
 interface INightFactory is INightTypes {
     error InvalidTokenOrder();
+    function registerNightIdentity(string calldata propertyId, string calldata roomTypeId, string calldata date)
+        external
+        returns (bytes32);
+    function openNight(
+        string calldata propertyId,
+        string calldata roomTypeId,
+        string calldata date,
+        NightConfig calldata config,
+        bytes32 salt
+    ) external returns (bytes32 night, address token);
+
     /// @notice Maximum inventory in 18-decimal units: 100e18.
     function MAX_S() external view returns (uint256);
     /// @notice Anyone relays an unexpired attester signature for an unbound property.
@@ -22,6 +33,7 @@ interface INightFactory is INightTypes {
     function dependencies() external view returns (Deployment memory);
     /// @notice Bound host payout only; config.host must equal caller. Checks Orb identity and fewer than two payout-identity incidents.
     /// @dev Validates immutable F/k/S/cutoff, derives X, mines token < USDC using supplied salt, initializes fee 0 / spacing 1 and starts an incomplete ladder. Requires 0 < S <= 100e18 whole rooms.
+    /// Canonical strings must first be registered through registerNightIdentity.
     /// Trading is forbidden until addLadderChunk completes every position.
     function openNight(NightConfig calldata config, bytes32 salt) external returns (bytes32 night, address token);
     /// @notice Public immutable night configuration. Reverts for an unknown night.
@@ -34,4 +46,8 @@ interface INightFactory is INightTypes {
     function predictToken(NightConfig calldata config, bytes32 salt) external view returns (address);
     /// @notice Public canonical pool key, including the fixed hook and USDC.
     function poolKey(bytes32 night) external view returns (PoolKey memory);
+
+    // Public dependency and accounting views expose the complete implementation ABI.
+    function consumed(bytes32) external view returns (bool);
+    function identities(bytes32) external view returns (bytes32 property, bytes32 roomType, uint64 checkIn);
 }

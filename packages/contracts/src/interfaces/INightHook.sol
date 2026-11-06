@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
+import {PoolId} from "v4-core/src/types/PoolId.sol";
+import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
+import {INightFactory} from "./INightFactory.sol";
+import {IHumanRegistry} from "./IHumanRegistry.sol";
 import {INightTypes} from "./INightTypes.sol";
 import {IHooks} from "v4-core/src/interfaces/IHooks.sol";
 import {Hooks} from "v4-core/src/libraries/Hooks.sol";
@@ -100,4 +104,22 @@ interface INightHook is INightTypes, IHooks {
         uint256 amount1,
         bytes calldata hookData
     ) external override returns (bytes4);
+
+    // Public dependency and accounting views expose the complete implementation ABI.
+    function bookingRouter() external view returns (address);
+    function coverFund() external view returns (address);
+    function factory() external view returns (INightFactory);
+    function initialized(PoolId) external view returns (bool);
+    function manager() external view returns (IPoolManager);
+    function nightOf(PoolId) external view returns (bytes32);
+    function platform() external view returns (address);
+    function rebatePool() external view returns (address);
+    function registry() external view returns (IHumanRegistry);
+    function removed(bytes32, uint256) external view returns (bool);
+    function seeded(bytes32, uint256) external view returns (bool);
+    function seededRooms(bytes32) external view returns (uint256);
+    function settlement() external view returns (address);
+    function tradeRouter() external view returns (address);
+    function usdc() external view returns (address);
+    function vault() external view returns (address);
 }
