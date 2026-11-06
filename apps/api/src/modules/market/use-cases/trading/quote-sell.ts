@@ -6,7 +6,6 @@ import {
   FEE,
   lateFee,
   toMicros,
-  toTenths,
 } from "@night-shares/market-model";
 import {
   BookSource,
@@ -15,9 +14,16 @@ import {
 import type { User } from "../../../../ports/sessions/session-store";
 import { mulTenths } from "../../../../shared/money";
 import { toProto } from "../../../../shared/night-key";
+import { toWholeTenths } from "../../../../shared/tenths";
 import type { NightRecord } from "../../../inventory/inventory-repo";
 import { cutoffAt } from "../../cutoff";
-import { bookOf, type Deps, hoursLeft, syncPosition } from "../context";
+import {
+  bookOf,
+  type Deps,
+  hoursLeft,
+  quantity,
+  syncPosition,
+} from "../context";
 export function quoteSell(
   deps: Deps,
   key: string,
@@ -25,12 +31,13 @@ export function quoteSell(
   user?: User,
   record: NightRecord = deps.ports.inventory.get(key),
 ) {
+  quantity({ tenths: size });
   let left = size,
     gross = 0n,
     net = 0n;
   const fills = [];
   for (const bid of bookOf(deps.ports, record).bids) {
-    const take = Math.min(left, toTenths(bid.size));
+    const take = Math.min(left, toWholeTenths(bid.size));
     if (!take) break;
     gross += mulTenths(toMicros(bid.price), take);
     net += mulTenths(toMicros(bid.net), take);
@@ -58,7 +65,7 @@ export function quoteSell(
       micros: mulTenths(toMicros(cutoffRefund(record.state).perNight), size),
     },
     capUsed: { tenths: position ? position.free + position.escrow : 0 },
-    cap: { tenths: toTenths(capOf(record.state.S)) },
+    cap: { tenths: Math.floor(capOf(record.state.S) * 10 + 1e-9) },
     releaseAt: timestampFromMs(cutoffAt(deps.ports, record)),
   });
 }

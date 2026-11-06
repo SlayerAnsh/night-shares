@@ -1,11 +1,8 @@
-import {
-  askFillProceeds,
-  toMicros,
-  toTenths,
-} from "@night-shares/market-model";
+import { askFillProceeds, toMicros } from "@night-shares/market-model";
 import type { Ports } from "../../../container/ports";
 import { transaction } from "../../../db/transaction";
 import { mulTenths } from "../../../shared/money";
+import { toWholeTenths } from "../../../shared/tenths";
 import type {
   InventoryRepo,
   NightRecord,
@@ -27,7 +24,7 @@ export function reconcileSigned(ports: Ports, record: NightRecord) {
   for (const ask of signedAsks(ports.db, record.key)) {
     if (!frame.sizes.has(ask.maker)) continue;
     const previous = frame.sizes.get(ask.maker) ?? 0;
-    const remaining = toTenths(
+    const remaining = toWholeTenths(
       record.state.traderAsks.find((a) => a.who === ask.maker)?.size ?? 0,
     );
     const filled = previous - remaining;
@@ -76,7 +73,7 @@ export function signedInventory(
           if (!isLive(ports.db, ask, ports.clock.now())) return [];
           const holding = repo.position(ask.human_id, record.key).free;
           const size = Math.min(
-            toTenths(a.size),
+            toWholeTenths(a.size),
             Number(ask.remaining),
             holding,
           );
@@ -99,7 +96,7 @@ export function signedInventory(
           for (const ask of orders) {
             frame.sizes.set(
               ask.maker,
-              toTenths(
+              toWholeTenths(
                 before.state.traderAsks.find((a) => a.who === ask.maker)
                   ?.size ?? 0,
               ),
@@ -126,9 +123,9 @@ export function signedInventory(
                 (a) => a.who === order.maker,
               );
               const size =
-                toTenths(prior?.size ?? 0) -
-                toTenths(visibleBefore?.size ?? 0) +
-                toTenths(after?.size ?? 0);
+                toWholeTenths(prior?.size ?? 0) -
+                toWholeTenths(visibleBefore?.size ?? 0) +
+                toWholeTenths(after?.size ?? 0);
               const template = after ?? prior;
               if (size > 0 && template)
                 asks.push({ ...template, size: size / 10 });

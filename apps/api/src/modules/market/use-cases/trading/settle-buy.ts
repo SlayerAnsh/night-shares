@@ -3,9 +3,9 @@ import {
   type BuyResult,
   type NightState,
   toMicros,
-  toTenths,
 } from "@night-shares/market-model";
 import type { User } from "../../../../ports/sessions/session-store";
+import { toWholeTenths } from "../../../../shared/tenths";
 import type { Deps } from "../context";
 import { tradeFeePayments } from "./host-fees";
 import { rebatePayments } from "./rebate-payments";
@@ -17,6 +17,8 @@ export async function settleBuy(
   marketMaker: string,
   state: NightState,
 ) {
+  toWholeTenths(result.filled);
+  for (const fill of result.fills) toWholeTenths(fill.take);
   const legs: Parameters<typeof ports.walletProvider.settle>[0] = [];
   const transfer = (from: string, to: string, amount: bigint, memo: string) => {
     if (amount > 0n) legs.push({ from, to, amount, memo });
@@ -78,7 +80,7 @@ export async function settleBuy(
         propertyId: key.split(":")[0] ?? "",
         kind: "ask_filled",
         actor: "trader",
-        tenths: toTenths(fill.take),
+        tenths: toWholeTenths(fill.take),
         priceMicros: toMicros(fill.price),
       });
     }

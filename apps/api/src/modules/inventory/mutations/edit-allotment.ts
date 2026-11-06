@@ -1,5 +1,6 @@
 import { capOf, PRESETS } from "@night-shares/market-model";
 import { DomainError } from "../../../shared/errors/domain-error";
+import { toWholeTenths } from "../../../shared/tenths";
 import type { NightRecord } from "../inventory-repo";
 import { quantity } from "./quantity";
 export type AllotmentEdit = {
@@ -13,7 +14,7 @@ export function editAllotment(
 ): NightRecord {
   if (
     record.openedAt > 0 &&
-    (edit.tenths !== Math.round(record.state.S * 10) ||
+    (edit.tenths !== toWholeTenths(record.state.S) ||
       PRESETS[edit.preset] !== record.state.k ||
       (edit.floor !== undefined && edit.floor !== record.state.F))
   )

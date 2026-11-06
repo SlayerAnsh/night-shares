@@ -1,7 +1,8 @@
-import { cutoffRefund, toMicros, toTenths } from "@night-shares/market-model";
+import { cutoffRefund, toMicros } from "@night-shares/market-model";
 import { transaction } from "../../../db/transaction";
 import { SYSTEM_ADDRESSES } from "../../../ports/wallet-provider/wallet-provider";
 import { mulTenths } from "../../../shared/money";
+import { toWholeTenths } from "../../../shared/tenths";
 import { cutoffAt } from "../cutoff";
 import { type Deps, realise, syncPosition } from "./context";
 
@@ -56,7 +57,8 @@ async function releaseNight(deps: Deps, key: string) {
     // Seeded holdings belong to the mock market maker, including unlisted inventory.
     const remaining = Math.max(
       0,
-      toTenths(before.state.held) - holders.reduce((sum, h) => sum + h.size, 0),
+      toWholeTenths(before.state.held) -
+        holders.reduce((sum, h) => sum + h.size, 0),
     );
     const legs = holders.map((h) => ({
       from: "pool",
@@ -81,7 +83,7 @@ async function releaseNight(deps: Deps, key: string) {
       released: true,
       stopped: true,
       cutoffAt: cutoffAt(ports, record),
-      returnedTenths: toTenths(record.state.S - record.state.booked),
+      returnedTenths: toWholeTenths(record.state.S - record.state.booked),
       state: {
         ...record.state,
         cutoffPaid:
@@ -143,7 +145,7 @@ async function releaseNight(deps: Deps, key: string) {
     ports.activity.append({
       ...event,
       kind: "night_released",
-      tenths: toTenths(
+      tenths: toWholeTenths(
         reservation.before.state.S - reservation.before.state.booked,
       ),
     });

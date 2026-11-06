@@ -1,5 +1,6 @@
-import { type BuyResult, toMicros, toTenths } from "@night-shares/market-model";
+import { type BuyResult, toMicros } from "@night-shares/market-model";
 import type { Ports } from "../../../../container/ports";
+import { toWholeTenths } from "../../../../shared/tenths";
 import { revertFills } from "../../../market/use-cases/trading/revert-fills";
 import { routeNight } from "../../pricing/quote-night";
 import { fillNight } from "./fill-night";
@@ -43,8 +44,8 @@ export function commitNights(
               ...record,
               state: {
                 ...record.state,
-                booked: Math.round((record.state.booked - rooms) * 10) / 10,
-                held: Math.round((record.state.held + rooms) * 10) / 10,
+                booked: toWholeTenths(record.state.booked - rooms) / 10,
+                held: toWholeTenths(record.state.held + rooms) / 10,
               },
             },
             night.route,
@@ -71,7 +72,7 @@ export function commitNights(
           ports.activity.append({
             ...event,
             kind: "ask_filled",
-            tenths: toTenths(fill.take),
+            tenths: toWholeTenths(fill.take),
             priceMicros: toMicros(fill.price),
           });
       }

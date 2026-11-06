@@ -4,6 +4,7 @@ import { format, parse } from "../../shared/night-key";
 import type { CatalogRepo } from "../catalog-data/catalog-repo";
 import type { InventoryRepo, NightRecord } from "./inventory-repo";
 import { seedNight } from "./seed-night";
+import { wholeQuantities } from "./whole-quantities";
 export function createMemoryInventoryRepo(deps: {
   catalog: CatalogRepo;
   clock: Clock;
@@ -17,7 +18,7 @@ export function createMemoryInventoryRepo(deps: {
       const key = format(night);
       let record = records.get(key);
       if (!record) {
-        record = seedNight(deps, night);
+        record = wholeQuantities(seedNight(deps, night));
         records.set(key, record);
       }
       return structuredClone(record);
@@ -33,6 +34,7 @@ export function createMemoryInventoryRepo(deps: {
       return structuredClone(record);
     },
     save(record) {
+      record = wholeQuantities(record);
       if (format(record) !== record.key)
         throw new DomainError(
           "INVALID_ARGUMENT",

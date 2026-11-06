@@ -100,6 +100,8 @@ Auth column: the `access` option on each RPC.
 
 ### market.v1.MarketService
 
+Every NightToken quantity is a whole tenth of a room night; the API rejects fractional tenths and validates model quantities before quoting, storing or settling them.
+
 | RPC | Access | Purpose |
 | --- | --- | --- |
 | Discover | PUBLIC | Night cards for the next 75 nights. Filters: city, sort (return, risk), value only, soon, watchlist |

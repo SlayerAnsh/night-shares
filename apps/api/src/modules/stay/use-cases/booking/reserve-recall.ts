@@ -1,7 +1,8 @@
-import { type BuyResult, toMicros, toTenths } from "@night-shares/market-model";
+import { type BuyResult, toMicros } from "@night-shares/market-model";
 import type { Ports } from "../../../../container/ports";
 import { SYSTEM_ADDRESSES } from "../../../../ports/wallet-provider/wallet-provider";
 import { DomainError } from "../../../../shared/errors/domain-error";
+import { toWholeTenths } from "../../../../shared/tenths";
 import type { NightRecord } from "../../../inventory/inventory-repo";
 import { createSqliteMarketRepo } from "../../../market/repo/market-repo.sqlite";
 import { realise, syncPosition } from "../../../market/use-cases/context";
@@ -15,6 +16,8 @@ export function reserveRecall(
   route: BuyResult,
   next: NightRecord,
 ) {
+  toWholeTenths(route.filled);
+  for (const fill of route.fills) toWholeTenths(fill.take);
   const repo = createSqliteMarketRepo(ports.db);
   const holders = repo.holders(before.key).map((user) => {
     const position = syncPosition({ ports, repo }, user, before);
@@ -36,7 +39,7 @@ export function reserveRecall(
       (f) =>
         f.src === "trader" && !holders.some((h) => h.wallets.has(f.who ?? "")),
     )
-    .reduce((sum, f) => sum + toTenths(f.take), 0);
+    .reduce((sum, f) => sum + toWholeTenths(f.take), 0);
   const candidates: {
     holder: (typeof holders)[number] | undefined;
     size: number;
@@ -48,7 +51,7 @@ export function reserveRecall(
   }));
   candidates.push({
     holder: undefined,
-    size: Math.max(0, toTenths(before.state.held) - known - anonymousAsks),
+    size: Math.max(0, toWholeTenths(before.state.held) - known - anonymousAsks),
     wallet: SYSTEM_ADDRESSES.marketMaker,
   });
   candidates.sort(
@@ -57,7 +60,7 @@ export function reserveRecall(
   const payments: { to: string; amount: bigint }[] = [];
   const removed: typeof next.state.traderAsks = [];
   for (const fill of route.fills.filter((f) => f.src === "recall")) {
-    let left = toTenths(fill.take);
+    let left = toWholeTenths(fill.take);
     for (const candidate of candidates) {
       const take = Math.min(left, candidate.size);
       if (!take) continue;
@@ -96,12 +99,12 @@ export function reserveRecall(
               listed <= 0
             )
               return [ask];
-            const count = Math.min(listed, toTenths(ask.size));
+            const count = Math.min(listed, toWholeTenths(ask.size));
             listed -= count;
             removed.push({ ...ask, size: count / 10 });
-            return count === toTenths(ask.size)
+            return count === toWholeTenths(ask.size)
               ? []
-              : [{ ...ask, size: (toTenths(ask.size) - count) / 10 }];
+              : [{ ...ask, size: (toWholeTenths(ask.size) - count) / 10 }];
           }),
         },
       };
@@ -133,7 +136,8 @@ export function reserveRecall(
           (a) => a.who === ask.who && a.price === ask.price,
         );
         if (existing)
-          existing.size = (toTenths(existing.size) + toTenths(ask.size)) / 10;
+          existing.size =
+            (toWholeTenths(existing.size) + toWholeTenths(ask.size)) / 10;
         else asks.push(ask);
       }
       return { ...record, state: { ...record.state, traderAsks: asks } };

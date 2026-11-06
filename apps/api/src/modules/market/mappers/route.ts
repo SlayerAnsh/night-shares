@@ -5,7 +5,6 @@ import {
   capOf,
   cutoffRefund,
   toMicros,
-  toTenths,
 } from "@night-shares/market-model";
 import {
   BookSource,
@@ -13,6 +12,7 @@ import {
 } from "@night-shares/proto/market/v1/book_pb";
 import { mulTenths } from "../../../shared/money";
 import { toProto } from "../../../shared/night-key";
+import { toWholeTenths } from "../../../shared/tenths";
 import type { NightRecord } from "../../inventory/inventory-repo";
 import { releaseAt } from "../use-cases/context";
 export const source = (src: string) =>
@@ -33,10 +33,10 @@ export function buyQuote(
   return create(RouteQuoteSchema, {
     night: toProto(record.key),
     requested: { tenths: size },
-    filled: { tenths: toTenths(result.filled) },
+    filled: { tenths: toWholeTenths(result.filled) },
     fills: result.fills.map((f) => ({
       price: { micros: toMicros(f.price) },
-      size: { tenths: toTenths(f.take) },
+      size: { tenths: toWholeTenths(f.take) },
       source: source(f.src),
       askId: f.src === "trader" ? `${record.key}|${f.who}` : "",
     })),
@@ -45,12 +45,12 @@ export function buyQuote(
     fee: { micros: toMicros(result.fee) },
     total: { micros: toMicros(result.gross) + toMicros(result.fee) },
     capUsed: { tenths: used },
-    cap: { tenths: toTenths(capOf(record.state.S)) },
+    cap: { tenths: Math.floor(capOf(record.state.S) * 10 + 1e-9) },
     lateFee: { micros: 0n },
     unsoldRefund: {
       micros: mulTenths(
         toMicros(cutoffRefund(record.state).perNight),
-        toTenths(result.filled),
+        toWholeTenths(result.filled),
       ),
     },
     releaseAt: timestampFromMs(cutoff),

@@ -2,6 +2,7 @@ import { book, routeBuy, toMicros } from "@night-shares/market-model";
 import { PriceSource } from "@night-shares/proto/stay/v1/trip_pb";
 import type { Ports } from "../../../container/ports";
 import { DomainError } from "../../../shared/errors/domain-error";
+import { toWholeTenths } from "../../../shared/tenths";
 import type { NightRecord } from "../../inventory/inventory-repo";
 
 export function routeNight(record: NightRecord, rooms: number) {
@@ -12,8 +13,9 @@ export function routeNight(record: NightRecord, rooms: number) {
     rooms,
     { guest: true, recallable: record.state.held },
   );
-  if (Math.round(route.filled * 10) !== rooms * 10)
+  if (toWholeTenths(route.filled) !== rooms * 10)
     throw new DomainError("FAILED_PRECONDITION", "This night is sold out.");
+  for (const fill of route.fills) toWholeTenths(fill.take);
   return route;
 }
 export function quoteNight(

@@ -1,10 +1,11 @@
 import { create } from "@bufbuild/protobuf";
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
-import { cutoffRefund, toMicros, toTenths } from "@night-shares/market-model";
+import { cutoffRefund, toMicros } from "@night-shares/market-model";
 import { GetPortfolioResponseSchema } from "@night-shares/proto/market/v1/market_pb";
 import type { User } from "../../../../ports/sessions/session-store";
 import { mulTenths } from "../../../../shared/money";
 import { toProto } from "../../../../shared/night-key";
+import { toWholeTenths } from "../../../../shared/tenths";
 import { signedAsks } from "../../orders/store";
 import { type Deps, syncPosition } from "../context";
 import { humanWallets } from "../human-wallets";
@@ -67,7 +68,7 @@ export function getPortfolio(deps: Deps, user: User) {
         night,
         size: {
           $typeName: "night_shares.common.v1.RoomNights",
-          tenths: toTenths(ask.size),
+          tenths: toWholeTenths(ask.size),
         },
         price: {
           $typeName: "night_shares.common.v1.Usdc",

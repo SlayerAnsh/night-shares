@@ -7,10 +7,17 @@ import {
 import { transaction } from "../../../../db/transaction";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
+import { toWholeTenths } from "../../../../shared/tenths";
 import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyPoolSell } from "../../../inventory/mutations/apply-pool-sell";
 import { signedAsks } from "../../orders/store";
-import { assertOpen, type Deps, realise, syncPosition } from "../context";
+import {
+  assertOpen,
+  type Deps,
+  quantity,
+  realise,
+  syncPosition,
+} from "../context";
 import { isHost, tradeFeePayments } from "./host-fees";
 import { quoteSell } from "./quote-sell";
 import { withSettlement } from "./with-settlement";
@@ -21,6 +28,7 @@ export async function sell(
   size: number,
   min: bigint,
 ) {
+  quantity({ tenths: size });
   return withSettlement(deps, key, () =>
     executeSell(deps, user, key, size, min),
   );
@@ -50,7 +58,7 @@ async function executeSell(
         quote = quoteSell(deps, key, size, user, current);
         if (
           quote.filled?.tenths !== size ||
-          size > Math.round(current.state.held * 10)
+          size > toWholeTenths(current.state.held)
         )
           throw new DomainError(
             "FAILED_PRECONDITION",

@@ -1,15 +1,11 @@
-import {
-  askFillProceeds,
-  book,
-  toMicros,
-  toTenths,
-} from "@night-shares/market-model";
+import { askFillProceeds, book, toMicros } from "@night-shares/market-model";
 import type { Ports } from "../../../container/ports";
 import { transaction } from "../../../db/transaction";
 import type { User } from "../../../ports/sessions/session-store";
 import { DomainError } from "../../../shared/errors/domain-error";
 import { mulTenths } from "../../../shared/money";
 import { format, type NightIdentity } from "../../../shared/night-key";
+import { toWholeTenths } from "../../../shared/tenths";
 import type { NightRecord } from "../../inventory/inventory-repo";
 import { cutoffAt } from "../cutoff";
 import { reconcileSigned } from "../orders/inventory";
@@ -40,7 +36,7 @@ export function bookOf(
 ) {
   return book({
     ...record.state,
-    levels: Math.max(80, toTenths(record.state.S)),
+    levels: Math.max(80, toWholeTenths(record.state.S)),
     hoursLeft: hoursLeft(ports, record),
     traderAsks: record.state.traderAsks.filter((a) =>
       typeof wallet === "string" ? a.who !== wallet : !wallet?.has(a.who ?? ""),
@@ -72,7 +68,7 @@ export function syncPosition(
     const wallets = humanWallets(ports, user, record.propertyId);
     const remaining = record.state.traderAsks
       .filter((a) => wallets.has(a.who ?? ""))
-      .reduce((sum, a) => sum + toTenths(a.size), 0);
+      .reduce((sum, a) => sum + toWholeTenths(a.size), 0);
     const filled = position.escrow - remaining;
     if (filled > 0)
       realise(

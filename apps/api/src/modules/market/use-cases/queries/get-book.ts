@@ -1,5 +1,6 @@
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
-import { lateFee, toMicros, toTenths } from "@night-shares/market-model";
+import { lateFee, toMicros } from "@night-shares/market-model";
+import { toWholeTenths } from "../../../../shared/tenths";
 import { source } from "../../mappers/route";
 import {
   bookOf,
@@ -27,14 +28,14 @@ export function getBook(deps: Deps, key: string) {
       .filter((h) => h.size.tenths > 0),
     asks: bk.asks.map((a) => ({
       price: { micros: toMicros(a.price) },
-      size: { tenths: toTenths(a.size) },
+      size: { tenths: toWholeTenths(a.size) },
       source: source(a.src),
       askId: a.src === "trader" ? `${key}|${a.who}` : "",
     })),
     bids: bk.bids.map((b) => ({
       price: { micros: toMicros(b.price) },
       net: { micros: toMicros(b.net) },
-      size: { tenths: toTenths(b.size) },
+      size: { tenths: toWholeTenths(b.size) },
       source: source(b.src),
     })),
     recallCap: { micros: toMicros(bk.recall) },

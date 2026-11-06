@@ -1,6 +1,7 @@
 import { Code, ConnectError } from "@connectrpc/connect";
 import { transaction } from "../../../../db/transaction";
 import { DomainError } from "../../../../shared/errors/domain-error";
+import { toWholeTenths } from "../../../../shared/tenths";
 import type { HostDeps } from "../deps";
 export function pushChange<T>(
   deps: HostDeps,
@@ -45,7 +46,7 @@ export function pushChange<T>(
       await ports.channelManager.pushInventory(
         reservation.updates.map((record) => ({
           nightKey: record.key,
-          allotmentTenths: Math.round(record.state.S * 10),
+          allotmentTenths: toWholeTenths(record.state.S),
           stopped: record.stopped,
         })),
       );

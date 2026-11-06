@@ -1,4 +1,5 @@
 import type { User } from "../../../ports/sessions/session-store";
+import { assertIntegerTenths } from "../../../shared/tenths";
 import type { Account, MarketRepo } from "./market-repo";
 export function createMemoryMarketRepo(): MarketRepo {
   const users = new Map<string, User>();
@@ -37,6 +38,13 @@ export function createMemoryMarketRepo(): MarketRepo {
           wins: 0,
           returns: 0,
         };
+        position = new Proxy(position, {
+          set(target, field, value) {
+            if (field === "free" || field === "escrow")
+              assertIntegerTenths(value);
+            return Reflect.set(target, field, value);
+          },
+        });
         positions.set(key, position);
       }
       return position;

@@ -4,13 +4,13 @@ import {
   type NightState,
   price,
   toMicros,
-  toTenths,
 } from "@night-shares/market-model";
 import {
   type SettlementLeg,
   SYSTEM_ADDRESSES,
   type WalletProvider,
 } from "../../../../ports/wallet-provider/wallet-provider";
+import { toWholeTenths } from "../../../../shared/tenths";
 
 // Advance the curve only for pool fills, preserving the price at each ask fill.
 export async function rebatePayments(
@@ -42,7 +42,7 @@ export async function rebatePayments(
       to: fill.who === "mm-bot" ? marketMaker : (fill.who ?? marketMaker),
       amount,
       memo: "rebate:maker",
-      tenths: toTenths(fill.take),
+      tenths: toWholeTenths(fill.take),
     });
   }
   return legs;

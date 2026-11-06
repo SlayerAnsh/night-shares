@@ -1,5 +1,6 @@
-import { fromTenths, toTenths } from "@night-shares/market-model";
+import { fromTenths } from "@night-shares/market-model";
 import { DomainError } from "../../../shared/errors/domain-error";
+import { toWholeTenths } from "../../../shared/tenths";
 export function quantity(tenths: number): number {
   if (!Number.isSafeInteger(tenths) || tenths < 0)
     throw new DomainError(
@@ -8,4 +9,5 @@ export function quantity(tenths: number): number {
     );
   return fromTenths(tenths);
 }
-export const clean = (rooms: number): number => fromTenths(toTenths(rooms));
+export const clean = (rooms: number): number =>
+  fromTenths(toWholeTenths(rooms));

@@ -1,6 +1,7 @@
 import { transaction } from "../../../../db/transaction";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
+import { toWholeTenths } from "../../../../shared/tenths";
 import { type Deps, syncPosition } from "../context";
 import { humanWallets } from "../human-wallets";
 export function cancelAsk(deps: Deps, user: User, askId: string) {
@@ -13,7 +14,7 @@ export function cancelAsk(deps: Deps, user: User, askId: string) {
       throw new DomainError("NOT_FOUND", "Ask not found.");
     const ask = current.state.traderAsks.find((a) => a.who === owner);
     if (!ask) throw new DomainError("NOT_FOUND", "Ask not found.");
-    const size = Math.round(ask.size * 10);
+    const size = toWholeTenths(ask.size);
     const position = syncPosition(deps, user, current);
     const signed = deps.ports.db
       .query(

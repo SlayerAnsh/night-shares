@@ -1,10 +1,11 @@
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
-import { book, routeBuy, toMicros, toTenths } from "@night-shares/market-model";
+import { book, routeBuy, toMicros } from "@night-shares/market-model";
 import {
   DemandPreset,
   ReleasePolicy,
 } from "@night-shares/proto/host/v1/opening_pb";
 import { parseDate } from "../../../shared/dates";
+import { toWholeTenths } from "../../../shared/tenths";
 import type { NightRecord } from "../../inventory/inventory-repo";
 import type { HostRepo } from "../repo/host-repo";
 import { payoutOf } from "./payout";
@@ -41,13 +42,13 @@ export function mapNight(record: NightRecord, repo: HostRepo) {
       roomTypeId: record.roomTypeId,
       date: record.date,
     },
-    allotment: { tenths: toTenths(s.S) },
-    booked: { tenths: toTenths(s.booked) },
-    held: { tenths: toTenths(s.held) },
+    allotment: { tenths: toWholeTenths(s.S) },
+    booked: { tenths: toWholeTenths(s.booked) },
+    held: { tenths: toWholeTenths(s.held) },
     onSale: {
       tenths: record.stopped
         ? 0
-        : Math.max(0, toTenths(s.S - s.booked - s.held)),
+        : Math.max(0, toWholeTenths(s.S - s.booked - s.held)),
     },
     usualRate: { micros: toMicros(s.usualRate) },
     guestPrice: { micros: guestMicros(record) },

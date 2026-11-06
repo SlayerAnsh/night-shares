@@ -28,6 +28,7 @@ All notable changes to this monorepo. Newest first.
 
 ### Changed
 
+- Every NightToken quantity is a whole tenth of a room night: a shared guard converts model floats to integer tenths (tolerating float drift only), buys, sells, quotes, agent orders, partial fills, recall, cutoff and openings reject or floor non tenth amounts, and migration 340 makes SQLite reject fractional positions and ask sizes.
 - `GetPriceCalendar` returns every night in the window; sold out or closed nights carry `is_sold_out` instead of failing the whole request.
 - Opened nights fix price, curve and room count; all rooms are recorded under `NightVault`.
 - Market model synced to `3d84c7b5d2cb`: guest recall uses actual trader holdings, largest holder first; `CAP_HUMAN` applies a 30% cap on every night across all wallets a human controls, including agents.

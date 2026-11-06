@@ -1,10 +1,7 @@
-import {
-  floorFromRate,
-  toTenths,
-  WALK_SUSPEND_AFTER,
-} from "@night-shares/market-model";
+import { floorFromRate, WALK_SUSPEND_AFTER } from "@night-shares/market-model";
 import type { OpenNightsSelection } from "@night-shares/proto/host/v1/opening_pb";
 import { DomainError } from "../../../../shared/errors/domain-error";
+import { toWholeTenths } from "../../../../shared/tenths";
 import { editAllotment } from "../../../inventory/mutations/edit-allotment";
 import { openAllotment } from "../../../inventory/mutations/open-allotment";
 import { walkIncidents } from "../../../walk/repo/incidents";
@@ -42,7 +39,7 @@ export function createOpenNights(deps: HostDeps) {
             const edit = {
               tenths: Math.max(
                 tenths,
-                toTenths(current.state.booked + current.state.held),
+                toWholeTenths(current.state.booked + current.state.held),
               ),
               preset,
               floor: floorFromRate(current.state.usualRate),
@@ -56,7 +53,7 @@ export function createOpenNights(deps: HostDeps) {
               .query(
                 "INSERT OR IGNORE INTO host_pool_positions VALUES (?, ?, ?)",
               )
-              .run(record.key, NIGHT_VAULT, toTenths(updated.state.S));
+              .run(record.key, NIGHT_VAULT, toWholeTenths(updated.state.S));
           });
           deps.repo.setRelease(record.key, releasePolicy);
           publish.push(() =>
@@ -64,7 +61,7 @@ export function createOpenNights(deps: HostDeps) {
               nightKey: record.key,
               propertyId: record.propertyId,
               kind: edited ? "nights_edited" : "nights_opened",
-              tenths: toTenths(updated.state.S),
+              tenths: toWholeTenths(updated.state.S),
               actor: "host",
               userId,
             }),

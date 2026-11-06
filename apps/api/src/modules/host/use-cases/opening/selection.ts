@@ -1,8 +1,8 @@
-import { toTenths } from "@night-shares/market-model";
 import type { OpenNightsSelection } from "@night-shares/proto/host/v1/opening_pb";
 import { diffDays } from "../../../../shared/dates";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { format } from "../../../../shared/night-key";
+import { toWholeTenths } from "../../../../shared/tenths";
 import type { HostDeps } from "../deps";
 import { propertyOf } from "../property";
 export function selectNights(
@@ -54,8 +54,8 @@ export function selectNights(
         kept: record.state.booked + record.state.held > requested,
         preset,
         tenths: Math.max(
-          toTenths(requested),
-          toTenths(record.state.booked + record.state.held),
+          toWholeTenths(requested),
+          toWholeTenths(record.state.booked + record.state.held),
         ),
         releasePolicy: selection.releasePolicy,
       };

@@ -1,4 +1,5 @@
 import type { Database } from "bun:sqlite";
+import { assertIntegerTenths } from "../../../shared/tenths";
 import type { Position } from "./market-repo";
 
 const columns = {
@@ -40,6 +41,8 @@ export function sqlitePosition(
           : Number(value);
       },
       set(value: number | bigint) {
+        if (field === "free" || field === "escrow")
+          assertIntegerTenths(Number(value));
         db.query(
           `UPDATE market_positions SET ${column} = ? WHERE human_id = ? AND night_key = ?`,
         ).run(value, humanId, key);

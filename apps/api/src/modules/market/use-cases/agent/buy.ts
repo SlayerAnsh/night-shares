@@ -5,7 +5,6 @@ import {
   capOf,
   routeBuy,
   toMicros,
-  toTenths,
 } from "@night-shares/market-model";
 import { ExecutionSchema } from "@night-shares/proto/market/v1/book_pb";
 import { transaction } from "../../../../db/transaction";
@@ -13,12 +12,19 @@ import type { User } from "../../../../ports/sessions/session-store";
 import { SYSTEM_ADDRESSES } from "../../../../ports/wallet-provider/wallet-provider";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { mulTenths } from "../../../../shared/money";
+import { toWholeTenths } from "../../../../shared/tenths";
 import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyTraderAskFill } from "../../../inventory/mutations/apply-trader-ask-fill";
 import { cutoffAt } from "../../cutoff";
 import { buyQuote } from "../../mappers/route";
 import { agentWallets } from "../../repo/agent-wallets.sqlite";
-import { assertOpen, bookOf, type Deps, syncPosition } from "../context";
+import {
+  assertOpen,
+  bookOf,
+  type Deps,
+  quantity,
+  syncPosition,
+} from "../context";
 import { humanWallets } from "../human-wallets";
 import { revertFills } from "../trading/revert-fills";
 import { settleBuy } from "../trading/settle-buy";
@@ -30,6 +36,7 @@ export async function buyAgent(
   size: number,
   max: bigint,
 ) {
+  quantity({ tenths: size });
   return withSettlement(deps, key, () =>
     executeBuy(deps, user, key, size, max),
   );
@@ -61,7 +68,7 @@ async function executeBuy(
       assertOpen(ports, current);
       const position = syncPosition(deps, user, current);
       used = position.free + position.escrow;
-      if (used + size > toTenths(capOf(current.state.S)))
+      if (used + size > Math.floor(capOf(current.state.S) * 10 + 1e-9))
         throw new DomainError("FAILED_PRECONDITION", "Per-human cap exceeded.");
       result = routeBuy(
         bookOf(ports, current, humanWallets(ports, user, current.propertyId)),
@@ -74,7 +81,7 @@ async function executeBuy(
         used,
         cutoffAt(ports, current),
       );
-      if (toTenths(result.filled) !== size)
+      if (toWholeTenths(result.filled) !== size)
         throw new DomainError(
           "FAILED_PRECONDITION",
           "Not enough trader liquidity.",
@@ -83,12 +90,13 @@ async function executeBuy(
         throw new DomainError("FAILED_PRECONDITION", "Price moved.");
       let next = current;
       for (const fill of result.fills) {
-        if (fill.src === "pool") next = applyPoolBuy(next, toTenths(fill.take));
+        if (fill.src === "pool")
+          next = applyPoolBuy(next, toWholeTenths(fill.take));
         if (fill.src === "trader")
           next = applyTraderAskFill(
             next,
             next.state.traderAsks.findIndex((a) => a.who === fill.who),
-            toTenths(fill.take),
+            toWholeTenths(fill.take),
           );
       }
       return next;
