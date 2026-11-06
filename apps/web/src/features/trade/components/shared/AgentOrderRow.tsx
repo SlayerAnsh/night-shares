@@ -1,9 +1,9 @@
+import { Button } from "@night-shares/design-system";
 import type { AgentOrder } from "@night-shares/proto/market/v1/portfolio_pb";
 import Link from "next/link";
 import { formatRoomNights } from "../../../../shared/format";
 import { shortDate, usd } from "../../model/display";
 import { nightHref } from "../../model/market";
-import { Button } from "../ui/Button";
 import text from "../ui/text.module.css";
 import styles from "./lists.module.css";
 
@@ -49,7 +49,12 @@ export function AgentOrderRow({
       </span>
       <div>
         {order.status === 1 && (
-          <Button variant="primary" disabled={!canApprove} onClick={onApprove}>
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={!canApprove}
+            onClick={onApprove}
+          >
             Approve with World ID
           </Button>
         )}

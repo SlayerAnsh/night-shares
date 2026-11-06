@@ -1,4 +1,5 @@
 "use client";
+import { Button, EmptyState, Kpis } from "@night-shares/design-system";
 import { useRequireAccess } from "../../../../session/require-access";
 import { useAccount } from "../../hooks/use-account";
 import { signedUsd, tone, usd } from "../../model/display";
@@ -8,9 +9,6 @@ import { AgentOrders } from "../shared/AgentOrders";
 import { Feedback } from "../shared/Feedback";
 import { Listings } from "../shared/Listings";
 import page from "../shared/page.module.css";
-import { Button } from "../ui/Button";
-import { Empty } from "../ui/Empty";
-import { Kpis } from "../ui/Kpis";
 import { Skeleton } from "../ui/Skeleton";
 import { Positions } from "./Positions";
 import styles from "./portfolio.module.css";
@@ -28,14 +26,15 @@ export function PortfolioScreen() {
           <h1>Portfolio</h1>
           <p>Your nights, listings and agent orders, checked with World ID.</p>
         </header>
-        <Empty>
+        <EmptyState plain>
           <Button
             variant="primary"
+            size="sm"
             onClick={() => access.require("portfolio", "orb")}
           >
             Sign in with World ID to see your portfolio
           </Button>
-        </Empty>
+        </EmptyState>
       </div>
     );
   const value =
@@ -65,7 +64,7 @@ export function PortfolioScreen() {
                 {
                   label: "Value at fair price",
                   value: usd(value),
-                  sub: `${p.holdings.length} nights`,
+                  detail: `${p.holdings.length} nights`,
                 },
                 {
                   label: "Unrealised P&L",
@@ -76,7 +75,7 @@ export function PortfolioScreen() {
                   label: "Realised P&L",
                   value: signedUsd(p.realisedPnl?.micros),
                   tone: tone(p.realisedPnl?.micros ?? 0n, 500000),
-                  sub: p.trackRecord
+                  detail: p.trackRecord
                     ? `${p.trackRecord.closedPositions} closed`
                     : undefined,
                 },

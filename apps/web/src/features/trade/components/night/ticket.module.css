@@ -232,3 +232,14 @@
 .pos b {
   color: var(--ink);
 }
+
+/* Order box action: the primary button, filled grey while it cannot submit. */
+.go:disabled {
+  background: var(--surface-3);
+  color: var(--muted);
+  opacity: 1;
+}
+
+.go:hover:not(:disabled) {
+  filter: brightness(1.06);
+}

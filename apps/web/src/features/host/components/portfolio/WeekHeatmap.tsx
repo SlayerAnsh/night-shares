@@ -1,7 +1,7 @@
+import { cx } from "@night-shares/design-system";
 import type { Occupancy } from "@night-shares/proto/host/v1/hotel_pb";
 import type { CSSProperties } from "react";
 import { dayMonth } from "../../model/calendar";
-import { cx } from "../ui/cx";
 import ui from "../ui/ui.module.css";
 import styles from "./WeekHeatmap.module.css";
 

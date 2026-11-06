@@ -1,4 +1,4 @@
-/* .seg from mock/v2/assets/styles.css; trade .tk-tabs from trade.css (selected by fill). */
+/* .seg from mock/v2/assets/styles.css; trade .tk-tabs, .chip-x and .tf from trade.css (selected by fill). */
 @layer ns-base, ns-ui;
 
 @layer ns-ui {
@@ -6,6 +6,7 @@
     margin: 0;
     min-inline-size: 0;
     display: inline-flex;
+    flex-wrap: wrap;
     padding: 3px;
     gap: var(--sp-2);
     border-radius: var(--r-12);
@@ -27,26 +28,51 @@
     box-shadow: var(--shadow-seg-on);
   }
 
-  .block {
-    display: grid;
-    grid-auto-columns: minmax(0, 1fr);
-    grid-auto-flow: column;
+  .sm .option {
+    padding: 5px var(--sp-12);
+    font-size: var(--fs-12-5);
   }
 
+  .xs .option {
+    padding: var(--sp-4) var(--sp-10);
+    font-size: var(--fs-12);
+  }
+
+  /* Equal segments that wrap onto a second row when they do not fit (host .seg.full). */
+  .block {
+    display: flex;
+    width: 100%;
+  }
+
+  .block .option {
+    flex: 1;
+  }
+
+  /* Trader app: one row that scrolls sideways, flat fill for the pressed option. */
   [data-app="trade"] .seg {
+    max-width: 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
     padding: var(--sp-2);
     border: 0;
     border-radius: var(--r);
     background: var(--surface-2);
   }
 
+  [data-app="trade"] .seg::-webkit-scrollbar {
+    display: none;
+  }
+
   [data-app="trade"] .option {
+    flex: none;
     height: 36px;
     padding: 0 var(--sp-14);
     border-radius: var(--r);
     font-size: var(--fs-14);
     font-weight: var(--fw-regular);
     color: var(--muted);
+    white-space: nowrap;
   }
 
   [data-app="trade"] .option:hover {
@@ -58,5 +84,30 @@
     color: var(--ink);
     font-weight: var(--w6);
     box-shadow: none;
+  }
+
+  [data-app="trade"] .sm .option {
+    height: 30px;
+    padding: 0 var(--sp-12);
+    font-size: var(--fs-13);
+    color: var(--ink-2);
+  }
+
+  [data-app="trade"] .xs .option {
+    height: 26px;
+    padding: 0 var(--sp-10);
+    font-size: var(--fs-12-5);
+  }
+
+  [data-app="trade"] .sm .option[aria-pressed="true"],
+  [data-app="trade"] .xs .option[aria-pressed="true"] {
+    color: var(--ink);
+  }
+
+  [data-app="trade"] .block {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    background: var(--bg);
   }
 }

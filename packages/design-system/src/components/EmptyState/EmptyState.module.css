@@ -1,4 +1,4 @@
-/* .empty from mock/v2/guest.html and .empty-p from host.css. */
+/* .empty from mock/v2/guest.html and .empty-p from host.css; plain is trade .mt-empty. */
 @layer ns-base, ns-ui;
 
 @layer ns-ui {
@@ -29,6 +29,14 @@
 
   .action {
     margin-top: var(--sp-8);
+  }
+
+  .plain {
+    display: block;
+    margin: 0;
+    padding: var(--sp-20) 0;
+    text-align: left;
+    color: var(--muted);
   }
 
   [data-app="trade"] .empty {

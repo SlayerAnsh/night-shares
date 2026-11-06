@@ -8,7 +8,10 @@ const HERO =
 // Photo hero with the search bar. Compact on detail and trips, as in the mock.
 export function SearchHero({ compact = false }: { compact?: boolean }) {
   return (
-    <section className={`${styles.hero} ${compact ? styles.compact : ""}`}>
+    <section
+      className={`${styles.hero} ${compact ? styles.compact : ""}`}
+      data-bleed
+    >
       <Photo src={HERO} className={styles.photo} />
       <div className={styles.wrap}>
         {!compact && (

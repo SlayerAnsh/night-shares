@@ -1,3 +1,5 @@
+export * from "./Alert";
+export * from "./BackLink";
 export * from "./Badge";
 export * from "./Button";
 export * from "./Card";
@@ -6,8 +8,10 @@ export { cx } from "./cx";
 export * from "./Dialog";
 export * from "./EmptyState";
 export * from "./Field";
+export * from "./Icon";
 export * from "./IconButton";
 export * from "./Input";
+export * from "./Kpis";
 export * from "./Photo";
 export * from "./Pill";
 export * from "./Segmented";

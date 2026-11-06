@@ -2,7 +2,12 @@ import type { ButtonHTMLAttributes } from "react";
 import { cx } from "../cx";
 import styles from "./Button.module.css";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "danger"
+  | "text";
 export type ButtonSize = "sm" | "md" | "lg";
 
 export type ButtonStyle = {

@@ -1,8 +1,8 @@
+import { Button } from "@night-shares/design-system";
 import { formatRoomNights } from "../../../../shared/format";
 import type { useTicket } from "../../hooks/use-ticket";
 import { usd } from "../../model/display";
 import { parseTenths } from "../../model/market";
-import { Button } from "../ui/Button";
 import { Stepper } from "../ui/Stepper";
 import { QuotePreview } from "./QuotePreview";
 import styles from "./ticket.module.css";
@@ -55,7 +55,10 @@ export function TicketTrade({
         </b>
       </div>
       <Button
-        variant="go"
+        variant="primary"
+        size="lg"
+        block
+        className={styles.go}
         type="submit"
         disabled={signedIn && (!t.valid || t.actions.pending)}
       >

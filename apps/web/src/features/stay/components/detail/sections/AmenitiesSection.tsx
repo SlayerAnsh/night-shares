@@ -1,4 +1,4 @@
-import { Icon } from "../../shared/Icon";
+import { Icon } from "@night-shares/design-system";
 import styles from "../Detail.module.css";
 
 export function AmenitiesSection({ amenities }: { amenities: string[] }) {

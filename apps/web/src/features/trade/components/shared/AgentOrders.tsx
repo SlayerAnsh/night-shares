@@ -1,10 +1,8 @@
 "use client";
-import { Field, Input } from "@night-shares/design-system";
+import { Button, EmptyState, Field, Input } from "@night-shares/design-system";
 import type { NightKey } from "@night-shares/proto/common/v1/night_pb";
 import { useAgentOrders } from "../../hooks/use-agent-orders";
 import { nightHref } from "../../model/market";
-import { Button } from "../ui/Button";
-import { Empty } from "../ui/Empty";
 import { Section } from "../ui/Section";
 import { AgentOrderRow } from "./AgentOrderRow";
 import { Feedback } from "./Feedback";
@@ -59,6 +57,7 @@ export function AgentOrders({
           </Field>
           <Button
             variant="primary"
+            size="sm"
             type="submit"
             disabled={!a.valid || a.account.actions.pending}
           >
@@ -90,7 +89,7 @@ export function AgentOrders({
           ))}
         </div>
       ) : (
-        <Empty>No agent orders yet.</Empty>
+        <EmptyState plain>No agent orders yet.</EmptyState>
       )}
     </Section>
   );

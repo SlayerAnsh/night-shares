@@ -1,4 +1,4 @@
-import { cx } from "../../ui/cx";
+import { cx } from "@night-shares/design-system";
 import styles from "./Charts.module.css";
 
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];

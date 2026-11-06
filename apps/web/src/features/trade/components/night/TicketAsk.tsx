@@ -1,8 +1,8 @@
+import { Button } from "@night-shares/design-system";
 import { formatUsdc } from "../../../../shared/format";
 import type { useTicket } from "../../hooks/use-ticket";
 import { usd } from "../../model/display";
 import { parseTenths } from "../../model/market";
-import { Button } from "../ui/Button";
 import { Stepper } from "../ui/Stepper";
 import styles from "./ticket.module.css";
 
@@ -72,7 +72,10 @@ export function TicketAsk({
         <b>{usd(total, 2)}</b>
       </div>
       <Button
-        variant="go"
+        variant="primary"
+        size="lg"
+        block
+        className={styles.go}
         type="submit"
         disabled={signedIn && (!t.valid || t.actions.pending)}
       >

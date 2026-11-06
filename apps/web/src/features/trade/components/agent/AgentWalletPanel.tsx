@@ -1,4 +1,5 @@
 "use client";
+import { EmptyState, Kpis } from "@night-shares/design-system";
 import Link from "next/link";
 import { formatRoomNights } from "../../../../shared/format";
 import { useAgentWallet } from "../../hooks/use-agent-wallet";
@@ -6,8 +7,6 @@ import { shortDate, usd } from "../../model/display";
 import { nightHref } from "../../model/market";
 import { Feedback } from "../shared/Feedback";
 import lists from "../shared/lists.module.css";
-import { Empty } from "../ui/Empty";
-import { Kpis } from "../ui/Kpis";
 import { Section } from "../ui/Section";
 import { Skeleton } from "../ui/Skeleton";
 import text from "../ui/text.module.css";
@@ -45,7 +44,7 @@ export function AgentWalletPanel() {
                 {
                   label: "Budget used",
                   value: usd(spent, 2),
-                  sub: `of ${usd(budget, 2)}`,
+                  detail: `of ${usd(budget, 2)}`,
                   extra: (
                     <span className={styles.bar} aria-hidden="true">
                       <i style={{ width: `${Math.min(100, used)}%` }} />
@@ -87,7 +86,7 @@ export function AgentWalletPanel() {
               )}
             </div>
           ) : (
-            <Empty>Holds nothing yet.</Empty>
+            <EmptyState plain>Holds nothing yet.</EmptyState>
           )}
         </>
       )}

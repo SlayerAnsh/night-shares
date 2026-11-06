@@ -1,0 +1,46 @@
+/* .back from mock/v2/guest.html and trade.css (trade look). */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-8);
+    margin: var(--sp-28) 0 var(--sp-18);
+    font-weight: var(--fw-bold);
+    color: var(--ink-2);
+    text-decoration: none;
+  }
+
+  .back svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .back:hover {
+    color: var(--ink);
+  }
+
+  [data-app="trade"] .back {
+    gap: var(--sp-4);
+    margin: var(--sp-24) 0 var(--sp-16);
+    font-size: var(--fs-13);
+    font-weight: var(--fw-regular);
+    color: var(--muted);
+  }
+
+  [data-app="trade"] .back svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  [data-app="trade"] .back:hover {
+    color: var(--ink);
+  }
+
+  @media (max-width: 720px) {
+    [data-app="trade"] .back {
+      margin: var(--sp-16) 0 var(--sp-12);
+    }
+  }
+}

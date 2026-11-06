@@ -3,13 +3,3 @@
   padding-bottom: 40px;
   scroll-margin-top: var(--sp-24);
 }
-
-.alert {
-  margin: 0;
-  padding: var(--sp-10) var(--sp-12);
-  border-radius: var(--r-12);
-  background: var(--neg-soft);
-  color: var(--neg);
-  font-size: var(--fs-13-5);
-  font-weight: var(--fw-bold);
-}

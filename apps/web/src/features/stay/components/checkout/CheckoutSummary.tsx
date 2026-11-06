@@ -1,5 +1,5 @@
 "use client";
-import { Button, Photo, Skeleton } from "@night-shares/design-system";
+import { Alert, Button, Photo, Skeleton } from "@night-shares/design-system";
 import type { useCheckout } from "../../hooks/use-checkout";
 import { formatShort, plural } from "../../model/dates";
 import { PriceLines } from "../detail/price/PriceLines";
@@ -28,9 +28,9 @@ export function CheckoutSummary({ c }: { c: Checkout }) {
       </div>
       <QueryState error={model.property.error} />
       {!model.hasDates ? (
-        <p className={styles.warn}>
+        <Alert live={false} className={styles.warn}>
           Choose dates and a room on the stay page before checkout.
-        </p>
+        </Alert>
       ) : (
         <div className={styles.facts}>
           <div>
@@ -66,7 +66,11 @@ export function CheckoutSummary({ c }: { c: Checkout }) {
       {expired && (
         <div className={styles.expired}>
           <QueryState error={lock.error} />
-          {!lock.error && <p className={styles.warn}>Price lock expired.</p>}
+          {!lock.error && (
+            <Alert live={false} className={styles.warn}>
+              Price lock expired.
+            </Alert>
+          )}
           <Button
             size="sm"
             disabled={lock.isPending}

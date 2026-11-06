@@ -1,11 +1,10 @@
 "use client";
+import { Button, EmptyState } from "@night-shares/design-system";
 import { useAllMarkets } from "../../hooks/use-all-markets";
 import { useDiscover } from "../../hooks/use-discover";
 import { Feedback } from "../shared/Feedback";
 import { MarketTable } from "../shared/MarketTable";
 import page from "../shared/page.module.css";
-import { Button } from "../ui/Button";
-import { Empty } from "../ui/Empty";
 import { Skeleton } from "../ui/Skeleton";
 import { DiscoverFilters } from "./DiscoverFilters";
 import { DiscoverOverview } from "./DiscoverOverview";
@@ -29,12 +28,12 @@ export function DiscoverScreen() {
       <DiscoverOverview nights={all.nights} loading={all.query.isPending} />
       <DiscoverFilters filters={filters} cities={all.cities} change={change} />
       {gated ? (
-        <Empty>
+        <EmptyState plain>
           Your watchlist needs World ID.{" "}
-          <Button variant="primary" onClick={signIn}>
+          <Button variant="primary" size="sm" onClick={signIn}>
             Sign in with World ID to see your watchlist
           </Button>
-        </Empty>
+        </EmptyState>
       ) : (
         <>
           <Feedback error={query.error?.message} />

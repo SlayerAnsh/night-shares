@@ -81,9 +81,8 @@
   height: 16px;
 }
 
-.badgeWarn {
-  background: color-mix(in srgb, var(--warn) 14%, transparent);
-  color: var(--warn);
+.spin {
+  vertical-align: -3px;
 }
 
 .srOnly {

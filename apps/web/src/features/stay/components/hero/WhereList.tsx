@@ -1,7 +1,7 @@
+import { Icon } from "@night-shares/design-system";
 import type { Destination } from "@night-shares/proto/catalog/v1/property_pb";
 import { formatUsdc } from "../../../../shared/format";
 import { plural } from "../../model/dates";
-import { Icon } from "../shared/Icon";
 import { QueryState } from "../shared/QueryState";
 import styles from "./SearchBar.module.css";
 

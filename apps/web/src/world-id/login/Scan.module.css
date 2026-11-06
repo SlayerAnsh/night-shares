@@ -91,3 +91,32 @@
     animation: none;
   }
 }
+
+/* Mock only: the other World App outcomes, quieter than the main button. */
+.sims {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-8);
+}
+
+.sim {
+  height: 34px;
+  padding: 0 var(--sp-14);
+  border: 1px solid var(--w-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--w-ink);
+  font-family: var(--w-font);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-semibold);
+}
+
+.sim:hover:not(:disabled) {
+  border-color: var(--w-muted);
+}
+
+.sim:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

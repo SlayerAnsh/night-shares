@@ -1,5 +1,5 @@
 "use client";
-import { Button, Card } from "@night-shares/design-system";
+import { Button, Card, Icon } from "@night-shares/design-system";
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
 import { useState } from "react";
 import { useSession } from "../../../../../session/SessionProvider";
@@ -8,7 +8,6 @@ import { useProperty } from "../../../hooks/use-property";
 import { formatShort, plural } from "../../../model/dates";
 import { summarizeQuote } from "../../../model/quote";
 import { GuestCounters } from "../../shared/GuestCounters";
-import { Icon } from "../../shared/Icon";
 import { QueryState } from "../../shared/QueryState";
 import { PriceLines } from "../price/PriceLines";
 import { DATES_ID } from "../sections/DatesSection";

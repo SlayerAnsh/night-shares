@@ -1,0 +1,144 @@
+/* Trade figure rows split by hairlines (.tk-stats and .sum in mock/v2/assets/trade.css). */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .kpis {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-12) 0;
+  }
+
+  .item {
+    min-width: 0;
+    padding: 0 var(--sp-16);
+    border-left: 1px solid var(--line);
+  }
+
+  .item:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .label {
+    font-size: var(--fs-12);
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .dd {
+    margin: var(--sp-2) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sp-6);
+  }
+
+  .value {
+    font-family: var(--sans);
+    font-size: var(--fs-16);
+    font-weight: var(--w6);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings:
+      "tnum" 1,
+      "cv11" 1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .value.big {
+    font-size: var(--fs-20);
+  }
+
+  .detail {
+    font-size: var(--fs-12);
+    color: var(--muted);
+  }
+
+  .pos {
+    color: var(--pos);
+  }
+
+  .neg {
+    color: var(--neg);
+  }
+
+  .flat {
+    color: var(--muted);
+  }
+
+  .large {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .large .item {
+    padding: 0 var(--sp-24);
+  }
+
+  .large .item:first-child {
+    padding-left: 0;
+  }
+
+  .large .label {
+    font-size: var(--fs-12-5);
+  }
+
+  .large .dd {
+    margin-top: var(--sp-6);
+    gap: var(--sp-10);
+  }
+
+  .large .value {
+    font-size: var(--fs-28);
+    line-height: 1.1;
+  }
+
+  .large .detail {
+    font-size: var(--fs-12-5);
+  }
+
+  @media (max-width: 1100px) {
+    .large .item {
+      padding: 0 var(--sp-16);
+    }
+
+    .large .value {
+      font-size: var(--fs-24);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--sp-12) var(--sp-16);
+      width: 100%;
+    }
+
+    .strip .item {
+      padding: 0;
+      border-left: 0;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .large {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: var(--sp-20);
+    }
+
+    .large .item:nth-child(odd) {
+      padding-left: 0;
+      border-left: 0;
+    }
+
+    .large .value {
+      font-size: var(--fs-22);
+    }
+
+    .strip {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}

@@ -1,4 +1,5 @@
 "use client";
+import { Kpis } from "@night-shares/design-system";
 import type {
   HotelSummary,
   Payout,
@@ -9,7 +10,6 @@ import { sumPayouts } from "../../model/host-view";
 import { usd } from "../../model/money";
 import { PayCard } from "../shared/PayCard";
 import { Crumbs } from "../ui/Crumbs";
-import { Kpis } from "../ui/Kpis";
 import page from "../ui/Page.module.css";
 import { ErrorNote, Loading, StateCard } from "../ui/QueryState";
 import ui from "../ui/ui.module.css";
@@ -111,7 +111,7 @@ export function PayoutScreen() {
       <section aria-live="polite">
         <Kpis
           label="Wallet and payouts"
-          tiles={[
+          items={[
             {
               label: "Wallet balance",
               value: wallet.isPending
@@ -120,7 +120,7 @@ export function PayoutScreen() {
                   ? usd(wallet.data.balance?.micros)
                   : "Unavailable",
               detail: "USDC in your wallet now",
-              main: true,
+              inverse: true,
             },
             {
               label: "Available now",

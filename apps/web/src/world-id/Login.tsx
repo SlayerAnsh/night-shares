@@ -68,6 +68,9 @@ export function Login({
           onSeed={login.setSeed}
           busy={busy}
           onScan={() => void login.scan()}
+          onCancel={() => void login.cancel()}
+          onReject={() => void login.reject()}
+          onRecover={() => void login.recover()}
           links={links()}
         />
       );

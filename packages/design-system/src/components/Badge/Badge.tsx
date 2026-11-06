@@ -2,7 +2,7 @@ import type { HTMLAttributes } from "react";
 import { cx } from "../cx";
 import styles from "./Badge.module.css";
 
-export type BadgeTone = "soft" | "pos" | "neg" | "accent";
+export type BadgeTone = "soft" | "pos" | "neg" | "warn" | "accent";
 
 export type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
   tone?: BadgeTone;

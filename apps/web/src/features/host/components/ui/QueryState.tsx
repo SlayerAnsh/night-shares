@@ -1,16 +1,11 @@
-import type { CSSProperties, ReactNode } from "react";
-import { cx } from "./cx";
+import { Alert, Card, Skeleton } from "@night-shares/design-system";
+import type { ReactNode } from "react";
 import styles from "./QueryState.module.css";
-import ui from "./ui.module.css";
 
 /** Styled error line for a failed query or mutation. */
 export function ErrorNote({ error }: { error?: { message: string } | null }) {
   if (!error) return null;
-  return (
-    <p role="alert" className={styles.alert}>
-      {error.message}
-    </p>
-  );
+  return <Alert className={styles.alert}>{error.message}</Alert>;
 }
 
 /** Placeholder blocks shaped like the page that is loading. */
@@ -30,11 +25,7 @@ export function Loading({
       {shaped.map((row) => (
         <div key={row.key} className={styles.row}>
           {row.cells.map((cell) => (
-            <div
-              key={cell.key}
-              className={styles.block}
-              style={{ "--h": `${cell.h}px` } as CSSProperties}
-            />
+            <Skeleton key={cell.key} height={cell.h} radius="var(--r-lg)" />
           ))}
         </div>
       ))}
@@ -55,15 +46,11 @@ export function StateCard({
   error?: { message: string } | null;
 }) {
   return (
-    <section className={cx(ui.card, styles.box)}>
+    <Card as="section" className={styles.box}>
       <h2>{title}</h2>
       {children && <p>{children}</p>}
       <ErrorNote error={error} />
       {action && <div className={styles.action}>{action}</div>}
-    </section>
+    </Card>
   );
-}
-
-export function Spinner() {
-  return <span className={styles.spin} aria-hidden="true" />;
 }

@@ -1,8 +1,8 @@
 "use client";
-import { Card } from "@night-shares/design-system";
+import { BackLink, Card } from "@night-shares/design-system";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCheckout } from "../../hooks/use-checkout";
-import { BackLink } from "../shared/BackLink";
 import { BookingSuccess } from "./BookingSuccess";
 import styles from "./Checkout.module.css";
 import { CheckoutForm } from "./CheckoutForm";
@@ -27,7 +27,7 @@ function Checkout({ propertyId }: { propertyId: string }) {
         </Card>
       ) : (
         <>
-          <BackLink href={c.model.href(`/stay/${propertyId}`)}>
+          <BackLink as={Link} href={c.model.href(`/stay/${propertyId}`)}>
             Back to stay
           </BackLink>
           <Card className={styles.co}>

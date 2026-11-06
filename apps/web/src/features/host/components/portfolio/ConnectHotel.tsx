@@ -1,21 +1,24 @@
 "use client";
-import { buttonClass } from "@night-shares/design-system";
+import {
+  buttonClass,
+  cx,
+  Segmented,
+  Spinner,
+} from "@night-shares/design-system";
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
 import { Pms } from "@night-shares/proto/host/v1/opening_pb";
 import Link from "next/link";
 import { useRequireAccess } from "../../../../session/require-access";
 import { useHostMutations } from "../../hooks/use-host-data";
 import { useHostSearch } from "../../hooks/use-host-search";
-import { cx } from "../ui/cx";
-import { ErrorNote, Spinner } from "../ui/QueryState";
-import { Seg } from "../ui/Seg";
+import { ErrorNote } from "../ui/QueryState";
 import ui from "../ui/ui.module.css";
 import styles from "./ConnectHotel.module.css";
 
 const PMS = [
-  [Pms.MEWS, "Mews"],
-  [Pms.CLOUDBEDS, "Cloudbeds"],
-  [Pms.SITE_MINDER, "SiteMinder"],
+  { value: Pms.MEWS, label: "Mews" },
+  { value: Pms.CLOUDBEDS, label: "Cloudbeds" },
+  { value: Pms.SITE_MINDER, label: "SiteMinder" },
 ] as const;
 
 export function ConnectHotel({
@@ -113,11 +116,11 @@ export function ConnectHotel({
           </label>
           <div className={styles.field}>
             <span>Your channel manager</span>
-            <Seg
+            <Segmented
               label="Channel manager"
               options={PMS}
               value={pms}
-              full
+              block
               onChange={(value) => set({ pms: String(value) })}
             />
           </div>
@@ -132,7 +135,7 @@ export function ConnectHotel({
           >
             {connect.isPending ? (
               <>
-                <Spinner />
+                <Spinner className={ui.spin} />
                 Importing rooms and rates
               </>
             ) : (

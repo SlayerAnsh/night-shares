@@ -1,4 +1,4 @@
-import { buttonClass } from "@night-shares/design-system";
+import { buttonClass, cx, Icon } from "@night-shares/design-system";
 import {
   addDays,
   monthDates,
@@ -6,8 +6,6 @@ import {
   weekdayMon,
 } from "../../model/calendar";
 import { type DaySummary, openState } from "../../model/day-summary";
-import { cx } from "../ui/cx";
-import { Icon } from "../ui/Icon";
 import { Swatch } from "../ui/StackBar";
 import ui from "../ui/ui.module.css";
 import styles from "./Calendar.module.css";
@@ -57,7 +55,7 @@ export function HotelCalendar({
           aria-label="Previous month"
           onClick={() => onMonth(-1)}
         >
-          <Icon name="left" />
+          <Icon name="left" size={16} />
         </button>
         <h2 aria-live="polite">{monthName(month)}</h2>
         <button
@@ -66,7 +64,7 @@ export function HotelCalendar({
           aria-label="Next month"
           onClick={() => onMonth(1)}
         >
-          <Icon name="right" />
+          <Icon name="right" size={16} />
         </button>
         <button
           type="button"

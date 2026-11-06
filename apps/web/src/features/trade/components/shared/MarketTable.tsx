@@ -1,7 +1,7 @@
 "use client";
+import { EmptyState } from "@night-shares/design-system";
 import type { NightCard } from "@night-shares/proto/market/v1/analytics_pb";
 import { useState } from "react";
-import { Empty } from "../ui/Empty";
 import { MarketRow } from "./MarketRow";
 import styles from "./market-table.module.css";
 
@@ -76,7 +76,7 @@ export function MarketTable({
           />
         ))
       ) : (
-        <Empty>{empty}</Empty>
+        <EmptyState plain>{empty}</EmptyState>
       )}
       {more > 0 && (
         <button

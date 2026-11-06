@@ -1,8 +1,8 @@
+import { Icon } from "@night-shares/design-system";
 import type { RouteQuote } from "@night-shares/proto/market/v1/book_pb";
 import { formatRoomNights } from "../../../../shared/format";
 import { usd } from "../../model/display";
 import { sourceName } from "../../model/market";
-import { CheckIcon } from "../shared/Icons";
 import styles from "./ticket.module.css";
 
 const rn = (tenths?: number) => formatRoomNights(tenths ?? 0);
@@ -33,7 +33,7 @@ export function QuotePreview({
         </li>
         <li>
           <span className={styles.wid}>
-            <CheckIcon />
+            <Icon name="check" />
           </span>
           World ID limit: <b>{rn(q.capUsed?.tenths)}</b> used of{" "}
           <b>{rn(q.cap?.tenths)}</b> room nights

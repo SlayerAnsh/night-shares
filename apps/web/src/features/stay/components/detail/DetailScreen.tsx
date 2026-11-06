@@ -1,10 +1,11 @@
 "use client";
+import { BackLink } from "@night-shares/design-system";
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { useRequireAccess } from "../../../../session/require-access";
 import { useSession } from "../../../../session/SessionProvider";
 import { useProperty } from "../../hooks/use-property";
 import { SearchHero } from "../hero/SearchHero";
-import { BackLink } from "../shared/BackLink";
 import { QueryState } from "../shared/QueryState";
 import { BookCard } from "./book/BookCard";
 import styles from "./Detail.module.css";
@@ -54,7 +55,9 @@ export function DetailScreen({ propertyId }: { propertyId: string }) {
     <>
       <SearchHero compact />
       <div className={styles.wrap}>
-        <BackLink href={model.href("/stay")}>All stays</BackLink>
+        <BackLink as={Link} href={model.href("/stay")}>
+          All stays
+        </BackLink>
         {model.property.error && <QueryState error={model.property.error} />}
         {!property && !model.property.error && <DetailSkeleton />}
         {property && (

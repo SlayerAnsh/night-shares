@@ -1,10 +1,10 @@
+import { cx } from "@night-shares/design-system";
 import type { HostNight } from "@night-shares/proto/host/v1/hotel_pb";
 import Link from "next/link";
 import { formatRoomNights } from "../../../../shared/format";
 import { shortInstant } from "../../model/calendar";
 import { premium } from "../../model/day-summary";
 import { usd } from "../../model/money";
-import { cx } from "../ui/cx";
 import { StackBar, Swatch } from "../ui/StackBar";
 import ui from "../ui/ui.module.css";
 import styles from "./Rooms.module.css";

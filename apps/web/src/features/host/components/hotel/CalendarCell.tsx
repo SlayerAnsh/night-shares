@@ -1,10 +1,10 @@
+import { cx } from "@night-shares/design-system";
 import type { MouseEvent } from "react";
 import { formatRoomNights } from "../../../../shared/format";
 import { isHoliday, shortNight } from "../../model/calendar";
 import type { DaySummary, OpenState } from "../../model/day-summary";
 import { premium } from "../../model/day-summary";
 import { usd } from "../../model/money";
-import { cx } from "../ui/cx";
 import { StackBar } from "../ui/StackBar";
 import styles from "./CalendarCell.module.css";
 

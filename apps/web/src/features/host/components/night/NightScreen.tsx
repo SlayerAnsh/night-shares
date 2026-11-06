@@ -1,10 +1,9 @@
 "use client";
-import { buttonClass } from "@night-shares/design-system";
+import { buttonClass, cx } from "@night-shares/design-system";
 import Link from "next/link";
 import { useNight, useProperty } from "../../hooks/use-host-data";
 import { shortNight, todayIso } from "../../model/calendar";
 import { Crumbs } from "../ui/Crumbs";
-import { cx } from "../ui/cx";
 import { Loading, StateCard } from "../ui/QueryState";
 import ui from "../ui/ui.module.css";
 import { ActivityTable } from "./ActivityTable";

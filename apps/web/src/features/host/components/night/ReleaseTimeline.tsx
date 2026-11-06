@@ -1,7 +1,7 @@
+import { cx } from "@night-shares/design-system";
 import type { ReleaseEvent } from "@night-shares/proto/host/v1/hotel_pb";
 import { instantMs, shortInstant } from "../../model/calendar";
 import { SCAN_NOTE } from "../../model/walks";
-import { cx } from "../ui/cx";
 import ui from "../ui/ui.module.css";
 import styles from "./Timeline.module.css";
 

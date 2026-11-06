@@ -1,11 +1,10 @@
-import { buttonClass } from "@night-shares/design-system";
+import { buttonClass, Icon } from "@night-shares/design-system";
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
 import type { Trip } from "@night-shares/proto/stay/v1/trip_pb";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { formatUsdc } from "../../../../shared/format";
 import { formatShort, nightsBetween, plural } from "../../model/dates";
-import { Icon } from "../shared/Icon";
 import styles from "./Checkout.module.css";
 
 // Confirmation (.success, .g-conf): booked, sent to the hotel, then the

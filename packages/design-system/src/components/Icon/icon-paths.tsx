@@ -8,7 +8,18 @@ const stroke = {
   strokeLinejoin: "round",
 } as const;
 
-const paths: Record<IconName, { box: number; body: ReactNode }> = {
+export type IconName =
+  | "left"
+  | "right"
+  | "close"
+  | "pin"
+  | "cal"
+  | "user"
+  | "star"
+  | "heart"
+  | "check";
+
+export const iconPaths: Record<IconName, { box: number; body: ReactNode }> = {
   left: {
     box: 16,
     body: <path {...stroke} strokeWidth={1.8} d="M10 3 5 8l5 5" />,
@@ -74,34 +85,3 @@ const paths: Record<IconName, { box: number; body: ReactNode }> = {
     body: <path {...stroke} strokeWidth={2} d="m4.5 10.5 3.5 3.5 7.5-8" />,
   },
 };
-
-export type IconName =
-  | "left"
-  | "right"
-  | "close"
-  | "pin"
-  | "cal"
-  | "user"
-  | "star"
-  | "heart"
-  | "check";
-
-export function Icon({
-  name,
-  className,
-}: {
-  name: IconName;
-  className?: string;
-}) {
-  const icon = paths[name];
-  return (
-    <svg
-      viewBox={`0 0 ${icon.box} ${icon.box}`}
-      className={className}
-      aria-hidden="true"
-      focusable="false"
-    >
-      {icon.body}
-    </svg>
-  );
-}

@@ -1,12 +1,12 @@
+import { Segmented } from "@night-shares/design-system";
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
 import type { useOpening } from "../../hooks/use-opening";
 import { usd } from "../../model/money";
-import { Seg } from "../ui/Seg";
 import styles from "./Panel.module.css";
 
 const MODES = [
-  ["range", "Date range"],
-  ["picked", "Picked nights"],
+  { value: "range", label: "Date range" },
+  { value: "picked", label: "Picked nights" },
 ] as const;
 
 /** Which nights and which room types to open. */
@@ -26,11 +26,11 @@ export function OpeningFields({
           <b>Nights</b>
           <span>{o.dates.length} selected</span>
         </div>
-        <Seg
+        <Segmented
           label="Choose dates"
           options={MODES}
           value={o.mode === "picked" ? "picked" : "range"}
-          full
+          block
           onChange={(mode) => o.set({ mode })}
         />
         {o.mode === "picked" ? (

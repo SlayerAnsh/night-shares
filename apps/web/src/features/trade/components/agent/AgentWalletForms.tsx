@@ -1,6 +1,5 @@
-import { Field, Input } from "@night-shares/design-system";
+import { Button, Field, Input } from "@night-shares/design-system";
 import type { useAgentWallet } from "../../hooks/use-agent-wallet";
-import { Button } from "../ui/Button";
 import styles from "./agent.module.css";
 
 // Move funds, then set the budget caps and the nights the agent may trade.
@@ -24,10 +23,15 @@ export function AgentWalletForms({
           </Field>
         </div>
         <div className={styles.acts}>
-          <Button variant="primary" disabled={busy} onClick={agent.fund}>
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={busy}
+            onClick={agent.fund}
+          >
             Fund agent
           </Button>
-          <Button disabled={busy} onClick={agent.withdraw}>
+          <Button size="sm" disabled={busy} onClick={agent.withdraw}>
             Withdraw to my wallet
           </Button>
         </div>
@@ -62,7 +66,12 @@ export function AgentWalletForms({
           </Field>
         </div>
         <div className={styles.acts}>
-          <Button variant="primary" disabled={busy} onClick={agent.setBudget}>
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={busy}
+            onClick={agent.setBudget}
+          >
             Set budget and allowed nights
           </Button>
         </div>

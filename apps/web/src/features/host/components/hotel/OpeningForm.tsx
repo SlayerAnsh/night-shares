@@ -1,12 +1,10 @@
 "use client";
-import { buttonClass } from "@night-shares/design-system";
+import { buttonClass, cx, Icon, Spinner } from "@night-shares/design-system";
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
 import { useEffect } from "react";
 import type { useOpening } from "../../hooks/use-opening";
 import { addDays, dayMonth, shortNight } from "../../model/calendar";
-import { cx } from "../ui/cx";
-import { Icon } from "../ui/Icon";
-import { ErrorNote, Spinner } from "../ui/QueryState";
+import { ErrorNote } from "../ui/QueryState";
 import ui from "../ui/ui.module.css";
 import { OpeningFields } from "./OpeningFields";
 import { OpeningPreview } from "./OpeningPreview";
@@ -66,7 +64,7 @@ export function OpeningForm({
           aria-label="Clear selection"
           onClick={onClose}
         >
-          <Icon name="close" />
+          <Icon name="close" size={16} />
         </button>
       </div>
       <form
@@ -89,7 +87,7 @@ export function OpeningForm({
           )}
           {o.valid && o.preview.isFetching && (
             <p className={styles.status} role="status">
-              <Spinner /> Updating preview
+              <Spinner className={ui.spin} /> Updating preview
             </p>
           )}
           <ErrorNote error={o.valid ? o.preview.error : null} />
@@ -107,7 +105,7 @@ export function OpeningForm({
                 o.preview.isFetching
               }
             >
-              {pending && <Spinner />}
+              {pending && <Spinner className={ui.spin} />}
               Open {dates.length} {dates.length === 1 ? "night" : "nights"}
             </button>
           </div>

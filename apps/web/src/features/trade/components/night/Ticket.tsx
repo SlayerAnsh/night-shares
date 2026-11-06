@@ -1,10 +1,10 @@
 "use client";
+import { Segmented } from "@night-shares/design-system";
 import type { NightKey } from "@night-shares/proto/common/v1/night_pb";
 import { useRequireAccess } from "../../../../session/require-access";
 import { useSession } from "../../../../session/SessionProvider";
 import { useTicket } from "../../hooks/use-ticket";
 import { Feedback } from "../shared/Feedback";
-import { Segmented } from "../ui/Segmented";
 import { TicketAsk } from "./TicketAsk";
 import { TicketPosition } from "./TicketPosition";
 import { TicketTrade } from "./TicketTrade";
@@ -37,7 +37,7 @@ export function Ticket({
       }}
     >
       <Segmented
-        variant="wide"
+        block
         label="Buy or sell"
         value={t.mode === "buy" ? "buy" : "sell"}
         onChange={(mode) => t.update({ mode: mode === "buy" ? "" : mode })}

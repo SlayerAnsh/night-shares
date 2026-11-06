@@ -1,12 +1,11 @@
 "use client";
+import { Button, buttonClass, EmptyState } from "@night-shares/design-system";
 import type { NightKey } from "@night-shares/proto/common/v1/night_pb";
 import Link from "next/link";
 import { formatRoomNights } from "../../../../shared/format";
 import { useAccount } from "../../hooks/use-account";
 import { shortDate, usd } from "../../model/display";
 import { nightHref } from "../../model/market";
-import { Button, buttonClass } from "../ui/Button";
-import { Empty } from "../ui/Empty";
 import { Section } from "../ui/Section";
 import text from "../ui/text.module.css";
 import { Feedback } from "./Feedback";
@@ -57,13 +56,14 @@ export function Listings({
               <div className={styles.acts}>
                 {ask.night && (
                   <Link
-                    className={buttonClass()}
+                    className={buttonClass({ size: "sm" })}
                     href={`${nightHref(ask.night)}?mode=ask`}
                   >
                     Edit
                   </Link>
                 )}
                 <Button
+                  size="sm"
                   disabled={account.actions.pending}
                   onClick={() => void account.cancel(ask.id)}
                 >
@@ -74,7 +74,7 @@ export function Listings({
           ))}
         </div>
       ) : (
-        <Empty>Nothing listed.</Empty>
+        <EmptyState plain>Nothing listed.</EmptyState>
       )}
     </Section>
   );

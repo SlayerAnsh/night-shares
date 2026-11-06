@@ -1,9 +1,13 @@
 "use client";
-import { buttonClass, EmptyState, Skeleton } from "@night-shares/design-system";
+import {
+  BackLink,
+  buttonClass,
+  EmptyState,
+  Skeleton,
+} from "@night-shares/design-system";
 import Link from "next/link";
 import { useTrips } from "../../hooks/use-trips";
 import { SearchHero } from "../hero/SearchHero";
-import { BackLink } from "../shared/BackLink";
 import { QueryState } from "../shared/QueryState";
 import { SavedStays } from "./SavedStays";
 import { TripCard } from "./TripCard";
@@ -16,7 +20,9 @@ export function TripsScreen() {
     <>
       <SearchHero compact />
       <div className={styles.wrap}>
-        <BackLink href="/stay">All stays</BackLink>
+        <BackLink as={Link} href="/stay">
+          All stays
+        </BackLink>
         <div className={styles.head}>
           <h1 className={styles.title}>My trips</h1>
           <p className={styles.muted}>

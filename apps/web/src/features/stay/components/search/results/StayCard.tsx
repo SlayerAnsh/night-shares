@@ -1,10 +1,9 @@
 "use client";
-import { Photo } from "@night-shares/design-system";
+import { Icon, Photo } from "@night-shares/design-system";
 import type { StayCard as Card } from "@night-shares/proto/catalog/v1/property_pb";
 import Link from "next/link";
 import { formatUsdc } from "../../../../../shared/format";
 import { useStaySearch } from "../../../hooks/use-stay-search";
-import { Icon } from "../../shared/Icon";
 import styles from "./Results.module.css";
 
 const whole = (micros?: bigint) => formatUsdc(micros ?? 0n, { decimals: 0 });

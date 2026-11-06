@@ -1,4 +1,4 @@
-import { Segmented } from "../ui/Segmented";
+import { Segmented } from "@night-shares/design-system";
 import { Toggle } from "../ui/Toggle";
 import styles from "./discover.module.css";
 
@@ -29,6 +29,7 @@ export function DiscoverFilters({
   return (
     <div className={styles.filters}>
       <Segmented
+        size="sm"
         label="Location"
         options={options}
         value={filters.city}

@@ -30,6 +30,11 @@
     color: var(--neg);
   }
 
+  .warn {
+    background: color-mix(in srgb, var(--warn) 14%, transparent);
+    color: var(--warn);
+  }
+
   .accent {
     background: var(--accent-soft);
     color: var(--accent);

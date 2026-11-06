@@ -1,5 +1,5 @@
 import { ConnectError } from "@connectrpc/connect";
-import { Spinner } from "@night-shares/design-system";
+import { Alert, Spinner } from "@night-shares/design-system";
 import styles from "./QueryState.module.css";
 
 // Loading and error line for one query. Renders nothing once data is in.
@@ -12,12 +12,7 @@ export function QueryState({
   error?: unknown;
   label?: string;
 }) {
-  if (error)
-    return (
-      <p role="alert" className={styles.error}>
-        {ConnectError.from(error).rawMessage}
-      </p>
-    );
+  if (error) return <Alert>{ConnectError.from(error).rawMessage}</Alert>;
   if (!pending) return null;
   return (
     <p className={styles.pending}>

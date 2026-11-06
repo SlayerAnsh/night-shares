@@ -1,8 +1,7 @@
 "use client";
-import { Button } from "@night-shares/design-system";
+import { Button, Icon } from "@night-shares/design-system";
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
 import { useSaves } from "../../hooks/use-saves";
-import { Icon } from "../shared/Icon";
 import { QueryState } from "../shared/QueryState";
 import styles from "./Detail.module.css";
 

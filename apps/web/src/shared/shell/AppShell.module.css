@@ -1,25 +1,56 @@
-/* Page widths: .wrap (stay), .wrap-wide (host) from styles.css, .tr (trade) from trade.css. */
-.main {
+/* Page widths: .wrap (stay) and .wrap-wide (host) from styles.css. Trade screens set their own (.tr in trade.css). */
+.column {
   margin: 0 auto;
   padding: var(--sp-32) var(--gutter) 80px;
 }
 
-.stay {
+.column.stay {
   max-width: var(--wrap-max);
 }
 
-.host {
+.column.host {
   max-width: var(--wrap-wide-max);
 }
 
-.trade {
-  max-width: 1200px;
-  padding: 0 var(--sp-32) 48px;
+/* The stay column as a grid, so a full bleed child needs no negative margins. */
+.bleed {
+  --shell-gutter: var(--gutter);
+  display: grid;
+  grid-template-columns:
+    [full-start] minmax(var(--shell-gutter), 1fr)
+    [col-start] minmax(0, calc(var(--wrap-max) - 2 * var(--gutter)))
+    [col-end] minmax(var(--shell-gutter), 1fr)
+    [full-end];
+  align-content: start;
+  padding: var(--sp-32) 0 80px;
+}
+
+.bleed > * {
+  grid-column: col;
+  min-width: 0;
+}
+
+.bleed > [data-bleed] {
+  grid-column: full;
+}
+
+.bleed:has(> [data-bleed]:first-child) {
+  padding-top: 0;
+}
+
+.tradeApp {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
 }
 
 @media (max-width: 720px) {
-  .main {
+  .column {
     padding-left: var(--sp-16);
     padding-right: var(--sp-16);
+  }
+
+  .bleed {
+    --shell-gutter: var(--sp-16);
   }
 }

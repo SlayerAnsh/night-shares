@@ -1,9 +1,7 @@
 "use client";
-import { buttonClass, Photo } from "@night-shares/design-system";
+import { buttonClass, cx, Photo, Pill } from "@night-shares/design-system";
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
 import { useHostSearch } from "../../hooks/use-host-search";
-import { cx } from "../ui/cx";
-import { SyncPill } from "../ui/SyncPill";
 import ui from "../ui/ui.module.css";
 import styles from "./Portfolio.module.css";
 
@@ -22,9 +20,9 @@ export function OffHotelCard({ property }: { property: Property }) {
               room types
             </span>
           </div>
-          <SyncPill small off>
+          <Pill dot="off" size="sm">
             Not connected
-          </SyncPill>
+          </Pill>
         </div>
         <p className={styles.offText}>
           Connect its channel manager to start offering nights. Room types and

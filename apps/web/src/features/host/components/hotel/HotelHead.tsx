@@ -1,7 +1,6 @@
-import { buttonClass, Photo } from "@night-shares/design-system";
+import { buttonClass, Photo, Pill } from "@night-shares/design-system";
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
 import page from "../ui/Page.module.css";
-import { SyncPill } from "../ui/SyncPill";
 import ui from "../ui/ui.module.css";
 import styles from "./Hotel.module.css";
 
@@ -27,7 +26,7 @@ export function HotelHead({
       </div>
       {onOpen && (
         <div className={page.actions}>
-          <SyncPill>Channel manager connected</SyncPill>
+          <Pill dot>Channel manager connected</Pill>
           <button
             type="button"
             className={buttonClass({ variant: "primary" })}

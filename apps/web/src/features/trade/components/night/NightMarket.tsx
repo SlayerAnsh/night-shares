@@ -1,4 +1,5 @@
 "use client";
+import { Segmented } from "@night-shares/design-system";
 import type {
   GetBookResponse,
   GetNightResponse,
@@ -9,7 +10,6 @@ import { useState } from "react";
 import chart from "../charts/chart.module.css";
 import { PriceChart } from "../charts/PriceChart";
 import { Feedback } from "../shared/Feedback";
-import { Segmented } from "../ui/Segmented";
 import { Skeleton } from "../ui/Skeleton";
 import styles from "./night.module.css";
 import { OrderBook } from "./OrderBook";
@@ -60,7 +60,7 @@ export function NightMarket({
       </section>
       <div className={styles.btToggle}>
         <Segmented
-          variant="wide"
+          block
           label="Show order book or recent trades"
           value={show}
           onChange={setShow}

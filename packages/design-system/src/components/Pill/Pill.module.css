@@ -1,4 +1,4 @@
-/* .pill from mock/v2/assets/styles.css. */
+/* .pill from mock/v2/assets/styles.css; the status pill with a dot is .sync from host.css. */
 @layer ns-base, ns-ui;
 
 @layer ns-ui {
@@ -15,6 +15,17 @@
     white-space: nowrap;
   }
 
+  .status {
+    padding: 7px 13px;
+    font-size: var(--fs-12-5);
+    color: var(--ink-2);
+  }
+
+  .sm {
+    padding: var(--sp-4) var(--sp-10);
+    font-size: var(--fs-11-5);
+  }
+
   .dot {
     width: 8px;
     height: 8px;
@@ -22,5 +33,10 @@
     border-radius: 50%;
     background: var(--pos);
     box-shadow: 0 0 0 3px var(--pos-soft);
+  }
+
+  .off {
+    background: var(--muted);
+    box-shadow: none;
   }
 }

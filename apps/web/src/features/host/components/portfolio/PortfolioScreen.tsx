@@ -1,5 +1,5 @@
 "use client";
-import { buttonClass } from "@night-shares/design-system";
+import { buttonClass, Kpis, Segmented } from "@night-shares/design-system";
 import type { HotelSummary } from "@night-shares/proto/host/v1/hotel_pb";
 import Link from "next/link";
 import { useState } from "react";
@@ -8,10 +8,8 @@ import { usePortfolio } from "../../hooks/use-host-data";
 import { usd } from "../../model/money";
 import { WalkStrip } from "../shared/WalkStrip";
 import { Crumbs } from "../ui/Crumbs";
-import { Kpis } from "../ui/Kpis";
 import page from "../ui/Page.module.css";
 import { ErrorNote, Loading, StateCard } from "../ui/QueryState";
-import { Seg } from "../ui/Seg";
 import { Swatch } from "../ui/StackBar";
 import ui from "../ui/ui.module.css";
 import { ConnectHotel } from "./ConnectHotel";
@@ -21,11 +19,11 @@ import styles from "./Portfolio.module.css";
 import { WeekHeatmap } from "./WeekHeatmap";
 
 const SORTS = [
-  ["occ", "Occupancy"],
-  ["rev", "Revenue"],
-  ["name", "Name"],
+  { value: "occ", label: "Occupancy" },
+  { value: "rev", label: "Revenue" },
+  { value: "name", label: "Name" },
 ] as const;
-type Sort = (typeof SORTS)[number][0];
+type Sort = (typeof SORTS)[number]["value"];
 
 const BY: Record<Sort, (a: HotelSummary, b: HotelSummary) => number> = {
   occ: (a, b) => (b.kpis?.occupancyBps ?? 0) - (a.kpis?.occupancyBps ?? 0),
@@ -86,12 +84,12 @@ export function PortfolioScreen() {
       <ErrorNote error={query.error} />
       <Kpis
         label="Group totals"
-        tiles={[
+        items={[
           {
             label: "Available now",
             value: usd(kpis?.availableNow?.micros),
             detail: "Sweeps to your wallet automatically",
-            main: true,
+            inverse: true,
           },
           {
             label: "Revenue, next 30 nights",
@@ -115,7 +113,7 @@ export function PortfolioScreen() {
         <h2>Hotels</h2>
         <div className={styles.sort}>
           <span>Sort by</span>
-          <Seg
+          <Segmented
             label="Sort hotels by"
             options={SORTS}
             value={sort}

@@ -1,0 +1,120 @@
+/* .kpis and .kpi (with .kpi.main) from mock/v2/assets/host.css: one card per figure. */
+@layer ns-base, ns-ui;
+
+@layer ns-ui {
+  .kpis {
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sp-14);
+  }
+
+  .item {
+    min-width: 0;
+    padding: var(--sp-18) var(--sp-20);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow);
+  }
+
+  .label {
+    font-size: var(--fs-12-5);
+    font-weight: var(--fw-bold);
+    color: var(--muted);
+  }
+
+  .dd {
+    margin: 0;
+  }
+
+  .value {
+    display: block;
+    margin-top: var(--sp-8);
+    font-family: var(--display);
+    font-size: var(--fs-42);
+    line-height: var(--lh-tight);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .detail {
+    display: block;
+    margin-top: var(--sp-6);
+    font-size: var(--fs-12-5);
+    font-weight: var(--fw-bold);
+    color: var(--ink-2);
+  }
+
+  .detail a {
+    color: var(--accent);
+    font-weight: var(--fw-extrabold);
+    text-decoration: none;
+  }
+
+  .detail a:hover {
+    text-decoration: underline;
+  }
+
+  .inverse {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+
+  .inverse .label,
+  .inverse .detail {
+    color: color-mix(in srgb, var(--bg) 72%, transparent);
+  }
+
+  .inverse .detail a {
+    display: inline-block;
+    margin-top: var(--sp-2);
+    padding: 5px var(--sp-12);
+    border-radius: var(--r-8);
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  .pos {
+    color: var(--pos);
+  }
+
+  .neg {
+    color: var(--neg);
+  }
+
+  .flat {
+    color: var(--muted);
+  }
+
+  .compact .item {
+    padding: var(--sp-14) var(--sp-18);
+  }
+
+  .compact .value {
+    margin-top: var(--sp-6);
+    font-size: var(--fs-34);
+  }
+
+  @media (max-width: 720px) {
+    .kpis {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-10);
+    }
+
+    .item,
+    .compact .item {
+      padding: var(--sp-14);
+    }
+
+    .value {
+      font-size: var(--fs-30);
+    }
+
+    .compact .value {
+      font-size: var(--fs-28);
+    }
+  }
+}

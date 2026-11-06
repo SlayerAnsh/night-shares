@@ -1,3 +1,4 @@
+import { cx } from "@night-shares/design-system";
 import type { Activity } from "@night-shares/proto/host/v1/hotel_pb";
 import { formatRoomNights } from "../../../../shared/format";
 import {
@@ -7,7 +8,6 @@ import {
 } from "../../model/activity";
 import { instantMs, shortInstant } from "../../model/calendar";
 import { usd } from "../../model/money";
-import { cx } from "../ui/cx";
 import ui from "../ui/ui.module.css";
 import styles from "./ActivityTable.module.css";
 

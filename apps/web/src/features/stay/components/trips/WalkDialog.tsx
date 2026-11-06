@@ -1,5 +1,5 @@
 "use client";
-import { Button, Dialog, Spinner } from "@night-shares/design-system";
+import { Alert, Button, Dialog, Spinner } from "@night-shares/design-system";
 import type { Trip } from "@night-shares/proto/stay/v1/trip_pb";
 import { formatUsdc } from "../../../../shared/format";
 import styles from "./Trips.module.css";
@@ -36,10 +36,10 @@ export function WalkDialog({
         <p className={styles.note}>
           Your report becomes a public incident on the hotel's record.
         </p>
-        <p className={styles.warn}>
+        <Alert live={false}>
           Only report this if it is true. A false report gets your World ID
           banned from Night Shares.
-        </p>
+        </Alert>
         <div className={styles.walkCta}>
           <Button onClick={onClose}>Cancel</Button>
           <Button variant="primary" disabled={pending} onClick={onConfirm}>

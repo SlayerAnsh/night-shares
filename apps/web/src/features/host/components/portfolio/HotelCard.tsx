@@ -1,12 +1,10 @@
 "use client";
-import { Photo } from "@night-shares/design-system";
+import { cx, Photo, Pill } from "@night-shares/design-system";
 import type { Alert, HotelSummary } from "@night-shares/proto/host/v1/hotel_pb";
 import Link from "next/link";
 import { useProperty } from "../../hooks/use-host-data";
 import { usd } from "../../model/money";
 import { validWalks, WALK_LIMIT } from "../../model/walks";
-import { cx } from "../ui/cx";
-import { SyncPill } from "../ui/SyncPill";
 import ui from "../ui/ui.module.css";
 import { DayStrip } from "./DayStrip";
 import { NextBusyNight } from "./NextBusyNight";
@@ -40,7 +38,9 @@ export function HotelCard({
               {property ? ` · ${property.roomTypes.length} room types` : ""}
             </span>
           </div>
-          <SyncPill small>Connected</SyncPill>
+          <Pill dot size="sm">
+            Connected
+          </Pill>
         </div>
         <div className={styles.occ}>
           <b>{Math.round((kpis?.occupancyBps ?? 0) / 100)}%</b>

@@ -25,7 +25,7 @@ All are exported from the package root. Each lives in `src/components/<Name>/` a
 
 | Component | Props | Mock source |
 | --- | --- | --- |
-| `Button` | `variant`: `primary` (gradient) \| `secondary` (ink) \| `ghost` (outlined, default) \| `danger`; `size`: `sm` \| `md` \| `lg`; `block`; native button props (`type` defaults to `button`) | `.btn-*` |
+| `Button` | `variant`: `primary` (gradient) \| `secondary` (ink) \| `ghost` (outlined, default) \| `danger` \| `text` (borderless, underlines on hover); `size`: `sm` \| `md` \| `lg`; `block`; native button props (`type` defaults to `button`) | `.btn-*` |
 | `buttonClass({ variant, size, block })` | returns the class string, for `next/link` or `<a>` styled as a button | `.btn` |
 | `IconButton` | `label` (required, becomes `aria-label` and `title`), icon as children, native button props | `.ib` |
 | `Card` | `as`: `div` \| `section` \| `article` \| `aside`; `padded` (20px 24px); `inverse` (ink tile) | `.card`, `.kpi.main` |
@@ -33,18 +33,22 @@ All are exported from the package root. Each lives in `src/components/<Name>/` a
 | `Input` | `mono` (tabular figures), native input props | `.input` |
 | `Select` | native select props, `<option>` children | `.select` (host) |
 | `Stepper` | `value`, `onChange(value)`, `label` (required), `min` (0), `max`, `step` (1), `disabled` | `.stepper` |
-| `Pill` | `dot` (green live dot), span props | `.pill` |
-| `Badge` | `tone`: `soft` (default) \| `pos` \| `neg` \| `accent` | `.badge` |
+| `Pill` | `dot`: `true` (green live dot) \| `"off"` (grey dot), a pill with a dot is the status look; `size`: `md` \| `sm`; span props | `.pill`, host `.sync` |
+| `Badge` | `tone`: `soft` (default) \| `pos` \| `neg` \| `warn` \| `accent` | `.badge` |
 | `Chip` | `on` (pressed), native button props | `.chip`, trade `.chip-x` |
+| `Kpis` | `items: { label, value, detail, tone, big, extra, inverse }[]`, `label` (required), `variant`: `tiles` (cards, default) \| `compact` \| `strip` (hairline row) \| `large`. `inverse` marks the ink tile, `tone` (`pos` \| `neg` \| `flat`) colors the value | host `.kpis`, trade `.tk-stats`, `.sum` |
 | `Stat` | `label`, `value`, `detail`, `size`: `md` \| `sm`, `inverse` | `.kpi`, `.hero-meta` |
-| `Segmented` | `options: { value, label }[]`, `value`, `onChange(value)`, `label` (required), `block` | `.seg`, trade `.tk-tabs` |
+| `Segmented` | generic over string or number values: `options: { value, label }[]`, `value`, `onChange(value)`, `label` (required), `block` (equal segments, full width), `size`: `md` \| `sm` (trade chips, 30px) \| `xs` (trade time frames, 26px). Trade scrolls sideways in one row | `.seg`, host `.seg.full`, trade `.tk-tabs`, `.chip-x`, `.tf` |
 | `Tabs` | `options: { value, label }[]`, `value`, `onChange(value)`, `label` (required). Arrow keys move. Render the panel yourself with `role="tabpanel"` | `.n-tabs`, `.nav-links` |
 | `Switch` | `checked`, `onChange(checked)`, `label` (when no visible label), native button props | `.switch` |
 | `Dialog` | `open`, `onClose`, `title`, children, `sheet` (bottom sheet) | `.modal`, host `.panel` sheet |
 | `Table` | native table props; write `thead` and `tbody`; mark number cells with `data-numeric` | trade `.mh`, `.mr` |
-| `EmptyState` | `title`, children (body text), `action` | `.empty`, trade `.mt-empty` |
+| `EmptyState` | `title`, children (body text), `action`; or `plain` with children only (one muted line, hairline above in trade) | `.empty`, trade `.mt-empty` |
+| `Alert` | children, `live` (default true, sets `role="alert"`; false for a static warning), p props | guest `.g-warn` |
 | `Spinner` | `size`: `sm` (16px, current color) \| `lg` (48px), `label` ("Loading") | `.spin`, `.lg-spin` |
 | `Skeleton` | `width`, `height`, `radius` | none (loading placeholder) |
+| `Icon` | `name`: `left` \| `right` \| `close` \| `pin` \| `cal` \| `user` \| `star` \| `heart` \| `check`; `size` (px, else size with CSS). Decorative, current color | `NS.ICON` in `shared.js` |
+| `BackLink` | `href`, children, `as` (link component, for example `next/link`; default `<a>`) | guest `.back`, trade `.back` |
 | `Photo` | `src`, `tone: [from, to]` (gradient shown under or instead of the photo), `alt` (empty means decorative), children; size it with `className` | `.ph` |
 | `Display` | `as`: `h1` \| `h2` (default) \| `h3` \| `p` \| `span`; set the size with `className` | `.display` |
 | `Eyebrow` | `as`: `span` (default) \| `p` \| `h2` \| `h3` \| `div` | `.eyebrow` |
@@ -52,7 +56,7 @@ All are exported from the package root. Each lives in `src/components/<Name>/` a
 
 Components with hooks (`Tabs`, `Dialog`) are client components. The rest render on the server too; pass callbacks only from client components.
 
-Not ported as primitives: the range calendar, toasts and the command palette. They are app specific or not wired yet.
+Not ported as primitives: the range calendar (Stay only), breadcrumbs, the stacked occupancy bar and state cards (Host only), the trade section frame, typed amount stepper, labelled toggle and skeleton rows (Trade only), charts, toasts and the command palette. They live in one app or are not wired yet; promote one when a second app needs it.
 
 ## Token groups
 

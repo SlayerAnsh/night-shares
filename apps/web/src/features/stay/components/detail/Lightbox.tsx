@@ -1,7 +1,6 @@
 "use client";
-import { Dialog, IconButton, Photo } from "@night-shares/design-system";
+import { Dialog, Icon, IconButton, Photo } from "@night-shares/design-system";
 import { useState } from "react";
-import { Icon } from "../shared/Icon";
 import styles from "./Gallery.module.css";
 
 export function Lightbox({

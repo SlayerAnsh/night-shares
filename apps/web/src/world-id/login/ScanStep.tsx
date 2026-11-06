@@ -13,6 +13,10 @@ export function ScanStep(props: {
   onSeed: (seed: string) => void;
   busy: boolean;
   onScan: () => void;
+  // Mock only: simulate the other World App outcomes.
+  onCancel: () => void;
+  onReject: () => void;
+  onRecover: () => void;
   links: ReactNode;
 }) {
   const levelName = props.need === "orb" ? "Orb verified" : "Device";
@@ -58,6 +62,34 @@ export function ScanStep(props: {
       >
         {props.isWorldId ? "Verify with World ID" : "Simulate scan"}
       </button>
+      {!props.isWorldId && (
+        <div className={scan.sims}>
+          <button
+            type="button"
+            className={scan.sim}
+            disabled={props.busy}
+            onClick={props.onCancel}
+          >
+            Simulate cancel
+          </button>
+          <button
+            type="button"
+            className={scan.sim}
+            disabled={props.busy}
+            onClick={props.onReject}
+          >
+            Simulate reject
+          </button>
+          <button
+            type="button"
+            className={scan.sim}
+            disabled={props.busy}
+            onClick={props.onRecover}
+          >
+            Recover account
+          </button>
+        </div>
+      )}
       {!props.isWorldId && (
         <p className={styles.note}>
           Simulate scan is for the demo. It stands in for approving in World

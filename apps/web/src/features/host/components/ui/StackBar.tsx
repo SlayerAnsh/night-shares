@@ -1,4 +1,4 @@
-import { cx } from "./cx";
+import { cx } from "@night-shares/design-system";
 import styles from "./StackBar.module.css";
 
 export type Fill = "b" | "h" | "s" | "o";

@@ -1,4 +1,5 @@
 "use client";
+import { Alert } from "@night-shares/design-system";
 import { useSearchResults } from "../../hooks/use-search-results";
 import { SearchHero } from "../hero/SearchHero";
 import { QueryState } from "../shared/QueryState";
@@ -15,9 +16,7 @@ export function SearchScreen() {
       <div className={styles.wrap} id="results">
         <ResultsBar count={results.data?.stays.length} />
         {halfDates ? (
-          <p role="alert" className={styles.alert}>
-            Choose valid dates with check out after check in.
-          </p>
+          <Alert>Choose valid dates with check out after check in.</Alert>
         ) : results.error ? (
           <QueryState error={results.error} />
         ) : (

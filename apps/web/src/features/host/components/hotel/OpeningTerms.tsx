@@ -1,3 +1,4 @@
+import { Segmented } from "@night-shares/design-system";
 import {
   DemandPreset,
   ReleasePolicy,
@@ -5,14 +6,13 @@ import {
 import type { CSSProperties } from "react";
 import type { useOpening } from "../../hooks/use-opening";
 import { isHoliday } from "../../model/calendar";
-import { Seg } from "../ui/Seg";
 import ui from "../ui/ui.module.css";
 import styles from "./Panel.module.css";
 
 const DEMAND = [
-  [DemandPreset.CALM, "Calm"],
-  [DemandPreset.NORMAL, "Normal"],
-  [DemandPreset.PEAK, "Peak"],
+  { value: DemandPreset.CALM, label: "Calm" },
+  { value: DemandPreset.NORMAL, label: "Normal" },
+  { value: DemandPreset.PEAK, label: "Peak" },
 ] as const;
 const DEMAND_NOTE: Record<number, string> = {
   [DemandPreset.CALM]:
@@ -60,11 +60,11 @@ export function OpeningTerms({
         <div className={styles.fh}>
           <b>Demand</b>
         </div>
-        <Seg
+        <Segmented
           label="Demand"
           options={DEMAND}
           value={demand}
-          full
+          block
           onChange={(value) => o.set({ demand: String(value) })}
         />
         <p className={ui.note}>{DEMAND_NOTE[demand]}</p>

@@ -1,3 +1,4 @@
+import { cx } from "@night-shares/design-system";
 import type { HotelPricePoint } from "@night-shares/proto/host/v1/hotel_pb";
 import type { ReactNode } from "react";
 import { formatRoomNights } from "../../../../../shared/format";
@@ -9,7 +10,6 @@ import {
   roomTotals,
   weekdayShares,
 } from "../../../model/glance";
-import { cx } from "../../ui/cx";
 import ui from "../../ui/ui.module.css";
 import { Donut } from "./Donut";
 import styles from "./Glance.module.css";

@@ -1,4 +1,4 @@
-import { Badge, buttonClass } from "@night-shares/design-system";
+import { Badge, buttonClass, cx, Icon } from "@night-shares/design-system";
 import type { HostNight } from "@night-shares/proto/host/v1/hotel_pb";
 import Link from "next/link";
 import { formatRoomNights } from "../../../../shared/format";
@@ -10,8 +10,6 @@ import {
   shortInstant,
   shortNight,
 } from "../../model/calendar";
-import { cx } from "../ui/cx";
-import { Icon } from "../ui/Icon";
 import page from "../ui/Page.module.css";
 import ui from "../ui/ui.module.css";
 import styles from "./Night.module.css";
@@ -43,7 +41,7 @@ export function NightHead({
       href={`/host/${propertyId}/${addDays(date, step)}`}
       aria-label={`${step < 0 ? "Previous" : "Next"} night, ${shortNight(addDays(date, step))}`}
     >
-      <Icon name={step < 0 ? "left" : "right"} />
+      <Icon name={step < 0 ? "left" : "right"} size={16} />
     </Link>
   );
   return (
@@ -55,7 +53,7 @@ export function NightHead({
           {nav(1)}
         </div>
         <div className={styles.badges}>
-          {isHoliday(date) && <Badge className={ui.badgeWarn}>Holiday</Badge>}
+          {isHoliday(date) && <Badge tone="warn">Holiday</Badge>}
           {rows.length ? (
             <>
               {demand.length > 0 && <Badge>{demand.join(", ")} demand</Badge>}
@@ -85,7 +83,7 @@ export function NightHead({
         )}
         {rows[0] && (
           <Link className={buttonClass()} href={tradeHref(rows[0])}>
-            See trading for this night <Icon name="right" />
+            See trading for this night <Icon name="right" size={16} />
           </Link>
         )}
       </div>

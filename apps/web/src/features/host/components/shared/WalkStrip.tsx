@@ -1,3 +1,4 @@
+import { cx } from "@night-shares/design-system";
 import type { HotelSummary } from "@night-shares/proto/host/v1/hotel_pb";
 import {
   SCAN_NOTE,
@@ -6,7 +7,6 @@ import {
   WALK_RULE,
   walkStanding,
 } from "../../model/walks";
-import { cx } from "../ui/cx";
 import ui from "../ui/ui.module.css";
 import styles from "./Walks.module.css";
 

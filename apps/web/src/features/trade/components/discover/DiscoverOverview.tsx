@@ -1,4 +1,5 @@
 "use client";
+import { Kpis, Segmented } from "@night-shares/design-system";
 import type { NightCard } from "@night-shares/proto/market/v1/analytics_pb";
 import { useState } from "react";
 import {
@@ -9,8 +10,6 @@ import {
   signedPercent,
   tone,
 } from "../../model/display";
-import { Kpis } from "../ui/Kpis";
-import { Segmented } from "../ui/Segmented";
 import { Skeleton } from "../ui/Skeleton";
 import styles from "./discover.module.css";
 import { MoverRows } from "./MoverRows";
@@ -59,14 +58,14 @@ export function DiscoverOverview({
           {
             label: "Asks below fair",
             value: below,
-            sub: `of ${nights.length}`,
+            detail: `of ${nights.length}`,
           },
           {
             label: "Median est. return",
             value: signedPercent(Math.round(mid), 1),
             tone: tone(mid),
           },
-          { label: "Release in 14 days", value: soon, sub: "markets" },
+          { label: "Release in 14 days", value: soon, detail: "markets" },
         ]}
       />
       <div className={styles.overRow}>
@@ -74,7 +73,7 @@ export function DiscoverOverview({
           <div className={styles.panelHead}>
             <h2 id="h-mv">Top movers 24h</h2>
             <Segmented
-              variant="small"
+              size="xs"
               label="Show"
               value={movers}
               onChange={setMovers}

@@ -1,10 +1,10 @@
+import { EmptyState } from "@night-shares/design-system";
 import type { NightKey } from "@night-shares/proto/common/v1/night_pb";
 import type { NightCard } from "@night-shares/proto/market/v1/analytics_pb";
 import type { GetNightResponse } from "@night-shares/proto/market/v1/market_pb";
 import Link from "next/link";
 import { fairDelta, fairText, fairTone } from "../../model/display";
 import { nightHref } from "../../model/market";
-import { Empty } from "../ui/Empty";
 import { Skeleton } from "../ui/Skeleton";
 import text from "../ui/text.module.css";
 import styles from "./calendar.module.css";
@@ -89,7 +89,7 @@ export function CalendarPanel({
           })}
         </div>
       ) : (
-        <Empty>No other dates are trading this month.</Empty>
+        <EmptyState plain>No other dates are trading this month.</EmptyState>
       )}
       <p className={styles.legend}>
         <span>First line: price per room night</span>

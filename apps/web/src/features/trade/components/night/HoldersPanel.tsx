@@ -1,6 +1,6 @@
+import { EmptyState } from "@night-shares/design-system";
 import type { GetBookResponse } from "@night-shares/proto/market/v1/market_pb";
 import { formatRoomNights } from "../../../../shared/format";
-import { Empty } from "../ui/Empty";
 import { Skeleton } from "../ui/Skeleton";
 import text from "../ui/text.module.css";
 import styles from "./holders.module.css";
@@ -28,7 +28,7 @@ export function HoldersPanel({ book }: { book?: GetBookResponse }) {
           ))}
         </ul>
       ) : (
-        <Empty>No one holds this night yet.</Empty>
+        <EmptyState plain>No one holds this night yet.</EmptyState>
       )}
     </>
   );

@@ -1,11 +1,9 @@
-/* .g-hero from mock/v2/guest.html. The app nav sits above the hero, so the
-   top padding drops the 68px the mock reserves for an overlaid nav. */
-/* Full bleed out of the shell's page column, flush under the nav. */
+/* .g-hero from mock/v2/guest.html. Full bleed through the shell (data-bleed);
+   the transparent app nav lies over the top, so the padding clears it. */
 .hero {
   position: relative;
   color: var(--on-accent);
-  padding: 64px 0 48px;
-  margin: calc(-1 * var(--sp-32)) calc(50% - 50vw) 0;
+  padding: calc(var(--nav-h) + 64px) 0 48px;
 }
 
 .photo {
@@ -51,16 +49,16 @@
 }
 
 .compact {
-  padding: var(--sp-28) 0;
+  padding: calc(var(--nav-h) + var(--sp-28)) 0 var(--sp-28);
 }
 
 @media (max-width: 760px) {
   .hero {
-    padding: 40px 0 var(--sp-32);
+    padding: calc(var(--nav-h) + 40px) 0 var(--sp-32);
   }
 
   .compact {
-    padding: var(--sp-16) 0;
+    padding: calc(var(--nav-h) + var(--sp-16)) 0 var(--sp-16);
   }
 
   .wrap {

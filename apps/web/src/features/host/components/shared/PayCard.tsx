@@ -1,10 +1,9 @@
+import { cx, Pill } from "@night-shares/design-system";
 import type { Payout } from "@night-shares/proto/host/v1/hotel_pb";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { shortInstant } from "../../model/calendar";
 import { usd } from "../../model/money";
-import { cx } from "../ui/cx";
-import { SyncPill } from "../ui/SyncPill";
 import ui from "../ui/ui.module.css";
 import styles from "./PayCard.module.css";
 
@@ -42,7 +41,7 @@ export function PayCard({
           <h2>{href ? <Link href={href}>{title}</Link> : title}</h2>
           <p className={ui.muted}>{subtitle}</p>
         </div>
-        <SyncPill>Paid out automatically</SyncPill>
+        <Pill dot>Paid out automatically</Pill>
       </div>
       {children}
       {payout && (

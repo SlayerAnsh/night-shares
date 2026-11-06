@@ -65,6 +65,20 @@
     border-color: var(--neg);
   }
 
+  /* Borderless text action that underlines like a link (trade .tk-act). */
+  .text {
+    padding: 0 var(--sp-8);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--ink-2);
+  }
+
+  .text:hover:not(:disabled) {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
   .sm {
     height: 34px;
     padding: 0 var(--sp-14);
@@ -107,6 +121,12 @@
     background: var(--accent-btn);
     color: var(--on-accent);
     box-shadow: none;
+  }
+
+  [data-app="trade"] .text {
+    height: 28px;
+    padding: 0 var(--sp-8);
+    font-weight: var(--fw-medium);
   }
 
   [data-app="trade"] .ghost,

@@ -1,7 +1,7 @@
+import { EmptyState } from "@night-shares/design-system";
 import type { Ask } from "@night-shares/proto/market/v1/book_pb";
 import type { Holding } from "@night-shares/proto/market/v1/portfolio_pb";
 import { nightHref } from "../../model/market";
-import { Empty } from "../ui/Empty";
 import { Section } from "../ui/Section";
 import { HoldingRow } from "./HoldingRow";
 import styles from "./portfolio.module.css";
@@ -48,7 +48,7 @@ export function Positions({
           ))}
         </div>
       ) : (
-        <Empty>No positions yet. Pick a market and buy.</Empty>
+        <EmptyState plain>No positions yet. Pick a market and buy.</EmptyState>
       )}
     </Section>
   );

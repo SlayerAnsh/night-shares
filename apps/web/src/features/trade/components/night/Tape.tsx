@@ -1,7 +1,7 @@
+import { EmptyState } from "@night-shares/design-system";
 import type { TapePrint } from "@night-shares/proto/market/v1/analytics_pb";
 import { formatRoomNights } from "../../../../shared/format";
 import { clockTime, usd } from "../../model/display";
-import { Empty } from "../ui/Empty";
 import text from "../ui/text.module.css";
 import styles from "./book.module.css";
 
@@ -9,7 +9,8 @@ const ACTORS = ["Unknown", "Guest", "Trader", "You", "Sell-back", "Agent"];
 
 // Recent trades, newest first: buys in green, sells in red.
 export function Tape({ prints }: { prints: TapePrint[] }) {
-  if (!prints.length) return <Empty>No trades yet on this market.</Empty>;
+  if (!prints.length)
+    return <EmptyState plain>No trades yet on this market.</EmptyState>;
   return (
     <>
       <div className={styles.tapeCols}>

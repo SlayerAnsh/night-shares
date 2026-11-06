@@ -1,4 +1,5 @@
 "use client";
+import { Icon } from "@night-shares/design-system";
 import { useEffect, useState } from "react";
 import { type NightRange, pickNight } from "../../../model/calendar";
 import {
@@ -8,7 +9,6 @@ import {
   nightsBetween,
   plural,
 } from "../../../model/dates";
-import { Icon } from "../Icon";
 import { CalendarMonth } from "./CalendarMonth";
 import styles from "./RangeCalendar.module.css";
 

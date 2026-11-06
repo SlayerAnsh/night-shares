@@ -1,12 +1,11 @@
 "use client";
+import { BackLink, EmptyState } from "@night-shares/design-system";
 import Link from "next/link";
 import { useNight } from "../../hooks/use-night";
 import { useUrlState } from "../../hooks/use-url-state";
 import { parseNightKey } from "../../model/market";
 import { Feedback } from "../shared/Feedback";
-import { LeftIcon } from "../shared/Icons";
 import page from "../shared/page.module.css";
-import { Empty } from "../ui/Empty";
 import { Skeleton } from "../ui/Skeleton";
 import { NightHeader } from "./NightHeader";
 import { NightMarket } from "./NightMarket";
@@ -22,21 +21,20 @@ export function NightScreen({ nightKey }: { nightKey: string }) {
   if (night) return <NightContent night={night} />;
   return (
     <div className={page.page}>
-      <BackLink />
+      <MarketsLink />
       <Feedback error="This market link is not valid." />
-      <Empty>
+      <EmptyState plain>
         Pick a market from the <Link href="/trade">list of markets</Link>.
-      </Empty>
+      </EmptyState>
     </div>
   );
 }
 
-function BackLink() {
+function MarketsLink() {
   return (
-    <Link href="/trade" className={styles.back}>
-      <LeftIcon />
-      <span>Markets</span>
-    </Link>
+    <BackLink as={Link} href="/trade">
+      Markets
+    </BackLink>
   );
 }
 
@@ -53,7 +51,7 @@ function NightContent({
   const fair = state.book.data?.fairPrice?.micros;
   return (
     <div className={`${page.page} ${page.wide} ${styles.screen}`}>
-      <BackLink />
+      <MarketsLink />
       {card ? (
         <NightHeader
           card={card}

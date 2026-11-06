@@ -1,4 +1,4 @@
-import { Badge } from "@night-shares/design-system";
+import { Badge, cx } from "@night-shares/design-system";
 import type { WalkIncident } from "@night-shares/proto/catalog/v1/property_pb";
 import { shortInstant } from "../../model/calendar";
 import {
@@ -8,7 +8,6 @@ import {
   WALK_RULE,
   walkStanding,
 } from "../../model/walks";
-import { cx } from "../ui/cx";
 import ui from "../ui/ui.module.css";
 import styles from "./Walks.module.css";
 

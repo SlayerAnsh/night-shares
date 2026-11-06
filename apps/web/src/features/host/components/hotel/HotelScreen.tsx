@@ -1,4 +1,5 @@
 "use client";
+import { cx, Kpis, Segmented } from "@night-shares/design-system";
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
 import type { GetHotelResponse } from "@night-shares/proto/host/v1/host_pb";
 import { useState } from "react";
@@ -13,10 +14,7 @@ import { validWalks } from "../../model/walks";
 import { PayCard } from "../shared/PayCard";
 import { WalkCard } from "../shared/WalkCard";
 import { Crumbs } from "../ui/Crumbs";
-import { cx } from "../ui/cx";
-import { Kpis } from "../ui/Kpis";
 import { Loading, StateCard } from "../ui/QueryState";
-import { Seg } from "../ui/Seg";
 import { Glance } from "./glance/Glance";
 import styles from "./Hotel.module.css";
 import { HotelCalendar } from "./HotelCalendar";
@@ -69,9 +67,9 @@ function HotelBody({
     <>
       <HotelHead property={property} onOpen={pick.openMonth} />
       <Kpis
-        compact
+        variant="compact"
         label={`${property.name}, next 30 nights`}
-        tiles={[
+        items={[
           {
             label: "Occupancy, next 30 nights",
             value: `${Math.round((kpis?.occupancyBps ?? 0) / 100)}%`,
@@ -96,11 +94,14 @@ function HotelBody({
       />
       <div className={styles.filter}>
         <span>Room type</span>
-        <Seg
+        <Segmented
           label="Room type"
           options={[
-            ["all", "All rooms"],
-            ...property.roomTypes.map((room) => [room.id, room.name] as const),
+            { value: "all", label: "All rooms" },
+            ...property.roomTypes.map((room) => ({
+              value: room.id,
+              label: room.name,
+            })),
           ]}
           value={rt}
           onChange={setRt}

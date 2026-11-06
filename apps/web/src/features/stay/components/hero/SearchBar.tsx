@@ -1,11 +1,11 @@
 "use client";
+import { Icon } from "@night-shares/design-system";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useSearchResults } from "../../hooks/use-search-results";
 import { formatShort, plural } from "../../model/dates";
 import { RangeCalendar } from "../shared/calendar/RangeCalendar";
 import { GuestCounters } from "../shared/GuestCounters";
-import { Icon } from "../shared/Icon";
 import styles from "./SearchBar.module.css";
 import { WhereList } from "./WhereList";
 
