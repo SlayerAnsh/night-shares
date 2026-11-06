@@ -10,8 +10,10 @@ import "night_shares/host/v1/opening.proto";
 message Payout {
   night_shares.common.v1.Usdc available_now = 1;
   night_shares.common.v1.Usdc held_for_traders = 2;
-  night_shares.common.v1.Usdc security_hold = 3;
-  night_shares.common.v1.Usdc security_hold_target = 4;
+  reserved 3;
+  reserved "security_hold";
+  reserved 4;
+  reserved "security_hold_target";
   night_shares.common.v1.Usdc fees = 5;
   night_shares.common.v1.Usdc gross = 6;
 }

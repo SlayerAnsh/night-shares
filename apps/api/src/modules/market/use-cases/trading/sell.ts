@@ -6,6 +6,7 @@ import {
 } from "@night-shares/proto/market/v1/book_pb";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
+import { feePayments } from "../../../../shared/fee-payments";
 import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyPoolSell } from "../../../inventory/mutations/apply-pool-sell";
 import { assertOpen, type Deps, realise, syncPosition } from "../context";
@@ -56,12 +57,13 @@ export async function sell(
           amount: quote.total?.micros ?? 0n,
           memo: "sell back",
         },
-        {
-          from: "pool",
-          to: "treasury",
-          amount: quote.fee?.micros ?? 0n,
-          memo: "sell-back fee",
-        },
+        ...feePayments(quote.gross?.micros ?? 0n, quote.fee?.micros ?? 0n).map(
+          (payment) => ({
+            from: "pool",
+            ...payment,
+            memo: "sell-back fee",
+          }),
+        ),
       ].filter((leg) => leg.amount > 0n),
     );
   } catch (error) {

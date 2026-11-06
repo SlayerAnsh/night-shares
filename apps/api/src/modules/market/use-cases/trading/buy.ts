@@ -12,6 +12,7 @@ import { ExecutionSchema } from "@night-shares/proto/market/v1/book_pb";
 import type { User } from "../../../../ports/sessions/session-store";
 import { SYSTEM_ADDRESSES } from "../../../../ports/wallet-provider/wallet-provider";
 import { DomainError } from "../../../../shared/errors/domain-error";
+import { feePayments } from "../../../../shared/fee-payments";
 import { mulTenths } from "../../../../shared/money";
 import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyTraderAskFill } from "../../../inventory/mutations/apply-trader-ask-fill";
@@ -125,10 +126,15 @@ async function settle(
         gross - fee,
         "ask fill",
       );
-      transfer(user.walletAddress, "treasury", fee, "seller fee");
+      for (const payment of feePayments(gross, fee))
+        transfer(user.walletAddress, payment.to, payment.amount, "seller fee");
     } else transfer(user.walletAddress, "pool", gross, "market buy");
   }
-  transfer(user.walletAddress, "treasury", toMicros(result.fee), "buyer fee");
+  for (const payment of feePayments(
+    toMicros(result.gross),
+    toMicros(result.fee),
+  ))
+    transfer(user.walletAddress, payment.to, payment.amount, "buyer fee");
   await ports.walletProvider.settle(legs);
   for (const fill of result.fills) {
     if (fill.src === "trader") {

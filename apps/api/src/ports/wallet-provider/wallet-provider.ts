@@ -27,6 +27,7 @@ export interface WalletProvider {
 }
 export const SYSTEM_ADDRESSES = {
   treasury: "treasury",
+  coverFund: "cover_fund",
   pool: "pool",
   host: "host",
   marketMaker: "market_maker",

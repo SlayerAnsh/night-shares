@@ -98,6 +98,5 @@ describe("host reporting", () => {
     }));
     expect(sumPayouts(rows).availableNow.micros).toBe(3n);
     expect(sumPayouts(rows).fees.micros).toBe(200n);
-    expect(sumPayouts([]).securityHold.micros).toBe(0n);
   });
 });

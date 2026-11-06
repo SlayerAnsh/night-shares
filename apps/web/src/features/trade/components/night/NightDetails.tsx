@@ -65,7 +65,6 @@ export function NightDetails({ detail }: { detail: GetNightResponse }) {
               Refund: percent(t.refundBps),
               Honoured: percent(t.honouredBps),
               Incidents: t.incidents,
-              "Security hold": money(t.securityHold),
             }).map(([label, value]) => (
               <div key={label}>
                 <dt>{label}</dt>

@@ -121,11 +121,11 @@ Auth column: the `access` option on each RPC.
 | ConnectChannelManager | ORB | In: property, PMS (Mews, Cloudbeds, SiteMinder). Imports room types and usual rates |
 | GetPortfolio | ORB | All hotels: KPIs, alerts, 8 week occupancy |
 | GetHotel | ORB | One hotel: KPIs, month glance, price series, calendar |
-| PreviewOpenNights | ORB | Floor, last room price, guest price cap, minimum payout, security hold |
+| PreviewOpenNights | ORB | Floor, last room price, guest price cap, minimum payout, slots, kept |
 | OpenNights | ORB | In: dates, room types, allotment percent, demand preset, release policy. Allotment never drops below booked plus held |
 | StopSelling | ORB | Take back unsold rooms for the chosen nights |
 | GetNight | ORB | Per room type state, activity, release timeline, payout split |
-| GetPayout | ORB | Available now, held for traders, security hold, fees |
+| GetPayout | ORB | Available now, held for traders, fees |
 | Withdraw | ORB | Send available USDC to the host wallet |
 
 ### wallet.v1.WalletService
@@ -189,7 +189,9 @@ Each property has one owner. The four seeded connected hotels (Velana, Ubud, Riv
 
 Night state (allotment, pool position `q`, booked, held, trader asks) lives in the market repository. On boot it is seeded from `nightState` in `market-model`, so numbers match the mock. After boot, buys, sells and bookings change it.
 
-Not in the first cut (listed so it is not forgotten): release at cutoff with unsold refunds, bond return after checkout, background order flow simulation, offline double sale slashing.
+Hosts lock nothing beyond the traded nights themselves. There is no bond or security hold: the night's own escrowed reserve is the first collateral. A cover fund, fed by 0.1% of every trade's notional (carved out of the platform fee, so the 1.3% total fee is unchanged), backs offline double sales. Settlements pay that share to the `cover_fund` system address. `offlineSaleCover` in `market-model` defines the waterfall: the holder is made whole at the fair price from the voided night's reserve slice, then the host's pending payouts, then the cover fund; the host owes twice the fair price in total, and anything pending payouts cannot settle becomes host debt netted from future payouts. Track record limits how many rooms a new host can open.
+
+Not in the first cut (listed so it is not forgotten): release at cutoff with unsold refunds, background order flow simulation, offline double sale cover and payout netting in the API (the model function exists; detection and settlement do not).
 
 ## apps/web
 

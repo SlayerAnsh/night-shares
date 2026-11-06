@@ -12,7 +12,9 @@ test("night shows real shared activity and selected release cutoff", () => {
   );
   expect(
     result.releaseTimeline.some(
-      (e) => e.description === "Guests check out; security hold returns",
+      (e) =>
+        e.description ===
+        "The night closes. Your occupancy report updates your track record.",
     ),
   ).toBe(true);
 });

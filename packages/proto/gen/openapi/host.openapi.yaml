@@ -892,9 +892,6 @@ components:
         minimumPayout:
           title: minimum_payout
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
-        securityHold:
-          title: security_hold
-          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
       title: OpenNightPreview
       additionalProperties: false
     night_shares.host.v1.OpenNightsRequest:
@@ -951,12 +948,6 @@ components:
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
         heldForTraders:
           title: held_for_traders
-          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
-        securityHold:
-          title: security_hold
-          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
-        securityHoldTarget:
-          title: security_hold_target
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
         fees:
           title: fees

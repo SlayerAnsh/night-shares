@@ -39,7 +39,8 @@ message TrackRecord {
   int32 refund_bps = 6;
   int32 honoured_bps = 7;
   int32 incidents = 8;
-  night_shares.common.v1.Usdc security_hold = 9;
+  reserved 9;
+  reserved "security_hold";
 }
 
 message NightCard {

@@ -42,5 +42,6 @@ message OpenNightPreview {
   night_shares.common.v1.Usdc last_room_price = 4;
   night_shares.common.v1.Usdc guest_price_cap = 5;
   night_shares.common.v1.Usdc minimum_payout = 6;
-  night_shares.common.v1.Usdc security_hold = 7;
+  reserved 7;
+  reserved "security_hold";
 }

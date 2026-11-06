@@ -26,7 +26,6 @@ export function OpeningPreview({
             <th>Last room sells around</th>
             <th>Price cap for guests</th>
             <th>Minimum payout</th>
-            <th>Security hold</th>
           </tr>
         </thead>
         <tbody>
@@ -45,7 +44,6 @@ export function OpeningPreview({
               <td>{formatUsdc(row.lastRoomPrice?.micros ?? 0n)}</td>
               <td>{formatUsdc(row.guestPriceCap?.micros ?? 0n)}</td>
               <td>{formatUsdc(row.minimumPayout?.micros ?? 0n)}</td>
-              <td>{formatUsdc(row.securityHold?.micros ?? 0n)}</td>
             </tr>
           ))}
         </tbody>

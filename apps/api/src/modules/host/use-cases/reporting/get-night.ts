@@ -29,7 +29,8 @@ export function createGetNight(deps: HostDeps) {
       { ms: parseDate(date) + 15 * 3_600_000, description: "Guests check in" },
       {
         ms: parseDate(addDays(date, 1)) + 11 * 3_600_000,
-        description: "Guests check out; security hold returns",
+        description:
+          "The night closes. Your occupancy report updates your track record.",
       },
     );
     return {

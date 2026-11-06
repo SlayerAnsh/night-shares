@@ -17,6 +17,7 @@ All notable changes to this monorepo. Newest first.
 
 ### Changed
 
+- Host bond and security hold removed (mock model.js 4b697be65422). A cover fund takes 0.1% of each trade's notional out of the existing fee, paid to the `cover_fund` address; user totals are unchanged. `market-model` adds `offlineSaleCover`, the double sale waterfall (reserve slice, pending payouts, cover fund). Removed proto fields are reserved.
 - Design tokens re-synced with the latest mock CSS: a trade theme scoped to `[data-app="trade"]` (light and dark), command palette and app switcher tokens, and breakpoints md 860 and lg 1100. Dark `--warn` now matches the mock (`#B87A0A`).
 - Market model, in both mock and port: guests never pay above the recall cap, distant nights never show negative inventory, rooms split exactly across room types, trader ask and recall fills charge the seller fee, and recall markups below 5% are rejected.
 

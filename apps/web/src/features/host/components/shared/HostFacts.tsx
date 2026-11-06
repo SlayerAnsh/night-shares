@@ -30,8 +30,6 @@ export function PayoutFacts({
       <dd>{formatUsdc(value.availableNow?.micros ?? 0n)}</dd>
       <dt>Held while traders hold rooms</dt>
       <dd>{formatUsdc(value.heldForTraders?.micros ?? 0n)}</dd>
-      <dt>Security hold</dt>
-      <dd>{formatUsdc(value.securityHold?.micros ?? 0n)}</dd>
       <dt>Fees earned</dt>
       <dd>{formatUsdc(value.fees?.micros ?? 0n)}</dd>
     </dl>

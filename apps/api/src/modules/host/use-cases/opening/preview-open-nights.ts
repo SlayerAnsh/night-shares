@@ -1,7 +1,6 @@
 import {
   cost,
   floorFromRate,
-  hostPayout,
   lastRoomPrice,
   PRESETS,
   recallStrike,
@@ -28,9 +27,6 @@ export function createPreviewOpenNights(deps: HostDeps) {
         lastRoomPrice: { micros: toMicros(lastRoomPrice(F, k)) },
         guestPriceCap: { micros: toMicros(recallStrike(F, k)) },
         minimumPayout: { micros: toMicros(cost(F, k, S, 0, S)) },
-        securityHold: {
-          micros: toMicros(hostPayout({ F, k, S, q: 0, held: 0 }).bondTarget),
-        },
       };
     });
     return {

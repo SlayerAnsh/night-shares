@@ -1420,9 +1420,6 @@ components:
           type: integer
           title: incidents
           format: int32
-        securityHold:
-          title: security_hold
-          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
       title: TrackRecord
       additionalProperties: false
     night_shares.market.v1.TradeSide:
