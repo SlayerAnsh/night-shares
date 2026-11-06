@@ -17,6 +17,9 @@ export async function createHarness(
   container: Container = buildContainer({
     port: 0,
     adapters: "mock",
+    dbPath: ":memory:",
+    clock: "mock",
+    ids: "sequential",
     today: "2026-12-01",
   }),
 ) {
@@ -89,6 +92,7 @@ export async function createHarness(
         server.close((error) => (error ? reject(error) : resolve()));
         server.closeAllConnections();
       });
+      container.ports.db.close();
     },
   };
 }

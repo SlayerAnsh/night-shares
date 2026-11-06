@@ -12,6 +12,9 @@ test("auth context supplies users and the outer error interceptor maps domain co
   const container = buildContainer({
     port: 0,
     adapters: "mock",
+    dbPath: ":memory:",
+    clock: "mock",
+    ids: "sequential",
     today: "2026-12-01",
   });
   let domainCode: DomainErrorCode = "NOT_FOUND";

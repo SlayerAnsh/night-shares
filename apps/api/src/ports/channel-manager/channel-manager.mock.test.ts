@@ -5,6 +5,9 @@ test("channel manager imports room types and returns stable hotel references", a
   const { ports } = buildContainer({
     port: 0,
     adapters: "mock",
+    dbPath: ":memory:",
+    clock: "mock",
+    ids: "sequential",
     today: "2026-12-01",
   });
   const { roomTypes } = await ports.channelManager.connect({

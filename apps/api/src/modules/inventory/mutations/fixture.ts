@@ -3,6 +3,9 @@ export function fixture() {
   const { ports } = buildContainer({
     port: 0,
     adapters: "mock",
+    dbPath: ":memory:",
+    clock: "mock",
+    ids: "sequential",
     today: "2026-12-01",
   });
   const record = ports.inventory.get("prop_velana:rt_velana_0:2026-12-24");

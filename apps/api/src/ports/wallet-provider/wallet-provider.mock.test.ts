@@ -2,10 +2,9 @@ import { expect, test } from "bun:test";
 import { fromUsd } from "../../shared/money";
 import { createMockClock } from "../clock/clock.mock";
 import { createMockIdGenerator } from "../ids/id-generator.mock";
-import { createMockOnramp } from "../onramp/onramp.mock";
 import { createMockWalletProvider } from "./wallet-provider.mock";
 
-test("wallet linking is stable and card charges credit the same transfer balance", async () => {
+test("wallet linking is stable and transfers debit the balance", async () => {
   const ids = createMockIdGenerator();
   const wallet = createMockWalletProvider({
     ids,
@@ -14,8 +13,7 @@ test("wallet linking is stable and card charges credit the same transfer balance
   const address = await wallet.linkWallet("alice");
   expect(await wallet.linkWallet("alice")).toBe(address);
   expect(await wallet.balance(address)).toBe(fromUsd(12_480));
-  const onramp = createMockOnramp({ ids, wallet });
-  await onramp.chargeCard({ amount: fromUsd(20), address });
+  await wallet.transfer("treasury", address, fromUsd(20), "fund");
   await wallet.transfer(address, "pool", fromUsd(10), "buy");
   expect(await wallet.balance(address)).toBe(fromUsd(12_490));
   await expect(
@@ -27,15 +25,14 @@ test("wallet linking is stable and card charges credit the same transfer balance
   expect(await wallet.balance(address)).toBe(fromUsd(12_490));
 });
 
-test("wallet history records credits and both transfer directions with isolated copies", async () => {
+test("wallet history records both transfer directions with isolated copies", async () => {
   const ids = createMockIdGenerator();
   const clock = createMockClock(1000);
   const wallet = createMockWalletProvider({ ids, clock });
   const alice = await wallet.linkWallet("alice");
   const bob = await wallet.linkWallet("bob");
-  const onramp = createMockOnramp({ ids, wallet });
   expect(await wallet.transactions(alice)).toEqual([]);
-  await onramp.chargeCard({ amount: 20n, address: alice });
+  await wallet.transfer("treasury", alice, 20n, "fund");
   clock.advance(100);
   const id = await wallet.transfer(alice, bob, 10n, "buy");
   const transfer = {
@@ -51,10 +48,10 @@ test("wallet history records credits and both transfer directions with isolated 
     {
       id: "tx_0001",
       at: 1000,
-      from: "onramp",
+      from: "treasury",
       to: alice,
       amount: 20n,
-      memo: "onramp",
+      memo: "fund",
       direction: "in",
     },
   ]);
@@ -70,7 +67,7 @@ test("wallet history records credits and both transfer directions with isolated 
     wallet.transfer(alice, bob, fromUsd(50_000), "invalid"),
   ).rejects.toThrow();
   await expect(
-    onramp.chargeCard({ amount: 0n, address: alice }),
+    wallet.transfer("treasury", alice, 0n, "invalid"),
   ).rejects.toThrow();
   expect(await wallet.transactions(alice)).toHaveLength(2);
   const selfId = await wallet.transfer(alice, alice, 1n, "self");

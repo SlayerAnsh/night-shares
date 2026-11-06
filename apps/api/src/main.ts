@@ -3,7 +3,8 @@ import { buildContainer } from "./container/build-container";
 import { createServer } from "./server/create-server";
 
 const config = loadConfig();
-const server = createServer(buildContainer(config));
+const container = buildContainer(config);
+const server = createServer(container);
 server.listen(config.port, () => {
   const address = server.address();
   console.log(
@@ -13,6 +14,7 @@ server.listen(config.port, () => {
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.once(signal, () =>
     server.close((error) => {
+      container.ports.db.close();
       if (error) {
         console.error(error);
         process.exitCode = 1;

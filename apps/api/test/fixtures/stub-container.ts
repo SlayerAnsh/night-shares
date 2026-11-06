@@ -6,6 +6,9 @@ export function createStubContainer() {
   const container = buildContainer({
     port: 0,
     adapters: "mock",
+    dbPath: ":memory:",
+    clock: "mock",
+    ids: "sequential",
     today: "2026-12-01",
   });
   for (const module of Object.values(container.modules)) {

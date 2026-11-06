@@ -8,16 +8,13 @@ import {
   type WalletProvider,
   type WalletTransaction,
 } from "./wallet-provider";
-export type MockWalletProvider = WalletProvider & {
-  credit(address: string, amount: bigint): void;
-};
 export function createMockWalletProvider({
   ids,
   clock,
 }: {
   ids: IdGenerator;
   clock: Clock;
-}): MockWalletProvider {
+}): WalletProvider {
   const history: Omit<WalletTransaction, "direction">[] = [];
   const balances = new Map<string, bigint>(
     Object.values(SYSTEM_ADDRESSES).map((address) => [
@@ -30,19 +27,6 @@ export function createMockWalletProvider({
     if (value === undefined)
       throw new DomainError("NOT_FOUND", "Wallet not found.");
     return value;
-  }
-  function credit(address: string, amount: bigint) {
-    if (amount < 0n)
-      throw new DomainError("INVALID_ARGUMENT", "Amount cannot be negative.");
-    balances.set(address, balance(address) + amount);
-    history.push({
-      id: ids.next("tx"),
-      at: clock.now(),
-      from: "onramp",
-      to: address,
-      amount,
-      memo: "onramp",
-    });
   }
   // A real Arc adapter maps this batch to one multi-transfer transaction.
   async function settle(legs: Parameters<WalletProvider["settle"]>[0]) {
@@ -95,6 +79,5 @@ export function createMockWalletProvider({
       return id as string;
     },
     settle,
-    credit,
   };
 }

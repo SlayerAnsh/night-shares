@@ -36,7 +36,12 @@ test("configuration validates adapters, ports and deterministic TODAY", () => {
     port: 8787,
     adapters: "mock",
     today: undefined,
+    dbPath: "./data/night-shares.db",
+    clock: "system",
+    ids: "random",
   });
+  expect(() => loadConfig({ CLOCK: "fast" })).toThrow();
+  expect(() => loadConfig({ IDS: "uuid" })).toThrow();
   expect(loadConfig({ TODAY: "2026-12-01", PORT: "0" }).port).toBe(0);
   expect(() => loadConfig({ ADAPTERS: "real" })).toThrow();
   expect(() => loadConfig({ PORT: "1.5" })).toThrow();
