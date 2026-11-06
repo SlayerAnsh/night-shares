@@ -6,6 +6,7 @@ All notable changes to this monorepo. Newest first.
 
 ### Added
 
+- Chain design in `SPECS.md`: one Uniswap v4 pool per night, the host curve as a ladder of standard liquidity positions (pool does the pricing, hooks enforce policy and take fees in USDC), withdraw and stop selling as position removal, contract list and open decisions. Chainlink CRE dropped: on chain settlement is 1:1 redemption into the pool at the pool's bid, and double sale reports come from the API attester.
 - All six services implemented on mocks (identity, wallet, catalog, stay, market, host) with unit and end to end tests.
 - Activity log, wallet transaction history and one time World ID action tokens as shared ports.
 - Market analytics (return, APY, risk, price history, host track record) as pure functions in `market-model`.
