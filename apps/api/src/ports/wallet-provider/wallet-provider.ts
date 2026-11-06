@@ -1,6 +1,16 @@
+export type WalletTransaction = {
+  id: string;
+  at: number;
+  from: string;
+  to: string;
+  amount: bigint;
+  memo: string;
+  direction: "in" | "out";
+};
 export interface WalletProvider {
   linkWallet(humanId: string): Promise<string>;
   balance(address: string): Promise<bigint>;
+  transactions(address: string): Promise<WalletTransaction[]>;
   transfer(
     from: string,
     to: string,

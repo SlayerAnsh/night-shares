@@ -22,6 +22,16 @@ export function createMemoryInventoryRepo(deps: {
       }
       return structuredClone(record);
     },
+    update(key, mutate) {
+      const record = mutate(repo.get(key));
+      if (record.key !== key)
+        throw new DomainError(
+          "INVALID_ARGUMENT",
+          "Cannot change the night key during an update.",
+        );
+      repo.save(record);
+      return structuredClone(record);
+    },
     save(record) {
       if (format(record) !== record.key)
         throw new DomainError(

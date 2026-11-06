@@ -48,3 +48,34 @@ test("all six properties seed both room types with original mock pricing ids", (
     "Property or room type",
   );
 });
+
+test("inventory update seeds once and composes synchronous writes with isolated copies", () => {
+  const clock = createMockClock(parseDate("2026-12-01"));
+  const inventory = createMemoryInventoryRepo({
+    clock,
+    catalog: createMemoryCatalogRepo(),
+  });
+  const key = "prop_velana:rt_velana_0:2026-12-24";
+  let initialQ = 0;
+  const first = inventory.update(key, (record) => {
+    initialQ = record.state.q;
+    return applyPoolBuy(record, 1);
+  });
+  expect(first.state.q).toBeCloseTo(initialQ + 0.1);
+  const second = inventory.update(key, (record) => applyPoolBuy(record, 2));
+  expect(second.state.q).toBeCloseTo(initialQ + 0.3);
+  first.state.q = -1;
+  second.state.q = -1;
+  expect(inventory.get(key).state.q).toBeCloseTo(initialQ + 0.3);
+  expect(inventory.list()).toHaveLength(1);
+  expect(() =>
+    inventory.update(key, (record) => {
+      record.state.q = -1;
+      throw new Error("Mutation failed");
+    }),
+  ).toThrow("Mutation failed");
+  expect(inventory.get(key).state.q).toBeCloseTo(initialQ + 0.3);
+  expect(() =>
+    inventory.update(key, (record) => ({ ...record, key: "other" })),
+  ).toThrow("Cannot change the night key");
+});

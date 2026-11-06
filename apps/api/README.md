@@ -21,18 +21,24 @@ From this directory, `bun src/main.ts` starts the server. `PORT` defaults to `87
 
 ## Shared contracts
 
-`buildContainer(config)` returns `{ ports, modules }`. `Ports` contains `clock`, `ids`, `identityVerifier`, `walletProvider`, `onramp`, `channelManager`, `sessions`, `catalog`, and `inventory`. Each `createXModule(ports)` returns `{ service, handler }`, retaining the specific generated descriptor type and a complete `ServiceImpl<typeof XService>`.
+`buildContainer(config)` returns `{ ports, modules }`. `Ports` contains `clock`, `ids`, `identityVerifier`, `walletProvider`, `onramp`, `channelManager`, `sessions`, `catalog`, `inventory`, `activity`, and `verifications`. `verifications` issues a one time World ID action token (identity `VerifyAction`) that stay `CheckIn` and market `ApproveAgentOrder` consume; tokens expire after five minutes. Each `createXModule(ports)` returns `{ service, handler }`, retaining the specific generated descriptor type and a complete `ServiceImpl<typeof XService>`.
 
 The server installs interceptors in `[errors, auth]` order. Auth reads `getOption(request.method, access)` from `@bufbuild/protobuf` using `night_shares.auth.v1.access`. PUBLIC accepts anonymous calls, DEVICE requires a valid Bearer session, and ORB additionally requires `user.level === "orb"`. Missing sessions return Unauthenticated; insufficient or unconfigured access returns PermissionDenied. Valid sessions also populate public-call context. `optionalUser(ctx)` and `requireUser(ctx)` read the context. The outer error interceptor maps all six `DomainError` codes in one place and preserves existing Connect errors.
 
-All port interfaces are in `src/ports`, except `CatalogRepo` and `InventoryRepo`, which live beside their shared implementations. External adapter methods are asynchronous. Catalog, inventory and session operations are synchronous in memory. Repositories return copies; inventory writes require `save(record)`. Missing catalog items return `undefined`; missing inventory property or room type raises `NOT_FOUND`.
+All port interfaces are in `src/ports`, except `CatalogRepo` and `InventoryRepo`, which live beside their shared implementations. External adapter methods are asynchronous. Catalog, inventory, activity and session operations are synchronous in memory. Repositories return copies; inventory writes use `update(key, mutate)`. Missing catalog items return `undefined`; missing inventory property or room type raises `NOT_FOUND`.
+
+| Port | Shared behavior |
+| --- | --- |
+| `WalletProvider` | `transactions(address)` returns bigint micro USDC transfers and onramp credits, newest first, with direction relative to the address. |
+| `ActivityLog` | `append(event)` assigns an ID and clock timestamp. `list({ nightKey?, propertyId?, kinds?, limit? })` combines filters before limiting results, newest first. |
+| `InventoryRepo` | `update(key, mutate)` seeds if needed, synchronously mutates and saves, and returns a clone. |
 
 ## Mock adapters
 
 - IDs are deterministic per-prefix counters, such as `ids.next("bk")` yielding `bk_0001`.
 - Identity accepts exactly `mock:<seed>:<orb|device>`. Nullifiers hash the seed and action scope. Use a consistent action such as `signin` for stable human IDs. Requests expire after five minutes and successful verification consumes the request. An Orb request cannot complete with a Device proof. Action verification can omit the request ID.
 - Sessions hold `{ id, humanId, level, walletAddress }`; `create(user)` returns a token, `get(token)` returns a copy, and `delete(token)` revokes it. Counter-based session tokens are mock-only.
-- Wallet linking is stable per human ID and seeds 12,480 USDC only once. Transfers conserve bigint micro USDC and reject insufficient funds. The `SYSTEM_ADDRESSES` aliases `treasury`, `pool`, and `host` each start with 1 billion mock USDC. `linkWallet` can create additional host wallets. The onramp credits the same wallet adapter 1:1; its private mock credit hook is not part of `Ports.walletProvider`.
+- Wallet linking is stable per human ID and seeds 12,480 USDC only once. Transfers conserve bigint micro USDC and reject insufficient funds. The `SYSTEM_ADDRESSES` aliases `treasury`, `pool`, and `host` each start with 1 billion mock USDC. `linkWallet` can create additional host wallets. History uses transaction IDs and injected clock milliseconds. Onramp entries use `from: "onramp"` and `memo: "onramp"`. Equal timestamps place the latest entry first; self transfers appear once as outgoing. Initial balances are seeds, not transactions. The onramp credits the same wallet adapter 1:1; its private mock credit hook is not part of `Ports.walletProvider`.
 - Channel manager supports Mews, Cloudbeds and SiteMinder, imports seeded room types with bigint usual rates, and accepts reservations with guest details for hotel forwarding. Reservation references are idempotent by booking ID and formatted like `VEL-000001`. Guest details are not retained in this adapter.
 
 ## Catalog and inventory
@@ -43,7 +49,9 @@ Six property snapshots and twelve room types come from `mock/v2/assets/shared.js
 
 `state` deliberately preserves the market-model representation: USD numbers for model prices and room-night numbers for model quantities. All adapter, protobuf and ledger money boundaries use bigint micros. Mutator quantity arguments use integer tenths. Use `toMicros` and `toTenths` at model boundaries. `shared/money.ts` provides addition, multiplication by tenths (fractional micros truncate toward zero), USD conversion and protobuf conversion. Dates validate `YYYY-MM-DD`; ranges exclude checkout. Night keys validate and round-trip protobuf identities.
 
-Inventory mutators return new records without saving or pricing. Domain use cases validate capacity, authorization, ownership, tranche and routing before applying them and saving once. Do not await between reading and saving shared inventory during a synchronous mutation step.
+Writing to inventory: domains must use `inventory.update(key, record => ...)` for writes so no await sits between read and save. The callback runs synchronously on a clone of the latest record and must return the same night identity. A thrown callback leaves existing state unchanged. Inventory mutators return new records without saving or pricing. Domain use cases validate capacity, authorization, ownership, tranche and routing against the current record inside the callback before applying mutations.
+
+Activity events carry a night key, property ID, kind, actor, integer tenths, optional bigint price per room night and optional user ID. Append returns a copy; list returns copies. Wallet history also returns copies.
 
 | Mutator | State effect |
 | --- | --- |

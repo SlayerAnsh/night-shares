@@ -7,12 +7,14 @@ import { createMemoryInventoryRepo } from "../modules/inventory/inventory-repo.m
 import { createMarketModule } from "../modules/market/module";
 import { createStayModule } from "../modules/stay/module";
 import { createWalletModule } from "../modules/wallet/module";
+import { createMemoryActivityLog } from "../ports/activity/activity-log.memory";
 import { createMockChannelManager } from "../ports/channel-manager/channel-manager.mock";
 import { createMockClock } from "../ports/clock/clock.mock";
 import { createMockIdentityVerifier } from "../ports/identity-verifier/identity-verifier.mock";
 import { createMockIdGenerator } from "../ports/ids/id-generator.mock";
 import { createMockOnramp } from "../ports/onramp/onramp.mock";
 import { createMemorySessionStore } from "../ports/sessions/session-store.memory";
+import { createMemoryVerificationStore } from "../ports/verifications/verification-store.memory";
 import { createMockWalletProvider } from "../ports/wallet-provider/wallet-provider.mock";
 import { parseDate } from "../shared/dates";
 import type { Ports } from "./ports";
@@ -24,12 +26,14 @@ export function buildContainer(config: Config) {
   );
   const ids = createMockIdGenerator();
   const catalog = createMemoryCatalogRepo();
-  const walletProvider = createMockWalletProvider({ ids });
+  const walletProvider = createMockWalletProvider({ ids, clock });
   const ports: Ports = {
     clock,
     ids,
     catalog,
     walletProvider,
+    activity: createMemoryActivityLog({ ids, clock }),
+    verifications: createMemoryVerificationStore({ clock }),
     inventory: createMemoryInventoryRepo({ catalog, clock }),
     sessions: createMemorySessionStore(),
     identityVerifier: createMockIdentityVerifier({ clock, ids }),

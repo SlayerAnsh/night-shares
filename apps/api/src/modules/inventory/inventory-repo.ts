@@ -9,6 +9,11 @@ export type NightRecord = NightIdentity & {
 export interface InventoryRepo {
   get(key: string): NightRecord;
   seedNight(night: NightIdentity): NightRecord;
+  // Domains must use update for writes so no await sits between read and save.
+  update(
+    key: string,
+    mutate: (record: NightRecord) => NightRecord,
+  ): NightRecord;
   save(record: NightRecord): void;
   list(filter?: {
     propertyId?: string;
