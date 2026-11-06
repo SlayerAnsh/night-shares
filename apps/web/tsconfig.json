@@ -1,0 +1,11 @@
+{
+  "extends": "@night-shares/tsconfig/next.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "incremental": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
