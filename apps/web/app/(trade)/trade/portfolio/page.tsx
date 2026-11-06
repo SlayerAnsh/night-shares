@@ -1,4 +1,9 @@
-// TODO: Use MarketService.GetPortfolio, CreateAgentOrder, ApproveAgentOrder; IdentityService.VerifyAction.
+import { Suspense } from "react";
+import { PortfolioScreen } from "../../../../src/features/trade/components/portfolio/PortfolioScreen";
 export default function Page() {
-  return <p>Portfolio: /trade/portfolio</p>;
+  return (
+    <Suspense fallback={<p>Loading…</p>}>
+      <PortfolioScreen />
+    </Suspense>
+  );
 }

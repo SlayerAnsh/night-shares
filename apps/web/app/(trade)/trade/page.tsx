@@ -1,4 +1,9 @@
-// TODO: Use MarketService.Discover, ToggleWatch, ListWatch.
+import { Suspense } from "react";
+import { DiscoverScreen } from "../../../src/features/trade/components/discover/DiscoverScreen";
 export default function Page() {
-  return <p>Discover: /trade</p>;
+  return (
+    <Suspense fallback={<p>Loading…</p>}>
+      <DiscoverScreen />
+    </Suspense>
+  );
 }
