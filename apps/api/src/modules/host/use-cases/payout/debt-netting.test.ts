@@ -4,6 +4,7 @@ import {
   coverAccount,
 } from "../../../double-sale/repo/cover-accounts";
 import { fixture } from "../fixture";
+import { createSweep } from "./sweep";
 
 async function setup() {
   const f = fixture();
@@ -21,8 +22,12 @@ test("debt exceeding payout receives partial repayment with zero host transfer",
   adjustCoverAccount(f.ports.db, "prop_velana", 0n, gross + 100n);
   expect(f.use.getPayout(f.userId, "prop_velana").availableNow.micros).toBe(0n);
   const before = await f.ports.walletProvider.balance(f.user.walletAddress);
-  const result = await f.use.withdraw(f.user, "prop_velana");
-  expect(result.withdrawn.micros).toBe(0n);
+  const result = await createSweep(f)(
+    f.user.id,
+    "prop_velana",
+    f.user.walletAddress,
+  );
+  expect(result?.amount).toBe(0n);
   expect(await f.ports.walletProvider.balance(f.user.walletAddress)).toBe(
     before,
   );
@@ -31,16 +36,16 @@ test("debt exceeding payout receives partial repayment with zero host transfer",
     debt: 100n,
   });
 });
-test("failed withdrawal restores debt and available payout together", async () => {
+test("failed sweep restores debt and available payout together", async () => {
   const f = await setup();
   adjustCoverAccount(f.ports.db, "prop_velana", 0n, 100n);
   const before = f.use.getPayout(f.userId, "prop_velana");
   f.ports.walletProvider.settle = async () => {
     throw new Error("offline");
   };
-  await expect(f.use.withdraw(f.user, "prop_velana", 1n)).rejects.toThrow(
-    "offline",
-  );
+  await expect(
+    createSweep(f)(f.user.id, "prop_velana", f.user.walletAddress),
+  ).rejects.toThrow("offline");
   expect(coverAccount(f.ports.db, "prop_velana")).toEqual({
     spent: 0n,
     debt: 100n,

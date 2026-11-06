@@ -16,6 +16,10 @@ message Payout {
   reserved "security_hold_target";
   night_shares.common.v1.Usdc fees = 5;
   night_shares.common.v1.Usdc gross = 6;
+  night_shares.common.v1.Usdc swept_total = 7;
+  google.protobuf.Timestamp last_sweep_at = 8;
+  string last_sweep_transaction_id = 9;
+  night_shares.common.v1.Usdc last_sweep_amount = 10;
 }
 
 message Occupancy {

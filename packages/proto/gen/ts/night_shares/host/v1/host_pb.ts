@@ -7,10 +7,6 @@ import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2
 import { file_night_shares_auth_v1_access } from "../../auth/v1/access_pb";
 import type { Property } from "../../catalog/v1/property_pb";
 import { file_night_shares_catalog_v1_property } from "../../catalog/v1/property_pb";
-import type { Usdc } from "../../common/v1/money_pb";
-import { file_night_shares_common_v1_money } from "../../common/v1/money_pb";
-import type { NightKey, RoomNights } from "../../common/v1/night_pb";
-import { file_night_shares_common_v1_night } from "../../common/v1/night_pb";
 import type { Activity, Alert, HostKpis, HostNight, HotelPricePoint, HotelSummary, Occupancy, Payout, ReleaseEvent } from "./hotel_pb";
 import { file_night_shares_host_v1_hotel } from "./hotel_pb";
 import type { OpenNightPreview, OpenNightsSelection, Pms } from "./opening_pb";
@@ -21,7 +17,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file night_shares/host/v1/host.proto.
  */
 export const file_night_shares_host_v1_host: GenFile = /*@__PURE__*/
-  fileDesc("Ch9uaWdodF9zaGFyZXMvaG9zdC92MS9ob3N0LnByb3RvEhRuaWdodF9zaGFyZXMuaG9zdC52MSJbChxDb25uZWN0Q2hhbm5lbE1hbmFnZXJSZXF1ZXN0EhMKC3Byb3BlcnR5X2lkGAEgASgJEiYKA3BtcxgCIAEoDjIZLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLlBtcyJUCh1Db25uZWN0Q2hhbm5lbE1hbmFnZXJSZXNwb25zZRIzCghwcm9wZXJ0eRgBIAEoCzIhLm5pZ2h0X3NoYXJlcy5jYXRhbG9nLnYxLlByb3BlcnR5IhUKE0dldFBvcnRmb2xpb1JlcXVlc3Qi2QEKFEdldFBvcnRmb2xpb1Jlc3BvbnNlEjIKBmhvdGVscxgBIAMoCzIiLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLkhvdGVsU3VtbWFyeRIsCgRrcGlzGAIgASgLMh4ubmlnaHRfc2hhcmVzLmhvc3QudjEuSG9zdEtwaXMSKwoGYWxlcnRzGAMgAygLMhsubmlnaHRfc2hhcmVzLmhvc3QudjEuQWxlcnQSMgoJb2NjdXBhbmN5GAQgAygLMh8ubmlnaHRfc2hhcmVzLmhvc3QudjEuT2NjdXBhbmN5IjUKD0dldEhvdGVsUmVxdWVzdBITCgtwcm9wZXJ0eV9pZBgBIAEoCRINCgVtb250aBgCIAEoCSKcAgoQR2V0SG90ZWxSZXNwb25zZRIzCghwcm9wZXJ0eRgBIAEoCzIhLm5pZ2h0X3NoYXJlcy5jYXRhbG9nLnYxLlByb3BlcnR5EiwKBGtwaXMYAiABKAsyHi5uaWdodF9zaGFyZXMuaG9zdC52MS5Ib3N0S3BpcxI1Cgxtb250aF9nbGFuY2UYAyADKAsyHy5uaWdodF9zaGFyZXMuaG9zdC52MS5PY2N1cGFuY3kSOwoMcHJpY2Vfc2VyaWVzGAQgAygLMiUubmlnaHRfc2hhcmVzLmhvc3QudjEuSG90ZWxQcmljZVBvaW50EjEKCGNhbGVuZGFyGAUgAygLMh8ubmlnaHRfc2hhcmVzLmhvc3QudjEuSG9zdE5pZ2h0IlgKGFByZXZpZXdPcGVuTmlnaHRzUmVxdWVzdBI8CglzZWxlY3Rpb24YASABKAsyKS5uaWdodF9zaGFyZXMuaG9zdC52MS5PcGVuTmlnaHRzU2VsZWN0aW9uInAKGVByZXZpZXdPcGVuTmlnaHRzUmVzcG9uc2USNgoGbmlnaHRzGAEgAygLMiYubmlnaHRfc2hhcmVzLmhvc3QudjEuT3Blbk5pZ2h0UHJldmlldxINCgVzbG90cxgCIAEoBRIMCgRrZXB0GAMgASgFIlEKEU9wZW5OaWdodHNSZXF1ZXN0EjwKCXNlbGVjdGlvbhgBIAEoCzIpLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLk9wZW5OaWdodHNTZWxlY3Rpb24iRQoST3Blbk5pZ2h0c1Jlc3BvbnNlEi8KBm5pZ2h0cxgBIAMoCzIfLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLkhvc3ROaWdodCJGChJTdG9wU2VsbGluZ1JlcXVlc3QSMAoGbmlnaHRzGAEgAygLMiAubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5OaWdodEtleSKEAQoTU3RvcFNlbGxpbmdSZXNwb25zZRIvCgZuaWdodHMYASADKAsyHy5uaWdodF9zaGFyZXMuaG9zdC52MS5Ib3N0TmlnaHQSPAoQcm9vbXNfdGFrZW5fYmFjaxgCIAEoCzIiLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuUm9vbU5pZ2h0cyI0Cg9HZXROaWdodFJlcXVlc3QSEwoLcHJvcGVydHlfaWQYASABKAkSDAoEZGF0ZRgCIAEoCSLlAQoQR2V0TmlnaHRSZXNwb25zZRIzCgpyb29tX3R5cGVzGAEgAygLMh8ubmlnaHRfc2hhcmVzLmhvc3QudjEuSG9zdE5pZ2h0EjAKCGFjdGl2aXR5GAIgAygLMh4ubmlnaHRfc2hhcmVzLmhvc3QudjEuQWN0aXZpdHkSPAoQcmVsZWFzZV90aW1lbGluZRgDIAMoCzIiLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLlJlbGVhc2VFdmVudBIsCgZwYXlvdXQYBCABKAsyHC5uaWdodF9zaGFyZXMuaG9zdC52MS5QYXlvdXQiJwoQR2V0UGF5b3V0UmVxdWVzdBITCgtwcm9wZXJ0eV9pZBgBIAEoCSJBChFHZXRQYXlvdXRSZXNwb25zZRIsCgZwYXlvdXQYASABKAsyHC5uaWdodF9zaGFyZXMuaG9zdC52MS5QYXlvdXQiVAoPV2l0aGRyYXdSZXF1ZXN0EhMKC3Byb3BlcnR5X2lkGAEgASgJEiwKBmFtb3VudBgCIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyKJAQoQV2l0aGRyYXdSZXNwb25zZRIWCg50cmFuc2FjdGlvbl9pZBgBIAEoCRIvCgl3aXRoZHJhd24YAiABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSLAoGcGF5b3V0GAMgASgLMhwubmlnaHRfc2hhcmVzLmhvc3QudjEuUGF5b3V0MtcHCgtIb3N0U2VydmljZRKGAQoVQ29ubmVjdENoYW5uZWxNYW5hZ2VyEjIubmlnaHRfc2hhcmVzLmhvc3QudjEuQ29ubmVjdENoYW5uZWxNYW5hZ2VyUmVxdWVzdBozLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLkNvbm5lY3RDaGFubmVsTWFuYWdlclJlc3BvbnNlIgSItRgDEmsKDEdldFBvcnRmb2xpbxIpLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLkdldFBvcnRmb2xpb1JlcXVlc3QaKi5uaWdodF9zaGFyZXMuaG9zdC52MS5HZXRQb3J0Zm9saW9SZXNwb25zZSIEiLUYAxJfCghHZXRIb3RlbBIlLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLkdldEhvdGVsUmVxdWVzdBomLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLkdldEhvdGVsUmVzcG9uc2UiBIi1GAMSegoRUHJldmlld09wZW5OaWdodHMSLi5uaWdodF9zaGFyZXMuaG9zdC52MS5QcmV2aWV3T3Blbk5pZ2h0c1JlcXVlc3QaLy5uaWdodF9zaGFyZXMuaG9zdC52MS5QcmV2aWV3T3Blbk5pZ2h0c1Jlc3BvbnNlIgSItRgDEmUKCk9wZW5OaWdodHMSJy5uaWdodF9zaGFyZXMuaG9zdC52MS5PcGVuTmlnaHRzUmVxdWVzdBooLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLk9wZW5OaWdodHNSZXNwb25zZSIEiLUYAxJoCgtTdG9wU2VsbGluZxIoLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLlN0b3BTZWxsaW5nUmVxdWVzdBopLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLlN0b3BTZWxsaW5nUmVzcG9uc2UiBIi1GAMSXwoIR2V0TmlnaHQSJS5uaWdodF9zaGFyZXMuaG9zdC52MS5HZXROaWdodFJlcXVlc3QaJi5uaWdodF9zaGFyZXMuaG9zdC52MS5HZXROaWdodFJlc3BvbnNlIgSItRgDEmIKCUdldFBheW91dBImLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLkdldFBheW91dFJlcXVlc3QaJy5uaWdodF9zaGFyZXMuaG9zdC52MS5HZXRQYXlvdXRSZXNwb25zZSIEiLUYAxJfCghXaXRoZHJhdxIlLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLldpdGhkcmF3UmVxdWVzdBomLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLldpdGhkcmF3UmVzcG9uc2UiBIi1GANiBnByb3RvMw", [file_night_shares_auth_v1_access, file_night_shares_catalog_v1_property, file_night_shares_common_v1_money, file_night_shares_common_v1_night, file_night_shares_host_v1_hotel, file_night_shares_host_v1_opening]);
+  fileDesc("Ch9uaWdodF9zaGFyZXMvaG9zdC92MS9ob3N0LnByb3RvEhRuaWdodF9zaGFyZXMuaG9zdC52MSJbChxDb25uZWN0Q2hhbm5lbE1hbmFnZXJSZXF1ZXN0EhMKC3Byb3BlcnR5X2lkGAEgASgJEiYKA3BtcxgCIAEoDjIZLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLlBtcyJUCh1Db25uZWN0Q2hhbm5lbE1hbmFnZXJSZXNwb25zZRIzCghwcm9wZXJ0eRgBIAEoCzIhLm5pZ2h0X3NoYXJlcy5jYXRhbG9nLnYxLlByb3BlcnR5IhUKE0dldFBvcnRmb2xpb1JlcXVlc3Qi2QEKFEdldFBvcnRmb2xpb1Jlc3BvbnNlEjIKBmhvdGVscxgBIAMoCzIiLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLkhvdGVsU3VtbWFyeRIsCgRrcGlzGAIgASgLMh4ubmlnaHRfc2hhcmVzLmhvc3QudjEuSG9zdEtwaXMSKwoGYWxlcnRzGAMgAygLMhsubmlnaHRfc2hhcmVzLmhvc3QudjEuQWxlcnQSMgoJb2NjdXBhbmN5GAQgAygLMh8ubmlnaHRfc2hhcmVzLmhvc3QudjEuT2NjdXBhbmN5IjUKD0dldEhvdGVsUmVxdWVzdBITCgtwcm9wZXJ0eV9pZBgBIAEoCRINCgVtb250aBgCIAEoCSKcAgoQR2V0SG90ZWxSZXNwb25zZRIzCghwcm9wZXJ0eRgBIAEoCzIhLm5pZ2h0X3NoYXJlcy5jYXRhbG9nLnYxLlByb3BlcnR5EiwKBGtwaXMYAiABKAsyHi5uaWdodF9zaGFyZXMuaG9zdC52MS5Ib3N0S3BpcxI1Cgxtb250aF9nbGFuY2UYAyADKAsyHy5uaWdodF9zaGFyZXMuaG9zdC52MS5PY2N1cGFuY3kSOwoMcHJpY2Vfc2VyaWVzGAQgAygLMiUubmlnaHRfc2hhcmVzLmhvc3QudjEuSG90ZWxQcmljZVBvaW50EjEKCGNhbGVuZGFyGAUgAygLMh8ubmlnaHRfc2hhcmVzLmhvc3QudjEuSG9zdE5pZ2h0IlgKGFByZXZpZXdPcGVuTmlnaHRzUmVxdWVzdBI8CglzZWxlY3Rpb24YASABKAsyKS5uaWdodF9zaGFyZXMuaG9zdC52MS5PcGVuTmlnaHRzU2VsZWN0aW9uInAKGVByZXZpZXdPcGVuTmlnaHRzUmVzcG9uc2USNgoGbmlnaHRzGAEgAygLMiYubmlnaHRfc2hhcmVzLmhvc3QudjEuT3Blbk5pZ2h0UHJldmlldxINCgVzbG90cxgCIAEoBRIMCgRrZXB0GAMgASgFIlEKEU9wZW5OaWdodHNSZXF1ZXN0EjwKCXNlbGVjdGlvbhgBIAEoCzIpLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLk9wZW5OaWdodHNTZWxlY3Rpb24iRQoST3Blbk5pZ2h0c1Jlc3BvbnNlEi8KBm5pZ2h0cxgBIAMoCzIfLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLkhvc3ROaWdodCIiChJTdG9wU2VsbGluZ1JlcXVlc3RKBAgBEAJSBm5pZ2h0cyI7ChNTdG9wU2VsbGluZ1Jlc3BvbnNlSgQIARACSgQIAhADUgZuaWdodHNSEHJvb21zX3Rha2VuX2JhY2siNAoPR2V0TmlnaHRSZXF1ZXN0EhMKC3Byb3BlcnR5X2lkGAEgASgJEgwKBGRhdGUYAiABKAki5QEKEEdldE5pZ2h0UmVzcG9uc2USMwoKcm9vbV90eXBlcxgBIAMoCzIfLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLkhvc3ROaWdodBIwCghhY3Rpdml0eRgCIAMoCzIeLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLkFjdGl2aXR5EjwKEHJlbGVhc2VfdGltZWxpbmUYAyADKAsyIi5uaWdodF9zaGFyZXMuaG9zdC52MS5SZWxlYXNlRXZlbnQSLAoGcGF5b3V0GAQgASgLMhwubmlnaHRfc2hhcmVzLmhvc3QudjEuUGF5b3V0IicKEEdldFBheW91dFJlcXVlc3QSEwoLcHJvcGVydHlfaWQYASABKAkiQQoRR2V0UGF5b3V0UmVzcG9uc2USLAoGcGF5b3V0GAEgASgLMhwubmlnaHRfc2hhcmVzLmhvc3QudjEuUGF5b3V0IjIKD1dpdGhkcmF3UmVxdWVzdEoECAEQAkoECAIQA1ILcHJvcGVydHlfaWRSBmFtb3VudCJHChBXaXRoZHJhd1Jlc3BvbnNlSgQIARACSgQIAhADSgQIAxAEUg50cmFuc2FjdGlvbl9pZFIJd2l0aGRyYXduUgZwYXlvdXQyjAYKC0hvc3RTZXJ2aWNlEoYBChVDb25uZWN0Q2hhbm5lbE1hbmFnZXISMi5uaWdodF9zaGFyZXMuaG9zdC52MS5Db25uZWN0Q2hhbm5lbE1hbmFnZXJSZXF1ZXN0GjMubmlnaHRfc2hhcmVzLmhvc3QudjEuQ29ubmVjdENoYW5uZWxNYW5hZ2VyUmVzcG9uc2UiBIi1GAMSawoMR2V0UG9ydGZvbGlvEikubmlnaHRfc2hhcmVzLmhvc3QudjEuR2V0UG9ydGZvbGlvUmVxdWVzdBoqLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLkdldFBvcnRmb2xpb1Jlc3BvbnNlIgSItRgDEl8KCEdldEhvdGVsEiUubmlnaHRfc2hhcmVzLmhvc3QudjEuR2V0SG90ZWxSZXF1ZXN0GiYubmlnaHRfc2hhcmVzLmhvc3QudjEuR2V0SG90ZWxSZXNwb25zZSIEiLUYAxJ6ChFQcmV2aWV3T3Blbk5pZ2h0cxIuLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLlByZXZpZXdPcGVuTmlnaHRzUmVxdWVzdBovLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLlByZXZpZXdPcGVuTmlnaHRzUmVzcG9uc2UiBIi1GAMSZQoKT3Blbk5pZ2h0cxInLm5pZ2h0X3NoYXJlcy5ob3N0LnYxLk9wZW5OaWdodHNSZXF1ZXN0GigubmlnaHRfc2hhcmVzLmhvc3QudjEuT3Blbk5pZ2h0c1Jlc3BvbnNlIgSItRgDEl8KCEdldE5pZ2h0EiUubmlnaHRfc2hhcmVzLmhvc3QudjEuR2V0TmlnaHRSZXF1ZXN0GiYubmlnaHRfc2hhcmVzLmhvc3QudjEuR2V0TmlnaHRSZXNwb25zZSIEiLUYAxJiCglHZXRQYXlvdXQSJi5uaWdodF9zaGFyZXMuaG9zdC52MS5HZXRQYXlvdXRSZXF1ZXN0GicubmlnaHRfc2hhcmVzLmhvc3QudjEuR2V0UGF5b3V0UmVzcG9uc2UiBIi1GANiBnByb3RvMw", [file_night_shares_auth_v1_access, file_night_shares_catalog_v1_property, file_night_shares_host_v1_hotel, file_night_shares_host_v1_opening]);
 
 /**
  * @generated from message night_shares.host.v1.ConnectChannelManagerRequest
@@ -248,10 +244,6 @@ export const OpenNightsResponseSchema: GenMessage<OpenNightsResponse> = /*@__PUR
  * @generated from message night_shares.host.v1.StopSellingRequest
  */
 export type StopSellingRequest = Message<"night_shares.host.v1.StopSellingRequest"> & {
-  /**
-   * @generated from field: repeated night_shares.common.v1.NightKey nights = 1;
-   */
-  nights: NightKey[];
 };
 
 /**
@@ -265,15 +257,6 @@ export const StopSellingRequestSchema: GenMessage<StopSellingRequest> = /*@__PUR
  * @generated from message night_shares.host.v1.StopSellingResponse
  */
 export type StopSellingResponse = Message<"night_shares.host.v1.StopSellingResponse"> & {
-  /**
-   * @generated from field: repeated night_shares.host.v1.HostNight nights = 1;
-   */
-  nights: HostNight[];
-
-  /**
-   * @generated from field: night_shares.common.v1.RoomNights rooms_taken_back = 2;
-   */
-  roomsTakenBack?: RoomNights | undefined;
 };
 
 /**
@@ -375,15 +358,6 @@ export const GetPayoutResponseSchema: GenMessage<GetPayoutResponse> = /*@__PURE_
  * @generated from message night_shares.host.v1.WithdrawRequest
  */
 export type WithdrawRequest = Message<"night_shares.host.v1.WithdrawRequest"> & {
-  /**
-   * @generated from field: string property_id = 1;
-   */
-  propertyId: string;
-
-  /**
-   * @generated from field: night_shares.common.v1.Usdc amount = 2;
-   */
-  amount?: Usdc | undefined;
 };
 
 /**
@@ -397,20 +371,6 @@ export const WithdrawRequestSchema: GenMessage<WithdrawRequest> = /*@__PURE__*/
  * @generated from message night_shares.host.v1.WithdrawResponse
  */
 export type WithdrawResponse = Message<"night_shares.host.v1.WithdrawResponse"> & {
-  /**
-   * @generated from field: string transaction_id = 1;
-   */
-  transactionId: string;
-
-  /**
-   * @generated from field: night_shares.common.v1.Usdc withdrawn = 2;
-   */
-  withdrawn?: Usdc | undefined;
-
-  /**
-   * @generated from field: night_shares.host.v1.Payout payout = 3;
-   */
-  payout?: Payout | undefined;
 };
 
 /**
@@ -465,14 +425,8 @@ export const HostService: GenService<{
     output: typeof OpenNightsResponseSchema;
   },
   /**
-   * @generated from rpc night_shares.host.v1.HostService.StopSelling
-   */
-  stopSelling: {
-    methodKind: "unary";
-    input: typeof StopSellingRequestSchema;
-    output: typeof StopSellingResponseSchema;
-  },
-  /**
+   * StopSelling was removed. Open nights are immutable and payouts sweep automatically.
+   *
    * @generated from rpc night_shares.host.v1.HostService.GetNight
    */
   getNight: {
@@ -487,14 +441,6 @@ export const HostService: GenService<{
     methodKind: "unary";
     input: typeof GetPayoutRequestSchema;
     output: typeof GetPayoutResponseSchema;
-  },
-  /**
-   * @generated from rpc night_shares.host.v1.HostService.Withdraw
-   */
-  withdraw: {
-    methodKind: "unary";
-    input: typeof WithdrawRequestSchema;
-    output: typeof WithdrawResponseSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_night_shares_host_v1_host, 0);

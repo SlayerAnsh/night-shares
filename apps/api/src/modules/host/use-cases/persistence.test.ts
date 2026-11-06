@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { createSqliteHostRepo } from "../repo/host-repo.sqlite";
 import { createHostUseCases } from "./create-host-use-cases";
 import { fixture } from "./fixture";
+import { createSweep } from "./payout/sweep";
 
 function setup() {
   const f = fixture();
@@ -23,7 +24,9 @@ test("opening rolls back all inventory, release policies and activity if metadat
     const keys = f.selection.dates.map(
       (date) => `prop_salinas:rt_salinas_0:${date}`,
     );
-    const before = keys.map((key) => f.ports.inventory.get(key));
+    const before = keys.map((key) =>
+      f.ports.inventory.update(key, (r) => ({ ...r, openedAt: 0 })),
+    );
     f.ports.db.exec(`CREATE TRIGGER reject_release BEFORE INSERT ON host_releases
       WHEN NEW.night_key = '${keys[1]}' BEGIN SELECT RAISE(ABORT, 'reject release'); END`);
     expect(() => f.use.openNights(f.userId, f.selection)).toThrow(
@@ -66,18 +69,20 @@ test("SQLite withdrawal reserves once and compensates failed settlement", async 
     f.ports.walletProvider.settle = async () => {
       throw new Error("provider unavailable");
     };
-    await expect(f.use.withdraw(user, "prop_salinas", 1n)).rejects.toThrow(
-      "provider unavailable",
-    );
+    await expect(
+      createSweep(f)(user.id, "prop_salinas", user.walletAddress),
+    ).rejects.toThrow("provider unavailable");
     expect(f.repo.withdrawn("prop_salinas")).toBe(0n);
     expect(f.use.getPayout(user.id, "prop_salinas")).toEqual(before);
     f.ports.walletProvider.settle = settle;
     const results = await Promise.allSettled([
-      f.use.withdraw(user, "prop_salinas"),
-      f.use.withdraw(user, "prop_salinas"),
+      createSweep(f)(user.id, "prop_salinas", user.walletAddress),
+      createSweep(f)(user.id, "prop_salinas", user.walletAddress),
     ]);
     expect(
-      results.filter((result) => result.status === "fulfilled"),
+      results.filter(
+        (result) => result.status === "fulfilled" && result.value !== undefined,
+      ),
     ).toHaveLength(1);
     expect(f.repo.withdrawn("prop_salinas")).toBe(before.availableNow.micros);
   } finally {

@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { book, toMicros } from "@night-shares/market-model";
 import { buildContainer } from "../../../container/build-container";
 import { mockSubjectFor } from "../../../ports/identity-verifier/identity-verifier.mock";
-import { createWithdraw } from "../../host/use-cases/payout/withdraw";
+import { createSweep } from "../../host/use-cases/payout/sweep";
 import { adjustCoverAccount, coverAccount } from "../repo/cover-accounts";
 import { prepareCover } from "../testing/scenario";
 import { handleReport } from "./handle-report";
@@ -59,10 +59,10 @@ test("report pays pool bid once through reserve, pending and fund, then nets deb
   );
   // A future host receipt makes the debt and a net withdrawal available.
   adjustCoverAccount(f.ports.db, "prop_velana", -account.spent, 0n);
-  await createWithdraw({ ports: f.ports, repo: f.repo })(
-    f.host,
+  await createSweep({ ports: f.ports, repo: f.repo })(
+    f.host.id,
     "prop_velana",
-    1n,
+    f.host.walletAddress,
   );
   expect(coverAccount(f.ports.db, "prop_velana").debt).toBe(0n);
 });

@@ -25,12 +25,9 @@ export function createHostHandler(
     openNights: async (r, ctx) => ({
       nights: await use.openNights(host(ctx).id, r.selection),
     }),
-    stopSelling: (r, ctx) => use.stopSelling(host(ctx).id, r.nights),
     getNight: (r, ctx) => use.getNight(host(ctx).id, r.propertyId, r.date),
     getPayout: (r, ctx) => ({
       payout: use.getPayout(host(ctx).id, r.propertyId),
     }),
-    withdraw: (r, ctx) =>
-      use.withdraw(host(ctx), r.propertyId, r.amount?.micros),
   };
 }

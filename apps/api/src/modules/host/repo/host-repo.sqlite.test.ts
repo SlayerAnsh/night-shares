@@ -6,6 +6,7 @@ import { buildContainer } from "../../../container/build-container";
 import { mockSubjectFor } from "../../../ports/identity-verifier/identity-verifier.mock";
 import { createHostUseCases } from "../use-cases/create-host-use-cases";
 import { fixture } from "../use-cases/fixture";
+import { createSweep } from "../use-cases/payout/sweep";
 import { createSqliteHostRepo } from "./host-repo.sqlite";
 
 function open(path: string) {
@@ -51,11 +52,19 @@ test("host ownership, imports, withdrawals and opened nights survive a file data
       } as typeof room;
       f.repo.connections("other").set("prop_salinas", imported);
     }
-    f.ports.inventory.update(key, (record) => ({ ...record, stopped: true }));
+    f.ports.inventory.update(key, (record) => ({
+      ...record,
+      stopped: true,
+      openedAt: 0,
+    }));
     await f.use.openNights(user.id, selection);
     const night = f.ports.inventory.get(key);
     expect(night.openedAt).toBe(f.ports.clock.now());
-    await f.use.withdraw(user, "prop_velana", 1n);
+    const swept = await createSweep(f)(
+      user.id,
+      "prop_velana",
+      user.walletAddress,
+    );
     f.repo.addWithdrawal("prop_salinas", 9007199254740993n);
     const payout = f.use.getPayout(user.id, "prop_velana");
     f.ports.db.close();
@@ -65,7 +74,7 @@ test("host ownership, imports, withdrawals and opened nights survive a file data
     expect(f.repo.connections(user.id).size).toBe(4);
     expect(f.repo.owner("prop_salinas")).toBe("other");
     expect(f.repo.connections("other").get("prop_salinas")).toEqual(imported);
-    expect(f.repo.withdrawn("prop_velana")).toBe(1n);
+    expect(f.repo.withdrawn("prop_velana")).toBe(swept?.amount ?? 0n);
     expect(f.repo.withdrawn("prop_salinas")).toBe(9007199254740993n);
     expect(f.use.getPayout(user.id, "prop_velana")).toEqual(payout);
     expect(f.repo.release(key)).toBe(selection.releasePolicy);

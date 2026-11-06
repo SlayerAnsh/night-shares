@@ -5,6 +5,8 @@ import {
   Pms,
   ReleasePolicy,
 } from "@night-shares/proto/host/v1/opening_pb";
+import { createSqliteHostRepo } from "../../src/modules/host/repo/host-repo.sqlite";
+import { createSweep } from "../../src/modules/host/use-cases/payout/sweep";
 import { createHarness } from "./harness";
 
 let harness: Awaited<ReturnType<typeof createHarness>>;
@@ -15,7 +17,7 @@ afterAll(async () => {
   await harness?.close();
 });
 
-test("Orb host connects, previews, opens, inspects, stops and withdraws", async () => {
+test("Orb host connects, previews, opens, inspects, freezes nights and receives automatic payouts", async () => {
   const { clients, user } = await harness.signInAs("orb", "host");
   const portfolio = await clients.host.getPortfolio({});
   expect(portfolio.hotels).toHaveLength(4);
@@ -34,6 +36,10 @@ test("Orb host connects, previews, opens, inspects, stops and withdraws", async 
     demandPreset: DemandPreset.PEAK,
     releasePolicy: ReleasePolicy.THREE_DAYS_BEFORE_12,
   };
+  harness.container.ports.inventory.update(
+    "prop_machiya:rt_machiya_0:2026-12-24",
+    (r) => ({ ...r, openedAt: 0, stopped: true }),
+  );
   const preview = await clients.host.previewOpenNights({ selection });
   expect(preview.nights[0]?.floor?.micros).toBeGreaterThan(0n);
   expect(preview.slots).toBe(1);
@@ -56,18 +62,11 @@ test("Orb host connects, previews, opens, inspects, stops and withdraws", async 
   });
   expect(hotel.calendar).toHaveLength(62);
   expect(hotel.priceSeries).toHaveLength(60);
-  const stopped = await clients.host.stopSelling({
-    nights: [
-      {
-        propertyId: selection.propertyId,
-        roomTypeId: "rt_machiya_0",
-        date: "2026-12-24",
-      },
-    ],
-  });
-  expect(stopped.roomsTakenBack?.tenths).toBe(opened.nights[0]?.onSale?.tenths);
-  expect(stopped.nights[0]?.isStopped).toBe(true);
-  expect(stopped.nights[0]?.onSale?.tenths).toBe(0);
+  await expect(
+    clients.host.openNights({
+      selection: { ...selection, allotmentPercent: 50 },
+    }),
+  ).rejects.toMatchObject({ code: Code.FailedPrecondition });
   const payout = await clients.host.getPayout({
     propertyId: selection.propertyId,
   });
@@ -76,15 +75,17 @@ test("Orb host connects, previews, opens, inspects, stops and withdraws", async 
   const before = await harness.container.ports.walletProvider.balance(
     user.walletAddress,
   );
-  const withdrawal = await clients.host.withdraw({
+  const ports = harness.container.ports;
+  const sweep = createSweep({ ports, repo: createSqliteHostRepo(ports) });
+  await sweep(user.id, selection.propertyId, user.walletAddress);
+  const after = await clients.host.getPayout({
     propertyId: selection.propertyId,
-    amount: { micros: 1_000_000n },
   });
-  expect(withdrawal.withdrawn?.micros).toBe(1_000_000n);
-  expect(withdrawal.payout?.availableNow?.micros).toBe(available - 1_000_000n);
-  expect(
-    await harness.container.ports.walletProvider.balance(user.walletAddress),
-  ).toBe(before + 1_000_000n);
+  expect(after.payout?.sweptTotal?.micros).toBe(available);
+  expect(after.payout?.lastSweepTransactionId).toBeTruthy();
+  expect(await ports.walletProvider.balance(user.walletAddress)).toBe(
+    before + available,
+  );
 });
 
 test("Device user cannot access host RPCs", async () => {
@@ -93,6 +94,6 @@ test("Device user cannot access host RPCs", async () => {
     code: Code.PermissionDenied,
   });
   await expect(
-    clients.host.withdraw({ propertyId: "prop_velana" }),
+    clients.host.getPayout({ propertyId: "prop_velana" }),
   ).rejects.toMatchObject({ code: Code.PermissionDenied });
 });

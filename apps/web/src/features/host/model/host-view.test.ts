@@ -1,12 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { HostNight, Payout } from "@night-shares/proto/host/v1/hotel_pb";
-import {
-  aggregateDays,
-  datesBetween,
-  nextBusy,
-  parseAmount,
-  sumPayouts,
-} from "./host-view";
+import { aggregateDays, datesBetween, nextBusy, sumPayouts } from "./host-view";
 
 function night(date: string, booked: number, held: number): HostNight {
   return {
@@ -49,14 +43,6 @@ describe("host selections", () => {
       expect(datesBetween(start ?? "", end ?? "")).toEqual([]);
     }
   });
-  test("withdrawals preserve exact micros above floating point precision", () => {
-    expect(parseAmount("9007199254740993.000001")).toBe(
-      9007199254740993000001n,
-    );
-    expect(parseAmount("0.000001")).toBe(1n);
-    for (const value of ["0", "-1", "1e3", "1.0000001", "1,000", "NaN", ""])
-      expect(parseAmount(value)).toBeUndefined();
-  });
 });
 
 describe("host reporting", () => {
@@ -90,6 +76,7 @@ describe("host reporting", () => {
   test("payout totals keep fees separate from available funds", () => {
     const rows: Payout[] = [1n, 2n].map((amount) => ({
       $typeName: "night_shares.host.v1.Payout",
+      lastSweepTransactionId: "",
       availableNow: {
         $typeName: "night_shares.common.v1.Usdc",
         micros: amount,

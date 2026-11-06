@@ -32,7 +32,7 @@ function HotelBody({
         propertyId={property.id}
         selected={opening.dates}
         toggle={opening.toggleDate}
-        disabled={opening.open.isPending || opening.stop.isPending}
+        disabled={opening.open.isPending}
       />
       <OpeningForm property={property} opening={opening} />
       <table>

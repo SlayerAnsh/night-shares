@@ -9,7 +9,7 @@ export function payoutOf(records: NightRecord[], withdrawn = 0n) {
     const pay = hostPayout(state);
     const fee =
       (toMicros(pay.gross) * BigInt(Math.round(HOST_FEE * 10_000))) / 10_000n;
-    available += toMicros(pay.availableNow) + fee;
+    available += toMicros(pay.availableNow);
     held += toMicros(pay.heldForTraders);
     fees += fee;
     gross += toMicros(pay.gross);

@@ -38,7 +38,7 @@ export function useOpening(property: Property) {
     { selection },
     { enabled: valid, retry: false },
   );
-  const { open, stop } = useHostMutations();
+  const { open } = useHostMutations();
   const access = useRequireAccess();
   function toggleDate(date: string) {
     const selected = dates.includes(date)
@@ -61,18 +61,6 @@ export function useOpening(property: Property) {
     )
       open.mutate({ selection });
   }
-  function stopSelected() {
-    if (valid && access.require("host", "orb"))
-      stop.mutate({
-        nights: dates.flatMap((date) =>
-          roomTypeIds.map((roomTypeId) => ({
-            propertyId: property.id,
-            roomTypeId,
-            date,
-          })),
-        ),
-      });
-  }
   return {
     mode,
     start,
@@ -82,11 +70,9 @@ export function useOpening(property: Property) {
     valid,
     preview,
     open,
-    stop,
     set,
     toggleDate,
     toggleRoom,
     openSelected,
-    stopSelected,
   };
 }

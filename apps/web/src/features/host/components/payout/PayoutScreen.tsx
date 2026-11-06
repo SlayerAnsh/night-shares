@@ -6,9 +6,8 @@ import type {
 import { formatUsdc } from "../../../../shared/format";
 import { useBalance, usePayout, usePortfolio } from "../../hooks/use-host-data";
 import { useHostSearch } from "../../hooks/use-host-search";
-import { sumPayouts } from "../../model/host-view";
+import { formatInstant, sumPayouts } from "../../model/host-view";
 import { ErrorMessage, PayoutFacts } from "../shared/HostFacts";
-import { WithdrawForm } from "./WithdrawForm";
 
 function PropertyPayout({
   hotels,
@@ -64,10 +63,18 @@ function PayoutRow({
         {query.data?.payout && (
           <>
             <PayoutFacts value={query.data.payout} />
-            <WithdrawForm
-              propertyId={hotel.propertyId}
-              available={query.data.payout.availableNow?.micros ?? 0n}
-            />
+            <p>
+              Earned USDC sweeps automatically to your wallet. Swept:{" "}
+              {formatUsdc(query.data.payout.sweptTotal?.micros ?? 0n)}
+            </p>
+            {query.data.payout.lastSweepAt && (
+              <p>
+                Last sweep:{" "}
+                {formatUsdc(query.data.payout.lastSweepAmount?.micros ?? 0n)} at{" "}
+                {formatInstant(query.data.payout.lastSweepAt)}. Transaction:{" "}
+                {query.data.payout.lastSweepTransactionId}
+              </p>
+            )}
           </>
         )}
       </section>

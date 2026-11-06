@@ -6,7 +6,7 @@ import {
 } from "@night-shares/proto/host/v1/opening_pb";
 import { createHarness } from "./harness";
 
-test("hotel push failures leave open, edit and stop unchanged", async () => {
+test("hotel push failures leave open and edit unchanged", async () => {
   const h = await createHarness();
   try {
     const { clients } = await h.signInAs("orb", "host");
@@ -22,7 +22,11 @@ test("hotel push failures leave open, edit and stop unchanged", async () => {
     };
     ports.channelManager.setPushFailure?.(true);
     for (const stopped of [true, false]) {
-      ports.inventory.update(key, (record) => ({ ...record, stopped }));
+      ports.inventory.update(key, (record) => ({
+        ...record,
+        stopped,
+        openedAt: 0,
+      }));
       const before = ports.inventory.get(key);
       await expect(
         clients.host.openNights({ selection }),
@@ -32,16 +36,11 @@ test("hotel push failures leave open, edit and stop unchanged", async () => {
       });
       expect(ports.inventory.get(key)).toEqual(before);
     }
-    const before = ports.inventory.get(key);
-    await expect(
-      clients.host.stopSelling({ nights: [before] }),
-    ).rejects.toMatchObject({ code: Code.Unavailable });
-    expect(ports.inventory.get(key)).toEqual(before);
     expect(
       ports.activity
         .list({ nightKey: key })
         .filter((e) => e.kind === "channel_push_failed"),
-    ).toHaveLength(3);
+    ).toHaveLength(2);
   } finally {
     await h.close();
   }

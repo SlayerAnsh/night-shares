@@ -122,11 +122,10 @@ Auth column: the `access` option on each RPC.
 | GetPortfolio | ORB | All hotels: KPIs, alerts, 8 week occupancy |
 | GetHotel | ORB | One hotel: KPIs, month glance, price series, calendar |
 | PreviewOpenNights | ORB | Floor, last room price, guest price cap, minimum payout, slots, kept |
-| OpenNights | ORB | In: dates, room types, allotment percent, demand preset, release policy. Allotment never drops below booked plus held |
-| StopSelling | ORB | Take back unsold rooms for the chosen nights |
+| OpenNights | ORB | In: dates, room types, allotment percent, demand preset, release policy. All S tokens mint into NightVault-owned pool positions. F, k and S are fixed after open |
 | GetNight | ORB | Per room type state, activity, release timeline, payout split |
-| GetPayout | ORB | Available now, held for traders, fees |
-| Withdraw | ORB | Send available USDC to the host wallet |
+| GetPayout | ORB | Available earnings, held for traders, fees, swept total and last sweep |
+| Automatic sweep | Job | Send earned USDC, net of host debt, to the owner wallet on each tick. GetPayout shows totals and the last sweep |
 
 ### wallet.v1.WalletService
 
@@ -183,7 +182,7 @@ Every payment goes through `WalletProvider.settle(legs)`, which applies all legs
 
 ### Host ownership
 
-Each property has one owner. The four seeded connected hotels (Velana, Ubud, Rive, Alpen) belong to the demo host, who signs in with the mock proof `mock:host:orb`. Other hosts start with no hotels and can claim only unowned properties (Salinas, Machiya) through `ConnectChannelManager`. Every host RPC checks ownership, and withdrawals are tracked per property.
+Each property has one owner. The four seeded connected hotels (Velana, Ubud, Rive, Alpen) belong to the demo host, who signs in with the mock proof `mock:host:orb`. Other hosts start with no hotels and can claim only unowned properties (Salinas, Machiya) through `ConnectChannelManager`. Every host RPC checks ownership, and automatic sweeps are tracked per property. Earned USDC (R minus L) is swept to the owner wallet after netting outstanding host debt. Sweep records and reservations prevent duplicate payments; failed settlement compensates both payout and debt reservations. Hosts cannot stop selling or manually withdraw after opening. F, k and S are fixed; unopened nights remain editable.
 
 ### Market state
 

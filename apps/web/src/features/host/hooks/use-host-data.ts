@@ -45,7 +45,5 @@ export function useHostMutations() {
   return {
     connect: useMutation(rpc.connectChannelManager, { onSuccess }),
     open: useMutation(rpc.openNights, { onSuccess }),
-    stop: useMutation(rpc.stopSelling, { onSuccess }),
-    withdraw: useMutation(rpc.withdraw, { onSuccess }),
   };
 }

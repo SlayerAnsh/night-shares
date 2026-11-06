@@ -24,7 +24,7 @@ test("only the mock host subject receives seeded hotels lazily", () => {
   expect(repo.owner("prop_machiya")).toBeUndefined();
 });
 
-test("non-owner cannot read, open, stop or withdraw another host's property", async () => {
+test("non-owner cannot read or open another host's property", async () => {
   const f = fixture();
   expect(f.use.getPortfolio("other").hotels).toEqual([]);
   for (const call of [
@@ -35,12 +35,6 @@ test("non-owner cannot read, open, stop or withdraw another host's property", as
     () => f.use.openNights("other", f.selection),
   ])
     expect(call).toThrow("This property is managed by another host.");
-  await expect(
-    f.use.withdraw(
-      { id: "other", humanId: "other", level: "orb", walletAddress: "" },
-      "prop_velana",
-    ),
-  ).rejects.toMatchObject({ code: "PERMISSION_DENIED" });
   await expect(
     f.use.connectChannelManager("other", "prop_velana", 1),
   ).rejects.toMatchObject({ code: "PERMISSION_DENIED" });

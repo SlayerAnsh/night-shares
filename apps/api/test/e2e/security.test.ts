@@ -1,5 +1,7 @@
 import { afterAll, beforeAll, expect, test } from "bun:test";
 import { Code, ConnectError } from "@connectrpc/connect";
+import { createSqliteHostRepo } from "../../src/modules/host/repo/host-repo.sqlite";
+import { createSweep } from "../../src/modules/host/use-cases/payout/sweep";
 import { createHarness } from "./harness";
 
 let harness: Awaited<ReturnType<typeof createHarness>>;
@@ -10,7 +12,7 @@ afterAll(async () => {
   await harness?.close();
 });
 
-test("Orb non-owner cannot read, open, stop or withdraw demo hotels", async () => {
+test("Orb non-owner cannot read, open or connect demo hotels", async () => {
   const { clients } = await harness.signInAs("orb", "intruder");
   expect((await clients.host.getPortfolio({})).hotels).toHaveLength(0);
   const propertyId = "prop_velana";
@@ -20,10 +22,6 @@ test("Orb non-owner cannot read, open, stop or withdraw demo hotels", async () =
     clients.host.getPayout({ propertyId }),
     clients.host.previewOpenNights({ selection: { propertyId } }),
     clients.host.openNights({ selection: { propertyId } }),
-    clients.host.stopSelling({
-      nights: [{ propertyId, roomTypeId: "rt_velana_0", date: "2026-12-24" }],
-    }),
-    clients.host.withdraw({ propertyId }),
     clients.host.connectChannelManager({ propertyId, pms: 1 }),
   ];
   const codes = await Promise.all(
@@ -37,28 +35,27 @@ test("Orb non-owner cannot read, open, stop or withdraw demo hotels", async () =
   expect(codes).toEqual(forbidden.map(() => Code.PermissionDenied));
 });
 
-test("demo owner can withdraw full property payout only once concurrently", async () => {
+test("concurrent sweeps pay owner once", async () => {
   const { clients, user } = await harness.signInAs("orb", "host");
   const propertyId = "prop_ubud";
   const available =
     (await clients.host.getPayout({ propertyId })).payout?.availableNow
       ?.micros ?? 0n;
   expect(available).toBeGreaterThan(0n);
-  const wallet = harness.container.ports.walletProvider;
-  const before = await wallet.balance(user.walletAddress);
+  const ports = harness.container.ports;
+  const before = await ports.walletProvider.balance(user.walletAddress);
+  const sweep = createSweep({ ports, repo: createSqliteHostRepo(ports) });
   const results = await Promise.all([
-    clients.host.withdraw({ propertyId }).then(
-      (r) => r.withdrawn?.micros ?? 0n,
-      () => 0n,
-    ),
-    clients.host.withdraw({ propertyId }).then(
-      (r) => r.withdrawn?.micros ?? 0n,
-      () => 0n,
-    ),
+    sweep(user.id, propertyId, user.walletAddress),
+    sweep(user.id, propertyId, user.walletAddress),
   ]);
-  expect(results.filter((n) => n > 0n)).toHaveLength(1);
-  expect(results.reduce((sum, n) => sum + n, 0n)).toBe(available);
-  expect(await wallet.balance(user.walletAddress)).toBe(before + available);
+  expect(results.filter(Boolean)).toHaveLength(1);
+  expect(
+    results.reduce((sum, result) => sum + (result?.amount ?? 0n), 0n),
+  ).toBe(available);
+  expect(await ports.walletProvider.balance(user.walletAddress)).toBe(
+    before + available,
+  );
 });
 
 test("parallel market requests cannot buy twice with funds for one", async () => {

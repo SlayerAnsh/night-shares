@@ -1,24 +1,19 @@
 import { expect, test } from "bun:test";
-import { create } from "@bufbuild/protobuf";
 import { Code } from "@connectrpc/connect";
-import { NightKeySchema } from "@night-shares/proto/common/v1/night_pb";
 import { fixture } from "../fixture";
 
-for (const mode of ["open", "edit", "stop"] as const) {
+for (const mode of ["open", "edit"] as const) {
   test(`failed ${mode} push restores inventory and release policy`, async () => {
     const f = fixture();
-    if (mode === "open")
-      f.ports.inventory.update(f.key, (record) => ({
-        ...record,
-        stopped: true,
-      }));
+    f.ports.inventory.update(f.key, (record) => ({
+      ...record,
+      stopped: mode === "open",
+      openedAt: 0,
+    }));
     const before = f.ports.inventory.get(f.key);
     const policy = f.repo.release(f.key);
     f.ports.channelManager.setPushFailure?.(true);
-    const change =
-      mode === "stop"
-        ? f.use.stopSelling(f.userId, [create(NightKeySchema, before)])
-        : f.use.openNights(f.userId, f.selection);
+    const change = f.use.openNights(f.userId, f.selection);
     await expect(change).rejects.toMatchObject({
       code: Code.Unavailable,
       rawMessage: "The hotel system did not confirm. Nothing changed.",
@@ -39,7 +34,9 @@ test("failed batch push restores every selected night", async () => {
   const keys = f.selection.dates.map(
     (date) => `prop_velana:rt_velana_0:${date}`,
   );
-  const before = keys.map((key) => f.ports.inventory.get(key));
+  const before = keys.map((key) =>
+    f.ports.inventory.update(key, (r) => ({ ...r, openedAt: 0 })),
+  );
   f.ports.channelManager.setPushFailure?.(true);
   await expect(f.use.openNights(f.userId, f.selection)).rejects.toThrow(
     "Nothing changed.",

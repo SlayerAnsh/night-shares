@@ -3,7 +3,7 @@ import { editAllotment } from "./edit-allotment";
 import { fixture } from "./fixture";
 
 test("editAllotment updates state without changing its input", () => {
-  const record = fixture();
+  const record = { ...fixture(), openedAt: 0 };
 
   const before = structuredClone(record);
   const next = editAllotment(record, {
@@ -20,3 +20,15 @@ test("editAllotment updates state without changing its input", () => {
   );
   expect(record).toEqual(before);
 });
+
+for (const edit of [
+  { tenths: 1, preset: "normal" as const },
+  { tenths: 150, preset: "calm" as const },
+  { tenths: 150, preset: "peak" as const, floor: 1 },
+]) {
+  test("opened night rejects changed curve or supply", () => {
+    expect(() => editAllotment(fixture(), edit)).toThrow(
+      "Price and room count are fixed once a night is open.",
+    );
+  });
+}

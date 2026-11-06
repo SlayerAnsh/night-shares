@@ -17,13 +17,6 @@ export function datesBetween(start: string, end: string): string[] {
   );
 }
 
-export function parseAmount(value: string): bigint | undefined {
-  if (!/^\d+(\.\d{1,6})?$/.test(value)) return undefined;
-  const [whole = "0", fraction = ""] = value.split(".");
-  const amount = BigInt(whole) * 1000000n + BigInt(fraction.padEnd(6, "0"));
-  return amount > 0n ? amount : undefined;
-}
-
 export function aggregateDays(nights: HostNight[]) {
   const days = new Map<
     string,

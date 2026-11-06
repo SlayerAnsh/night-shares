@@ -30,11 +30,8 @@ export const previewOpenNights = HostService.method.previewOpenNights;
 export const openNights = HostService.method.openNights;
 
 /**
- * @generated from rpc night_shares.host.v1.HostService.StopSelling
- */
-export const stopSelling = HostService.method.stopSelling;
-
-/**
+ * StopSelling was removed. Open nights are immutable and payouts sweep automatically.
+ *
  * @generated from rpc night_shares.host.v1.HostService.GetNight
  */
 export const getNight = HostService.method.getNight;
@@ -43,8 +40,3 @@ export const getNight = HostService.method.getNight;
  * @generated from rpc night_shares.host.v1.HostService.GetPayout
  */
 export const getPayout = HostService.method.getPayout;
-
-/**
- * @generated from rpc night_shares.host.v1.HostService.Withdraw
- */
-export const withdraw = HostService.method.withdraw;

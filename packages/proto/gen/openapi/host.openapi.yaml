@@ -76,6 +76,7 @@ paths:
       tags:
         - night_shares.host.v1.HostService
       summary: GetNight
+      description: StopSelling was removed. Open nights are immutable and payouts sweep automatically.
       operationId: night_shares.host.v1.HostService.GetNight
       parameters:
         - name: Connect-Protocol-Version
@@ -246,76 +247,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.host.v1.PreviewOpenNightsResponse'
-  /night_shares.host.v1.HostService/StopSelling:
-    post:
-      tags:
-        - night_shares.host.v1.HostService
-      summary: StopSelling
-      operationId: night_shares.host.v1.HostService.StopSelling
-      parameters:
-        - name: Connect-Protocol-Version
-          in: header
-          required: true
-          schema:
-            $ref: '#/components/schemas/connect-protocol-version'
-        - name: Connect-Timeout-Ms
-          in: header
-          schema:
-            $ref: '#/components/schemas/connect-timeout-header'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/night_shares.host.v1.StopSellingRequest'
-        required: true
-      responses:
-        default:
-          description: Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/connect.error'
-        "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/night_shares.host.v1.StopSellingResponse'
-  /night_shares.host.v1.HostService/Withdraw:
-    post:
-      tags:
-        - night_shares.host.v1.HostService
-      summary: Withdraw
-      operationId: night_shares.host.v1.HostService.Withdraw
-      parameters:
-        - name: Connect-Protocol-Version
-          in: header
-          required: true
-          schema:
-            $ref: '#/components/schemas/connect-protocol-version'
-        - name: Connect-Timeout-Ms
-          in: header
-          schema:
-            $ref: '#/components/schemas/connect-timeout-header'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/night_shares.host.v1.WithdrawRequest'
-        required: true
-      responses:
-        default:
-          description: Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/connect.error'
-        "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/night_shares.host.v1.WithdrawResponse'
 components:
   schemas:
     connect-protocol-version:
@@ -955,6 +886,18 @@ components:
         gross:
           title: gross
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        sweptTotal:
+          title: swept_total
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        lastSweepAt:
+          title: last_sweep_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        lastSweepTransactionId:
+          type: string
+          title: last_sweep_transaction_id
+        lastSweepAmount:
+          title: last_sweep_amount
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
       title: Payout
       additionalProperties: false
     night_shares.host.v1.Pms:
@@ -1010,54 +953,6 @@ components:
         - RELEASE_POLICY_ARRIVAL_14
         - RELEASE_POLICY_DAY_BEFORE_18
         - RELEASE_POLICY_THREE_DAYS_BEFORE_12
-    night_shares.host.v1.StopSellingRequest:
-      type: object
-      properties:
-        nights:
-          type: array
-          items:
-            $ref: '#/components/schemas/night_shares.common.v1.NightKey'
-          title: nights
-      title: StopSellingRequest
-      additionalProperties: false
-    night_shares.host.v1.StopSellingResponse:
-      type: object
-      properties:
-        nights:
-          type: array
-          items:
-            $ref: '#/components/schemas/night_shares.host.v1.HostNight'
-          title: nights
-        roomsTakenBack:
-          title: rooms_taken_back
-          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
-      title: StopSellingResponse
-      additionalProperties: false
-    night_shares.host.v1.WithdrawRequest:
-      type: object
-      properties:
-        propertyId:
-          type: string
-          title: property_id
-        amount:
-          title: amount
-          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
-      title: WithdrawRequest
-      additionalProperties: false
-    night_shares.host.v1.WithdrawResponse:
-      type: object
-      properties:
-        transactionId:
-          type: string
-          title: transaction_id
-        withdrawn:
-          title: withdrawn
-          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
-        payout:
-          title: payout
-          $ref: '#/components/schemas/night_shares.host.v1.Payout'
-      title: WithdrawResponse
-      additionalProperties: false
 security: []
 tags:
   - name: night_shares.host.v1.HostService

@@ -7,9 +7,11 @@ import {
   coverAccount,
 } from "../../src/modules/double-sale/repo/cover-accounts";
 import { prepareCover } from "../../src/modules/double-sale/testing/scenario";
+import { createSqliteHostRepo } from "../../src/modules/host/repo/host-repo.sqlite";
+import { createSweep } from "../../src/modules/host/use-cases/payout/sweep";
 import { createHarness } from "./harness";
 
-test("neutral report refunds holder at pool bid and nets host debt on next withdrawal", async () => {
+test("neutral report refunds holder at pool bid and nets host debt on next automatic sweep", async () => {
   const h = await createHarness();
   try {
     const host = await h.signInAs("orb", "host");
@@ -47,13 +49,11 @@ test("neutral report refunds holder at pool bid and nets host debt on next withd
     const payout = await host.clients.host.getPayout({
       propertyId: "prop_velana",
     });
-    const withdrawal = await host.clients.host.withdraw({
-      propertyId: "prop_velana",
-      amount: { micros: 1n },
-    });
-    expect(withdrawal.payout?.availableNow?.micros).toBe(
-      (payout.payout?.availableNow?.micros ?? 0n) - 1n,
-    );
+    const swept = await createSweep({
+      ports,
+      repo: createSqliteHostRepo(ports),
+    })(host.user.id, "prop_velana", host.user.walletAddress);
+    expect(swept?.amount).toBe(payout.payout?.availableNow?.micros ?? 0n);
     expect(coverAccount(ports.db, "prop_velana").debt).toBe(0n);
     await pollReports(ports);
     expect(await ports.walletProvider.balance(holder.user.walletAddress)).toBe(

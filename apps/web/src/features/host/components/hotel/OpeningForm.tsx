@@ -1,5 +1,4 @@
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
-import { formatRoomNights } from "../../../../shared/format";
 import type { useOpening } from "../../hooks/use-opening";
 import { ErrorMessage } from "../shared/HostFacts";
 import { OpeningFields } from "./OpeningFields";
@@ -12,7 +11,7 @@ export function OpeningForm({
   property: Property;
   opening: ReturnType<typeof useOpening>;
 }) {
-  const pending = o.open.isPending || o.stop.isPending;
+  const pending = o.open.isPending;
   return (
     <section id="open-nights">
       <h2>Open nights</h2>
@@ -50,25 +49,7 @@ export function OpeningForm({
             Opened {o.open.data.nights.length} room type nights.
           </p>
         )}
-        <p>
-          Stop selling takes back rooms still on sale. Rooms traders hold are
-          not affected.
-        </p>
-        <button
-          type="button"
-          disabled={pending || !o.valid}
-          onClick={o.stopSelected}
-        >
-          Stop selling for selected nights
-        </button>
-        <ErrorMessage error={o.stop.error} />
-        {o.stop.data && (
-          <p role="status">
-            Took back{" "}
-            {formatRoomNights(o.stop.data.roomsTakenBack?.tenths ?? 0)} rooms
-            into your own inventory.
-          </p>
-        )}
+        <p>Price and room count are fixed once a night is open.</p>
       </form>
     </section>
   );

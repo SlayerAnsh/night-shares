@@ -4,8 +4,6 @@ package night_shares.host.v1;
 
 import "night_shares/auth/v1/access.proto";
 import "night_shares/catalog/v1/property.proto";
-import "night_shares/common/v1/money.proto";
-import "night_shares/common/v1/night.proto";
 import "night_shares/host/v1/hotel.proto";
 import "night_shares/host/v1/opening.proto";
 
@@ -25,18 +23,14 @@ service HostService {
   rpc OpenNights(OpenNightsRequest) returns (OpenNightsResponse) {
     option (night_shares.auth.v1.access) = ACCESS_ORB;
   }
-  rpc StopSelling(StopSellingRequest) returns (StopSellingResponse) {
-    option (night_shares.auth.v1.access) = ACCESS_ORB;
-  }
+  // StopSelling was removed. Open nights are immutable and payouts sweep automatically.
   rpc GetNight(GetNightRequest) returns (GetNightResponse) {
     option (night_shares.auth.v1.access) = ACCESS_ORB;
   }
   rpc GetPayout(GetPayoutRequest) returns (GetPayoutResponse) {
     option (night_shares.auth.v1.access) = ACCESS_ORB;
   }
-  rpc Withdraw(WithdrawRequest) returns (WithdrawResponse) {
-    option (night_shares.auth.v1.access) = ACCESS_ORB;
-  }
+  // Withdraw was removed. Open nights are immutable and payouts sweep automatically.
 }
 
 message ConnectChannelManagerRequest {
@@ -89,12 +83,13 @@ message OpenNightsResponse {
 }
 
 message StopSellingRequest {
-  repeated night_shares.common.v1.NightKey nights = 1;
+  reserved 1;
+  reserved "nights";
 }
 
 message StopSellingResponse {
-  repeated HostNight nights = 1;
-  night_shares.common.v1.RoomNights rooms_taken_back = 2;
+  reserved 1, 2;
+  reserved "nights", "rooms_taken_back";
 }
 
 message GetNightRequest {
@@ -118,12 +113,11 @@ message GetPayoutResponse {
 }
 
 message WithdrawRequest {
-  string property_id = 1;
-  night_shares.common.v1.Usdc amount = 2;
+  reserved 1, 2;
+  reserved "property_id", "amount";
 }
 
 message WithdrawResponse {
-  string transaction_id = 1;
-  night_shares.common.v1.Usdc withdrawn = 2;
-  Payout payout = 3;
+  reserved 1, 2, 3;
+  reserved "transaction_id", "withdrawn", "payout";
 }
