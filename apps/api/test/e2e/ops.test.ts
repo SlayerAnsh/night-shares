@@ -8,12 +8,22 @@ test("enabled IP limit rejects excess RPCs but leaves probes available", async (
     rateLimitPerIp: 1,
   });
   try {
+    for (const path of ["/healthz", "/readyz"]) {
+      const response = await fetch(`${h.baseUrl}${path}`);
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ status: "ok" });
+    }
     await h.clients.catalog.listDestinations({});
-    await expect(h.clients.catalog.listDestinations({})).rejects.toMatchObject({
-      code: Code.ResourceExhausted,
-    });
-    expect((await fetch(`${h.baseUrl}/healthz`)).status).toBe(200);
-    expect((await fetch(`${h.baseUrl}/readyz`)).status).toBe(200);
+    for (const path of ["/healthz", "/readyz", "/healthz"]) {
+      // Connect sends a chunked POST body. Probe immediately after rejection
+      // to catch a pooled socket retaining unread request framing.
+      await expect(
+        h.clients.catalog.listDestinations({ text: "Paris" }),
+      ).rejects.toMatchObject({ code: Code.ResourceExhausted });
+      const response = await fetch(`${h.baseUrl}${path}`);
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ status: "ok" });
+    }
   } finally {
     await h.close();
   }

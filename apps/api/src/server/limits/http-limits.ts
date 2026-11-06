@@ -12,6 +12,10 @@ export function rejectRequest(
     res.destroy();
     return;
   }
+  // Early responses can leave unread request bytes in Bun's HTTP parser.
+  // Close the socket after flushing instead of relying only on the header.
+  const socket = res.socket;
+  res.once("finish", () => socket?.end());
   res.writeHead(status, {
     "content-type": "application/json",
     connection: "close",
