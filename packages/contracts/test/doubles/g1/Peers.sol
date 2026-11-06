@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
+import {LadderMath} from "../../../src/libraries/LadderMath.sol";
+import {FeeMath} from "../../../src/libraries/FeeMath.sol";
+import {NightPosition} from "../../../src/libraries/NightPosition.sol";
 import {INightTypes} from "../../../src/interfaces/INightTypes.sol";
 import {NightFactory} from "../../../src/NightFactory.sol";
 import {NightToken} from "../../../src/NightToken.sol";
@@ -28,6 +31,11 @@ contract RegistryDouble {
 }
 
 contract SettlementDouble {
+    mapping(bytes32 => bool) public cutoffSettled;
+    function finish(NightFactory factory, bytes32 id) external {
+        cutoffSettled[id] = true;
+        factory.notifyCutoffSettled(id);
+    }
     address public attester;
     mapping(address => uint256) public incidents;
 
@@ -42,6 +50,7 @@ contract SettlementDouble {
 
 /// @dev Policy-free hook double. Tests exercise the real PoolManager, not production hook policy.
 contract HookDouble {
+    bool public paused;
     bool public attack;
     function setAttack(bool value) external { attack = value; }
 
@@ -80,6 +89,14 @@ contract HookDouble {
 }
 
 contract VaultDouble is INightTypes {
+    function openingValues(NightConfig calldata c) external pure returns (uint256 cost, uint160 initialPrice, uint256 strike) {
+        cost = NightPosition.poolCost(c.F, c.k, c.S);
+        initialPrice = TickMath.getSqrtPriceAtTick(LadderMath.boundaryTick(c.F, c.k, c.S, 0));
+        strike = FeeMath.recallStrike(c.F, c.k, 0.25e18);
+    }
+    function poolCost(NightConfig calldata c) external pure returns (uint256) {
+        return NightPosition.poolCost(c.F, c.k, c.S);
+    }
     NightFactory public factory;
     IPoolManager public manager;
     mapping(bytes32 => uint256) public nextRoom;

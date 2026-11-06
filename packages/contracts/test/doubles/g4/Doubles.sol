@@ -10,6 +10,7 @@ import {Currency} from "v4-core/src/types/Currency.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
 contract FactoryDouble is INightTypes {
+    function notifyCutoffSettled(bytes32) external {}
     NightConfig private cfg;
     PoolKey private key;
     address private token;

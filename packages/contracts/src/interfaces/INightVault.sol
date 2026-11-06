@@ -6,6 +6,8 @@ import {INightTypes} from "./INightTypes.sol";
 
 /// @notice Immutable manager and endpoints; per-night positions, seeded state, removed ranges, closing flag; pending USDC per property. No administrator.
 interface INightVault is INightTypes {
+    function openingValues(NightConfig calldata c) external pure returns (uint256 cost, uint160 initialPrice, uint256 strike);
+    function poolCost(NightConfig calldata c) external pure returns (uint256);
     function requiredInventory(NightConfig calldata config) external pure returns (uint256);
     error AlreadySeeded();
     error UnearnedPosition();

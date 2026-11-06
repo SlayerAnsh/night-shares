@@ -496,3 +496,39 @@ function setAttester(address value) external;
 function setOrb(uint256 id, bool value) external;
 function walkBanned(uint256) external view returns (bool);
 ```
+
+## Mainnet safety limits
+
+NightFactory takes immutable constructor arguments `(Deployment deps, uint256 maxF, uint256 maxPool, uint256 maxS, uint256 maxOpenNights)`. Defaults in Deploy.s.sol are `MAX_F = 1e6`, `MAX_POOL = 50e6`, `MAX_S = 100e18` and `MAX_OPEN_NIGHTS = 20`. Each has a public getter. `MAX_S` is supplied as 100 whole rooms in deployment environment configuration. Limits are checked before creating a night. Limit violations have distinct errors: `MaxFExceeded`, `MaxPoolExceeded`, `MaxSExceeded` and `MaxOpenNightsExceeded`.
+
+`poolCost(config)` sums the rounded-up currency1 deltas across the actual buffered NightPosition positions between their tick-snapped boundaries. It excludes trading fees. This uses the same liquidity definition as seeding, rather than a continuous exponential integral. Each position rounds up to micro USDC. A night at its configured cost limit passes; one micro USDC above it fails. Position rounding and split-fill rounding still apply to individual trades.
+
+`openNights` counts successfully opened nights, including incomplete ladders, until cutoff settlement succeeds. Only the configured Settlement can call `notifyCutoffSettled`, and the factory checks that the night exists, Settlement reports it settled and the notification has not already been consumed. The entire cutoff transaction rolls back if any later operation fails. Expired but unsettled nights still consume capacity.
+
+## Pause matrix
+
+The immutable hook owner controls the global hook pause and each NightToken pause. Token pause is local to its night. New opens check the global hook pause. Routers check both the global pause and the selected token pause. Token transfers involving ordinary holders check both as well. Pause controls cannot replace endpoints or withdraw reserves.
+
+| Operation | Global hook pause | Local token pause |
+| --- | --- | --- |
+| Buy, sellback and ask fill | Blocked | Blocked |
+| Booking and host buy-and-void | Blocked | Blocked |
+| Trader transfers and router pulls | Blocked | Blocked |
+| New opens | Blocked | Not applicable to a new token |
+| Authorized burns | Allowed | Allowed |
+| Cutoff settlement and reserve transfers | Allowed | Allowed |
+| Earned sweep | Allowed | Allowed |
+| pushBatch and claim | Allowed | Allowed |
+| Walk payout | Allowed | Allowed |
+
+## Deployment configuration
+
+Deploy.s.sol checks `CHAIN_ID` and reads `POOL_MANAGER`, `USDC`, `PERMIT2`, `ATTESTER`, `PLATFORM`, `OWNER` and the four limits. OWNER controls the hook and registry; PLATFORM remains the fee recipient and Settlement attester-rotation authority. The reusable DeployLib overload accepts these separately. The shorter overload uses the safety defaults and PLATFORM as OWNER. Regression fixtures explicitly request larger price limits without changing historical test assertions.
+
+Deploy.s.sol uses only configured external dependencies and never deploys PoolManager. It writes `deployments/<DEPLOYMENT_NAME>.json`, including ABIs from `out`, constructor configuration, chain ID, simulation block and the NightShares version 1 TradeRouter EIP-712 domain. The fork deployment uses chain ID 5042, the existing official mainnet PoolManager and Permit2, and etched MockUSDC. See README.md for commands and the distinction between simulation artifacts and confirmed broadcasts.
+
+## Developer workflow
+
+Run `sh script/install-deps.sh`, then `forge test --offline` from this package. Use the separate `docker-compose.chain.yml` from the app directory for network integration. Run ForkFlowTest with `FORK_RPC=http://127.0.0.1:8545` only after deployment and seed complete. Keep frozen order and attestation fields, event layouts and public compatibility selectors unchanged. Test pause with money already held and verify successful cutoff and claim fallback, rather than checking only rejected entries. Record fork block, deployed addresses and test output when refreshing integration evidence. Contracts remain unaudited.
+
+Opening math is implemented by the immutable vault's pure `openingValues` function, using the shared NightPosition library. The factory enforces the returned cost against its immutable limit before deployment. This keeps factory runtime at 22,362 bytes without relaxing the EIP-170 code-size limit. The same library defines the public pool-cost quote and seeded positions. The completed mainnet fork verification, deployment addresses and evidence links are recorded in README.md.

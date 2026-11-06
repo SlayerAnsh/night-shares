@@ -16,9 +16,18 @@ import {SqrtPriceMath} from "v4-core/src/libraries/SqrtPriceMath.sol";
 import {FullMath} from "v4-core/src/libraries/FullMath.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
+import {FeeMath} from "./libraries/FeeMath.sol";
 import {NightPosition} from "./libraries/NightPosition.sol";
 
 contract NightVault is INightVault {
+    function openingValues(NightConfig calldata c) external pure returns (uint256 cost, uint160 initialPrice, uint256 strike) {
+        cost = NightPosition.poolCost(c.F, c.k, c.S);
+        initialPrice = TickMath.getSqrtPriceAtTick(LadderMath.boundaryTick(c.F, c.k, c.S, 0));
+        strike = FeeMath.recallStrike(c.F, c.k, 0.25e18);
+    }
+    function poolCost(NightConfig calldata c) external pure returns (uint256) {
+        return NightPosition.poolCost(c.F, c.k, c.S);
+    }
     using SafeTransferLib for address;
     IPoolManager public immutable manager;
     INightFactory public immutable factory;

@@ -50,7 +50,7 @@ contract NightTest is Test, INightTypes {
             address(registry),
             address(0x333)
         );
-        f = new NightFactory(d);
+        f = new NightFactory(d, 6000e6, 2000000e6, 100e18, 20);
         vault.setup(f, manager);
         registry.set(HOST, 1, true);
         registry.set(A, 2, true);
@@ -93,6 +93,72 @@ contract NightTest is Test, INightTypes {
         Hint[] memory h = new Hint[](1);
         h[0] = Hint(who, p, n);
         t.setHints(h);
+    }
+
+    function _limits(uint256 maxF, uint256 maxPool, uint256 maxS, uint256 maxOpen) private {
+        f = new NightFactory(f.dependencies(), maxF, maxPool, maxS, maxOpen);
+        vault.setup(f, manager);
+        _bind();
+        id = f.registerNightIdentity("hotel", "double", "2030-01-01");
+        c.F = 500000;
+        c.S = 10e18;
+    }
+
+    function testMaxFBoundary() public {
+        _limits(1e6, 50e6, 100e18, 20);
+        c.F = 1e6 + 1;
+        vm.expectRevert(INightFactory.MaxFExceeded.selector);
+        vm.prank(HOST); f.openNight(c, bytes32(0));
+        c.F = 1e6;
+        _open();
+        assertEq(f.MAX_F(), c.F);
+    }
+
+    function testMaxPoolExactBoundary() public {
+        _limits(1e6, 50e6, 100e18, 20);
+        uint256 cost = f.poolCost(c);
+        assertLe(cost, 50e6);
+        _limits(1e6, cost - 1, 100e18, 20);
+        vm.expectRevert(INightFactory.MaxPoolExceeded.selector);
+        vm.prank(HOST); f.openNight(c, bytes32(0));
+        _limits(1e6, cost, 100e18, 20);
+        _open();
+        assertEq(f.poolCost(c), f.MAX_POOL());
+    }
+
+    function testMaxSBoundary() public {
+        _limits(1e6, 50e6, 100e18, 20);
+        c.F = 100000;
+        c.S = 101e18;
+        vm.expectRevert(INightFactory.MaxSExceeded.selector);
+        vm.prank(HOST); f.openNight(c, bytes32(0));
+        c.S = 100e18;
+        _open();
+        assertEq(t.S(), 100e18);
+    }
+
+    function testOpenNightsBoundaryAndRestrictedDecrement() public {
+        _limits(1e6, 50e6, 100e18, 20);
+        for (uint256 i; i < 20; ++i) {
+            string memory room = vm.toString(i);
+            c.night = f.registerNightIdentity("hotel", room, "2030-01-01");
+            c.roomType = keccak256(bytes(room));
+            _open();
+            assertEq(f.openNights(), i + 1);
+        }
+        bytes32 last = c.night;
+        c.night = f.registerNightIdentity("hotel", "overflow", "2030-01-01");
+        c.roomType = keccak256("overflow");
+        vm.expectRevert(INightFactory.MaxOpenNightsExceeded.selector);
+        vm.prank(HOST); f.openNight(c, bytes32(0));
+        vm.expectRevert(Unauthorized.selector); f.notifyCutoffSettled(last);
+        vm.prank(address(settlement));
+        vm.expectRevert(InvalidConfig.selector); f.notifyCutoffSettled(last);
+        settlement.finish(f, last);
+        assertEq(f.openNights(), 19);
+        vm.expectRevert(InvalidConfig.selector); settlement.finish(f, last);
+        _open();
+        assertEq(f.openNights(), 20);
     }
 
     function testCanonicalOpeningAndChunks() public {
@@ -163,7 +229,7 @@ contract NightTest is Test, INightTypes {
         f.openNight(c, salt);
         settlement.setIncidents(HOST, 0);
         c.S = 101e18;
-        vm.expectRevert(InvalidConfig.selector);
+        vm.expectRevert(INightFactory.MaxSExceeded.selector);
         vm.prank(HOST);
         f.openNight(c, salt);
         c.S = 1e17;
@@ -492,9 +558,9 @@ contract NightTest is Test, INightTypes {
     }
     function testDeploymentValidationAndSmallCap() public {
         Deployment memory deps=f.dependencies(); deps.usdc=address(0);
-        vm.expectRevert(InvalidConfig.selector); new NightFactory(deps);
+        vm.expectRevert(InvalidConfig.selector); new NightFactory(deps, 6000e6, 2000000e6, 100e18, 20);
         deps=f.dependencies(); deps.hook=address(0x1234);
-        vm.expectRevert(InvalidConfig.selector); new NightFactory(deps);
+        vm.expectRevert(InvalidConfig.selector); new NightFactory(deps, 6000e6, 2000000e6, 100e18, 20);
         c.S=1e18; _open(); assertEq(t.cap(),1e18); assertEq(t.name(),"NightShares Room Night"); assertEq(t.symbol(),"NIGHT");
         assertEq(f.MAX_S(),100e18); assertGt(f.config(id).X,c.F);
         assertTrue(t.excluded(BOOK)); assertFalse(t.excluded(A));

@@ -71,7 +71,7 @@ abstract contract RouterCore is INightTypes, IRouterCore {
         c = factory.config(night);
         if (block.timestamp >= c.cutoff) revert CutoffReached();
         if (!factory.ladderComplete(night)) revert LadderIncomplete();
-        if (hook.paused()) revert Paused();
+        if (hook.paused() || INightToken(factory.tokenOf(night)).paused()) revert Paused();
     }
 
     function _pull(address to, uint256 amount) internal {

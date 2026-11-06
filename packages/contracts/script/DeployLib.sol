@@ -18,6 +18,12 @@ library DeployLib {
         address platform,
         address attester
     ) internal returns (address factory, INightTypes.Deployment memory d) {
+        return deploy(deployer, manager, usdc, permit2, platform, attester, platform, 1e6, 50e6, 100e18, 20);
+    }
+
+    function deploy(address deployer, address manager, address usdc, address permit2, address platform,
+        address attester, address owner, uint256 maxF, uint256 maxPool, uint256 maxS, uint256 maxOpenNights)
+        internal returns (address factory, INightTypes.Deployment memory d) {
         uint256 nonce = vm.getNonce(deployer);
         factory = vm.computeCreateAddress(deployer, nonce);
         d.poolManager = manager;
@@ -34,7 +40,7 @@ library DeployLib {
         address hookDeployer = vm.computeCreateAddress(deployer, nonce + 8);
         // The hook does not read Deployment.hook. Keeping it zero avoids a CREATE2 cycle.
         bytes memory hookCode =
-            abi.encodePacked(vm.getCode("src/NightHook.sol:NightHook"), abi.encode(factory, d, platform));
+            abi.encodePacked(vm.getCode("src/NightHook.sol:NightHook"), abi.encode(factory, d, owner));
         bytes32 hash = keccak256(hookCode);
         bytes32 salt;
         for (uint256 i;; ++i) {
@@ -42,7 +48,7 @@ library DeployLib {
             d.hook = address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), hookDeployer, salt, hash)))));
             if (uint160(d.hook) & 0x3fff == 0x2aec) break;
         }
-        require(_create("src/NightFactory.sol:NightFactory", abi.encode(d)) == factory, "factory address");
+        require(_create("src/NightFactory.sol:NightFactory", abi.encode(d, maxF, maxPool, maxS, maxOpenNights)) == factory, "factory address");
         require(
             _create("src/NightVault.sol:NightVault", abi.encode(factory, manager, usdc, d.settlement)) == d.vault,
             "vault address"
@@ -62,7 +68,7 @@ library DeployLib {
             "rebate address"
         );
         require(
-            _create("src/HumanRegistry.sol:HumanRegistry", abi.encode(platform, attester)) == d.registry,
+            _create("src/HumanRegistry.sol:HumanRegistry", abi.encode(owner, attester)) == d.registry,
             "registry address"
         );
         HookDeployer helper = new HookDeployer(salt, hookCode);

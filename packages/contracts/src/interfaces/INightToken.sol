@@ -4,6 +4,8 @@ import {INightTypes} from "./INightTypes.sol";
 
 /// @notice ERC-20 balances and allowances; one time initialization; immutable night, S and X; burned count; human aggregate balances; descending holder links, size and transient insertion hints. Excluded endpoints are fixed at initialization.
 interface INightToken is INightTypes {
+    function paused() external view returns (bool);
+    function setPaused(bool value) external;
     function seedPosition(uint256 i)
         external
         view

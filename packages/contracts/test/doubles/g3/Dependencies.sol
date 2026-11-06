@@ -115,6 +115,7 @@ contract HookDouble {
 }
 
 contract TokenDouble is ERC20, INightTypes {
+    bool public paused;
     using SafeTransferLib for address;
     address public trade;
     address public book;

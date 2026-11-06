@@ -36,6 +36,11 @@ contract NightToken is INightToken {
     mapping(address => address) public prev;
     mapping(address => bool) public excluded;
     Deployment private d;
+    bool public paused;
+    function setPaused(bool value) external {
+        if (msg.sender != INightHook(d.hook).owner()) revert Unauthorized();
+        paused = value;
+    }
     bool private initialized;
     bool private entered;
     error InsufficientBalance();
@@ -184,6 +189,7 @@ contract NightToken is INightToken {
     }
 
     function _update(address from, address to, uint256 amount) private {
+        if ((!excluded[from] || !excluded[to]) && (paused || INightHook(d.hook).paused())) revert Paused();
         if (cutoffCollected && (!excluded[from] || !excluded[to])) revert CutoffReached();
         if (to == address(0) || from == address(0)) revert ZeroAddress();
         if (

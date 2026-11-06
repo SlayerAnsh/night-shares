@@ -7,6 +7,8 @@ import {DeployLib} from "../../script/DeployLib.sol";
 import {INightTypes} from "../../src/interfaces/INightTypes.sol";
 import {INightToken} from "../../src/interfaces/INightToken.sol";
 import {ITradeRouter} from "../../src/interfaces/ITradeRouter.sol";
+import {ISettlement} from "../../src/interfaces/ISettlement.sol";
+import {NightHook} from "../../src/NightHook.sol";
 import {NightFactory} from "../../src/NightFactory.sol";
 import {NightToken} from "../../src/NightToken.sol";
 import {NightVault} from "../../src/NightVault.sol";
@@ -69,7 +71,7 @@ contract FullFlowTest is Test, INightTypes {
         manager = new PoolManager(PLATFORM);
         address f;
         hookDeployer = vm.computeCreateAddress(address(this), vm.getNonce(address(this)) + 8);
-        (f, d) = DeployLib.deploy(address(this), address(manager), USDC, PERMIT2, PLATFORM, vm.addr(ATTESTER_KEY));
+        (f, d) = DeployLib.deploy(address(this), address(manager), USDC, PERMIT2, PLATFORM, vm.addr(ATTESTER_KEY), PLATFORM, 6000e6, 2000000e6, 100e18, 20);
         factory = NightFactory(f);
         vault = NightVault(d.vault);
         trade = TradeRouter(d.tradeRouter);
@@ -348,6 +350,47 @@ contract FullFlowTest is Test, INightTypes {
         _conserved();
     }
 
+    function testPauseBlocksEntriesButAllowsCutoffClaimsAndWalk() public {
+        _buy(maker, 1e18);
+        _buy(BUYER, 1e18);
+        _buy(ALT, 5e17);
+        _buy(address(0x900), 5e17);
+        vm.prank(maker); token.transfer(d.bookingRouter, 1e17);
+        vm.prank(GUEST);
+        (bytes32 bookingId,) = booking.buyAndRedeem(night, c.X);
+        vm.prank(PLATFORM); token.setPaused(true);
+        _pausedRoutes(false);
+        vm.prank(PLATFORM); token.setPaused(false);
+        vm.prank(PLATFORM); NightHook(d.hook).setPaused(true);
+        _pausedRoutes(true);
+        vm.prank(PLATFORM); token.setPaused(true);
+        // Burns remain callable by their fixed endpoint while both pauses are active.
+        vm.prank(d.bookingRouter); token.burn(1e17);
+        vm.warp(c.checkIn);
+        uint256 openBefore = factory.openNights();
+        _cutoff();
+        assertEq(factory.openNights(), openBefore - 1);
+        _walk(bookingId, 99);
+        vm.expectRevert(ISettlement.AlreadySettled.selector); settlement.settleCutoff(night);
+        assertEq(factory.openNights(), openBefore - 1);
+    }
+
+    function _pausedRoutes(bool globalPause) private {
+        Ask[] memory asks = _ask(1e17, 1);
+        vm.expectRevert(Paused.selector); vm.prank(BUYER);
+        trade.buy(night, 1e17, 100000e6, new Ask[](0), new Hint[](0), type(uint64).max);
+        vm.expectRevert(Paused.selector); vm.prank(BUYER);
+        trade.buy(night, 1e17, 100000e6, asks, new Hint[](0), type(uint64).max);
+        vm.prank(maker); token.approve(d.tradeRouter, 1e17);
+        vm.expectRevert(Paused.selector); vm.prank(maker);
+        trade.sell(night, 1e17, 0, new Hint[](0), type(uint64).max);
+        vm.expectRevert(Paused.selector); vm.prank(GUEST); booking.buyAndRedeem(night, c.X);
+        vm.expectRevert(Paused.selector); vm.prank(maker); token.transfer(BUYER, 1e17);
+        if (globalPause) {
+            vm.expectRevert(Paused.selector); vm.prank(HOST); factory.openNight(c, bytes32(0));
+        }
+    }
+
     function testFullFlowConservesUSDC() public {
         _trades();
         _bookAndRecall();
@@ -524,7 +567,7 @@ contract FullFlowTest is Test, INightTypes {
         address deployer = vm.addr(deployerKey);
         vm.startBroadcast(deployerKey);
         (address deployedFactory, Deployment memory peers) =
-            DeployLib.deploy(deployer, address(manager), USDC, PERMIT2, PLATFORM, vm.addr(ATTESTER_KEY));
+            DeployLib.deploy(deployer, address(manager), USDC, PERMIT2, PLATFORM, vm.addr(ATTESTER_KEY), PLATFORM, 6000e6, 2000000e6, 100e18, 20);
         vm.stopBroadcast();
         assertEq(address(NightVault(peers.vault).factory()), deployedFactory);
         assertEq(address(TradeRouter(peers.tradeRouter).factory()), deployedFactory);

@@ -150,6 +150,7 @@ contract Settlement is ISettlement {
         hostDebt[c.host] -= debtPaid;
         if (debtPaid != 0) SafeTransferLib.safeTransfer(usdc, address(coverFund), debtPaid);
         if (hostProceeds > debtPaid) SafeTransferLib.safeTransfer(usdc, c.host, hostProceeds - debtPaid);
+        factory.notifyCutoffSettled(night);
         settling[night] = false;
         emit CutoffReleased(night, held, rate);
     }

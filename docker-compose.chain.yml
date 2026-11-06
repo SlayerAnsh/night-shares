@@ -1,0 +1,46 @@
+services:
+  chain:
+    image: ghcr.io/foundry-rs/foundry:v1.7.1
+    user: "0:0"
+    entrypoint: ["anvil"]
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8545"
+      - --chain-id
+      - "5042"
+      - --fork-url
+      - ${ARC_FORK_RPC:-https://rpc.mainnet.arc.io}
+      - --fork-block-number
+      - "${ARC_FORK_BLOCK:-29914738}"
+      - --fork-retry-backoff
+      - "2000"
+      - --compute-units-per-second
+      - "20"
+      - --cache-path
+      - /state/cache
+      - --state
+      - /state/chain.json
+      - --state-interval
+      - "10"
+    ports: ["127.0.0.1:8545:8545"]
+    volumes: ["arc-fork-state:/state"]
+    healthcheck:
+      test: ["CMD", "cast", "block-number", "--rpc-url", "http://127.0.0.1:8545"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    stop_grace_period: 30s
+  contracts-deploy:
+    build: ./packages/contracts
+    environment:
+      ARC_FORK_BLOCK: "${ARC_FORK_BLOCK:-29914738}"
+    volumes: ["./packages/contracts/deployments:/contracts/deployments"]
+    depends_on:
+      chain:
+        condition: service_healthy
+    restart: "no"
+volumes:
+  arc-fork-state:

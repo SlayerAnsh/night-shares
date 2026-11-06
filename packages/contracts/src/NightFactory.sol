@@ -2,6 +2,7 @@
 pragma solidity 0.8.26;
 
 import {INightFactory} from "./interfaces/INightFactory.sol";
+import {INightHook} from "./interfaces/INightHook.sol";
 import {INightVault} from "./interfaces/INightVault.sol";
 import {IHumanRegistry} from "./interfaces/IHumanRegistry.sol";
 import {ISettlement} from "./interfaces/ISettlement.sol";
@@ -9,17 +10,19 @@ import {INightToken} from "./interfaces/INightToken.sol";
 import {NightToken} from "./NightToken.sol";
 import {NightKeyLib} from "./libraries/NightKeyLib.sol";
 import {OrderLib} from "./libraries/OrderLib.sol";
-import {FeeMath} from "./libraries/FeeMath.sol";
-import {LadderMath} from "./libraries/LadderMath.sol";
 import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
 import {IHooks} from "v4-core/src/interfaces/IHooks.sol";
 import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 import {Currency} from "v4-core/src/types/Currency.sol";
-import {TickMath} from "v4-core/src/libraries/TickMath.sol";
 import {ECDSA} from "solady/utils/ECDSA.sol";
 
 contract NightFactory is INightFactory {
-    uint256 public constant MAX_S = 100e18;
+    uint256 public immutable MAX_S;
+    uint256 public immutable MAX_F;
+    uint256 public immutable MAX_POOL;
+    uint256 public immutable MAX_OPEN_NIGHTS;
+    uint256 public openNights;
+    mapping(bytes32 => bool) public closed;
     Deployment private d;
     mapping(bytes32 => NightConfig) private configs;
     mapping(bytes32 => address) public tokenOf;
@@ -40,7 +43,9 @@ contract NightFactory is INightFactory {
         entered = false;
     }
 
-    constructor(Deployment memory deps) {
+    constructor(Deployment memory deps, uint256 maxF, uint256 maxPool, uint256 maxS, uint256 maxOpenNights) {
+        if (maxF == 0 || maxPool == 0 || maxS == 0 || maxS > 100e18 || maxS % 1e18 != 0 || maxOpenNights == 0) revert InvalidConfig();
+        MAX_F = maxF; MAX_POOL = maxPool; MAX_S = maxS; MAX_OPEN_NIGHTS = maxOpenNights;
         if (
             deps.poolManager == address(0) || deps.usdc == address(0) || deps.permit2 == address(0)
                 || deps.vault == address(0) || deps.hook == address(0) || deps.bookingRouter == address(0)
@@ -163,6 +168,7 @@ contract NightFactory is INightFactory {
     }
 
     function _open(NightConfig memory c, bytes32 salt) private returns (bytes32 id, address token) {
+        if (INightHook(d.hook).paused()) revert Paused();
         id = c.night;
         Identity memory identity = identities[id];
         if (
@@ -174,18 +180,36 @@ contract NightFactory is INightFactory {
         if (ISettlement(d.settlement).incidents(msg.sender) >= 2) revert HostSuspended(msg.sender);
         if (tokenOf[id] != address(0)) revert AlreadyOpened(id);
         if (c.cutoff <= block.timestamp) revert CutoffReached();
-        if (c.cutoff > c.checkIn || c.S == 0 || c.S > MAX_S || c.S % 1e18 != 0) revert InvalidConfig();
-        int24 initialTick = LadderMath.boundaryTick(c.F, c.k, c.S, 0);
-        c.X = FeeMath.recallStrike(c.F, c.k, 0.25e18);
+        if (c.F > MAX_F) revert MaxFExceeded();
+        if (c.S > MAX_S) revert MaxSExceeded();
+        if (openNights >= MAX_OPEN_NIGHTS) revert MaxOpenNightsExceeded();
+        if (c.cutoff > c.checkIn || c.S == 0 || c.S % 1e18 != 0) revert InvalidConfig();
+        (uint256 cost, uint160 initialPrice, uint256 strike) = INightVault(d.vault).openingValues(c);
+        if (cost > MAX_POOL) revert MaxPoolExceeded();
+        ++openNights;
+        c.X = strike;
         token = _predict(id, salt);
         if (token >= d.usdc) revert InvalidTokenOrder();
         configs[id] = c;
         tokenOf[id] = token;
         new NightToken{salt: _salt(id, salt)}(address(this));
         INightToken(token).initialize(id);
-        IPoolManager(d.poolManager).initialize(poolKey(id), TickMath.getSqrtPriceAtTick(initialTick));
+        IPoolManager(d.poolManager).initialize(poolKey(id), initialPrice);
         INightVault(d.vault).openNight(id);
         emit NightOpened(id, token, c.host);
+    }
+
+    /// @notice Full tick-snapped ladder cost, excluding fees.
+    function poolCost(NightConfig memory c) public view returns (uint256) {
+        return INightVault(d.vault).poolCost(c);
+    }
+
+    function notifyCutoffSettled(bytes32 id) external {
+        if (msg.sender != d.settlement) revert Unauthorized();
+        if (tokenOf[id] == address(0)) revert UnknownNight(id);
+        if (closed[id] || !ISettlement(d.settlement).cutoffSettled(id)) revert InvalidConfig();
+        closed[id] = true;
+        --openNights;
     }
 
     function ladderComplete(bytes32 id) external view returns (bool) {

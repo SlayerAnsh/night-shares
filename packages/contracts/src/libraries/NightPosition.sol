@@ -7,6 +7,14 @@ import {FullMath} from "v4-core/src/libraries/FullMath.sol";
 
 /// @notice Shared position definition, including the rounding inventory reserved for ten fills.
 library NightPosition {
+    function poolCost(uint256 F, uint256 k, uint256 S) internal pure returns (uint256 cost) {
+        if (S == 0 || S > 100e18 || S % 1e18 != 0) revert LadderMath.InvalidCurve();
+        for (uint256 i; i < S / 1e18; ++i) {
+            (int24 lo, int24 hi, uint128 l,) = room(F, k, S, i);
+            cost += SqrtPriceMath.getAmount1Delta(TickMath.getSqrtPriceAtTick(lo), TickMath.getSqrtPriceAtTick(hi), l, true);
+        }
+    }
+
     function room(uint256 F, uint256 k, uint256 S, uint256 i)
         internal
         pure

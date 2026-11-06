@@ -6,6 +6,17 @@ import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 /// @notice Immutable deployment dependencies; night configs, token addresses, pool keys and property owners. Property ownership is bound by an attester signature, never by the first opener.
 interface INightFactory is INightTypes {
     error InvalidTokenOrder();
+    error MaxFExceeded();
+    error MaxPoolExceeded();
+    error MaxSExceeded();
+    error MaxOpenNightsExceeded();
+    function MAX_F() external view returns (uint256);
+    function MAX_POOL() external view returns (uint256);
+    function MAX_OPEN_NIGHTS() external view returns (uint256);
+    function openNights() external view returns (uint256);
+    function closed(bytes32) external view returns (bool);
+    function poolCost(NightConfig memory c) external view returns (uint256);
+    function notifyCutoffSettled(bytes32 night) external;
     function registerNightIdentity(string calldata propertyId, string calldata roomTypeId, string calldata date)
         external
         returns (bytes32);

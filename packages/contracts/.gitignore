@@ -2,3 +2,7 @@ out/
 cache/
 broadcast/
 lib/
+.cache/
+evidence/
+unit-results.txt
+deployments/*-fork.json
