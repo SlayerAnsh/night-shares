@@ -11,6 +11,12 @@ import "night_shares/market/v1/book.proto";
 import "night_shares/market/v1/portfolio.proto";
 
 service MarketService {
+  rpc ClaimCutoff(ClaimCutoffRequest) returns (ClaimCutoffResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc ListCutoffClaims(ListCutoffClaimsRequest) returns (ListCutoffClaimsResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
   rpc PrepareAsk(PrepareAskRequest) returns (PrepareAskResponse) {
     option (night_shares.auth.v1.access) = ACCESS_ORB;
   }
@@ -208,6 +214,7 @@ message GetPortfolioResponse {
   TraderTrackRecord track_record = 5;
   repeated AgentOrder agent_orders = 6;
   AgentWallet agent_wallet = 7;
+  night_shares.common.v1.Usdc unclaimed_cutoff = 8;
 }
 
 message ToggleWatchRequest {
@@ -263,3 +270,19 @@ message SetAgentBudgetRequest {
   night_shares.common.v1.Usdc per_order_cap = 2;
   repeated night_shares.common.v1.NightKey allowed_nights = 3;
 }
+
+
+// Entitlements are fixed at release and paid only when the holder claims.
+message CutoffClaim {
+  night_shares.common.v1.NightKey night = 1;
+  night_shares.common.v1.RoomNights size = 2;
+  night_shares.common.v1.Usdc amount = 3;
+  google.protobuf.Timestamp claimed_at = 4;
+}
+message ClaimCutoffRequest { night_shares.common.v1.NightKey night = 1; }
+message ClaimCutoffResponse {
+  CutoffClaim claim = 1;
+  bool already_claimed = 2;
+}
+message ListCutoffClaimsRequest {}
+message ListCutoffClaimsResponse { repeated CutoffClaim claims = 1; }

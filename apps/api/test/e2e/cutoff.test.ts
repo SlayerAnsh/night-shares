@@ -19,6 +19,7 @@ test("clock-driven cutoff releases holdings through the job registry", async () 
       size: { tenths: 5 },
       maxTotal: { micros: 10n ** 12n },
     });
+    const balance = await clients.wallet.getBalance({});
     const { ports } = h.container;
     const key = `${night.propertyId}:${night.roomTypeId}:${night.date}`;
     (ports.clock as MockClock).set(
@@ -31,6 +32,25 @@ test("clock-driven cutoff releases holdings through the job registry", async () 
       onError: () => {},
     });
     await runner.tick();
+    expect(await clients.wallet.getBalance({})).toEqual(balance);
+    const claims = await clients.market.listCutoffClaims({});
+    expect(claims.claims).toHaveLength(1);
+    expect(claims.claims[0]?.claimedAt).toBeUndefined();
+    expect(
+      (await clients.market.getPortfolio({})).unclaimedCutoff?.micros,
+    ).toBe(claims.claims[0]?.amount?.micros);
+    expect((await clients.market.claimCutoff({ night })).alreadyClaimed).toBe(
+      false,
+    );
+    const paid = await clients.wallet.getBalance({});
+    expect(paid).not.toEqual(balance);
+    expect((await clients.market.claimCutoff({ night })).alreadyClaimed).toBe(
+      true,
+    );
+    expect(await clients.wallet.getBalance({})).toEqual(paid);
+    expect(
+      (await clients.market.listCutoffClaims({})).claims[0]?.claimedAt,
+    ).toBeDefined();
     expect((await clients.market.getPortfolio({})).holdings).toEqual([]);
     expect(
       ports.activity.list({ nightKey: key, kinds: ["night_released"] }),

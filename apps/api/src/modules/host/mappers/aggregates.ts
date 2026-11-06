@@ -23,7 +23,7 @@ export function occupancyOf(date: string, records: NightRecord[]) {
 }
 export function kpisOf(
   records: NightRecord[],
-  available: bigint,
+  unsweptEarnings: bigint,
   capacityTenths: number,
 ) {
   const revenue = records.reduce(
@@ -37,6 +37,6 @@ export function kpisOf(
     occupancyBps: capacityTenths
       ? Math.round((booked * 10_000) / capacityTenths)
       : 0,
-    availableNow: { micros: available },
+    availableNow: { micros: unsweptEarnings },
   };
 }

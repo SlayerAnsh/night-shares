@@ -82,6 +82,15 @@ test("Orb host connects, previews, opens, inspects, freezes nights and receives 
     propertyId: selection.propertyId,
   });
   expect(after.payout?.sweptTotal?.micros).toBe(available);
+  const afterHotel = await clients.host.getHotel({
+    propertyId: selection.propertyId,
+  });
+  const afterPortfolio = await clients.host.getPortfolio({});
+  expect(afterHotel.kpis?.availableNow?.micros).toBe(0n);
+  expect(
+    afterPortfolio.hotels.find((h) => h.propertyId === selection.propertyId)
+      ?.kpis?.availableNow,
+  ).toEqual(afterHotel.kpis?.availableNow);
   expect(after.payout?.lastSweepTransactionId).toBeTruthy();
   expect(await ports.walletProvider.balance(user.walletAddress)).toBe(
     before + available,
@@ -96,4 +105,33 @@ test("Device user cannot access host RPCs", async () => {
   await expect(
     clients.host.getPayout({ propertyId: "prop_velana" }),
   ).rejects.toMatchObject({ code: Code.PermissionDenied });
+});
+
+test("OpenNights rejects 101 rooms per room type with INVALID_ARGUMENT", async () => {
+  const h = await createHarness();
+  try {
+    const { clients } = await h.signInAs("orb", "host");
+    const get = h.container.ports.catalog.get.bind(h.container.ports.catalog);
+    h.container.ports.catalog.get = (id) => {
+      const p = get(id);
+      return p ? { ...p, rooms: 202 } : p;
+    };
+    await expect(
+      clients.host.openNights({
+        selection: {
+          propertyId: "prop_velana",
+          roomTypeIds: ["rt_velana_0"],
+          dates: ["2026-12-24"],
+          allotmentPercent: 100,
+          demandPreset: DemandPreset.PEAK,
+          releasePolicy: ReleasePolicy.DAY_BEFORE_18,
+        },
+      }),
+    ).rejects.toMatchObject({
+      code: Code.InvalidArgument,
+      rawMessage: "Allotment cannot exceed 100 rooms per night and room type.",
+    });
+  } finally {
+    await h.close();
+  }
 });

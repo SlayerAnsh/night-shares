@@ -1,6 +1,8 @@
 export type ActivityKind =
   | "night_released"
   | "cutoff_refund"
+  | "cutoff_claimable"
+  | "cutoff_claimed"
   | "guest_booked"
   | "trader_bought"
   | "trader_sold_back"

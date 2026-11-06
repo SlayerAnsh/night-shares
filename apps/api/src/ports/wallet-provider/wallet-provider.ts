@@ -31,5 +31,6 @@ export const SYSTEM_ADDRESSES = {
   pool: "pool",
   host: "host",
   marketMaker: "market_maker",
+  cutoffClaims: "cutoff_claims",
   rebatePool: "rebate_pool",
 } as const;

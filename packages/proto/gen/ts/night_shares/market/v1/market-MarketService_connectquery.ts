@@ -5,6 +5,16 @@
 import { MarketService } from "./market_pb";
 
 /**
+ * @generated from rpc night_shares.market.v1.MarketService.ClaimCutoff
+ */
+export const claimCutoff = MarketService.method.claimCutoff;
+
+/**
+ * @generated from rpc night_shares.market.v1.MarketService.ListCutoffClaims
+ */
+export const listCutoffClaims = MarketService.method.listCutoffClaims;
+
+/**
  * @generated from rpc night_shares.market.v1.MarketService.PrepareAsk
  */
 export const prepareAsk = MarketService.method.prepareAsk;

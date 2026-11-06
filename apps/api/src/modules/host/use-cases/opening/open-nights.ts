@@ -6,6 +6,7 @@ import { editAllotment } from "../../../inventory/mutations/edit-allotment";
 import { openAllotment } from "../../../inventory/mutations/open-allotment";
 import { walkIncidents } from "../../../walk/repo/incidents";
 import { mapNight } from "../../mappers/night";
+import { assertMaxSupply } from "../../max-s";
 import type { HostDeps } from "../deps";
 import { pushChange } from "./push-change";
 import { selectNights } from "./selection";
@@ -44,6 +45,7 @@ export function createOpenNights(deps: HostDeps) {
               preset,
               floor: floorFromRate(current.state.usualRate),
             };
+            assertMaxSupply(edit.tenths);
             return edited
               ? editAllotment(current, edit)
               : openAllotment(current, edit, deps.ports.clock.now());

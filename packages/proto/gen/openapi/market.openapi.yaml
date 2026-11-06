@@ -141,6 +141,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.market.v1.CancelAskResponse'
+  /night_shares.market.v1.MarketService/ClaimCutoff:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: ClaimCutoff
+      operationId: night_shares.market.v1.MarketService.ClaimCutoff
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.ClaimCutoffRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.ClaimCutoffResponse'
   /night_shares.market.v1.MarketService/CreateAgentOrder:
     post:
       tags:
@@ -386,6 +421,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.market.v1.GetPortfolioResponse'
+  /night_shares.market.v1.MarketService/ListCutoffClaims:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: ListCutoffClaims
+      operationId: night_shares.market.v1.MarketService.ListCutoffClaims
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.ListCutoffClaimsRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.ListCutoffClaimsResponse'
   /night_shares.market.v1.MarketService/ListTape:
     post:
       tags:
@@ -1150,6 +1220,25 @@ components:
       type: object
       title: CancelAskResponse
       additionalProperties: false
+    night_shares.market.v1.ClaimCutoffRequest:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+      title: ClaimCutoffRequest
+      additionalProperties: false
+    night_shares.market.v1.ClaimCutoffResponse:
+      type: object
+      properties:
+        claim:
+          title: claim
+          $ref: '#/components/schemas/night_shares.market.v1.CutoffClaim'
+        alreadyClaimed:
+          type: boolean
+          title: already_claimed
+      title: ClaimCutoffResponse
+      additionalProperties: false
     night_shares.market.v1.CreateAgentOrderRequest:
       type: object
       properties:
@@ -1172,6 +1261,24 @@ components:
           $ref: '#/components/schemas/night_shares.market.v1.AgentOrder'
       title: CreateAgentOrderResponse
       additionalProperties: false
+    night_shares.market.v1.CutoffClaim:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        amount:
+          title: amount
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        claimedAt:
+          title: claimed_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+      title: CutoffClaim
+      additionalProperties: false
+      description: Entitlements are fixed at release and paid only when the holder claims.
     night_shares.market.v1.DiscoverRequest:
       type: object
       properties:
@@ -1359,6 +1466,9 @@ components:
         agentWallet:
           title: agent_wallet
           $ref: '#/components/schemas/night_shares.market.v1.AgentWallet'
+        unclaimedCutoff:
+          title: unclaimed_cutoff
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
       title: GetPortfolioResponse
       additionalProperties: false
     night_shares.market.v1.Holding:
@@ -1386,6 +1496,20 @@ components:
           title: unsold_refund
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
       title: Holding
+      additionalProperties: false
+    night_shares.market.v1.ListCutoffClaimsRequest:
+      type: object
+      title: ListCutoffClaimsRequest
+      additionalProperties: false
+    night_shares.market.v1.ListCutoffClaimsResponse:
+      type: object
+      properties:
+        claims:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.CutoffClaim'
+          title: claims
+      title: ListCutoffClaimsResponse
       additionalProperties: false
     night_shares.market.v1.ListTapeRequest:
       type: object

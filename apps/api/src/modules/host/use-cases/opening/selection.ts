@@ -3,6 +3,7 @@ import { diffDays } from "../../../../shared/dates";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { format } from "../../../../shared/night-key";
 import { toWholeTenths } from "../../../../shared/tenths";
+import { assertMaxSupply } from "../../max-s";
 import type { HostDeps } from "../deps";
 import { propertyOf } from "../property";
 export function selectNights(
@@ -49,6 +50,12 @@ export function selectNights(
     return dates.map((date) => {
       const key = format({ propertyId: p.id, roomTypeId, date });
       const record = deps.ports.inventory.get(key);
+      assertMaxSupply(
+        Math.max(
+          toWholeTenths(requested),
+          toWholeTenths(record.state.booked + record.state.held),
+        ),
+      );
       return {
         record,
         kept: record.state.booked + record.state.held > requested,

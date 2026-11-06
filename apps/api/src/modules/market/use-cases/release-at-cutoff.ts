@@ -1,10 +1,13 @@
 import { cutoffRefund, toMicros } from "@night-shares/market-model";
 import { transaction } from "../../../db/transaction";
-import { SYSTEM_ADDRESSES } from "../../../ports/wallet-provider/wallet-provider";
+import {
+  type SettlementLeg,
+  SYSTEM_ADDRESSES,
+} from "../../../ports/wallet-provider/wallet-provider";
 import { mulTenths } from "../../../shared/money";
 import { toWholeTenths } from "../../../shared/tenths";
 import { cutoffAt } from "../cutoff";
-import { type Deps, realise, syncPosition } from "./context";
+import { type Deps, syncPosition } from "./context";
 
 export async function releaseAtCutoff(deps: Deps) {
   const errors: unknown[] = [];
@@ -51,7 +54,12 @@ async function releaseNight(deps: Deps, key: string) {
       const amount = mulTenths(perNight, size);
       position.free = 0;
       position.escrow = 0;
-      if (size) realise(position, size, amount);
+      if (size)
+        ports.db
+          .query(
+            "INSERT INTO market_cutoff_claims (night_key, human_id, size, amount, average) VALUES (?, ?, ?, ?, ?)",
+          )
+          .run(key, user.humanId, size, amount, position.average);
       return { user, position, previous, size, amount, escrow };
     });
     // Seeded holdings belong to the mock market maker, including unlisted inventory.
@@ -60,12 +68,14 @@ async function releaseNight(deps: Deps, key: string) {
       toWholeTenths(before.state.held) -
         holders.reduce((sum, h) => sum + h.size, 0),
     );
-    const legs = holders.map((h) => ({
-      from: "pool",
-      to: h.user.walletAddress,
-      amount: h.amount,
-      memo: "cutoff refund",
-    }));
+    const legs: SettlementLeg[] = [
+      {
+        from: "pool",
+        to: SYSTEM_ADDRESSES.cutoffClaims,
+        amount: holders.reduce((sum, h) => sum + h.amount, 0n),
+        memo: "cutoff claims escrow",
+      },
+    ];
     legs.push({
       from: "pool",
       to: SYSTEM_ADDRESSES.marketMaker,
@@ -106,6 +116,9 @@ async function releaseNight(deps: Deps, key: string) {
     await ports.walletProvider.settle(reservation.legs);
   } catch (error) {
     transaction(ports.db, () => {
+      ports.db
+        .query("DELETE FROM market_cutoff_claims WHERE night_key = ?")
+        .run(key);
       ports.inventory.save(reservation.before);
       for (const holder of reservation.holders)
         Object.assign(holder.position, holder.previous);
@@ -113,6 +126,9 @@ async function releaseNight(deps: Deps, key: string) {
     throw error;
   }
   transaction(ports.db, () => {
+    ports.db
+      .query("UPDATE market_cutoff_claims SET ready = 1 WHERE night_key = ?")
+      .run(key);
     const event = {
       nightKey: key,
       propertyId: reservation.before.propertyId,
@@ -129,7 +145,7 @@ async function releaseNight(deps: Deps, key: string) {
         });
       ports.activity.append({
         ...event,
-        kind: "cutoff_refund",
+        kind: "cutoff_claimable",
         userId: holder.user.id,
         tenths: holder.size,
         priceMicros: reservation.perNight,

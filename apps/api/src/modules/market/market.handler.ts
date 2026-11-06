@@ -6,6 +6,10 @@ import { cancelAllAsks } from "./orders/cancel-all";
 import { prepareAsk } from "./orders/prepare";
 import { approveAgentOrder } from "./use-cases/account/approve-agent-order";
 import { cancelAsk } from "./use-cases/account/cancel-ask";
+import {
+  claimCutoff,
+  listCutoffClaims,
+} from "./use-cases/account/claim-cutoff";
 import { createAgentOrder } from "./use-cases/account/create-agent-order";
 import { getPortfolio } from "./use-cases/account/get-portfolio";
 import { listWatch } from "./use-cases/account/list-watch";
@@ -35,6 +39,9 @@ export function createMarketHandler(
   deps: Deps,
 ): ServiceImpl<typeof MarketService> {
   return {
+    claimCutoff: (r, ctx) =>
+      claimCutoff(deps, requireUser(ctx), nightKey(r.night)),
+    listCutoffClaims: (_, ctx) => listCutoffClaims(deps, requireUser(ctx)),
     prepareAsk: (r, ctx) =>
       prepareAsk(
         deps,

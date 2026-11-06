@@ -7,13 +7,25 @@ import { mulTenths } from "../../../../shared/money";
 import { toProto } from "../../../../shared/night-key";
 import { toWholeTenths } from "../../../../shared/tenths";
 import { signedAsks } from "../../orders/store";
+import { cutoffClaims } from "../../repo/cutoff-claims";
 import { type Deps, syncPosition } from "../context";
 import { humanWallets } from "../human-wallets";
 import { isHost } from "../trading/host-fees";
 export function getPortfolio(deps: Deps, user: User) {
   const response = create(GetPortfolioResponseSchema);
+  const unclaimed = cutoffClaims(deps.ports.db, user.humanId).filter(
+    (claim) => claim.claimed_at === null,
+  );
+  response.unclaimedCutoff = {
+    $typeName: "night_shares.common.v1.Usdc",
+    micros: unclaimed.reduce((sum, claim) => sum + claim.amount, 0n),
+  };
   let realised = 0n,
-    unrealised = 0n,
+    unrealised = unclaimed.reduce(
+      (sum, claim) =>
+        sum + claim.amount - mulTenths(claim.average, Number(claim.size)),
+      0n,
+    ),
     closed = 0,
     wins = 0,
     returns = 0;

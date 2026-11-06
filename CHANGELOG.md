@@ -6,6 +6,9 @@ All notable changes to this monorepo. Newest first.
 
 ### Added
 
+- Cutoff pull claims: persisted entitlements, cutoff_claims escrow, Orb ClaimCutoff and ListCutoffClaims RPCs, unclaimed portfolio amounts, and claim activity. Holder payouts occur only on claim.
+- Host allotments are capped at 100 rooms per night and room type. Portfolio and hotel availableNow consistently show unswept earnings, with regression coverage after automatic sweeps.
+
 - Signed trader asks: EIP-712 orders (`PrepareAsk`, signed `PostAsk`, `CancelAllAsks`) with per maker nonces, 24 hour default expiry, no escrow, and fills limited to the maker's current holding. The order encoding matches the contracts package (token base units, uint64 seconds, Keccak-256 night key). An `OrderSigner` port has a mock HMAC adapter; mock mode signs custodially when no signature is sent.
 - Walk reports carry `evidenceHash` (SHA-256 of tag UID, tag counter, tap time and booking ID) and a typed `WalkAttestation` for the API attester. Reception tags keep a monotonic per tag counter.
 - Web visual base: global base CSS and React primitives in `packages/design-system` (Button, IconButton, Card, Field, Input, Select, Stepper, Pill, Badge, Chip, Stat, Segmented, Tabs, Switch, Dialog, Table, EmptyState, Spinner, Skeleton, Photo, Display, Eyebrow), CSS Modules on tokens only, fonts through `next/font`, the shared app shell and nav (brand, Stay, Trade and Host switcher, section links, World ID account menu with sign out), the landing page and the World ID sign in page styled after the mock.
