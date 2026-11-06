@@ -4,7 +4,7 @@ import {
   createBooking,
   lockQuote,
 } from "@night-shares/proto/stay/v1/stay-StayService_connectquery";
-import { PayMethod, type StayQuote } from "@night-shares/proto/stay/v1/trip_pb";
+import type { StayQuote } from "@night-shares/proto/stay/v1/trip_pb";
 import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useRequireAccess } from "../../../session/require-access";
@@ -25,7 +25,6 @@ export function useCheckout(propertyId: string) {
   });
   const [lockedQuote, setLockedQuote] = useState<StayQuote>();
   const [now, setNow] = useState(() => Date.now());
-  const [payMethod, setPayMethod] = useState(PayMethod.USDC);
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
   const attempted = useRef(false);
@@ -63,7 +62,6 @@ export function useCheckout(propertyId: string) {
       lockId: lock.data.lockId,
       guestName,
       guestEmail,
-      payMethod,
     });
   }
   return {
@@ -73,8 +71,6 @@ export function useCheckout(propertyId: string) {
     lock,
     booking,
     countdown,
-    payMethod,
-    setPayMethod,
     guestName,
     setGuestName,
     guestEmail,

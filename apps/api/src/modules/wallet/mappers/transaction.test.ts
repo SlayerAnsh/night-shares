@@ -22,12 +22,12 @@ test("maps outgoing micros, memo kind, reference and exact timestamp", () => {
 test("maps incoming deposits and preserves unknown memos", () => {
   const tx = {
     id: "tx_2",
-    from: "onramp",
+    from: "treasury",
     to: "alice",
     amount: 1n,
     at: 0,
     direction: "in" as const,
-    memo: "onramp",
+    memo: "deposit",
   };
   expect(toTransaction(tx)).toMatchObject({
     kind: TransactionKind.DEPOSIT,

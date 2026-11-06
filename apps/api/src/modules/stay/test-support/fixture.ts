@@ -1,7 +1,6 @@
 import { create } from "@bufbuild/protobuf";
 import { CreateBookingRequestSchema } from "@night-shares/proto/stay/v1/stay_pb";
 import {
-  PayMethod,
   StaySelectionSchema,
   TripSchema,
 } from "@night-shares/proto/stay/v1/trip_pb";
@@ -47,7 +46,6 @@ export async function bookingFixture() {
     lockId: lock.id,
     guestName: "Test Guest",
     guestEmail: "guest@example.test",
-    payMethod: PayMethod.USDC,
   });
   return { ...f, user, quote, lock, request };
 }

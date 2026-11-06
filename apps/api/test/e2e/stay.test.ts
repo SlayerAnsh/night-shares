@@ -1,5 +1,4 @@
 import { expect, test } from "bun:test";
-import { PayMethod } from "@night-shares/proto/stay/v1/trip_pb";
 import type { MockClock } from "../../src/ports/clock/clock.mock";
 import { createHarness } from "./harness";
 
@@ -41,7 +40,6 @@ test("search, quote, lock, USDC booking, receipt, trips and verified check-in", 
     const { trip } = await clients.stay.createBooking({
       ...guest,
       lockId: lock.lockId,
-      payMethod: PayMethod.USDC,
     });
     expect(before - (await wallet.balance(user.walletAddress))).toBe(
       trip?.total?.micros ?? 0n,
@@ -82,26 +80,6 @@ test("search, quote, lock, USDC booking, receipt, trips and verified check-in", 
   }
 });
 
-test("card bookings fund the wallet and settle the same quote", async () => {
-  const h = await createHarness();
-  try {
-    const { user, clients } = await h.signInAs("device", "card");
-    const { quote } = await clients.stay.quoteStay({ selection });
-    const lock = await clients.stay.lockQuote({ quoteId: quote?.id });
-    const wallet = h.container.ports.walletProvider;
-    const before = await wallet.balance(user.walletAddress);
-    const { trip } = await clients.stay.createBooking({
-      ...guest,
-      lockId: lock.lockId,
-      payMethod: PayMethod.CARD,
-    });
-    expect(trip?.payMethod).toBe(PayMethod.CARD);
-    expect(await wallet.balance(user.walletAddress)).toBe(before);
-  } finally {
-    await h.close();
-  }
-});
-
 test("locks expire after ten minutes", async () => {
   const h = await createHarness();
   try {
@@ -113,7 +91,6 @@ test("locks expire after ten minutes", async () => {
       clients.stay.createBooking({
         ...guest,
         lockId: lock.lockId,
-        payMethod: PayMethod.USDC,
       }),
     ).rejects.toThrow("Quote lock is unavailable or expired.");
   } finally {

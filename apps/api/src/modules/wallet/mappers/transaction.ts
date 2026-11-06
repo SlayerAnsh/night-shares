@@ -11,7 +11,6 @@ const kinds: Record<string, TransactionKind> = {
   withdraw: TransactionKind.WITHDRAWAL,
   fee: TransactionKind.FEE,
   deposit: TransactionKind.DEPOSIT,
-  onramp: TransactionKind.DEPOSIT,
 };
 export function toTransaction(tx: WalletTransaction) {
   // The contract represents direction with the sign of the amount.

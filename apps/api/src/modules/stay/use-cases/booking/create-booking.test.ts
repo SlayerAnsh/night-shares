@@ -1,5 +1,4 @@
 import { expect, test } from "bun:test";
-import { PayMethod } from "@night-shares/proto/stay/v1/trip_pb";
 import { routeNight } from "../../pricing/quote-night";
 import { bookingFixture } from "../../test-support/fixture";
 import { fillNight } from "./fill-night";
@@ -21,22 +20,6 @@ test("USDC booking burns room nights, pays exact total and returns a private tri
   await expect(f.cases.createBooking(f.request, f.user)).rejects.toThrow(
     "Quote lock",
   );
-});
-test("card payment credits wallet before settlement", async () => {
-  const f = await bookingFixture();
-  const before = await f.ports.walletProvider.balance(f.user.walletAddress);
-  await f.cases.createBooking(
-    { ...f.request, payMethod: PayMethod.CARD },
-    f.user,
-  );
-  expect(await f.ports.walletProvider.balance(f.user.walletAddress)).toBe(
-    before,
-  );
-  expect(
-    (await f.ports.walletProvider.transactions(f.user.walletAddress)).some(
-      (tx) => tx.memo === "onramp",
-    ),
-  ).toBe(true);
 });
 test("foreign and expired locks reject before payment", async () => {
   const f = await bookingFixture();
@@ -162,7 +145,7 @@ test("parallel distinct locks with funds for one booking reserve only one stay",
   expect(f.ports.activity.list({ kinds: ["guest_booked"] })).toHaveLength(2);
 });
 
-test("failed card settlement restores nights and lock while retaining onramp credit", async () => {
+test("failed USDC settlement restores nights and lock without changing wallet balance", async () => {
   const f = await bookingFixture();
   const before = f.ports.inventory.get(f.key);
   const wallet = f.ports.walletProvider;
@@ -170,13 +153,11 @@ test("failed card settlement restores nights and lock while retaining onramp cre
   wallet.settle = async () => {
     throw new Error("settlement failed");
   };
-  await expect(
-    f.cases.createBooking({ ...f.request, payMethod: PayMethod.CARD }, f.user),
-  ).rejects.toThrow("settlement failed");
-  expect(f.ports.inventory.get(f.key)).toEqual(before);
-  expect(await wallet.balance(f.user.walletAddress)).toBe(
-    balance + (f.quote.total?.micros ?? 0n),
+  await expect(f.cases.createBooking(f.request, f.user)).rejects.toThrow(
+    "settlement failed",
   );
+  expect(f.ports.inventory.get(f.key)).toEqual(before);
+  expect(await wallet.balance(f.user.walletAddress)).toBe(balance);
   expect(f.repo.locks.get(f.lock.id)?.busy).toBe(false);
   expect(f.repo.trips.size).toBe(0);
   expect(f.ports.activity.list({ kinds: ["guest_booked"] })).toHaveLength(0);

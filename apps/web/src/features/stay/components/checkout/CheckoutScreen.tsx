@@ -1,5 +1,4 @@
 "use client";
-import { PayMethod } from "@night-shares/proto/stay/v1/trip_pb";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { formatUsdc } from "../../../../shared/format";
@@ -97,21 +96,7 @@ function CheckoutForm({ propertyId }: { propertyId: string }) {
           />
         </label>
         <p>Sent only to your hotel.</p>
-        <label>
-          Payment{" "}
-          <select
-            value={c.payMethod}
-            onChange={(e) => c.setPayMethod(Number(e.target.value))}
-          >
-            <option value={PayMethod.USDC}>USDC</option>
-            <option value={PayMethod.CARD}>Card</option>
-          </select>
-        </label>
-        <p>
-          {c.payMethod === PayMethod.CARD
-            ? "Pay by card, settled in USDC."
-            : "Pay with USDC from your wallet on Arc."}
-        </p>
+        <p>Paid from your wallet on Arc</p>
         <button
           type="submit"
           disabled={
@@ -122,11 +107,7 @@ function CheckoutForm({ propertyId }: { propertyId: string }) {
         </button>
         {c.booking.isPending && (
           <div role="status">
-            <p>
-              {c.payMethod === PayMethod.CARD
-                ? "Charging your card"
-                : "Paying in USDC"}
-            </p>
+            <p>Paying in USDC</p>
             <ol>
               <li>Locking your price</li>
               <li>Booking your room</li>

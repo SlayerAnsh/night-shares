@@ -1,7 +1,7 @@
 import { create } from "@bufbuild/protobuf";
 import { toMicros } from "@night-shares/market-model";
 import type { CreateBookingRequest } from "@night-shares/proto/stay/v1/stay_pb";
-import { PayMethod, TripSchema } from "@night-shares/proto/stay/v1/trip_pb";
+import { TripSchema } from "@night-shares/proto/stay/v1/trip_pb";
 import type { Ports } from "../../../../container/ports";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
@@ -28,37 +28,23 @@ export function createCreateBooking(ports: Ports, repo: StayRepo) {
         "Quote lock is unavailable or expired.",
       );
     if (
-      ![PayMethod.USDC, PayMethod.CARD].includes(input.payMethod) ||
       !input.guestName.trim() ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.guestEmail)
     )
       throw new DomainError(
         "INVALID_ARGUMENT",
-        "Provide guest name, email and payment method.",
+        "Provide guest name and email.",
       );
     lock.busy = true;
     let committed = false;
     try {
       const { value, dates } = selection(ports, lock.quote.selection);
       const keys = dates.map((date) => format({ ...value, date }));
-      const preview = () =>
-        keys.map((key) => ({
-          key,
-          route: routeNight(ports.inventory.get(key), value.rooms),
-        }));
-      const initial = preview();
+      const current = keys.map((key) => ({
+        key,
+        route: routeNight(ports.inventory.get(key), value.rooms),
+      }));
       const locked = lock.quote.total?.micros ?? 0n;
-      const initialTotal = initial.reduce(
-        (sum, n) => sum + toMicros(n.route.total),
-        0n,
-      );
-      const charge = minMicros(initialTotal, locked);
-      if (input.payMethod === PayMethod.CARD)
-        await ports.onramp.chargeCard({
-          amount: charge,
-          address: user.walletAddress,
-        });
-      const current = preview();
       const total = current.reduce(
         (sum, n) => sum + toMicros(n.route.total),
         0n,
@@ -123,7 +109,6 @@ export function createCreateBooking(ports: Ports, repo: StayRepo) {
         hotelRef,
         total: { micros: paid },
         fee: { micros: minMicros(fee, paid) },
-        payMethod: input.payMethod,
       });
       repo.trips.set(id, {
         trip,

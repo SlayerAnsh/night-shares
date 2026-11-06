@@ -595,9 +595,6 @@ components:
         guestEmail:
           type: string
           title: guest_email
-        payMethod:
-          title: pay_method
-          $ref: '#/components/schemas/night_shares.stay.v1.PayMethod'
       title: CreateBookingRequest
       additionalProperties: false
     night_shares.stay.v1.CreateBookingResponse:
@@ -720,13 +717,6 @@ components:
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
       title: NightPrice
       additionalProperties: false
-    night_shares.stay.v1.PayMethod:
-      type: string
-      title: PayMethod
-      enum:
-        - PAY_METHOD_UNSPECIFIED
-        - PAY_METHOD_USDC
-        - PAY_METHOD_CARD
     night_shares.stay.v1.PriceSource:
       type: string
       title: PriceSource
@@ -880,9 +870,6 @@ components:
         fee:
           title: fee
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
-        payMethod:
-          title: pay_method
-          $ref: '#/components/schemas/night_shares.stay.v1.PayMethod'
         checkedIn:
           type: boolean
           title: checked_in

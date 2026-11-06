@@ -5,12 +5,6 @@ package night_shares.stay.v1;
 import "google/protobuf/timestamp.proto";
 import "night_shares/common/v1/money.proto";
 
-enum PayMethod {
-  PAY_METHOD_UNSPECIFIED = 0;
-  PAY_METHOD_USDC = 1;
-  PAY_METHOD_CARD = 2;
-}
-
 enum PriceSource {
   PRICE_SOURCE_UNSPECIFIED = 0;
   PRICE_SOURCE_HOTEL = 1;
@@ -41,7 +35,8 @@ message Trip {
   int32 rooms = 10;
   night_shares.common.v1.Usdc total = 11;
   night_shares.common.v1.Usdc fee = 12;
-  PayMethod pay_method = 13;
+  reserved 13;
+  reserved "pay_method";
   bool checked_in = 14;
 }
 

@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file night_shares/stay/v1/trip.proto.
  */
 export const file_night_shares_stay_v1_trip: GenFile = /*@__PURE__*/
-  fileDesc("Ch9uaWdodF9zaGFyZXMvc3RheS92MS90cmlwLnByb3RvEhRuaWdodF9zaGFyZXMuc3RheS52MSKMAQoNU3RheVNlbGVjdGlvbhITCgtwcm9wZXJ0eV9pZBgBIAEoCRIUCgxyb29tX3R5cGVfaWQYAiABKAkSEAoIY2hlY2tfaW4YAyABKAkSEQoJY2hlY2tfb3V0GAQgASgJEg4KBmFkdWx0cxgFIAEoBRIMCgRraWRzGAYgASgFEg0KBXJvb21zGAcgASgFItACCgRUcmlwEgoKAmlkGAEgASgJEgsKA3JlZhgCIAEoCRIRCglob3RlbF9yZWYYAyABKAkSEwoLcHJvcGVydHlfaWQYBCABKAkSFAoMcm9vbV90eXBlX2lkGAUgASgJEhAKCGNoZWNrX2luGAYgASgJEhEKCWNoZWNrX291dBgHIAEoCRIOCgZhZHVsdHMYCCABKAUSDAoEa2lkcxgJIAEoBRINCgVyb29tcxgKIAEoBRIrCgV0b3RhbBgLIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIpCgNmZWUYDCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSMwoKcGF5X21ldGhvZBgNIAEoDjIfLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlBheU1ldGhvZBISCgpjaGVja2VkX2luGA4gASgIIqwBCgpOaWdodFByaWNlEgwKBGRhdGUYASABKAkSKwoFcHJpY2UYAiABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSMQoGc291cmNlGAMgASgOMiEubmlnaHRfc2hhcmVzLnN0YXkudjEuUHJpY2VTb3VyY2USMAoKdXN1YWxfcmF0ZRgEIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyKLAgoJU3RheVF1b3RlEgoKAmlkGAEgASgJEjYKCXNlbGVjdGlvbhgCIAEoCzIjLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlN0YXlTZWxlY3Rpb24SKwoFdG90YWwYAyABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSKQoDZmVlGAQgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEjAKBm5pZ2h0cxgFIAMoCzIgLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLk5pZ2h0UHJpY2USMAoKdXN1YWxfcmF0ZRgGIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyKoAQoHUmVjZWlwdBIoCgR0cmlwGAEgASgLMhoubmlnaHRfc2hhcmVzLnN0YXkudjEuVHJpcBIuCghzdWJ0b3RhbBgCIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIWCg53YWxsZXRfYWRkcmVzcxgDIAEoCRIrCgdwYWlkX2F0GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCpRCglQYXlNZXRob2QSGgoWUEFZX01FVEhPRF9VTlNQRUNJRklFRBAAEhMKD1BBWV9NRVRIT0RfVVNEQxABEhMKD1BBWV9NRVRIT0RfQ0FSRBACKnkKC1ByaWNlU291cmNlEhwKGFBSSUNFX1NPVVJDRV9VTlNQRUNJRklFRBAAEhYKElBSSUNFX1NPVVJDRV9IT1RFTBABEhcKE1BSSUNFX1NPVVJDRV9UUkFERVIQAhIbChdQUklDRV9TT1VSQ0VfUkVDQUxMX0NBUBADYgZwcm90bzM", [file_google_protobuf_timestamp, file_night_shares_common_v1_money]);
+  fileDesc("Ch9uaWdodF9zaGFyZXMvc3RheS92MS90cmlwLnByb3RvEhRuaWdodF9zaGFyZXMuc3RheS52MSKMAQoNU3RheVNlbGVjdGlvbhITCgtwcm9wZXJ0eV9pZBgBIAEoCRIUCgxyb29tX3R5cGVfaWQYAiABKAkSEAoIY2hlY2tfaW4YAyABKAkSEQoJY2hlY2tfb3V0GAQgASgJEg4KBmFkdWx0cxgFIAEoBRIMCgRraWRzGAYgASgFEg0KBXJvb21zGAcgASgFIq0CCgRUcmlwEgoKAmlkGAEgASgJEgsKA3JlZhgCIAEoCRIRCglob3RlbF9yZWYYAyABKAkSEwoLcHJvcGVydHlfaWQYBCABKAkSFAoMcm9vbV90eXBlX2lkGAUgASgJEhAKCGNoZWNrX2luGAYgASgJEhEKCWNoZWNrX291dBgHIAEoCRIOCgZhZHVsdHMYCCABKAUSDAoEa2lkcxgJIAEoBRINCgVyb29tcxgKIAEoBRIrCgV0b3RhbBgLIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIpCgNmZWUYDCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSEgoKY2hlY2tlZF9pbhgOIAEoCEoECA0QDlIKcGF5X21ldGhvZCKsAQoKTmlnaHRQcmljZRIMCgRkYXRlGAEgASgJEisKBXByaWNlGAIgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEjEKBnNvdXJjZRgDIAEoDjIhLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlByaWNlU291cmNlEjAKCnVzdWFsX3JhdGUYBCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMiiwIKCVN0YXlRdW90ZRIKCgJpZBgBIAEoCRI2CglzZWxlY3Rpb24YAiABKAsyIy5uaWdodF9zaGFyZXMuc3RheS52MS5TdGF5U2VsZWN0aW9uEisKBXRvdGFsGAMgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEikKA2ZlZRgEIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIwCgZuaWdodHMYBSADKAsyIC5uaWdodF9zaGFyZXMuc3RheS52MS5OaWdodFByaWNlEjAKCnVzdWFsX3JhdGUYBiABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMiqAEKB1JlY2VpcHQSKAoEdHJpcBgBIAEoCzIaLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlRyaXASLgoIc3VidG90YWwYAiABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFgoOd2FsbGV0X2FkZHJlc3MYAyABKAkSKwoHcGFpZF9hdBgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAqeQoLUHJpY2VTb3VyY2USHAoYUFJJQ0VfU09VUkNFX1VOU1BFQ0lGSUVEEAASFgoSUFJJQ0VfU09VUkNFX0hPVEVMEAESFwoTUFJJQ0VfU09VUkNFX1RSQURFUhACEhsKF1BSSUNFX1NPVVJDRV9SRUNBTExfQ0FQEANiBnByb3RvMw", [file_google_protobuf_timestamp, file_night_shares_common_v1_money]);
 
 /**
  * @generated from message night_shares.stay.v1.StaySelection
@@ -126,11 +126,6 @@ export type Trip = Message<"night_shares.stay.v1.Trip"> & {
    * @generated from field: night_shares.common.v1.Usdc fee = 12;
    */
   fee?: Usdc | undefined;
-
-  /**
-   * @generated from field: night_shares.stay.v1.PayMethod pay_method = 13;
-   */
-  payMethod: PayMethod;
 
   /**
    * @generated from field: bool checked_in = 14;
@@ -252,32 +247,6 @@ export const ReceiptSchema: GenMessage<Receipt> = /*@__PURE__*/
   messageDesc(file_night_shares_stay_v1_trip, 4);
 
 /**
- * @generated from enum night_shares.stay.v1.PayMethod
- */
-export enum PayMethod {
-  /**
-   * @generated from enum value: PAY_METHOD_UNSPECIFIED = 0;
-   */
-  UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: PAY_METHOD_USDC = 1;
-   */
-  USDC = 1,
-
-  /**
-   * @generated from enum value: PAY_METHOD_CARD = 2;
-   */
-  CARD = 2,
-}
-
-/**
- * Describes the enum night_shares.stay.v1.PayMethod.
- */
-export const PayMethodSchema: GenEnum<PayMethod> = /*@__PURE__*/
-  enumDesc(file_night_shares_stay_v1_trip, 0);
-
-/**
  * @generated from enum night_shares.stay.v1.PriceSource
  */
 export enum PriceSource {
@@ -306,5 +275,5 @@ export enum PriceSource {
  * Describes the enum night_shares.stay.v1.PriceSource.
  */
 export const PriceSourceSchema: GenEnum<PriceSource> = /*@__PURE__*/
-  enumDesc(file_night_shares_stay_v1_trip, 1);
+  enumDesc(file_night_shares_stay_v1_trip, 0);
 

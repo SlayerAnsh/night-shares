@@ -69,7 +69,8 @@ message CreateBookingRequest {
   string lock_id = 1;
   string guest_name = 2;
   string guest_email = 3;
-  PayMethod pay_method = 4;
+  reserved 4;
+  reserved "pay_method";
 }
 
 message CreateBookingResponse {
