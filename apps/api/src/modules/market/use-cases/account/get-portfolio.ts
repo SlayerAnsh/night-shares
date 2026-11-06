@@ -1,9 +1,11 @@
 import { create } from "@bufbuild/protobuf";
+import { timestampFromMs } from "@bufbuild/protobuf/wkt";
 import { cutoffRefund, toMicros, toTenths } from "@night-shares/market-model";
 import { GetPortfolioResponseSchema } from "@night-shares/proto/market/v1/market_pb";
 import type { User } from "../../../../ports/sessions/session-store";
 import { mulTenths } from "../../../../shared/money";
 import { toProto } from "../../../../shared/night-key";
+import { signedAsks } from "../../orders/store";
 import { type Deps, syncPosition } from "../context";
 import { humanWallets } from "../human-wallets";
 import { isHost } from "../trading/host-fees";
@@ -19,7 +21,10 @@ export function getPortfolio(deps: Deps, user: User) {
     const position = syncPosition(deps, user, record);
     const wallets = humanWallets(deps.ports, user, record.propertyId);
     const ask = record.state.traderAsks.find((a) => wallets.has(a.who ?? ""));
-    const size = position.free + (ask ? toTenths(ask.size) : 0);
+    const signed = signedAsks(deps.ports.db, key).find(
+      (a) => a.maker === ask?.who,
+    );
+    const size = position.free + position.escrow;
     const value = mulTenths(toMicros(record.state.pstar), size);
     const pnl = value - mulTenths(position.average, size);
     realised += position.realised;
@@ -55,6 +60,10 @@ export function getPortfolio(deps: Deps, user: User) {
       response.listings.push({
         $typeName: "night_shares.market.v1.Ask",
         id: `${key}|${ask.who}`,
+        expiry: signed ? timestampFromMs(Number(signed.expiry)) : undefined,
+        nonce: signed?.nonce ?? 0n,
+        maker: signed?.maker ?? "",
+        digest: signed?.digest ?? "",
         night,
         size: {
           $typeName: "night_shares.common.v1.RoomNights",

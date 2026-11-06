@@ -9,6 +9,7 @@ import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyPoolSell } from "../../../inventory/mutations/apply-pool-sell";
+import { signedAsks } from "../../orders/store";
 import { assertOpen, type Deps, realise, syncPosition } from "../context";
 import { isHost, tradeFeePayments } from "./host-fees";
 import { quoteSell } from "./quote-sell";
@@ -32,9 +33,11 @@ async function executeSell(
   min: bigint,
 ) {
   const { ports } = deps;
-  const { record, quote, position, previous, reserved } = transaction(
-    ports.db,
-    () => {
+  const { record, quote, position, previous, reserved, listedMakers } =
+    transaction(ports.db, () => {
+      const listedMakers = signedAsks(ports.db, key)
+        .filter((a) => a.human_id === user.humanId && a.status === "open")
+        .map((a) => a.maker);
       let quote: RouteQuote | undefined;
       const record = ports.inventory.update(key, (current) => {
         assertOpen(ports, current);
@@ -67,9 +70,8 @@ async function executeSell(
       position.free -= size;
       realise(position, size, quote.total?.micros ?? 0n);
       const reserved = { ...position };
-      return { record, quote, position, previous, reserved };
-    },
-  );
+      return { record, quote, position, previous, reserved, listedMakers };
+    });
   try {
     await ports.walletProvider.settle(
       [
@@ -97,6 +99,12 @@ async function executeSell(
     transaction(ports.db, () => {
       ports.inventory.update(key, (current) => applyPoolBuy(current, size));
       position.free += size;
+      for (const maker of listedMakers)
+        ports.db
+          .query(
+            "UPDATE market_signed_asks SET status = 'open' WHERE night_key = ? AND maker = ? AND status = 'unfillable'",
+          )
+          .run(key, maker);
       position.realised += previous.realised - reserved.realised;
       position.closed += previous.closed - reserved.closed;
       position.wins += previous.wins - reserved.wins;

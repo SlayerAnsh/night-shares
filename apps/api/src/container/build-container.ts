@@ -7,6 +7,9 @@ import { createHostModule } from "../modules/host/module";
 import { createIdentityModule } from "../modules/identity/module";
 import { createSqliteInventoryRepo } from "../modules/inventory/inventory-repo.sqlite";
 import { createMarketModule } from "../modules/market/module";
+import { signedInventory } from "../modules/market/orders/inventory";
+import { configureOrders } from "../modules/market/orders/settings";
+import { defaultDomain } from "../modules/market/orders/typed-data";
 import { createStayModule } from "../modules/stay/module";
 import { createWalletModule } from "../modules/wallet/module";
 import { createSqliteActivityLog } from "../ports/activity/activity-log.sqlite";
@@ -18,6 +21,7 @@ import { createMockIdentityVerifier } from "../ports/identity-verifier/identity-
 import { createWorldIdIdentityVerifier } from "../ports/identity-verifier/identity-verifier.world-id";
 import { createMockIdGenerator } from "../ports/ids/id-generator.mock";
 import { createRandomIdGenerator } from "../ports/ids/id-generator.random";
+import { createMockOrderSigner } from "../ports/order-signer/order-signer.mock";
 import { createMockReceptionTag } from "../ports/reception-tag/reception-tag.mock";
 import { createSqliteSessionStore } from "../ports/sessions/session-store.sqlite";
 import { createSqliteVerificationStore } from "../ports/verifications/verification-store.sqlite";
@@ -90,6 +94,16 @@ export function buildContainer(config: Config) {
             }),
       channelManager: createMockChannelManager({ catalog, clock, ids }),
     };
+  configureOrders(ports, {
+    domain: {
+      chainId: config.orderChainId ?? defaultDomain.chainId,
+      verifyingContract: (config.orderVerifyingContract ??
+        defaultDomain.verifyingContract) as `0x${string}`,
+    },
+    signer: createMockOrderSigner(config.orderMockSecret),
+    custodial: config.adapters === "mock",
+  });
+  ports.inventory = signedInventory(ports, ports.inventory);
   const modules = {
     identity: createIdentityModule(ports),
     catalog: createCatalogModule(ports),

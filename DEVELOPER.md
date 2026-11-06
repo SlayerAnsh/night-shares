@@ -40,6 +40,9 @@ API settings come from `apps/api/src/config/load-config.ts` and `server-config.t
 | `PORT` | `8787` | API listener, integer 0 to 65535; 0 selects an ephemeral port |
 | `DB_PATH` | `./data/night-shares.db` | SQLite path, or `:memory:` for isolated tests |
 | `ADAPTERS` | `mock` | Only supported value; wallet and chain remain mock |
+| `ORDER_CHAIN_ID` | `5042002` | Positive EIP-712 domain chain ID |
+| `ORDER_VERIFYING_CONTRACT` | `0x0000000000000000000000000000000000000000` | EIP-712 verifying contract address |
+| `ORDER_MOCK_SECRET` | `night-shares-dev-order-secret` | HMAC-SHA256 secret for mock order signatures |
 | `DEV_TAG_ISSUER` | `false` | Set `DEV_TAG_ISSUER=true` for the local demo only. Enables guest tag issuance with `ADAPTERS=mock`; startup fails otherwise. Real presence requires platform provisioned NFC tags |
 | `CLOCK` | `system` | `system` or settable `mock` clock |
 | `TODAY` | unset | Optional valid `YYYY-MM-DD`; overrides the system clock's calendar date, not its timestamp, or initializes mock time |

@@ -1,14 +1,14 @@
 import { buildContainer } from "../../../container/build-container";
 import type { User } from "../../../ports/sessions/session-store";
 import { format } from "../../../shared/night-key";
-import { createMemoryMarketRepo } from "../repo/market-repo.memory";
+import { createSqliteMarketRepo } from "../repo/market-repo.sqlite";
 export async function fixture() {
   const { ports } = buildContainer({
     port: 0,
     adapters: "mock",
     today: "2026-12-01",
   });
-  const repo = createMemoryMarketRepo();
+  const repo = createSqliteMarketRepo(ports.db);
   const user: User = {
     id: "usr_trader",
     humanId: "human_trader",

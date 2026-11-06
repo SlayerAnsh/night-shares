@@ -52,6 +52,10 @@ message Ask {
   night_shares.common.v1.NightKey night = 2;
   night_shares.common.v1.RoomNights size = 3;
   night_shares.common.v1.Usdc price = 4;
+  google.protobuf.Timestamp expiry = 5;
+  uint64 nonce = 6;
+  string maker = 7;
+  string digest = 8;
 }
 
 message Execution {

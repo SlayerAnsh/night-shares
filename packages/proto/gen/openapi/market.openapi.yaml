@@ -71,6 +71,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.market.v1.BuyResponse'
+  /night_shares.market.v1.MarketService/CancelAllAsks:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: CancelAllAsks
+      operationId: night_shares.market.v1.MarketService.CancelAllAsks
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.CancelAllAsksRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.CancelAllAsksResponse'
   /night_shares.market.v1.MarketService/CancelAsk:
     post:
       tags:
@@ -456,6 +491,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.market.v1.PostAskResponse'
+  /night_shares.market.v1.MarketService/PrepareAsk:
+    post:
+      tags:
+        - night_shares.market.v1.MarketService
+      summary: PrepareAsk
+      operationId: night_shares.market.v1.MarketService.PrepareAsk
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.market.v1.PrepareAskRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.market.v1.PrepareAskResponse'
   /night_shares.market.v1.MarketService/QuoteBuy:
     post:
       tags:
@@ -982,6 +1052,21 @@ components:
         price:
           title: price
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        expiry:
+          title: expiry
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        nonce:
+          type:
+            - integer
+            - string
+          title: nonce
+          format: int64
+        maker:
+          type: string
+          title: maker
+        digest:
+          type: string
+          title: digest
       title: Ask
       additionalProperties: false
     night_shares.market.v1.BookLevel:
@@ -1034,6 +1119,24 @@ components:
           title: execution
           $ref: '#/components/schemas/night_shares.market.v1.Execution'
       title: BuyResponse
+      additionalProperties: false
+    night_shares.market.v1.CancelAllAsksRequest:
+      type: object
+      title: CancelAllAsksRequest
+      additionalProperties: false
+    night_shares.market.v1.CancelAllAsksResponse:
+      type: object
+      properties:
+        nonce:
+          type:
+            - integer
+            - string
+          title: nonce
+          format: int64
+        cancelledCount:
+          type: integer
+          title: cancelled_count
+      title: CancelAllAsksResponse
       additionalProperties: false
     night_shares.market.v1.CancelAskRequest:
       type: object
@@ -1397,6 +1500,19 @@ components:
         price:
           title: price
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        expiry:
+          title: expiry
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        nonce:
+          type:
+            - integer
+            - string
+            - "null"
+          title: nonce
+          format: int64
+        signature:
+          type: string
+          title: signature
       title: PostAskRequest
       additionalProperties: false
     night_shares.market.v1.PostAskResponse:
@@ -1412,6 +1528,37 @@ components:
           type: boolean
           title: is_above_recall_cap
       title: PostAskResponse
+      additionalProperties: false
+    night_shares.market.v1.PrepareAskRequest:
+      type: object
+      properties:
+        night:
+          title: night
+          $ref: '#/components/schemas/night_shares.common.v1.NightKey'
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        price:
+          title: price
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        expiry:
+          title: expiry
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+      title: PrepareAskRequest
+      additionalProperties: false
+    night_shares.market.v1.PrepareAskResponse:
+      type: object
+      properties:
+        order:
+          title: order
+          $ref: '#/components/schemas/night_shares.market.v1.Ask'
+        typedDataJson:
+          type: string
+          title: typed_data_json
+        digest:
+          type: string
+          title: digest
+      title: PrepareAskResponse
       additionalProperties: false
     night_shares.market.v1.PricePoint:
       type: object

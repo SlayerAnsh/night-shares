@@ -12,6 +12,8 @@ import { mulTenths } from "../../../shared/money";
 import { format, type NightIdentity } from "../../../shared/night-key";
 import type { NightRecord } from "../../inventory/inventory-repo";
 import { cutoffAt } from "../cutoff";
+import { reconcileSigned } from "../orders/inventory";
+import { signedAsks } from "../orders/store";
 import type { MarketRepo, Position } from "../repo/market-repo";
 import { humanWallets } from "./human-wallets";
 export type Deps = { ports: Ports; repo: MarketRepo };
@@ -61,6 +63,12 @@ export function syncPosition(
   return transaction(ports.db, () => {
     repo.remember(user);
     const position = repo.position(user.humanId, record.key);
+    if (
+      signedAsks(ports.db, record.key).some((a) => a.human_id === user.humanId)
+    ) {
+      reconcileSigned(ports, record);
+      return position;
+    }
     const wallets = humanWallets(ports, user, record.propertyId);
     const remaining = record.state.traderAsks
       .filter((a) => wallets.has(a.who ?? ""))

@@ -23,7 +23,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file night_shares/market/v1/market.proto.
  */
 export const file_night_shares_market_v1_market: GenFile = /*@__PURE__*/
-  fileDesc("CiNuaWdodF9zaGFyZXMvbWFya2V0L3YxL21hcmtldC5wcm90bxIWbmlnaHRfc2hhcmVzLm1hcmtldC52MSKIAQoPRGlzY292ZXJSZXF1ZXN0EgwKBGNpdHkYASABKAkSMgoEc29ydBgCIAEoDjIkLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuRGlzY292ZXJTb3J0EhIKCnZhbHVlX29ubHkYAyABKAgSDAoEc29vbhgEIAEoCBIRCgl3YXRjaGxpc3QYBSABKAgiRQoQRGlzY292ZXJSZXNwb25zZRIxCgZuaWdodHMYASADKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLk5pZ2h0Q2FyZCJCCg9HZXROaWdodFJlcXVlc3QSLwoFbmlnaHQYASABKAsyIC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLk5pZ2h0S2V5Iq0CChBHZXROaWdodFJlc3BvbnNlEjAKBW5pZ2h0GAEgASgLMiEubmlnaHRfc2hhcmVzLm1hcmtldC52MS5OaWdodENhcmQSMQoFc3RhdHMYAiABKAsyIi5uaWdodF9zaGFyZXMubWFya2V0LnYxLk5pZ2h0U3RhdHMSOQoNcHJpY2VfaGlzdG9yeRgDIAMoCzIiLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuUHJpY2VQb2ludBI+ChFob3N0X3RyYWNrX3JlY29yZBgEIAEoCzIjLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuVHJhY2tSZWNvcmQSOQoObW9udGhfY2FsZW5kYXIYBSADKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLk5pZ2h0Q2FyZCJBCg5HZXRCb29rUmVxdWVzdBIvCgVuaWdodBgBIAEoCzIgLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuTmlnaHRLZXki1AIKD0dldEJvb2tSZXNwb25zZRI1Cgdob2xkZXJzGAcgAygLMiQubmlnaHRfc2hhcmVzLm1hcmtldC52MS5QdWJsaWNIb2xkZXISLwoEYXNrcxgBIAMoCzIhLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQm9va0xldmVsEi8KBGJpZHMYAiADKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLkJvb2tMZXZlbBIwCgpyZWNhbGxfY2FwGAMgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEjAKCmZhaXJfcHJpY2UYBCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFAoMbGF0ZV9mZWVfYnBzGAUgASgFEi4KCnJlbGVhc2VfYXQYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIkIKD0xpc3RUYXBlUmVxdWVzdBIvCgVuaWdodBgBIAEoCzIgLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuTmlnaHRLZXkiRQoQTGlzdFRhcGVSZXNwb25zZRIxCgZwcmludHMYASADKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLlRhcGVQcmludCJ0Cg9RdW90ZUJ1eVJlcXVlc3QSLwoFbmlnaHQYASABKAsyIC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLk5pZ2h0S2V5EjAKBHNpemUYAiABKAsyIi5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlJvb21OaWdodHMiRQoQUXVvdGVCdXlSZXNwb25zZRIxCgVxdW90ZRgBIAEoCzIiLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuUm91dGVRdW90ZSJ1ChBRdW90ZVNlbGxSZXF1ZXN0Ei8KBW5pZ2h0GAEgASgLMiAubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5OaWdodEtleRIwCgRzaXplGAIgASgLMiIubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Sb29tTmlnaHRzIkYKEVF1b3RlU2VsbFJlc3BvbnNlEjEKBXF1b3RlGAEgASgLMiIubmlnaHRfc2hhcmVzLm1hcmtldC52MS5Sb3V0ZVF1b3RlIqABCgpCdXlSZXF1ZXN0Ei8KBW5pZ2h0GAEgASgLMiAubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5OaWdodEtleRIwCgRzaXplGAIgASgLMiIubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Sb29tTmlnaHRzEi8KCW1heF90b3RhbBgDIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyJDCgtCdXlSZXNwb25zZRI0CglleGVjdXRpb24YASABKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLkV4ZWN1dGlvbiKhAQoLU2VsbFJlcXVlc3QSLwoFbmlnaHQYASABKAsyIC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLk5pZ2h0S2V5EjAKBHNpemUYAiABKAsyIi5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlJvb21OaWdodHMSLwoJbWluX3RvdGFsGAMgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjIkQKDFNlbGxSZXNwb25zZRI0CglleGVjdXRpb24YASABKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLkV4ZWN1dGlvbiKgAQoOUG9zdEFza1JlcXVlc3QSLwoFbmlnaHQYASABKAsyIC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLk5pZ2h0S2V5EjAKBHNpemUYAiABKAsyIi5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlJvb21OaWdodHMSKwoFcHJpY2UYAyABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMidQoPUG9zdEFza1Jlc3BvbnNlEigKA2FzaxgBIAEoCzIbLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQXNrEhsKE2lzX2Fib3ZlX3R3aWNlX2ZhaXIYAiABKAgSGwoTaXNfYWJvdmVfcmVjYWxsX2NhcBgDIAEoCCIiChBDYW5jZWxBc2tSZXF1ZXN0Eg4KBmFza19pZBgBIAEoCSITChFDYW5jZWxBc2tSZXNwb25zZSIVChNHZXRQb3J0Zm9saW9SZXF1ZXN0IpgDChRHZXRQb3J0Zm9saW9SZXNwb25zZRIxCghob2xkaW5ncxgBIAMoCzIfLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuSG9sZGluZxItCghsaXN0aW5ncxgCIAMoCzIbLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQXNrEjIKDHJlYWxpc2VkX3BubBgDIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxI0Cg51bnJlYWxpc2VkX3BubBgEIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxI/Cgx0cmFja19yZWNvcmQYBSABKAsyKS5uaWdodF9zaGFyZXMubWFya2V0LnYxLlRyYWRlclRyYWNrUmVjb3JkEjgKDGFnZW50X29yZGVycxgGIAMoCzIiLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQWdlbnRPcmRlchI5CgxhZ2VudF93YWxsZXQYByABKAsyIy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkFnZW50V2FsbGV0IkUKElRvZ2dsZVdhdGNoUmVxdWVzdBIvCgVuaWdodBgBIAEoCzIgLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuTmlnaHRLZXkiKQoTVG9nZ2xlV2F0Y2hSZXNwb25zZRISCgppc193YXRjaGVkGAEgASgIIhIKEExpc3RXYXRjaFJlcXVlc3QiRgoRTGlzdFdhdGNoUmVzcG9uc2USMQoGbmlnaHRzGAEgAygLMiEubmlnaHRfc2hhcmVzLm1hcmtldC52MS5OaWdodENhcmQiqgEKF0NyZWF0ZUFnZW50T3JkZXJSZXF1ZXN0Ei8KBW5pZ2h0GAEgASgLMiAubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5OaWdodEtleRIwCgRzaXplGAIgASgLMiIubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Sb29tTmlnaHRzEiwKBmJ1ZGdldBgDIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyJNChhDcmVhdGVBZ2VudE9yZGVyUmVzcG9uc2USMQoFb3JkZXIYASABKAsyIi5uaWdodF9zaGFyZXMubWFya2V0LnYxLkFnZW50T3JkZXIiSAoYQXBwcm92ZUFnZW50T3JkZXJSZXF1ZXN0EhAKCG9yZGVyX2lkGAEgASgJEhoKEnZlcmlmaWNhdGlvbl90b2tlbhgCIAEoCSKEAQoZQXBwcm92ZUFnZW50T3JkZXJSZXNwb25zZRIxCgVvcmRlchgBIAEoCzIiLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQWdlbnRPcmRlchI0CglleGVjdXRpb24YAiABKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLkV4ZWN1dGlvbiLQAgoLQWdlbnRXYWxsZXQSDwoHYWRkcmVzcxgBIAEoCRItCgdiYWxhbmNlGAIgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEjIKDHRvdGFsX2J1ZGdldBgDIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIzCg1wZXJfb3JkZXJfY2FwGAQgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEisKBXNwZW50GAUgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEjgKDmFsbG93ZWRfbmlnaHRzGAYgAygLMiAubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5OaWdodEtleRIxCghob2xkaW5ncxgHIAMoCzIfLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuSG9sZGluZyJKChNBZ2VudFdhbGxldFJlc3BvbnNlEjMKBndhbGxldBgBIAEoCzIjLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQWdlbnRXYWxsZXQiFwoVR2V0QWdlbnRXYWxsZXRSZXF1ZXN0IkYKFkZ1bmRBZ2VudFdhbGxldFJlcXVlc3QSLAoGYW1vdW50GAEgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjIkoKGldpdGhkcmF3QWdlbnRXYWxsZXRSZXF1ZXN0EiwKBmFtb3VudBgBIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyK6AQoVU2V0QWdlbnRCdWRnZXRSZXF1ZXN0EjIKDHRvdGFsX2J1ZGdldBgBIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIzCg1wZXJfb3JkZXJfY2FwGAIgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEjgKDmFsbG93ZWRfbmlnaHRzGAMgAygLMiAubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5OaWdodEtleTKGEAoNTWFya2V0U2VydmljZRJyCg5HZXRBZ2VudFdhbGxldBItLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuR2V0QWdlbnRXYWxsZXRSZXF1ZXN0GisubmlnaHRfc2hhcmVzLm1hcmtldC52MS5BZ2VudFdhbGxldFJlc3BvbnNlIgSItRgDEnQKD0Z1bmRBZ2VudFdhbGxldBIuLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuRnVuZEFnZW50V2FsbGV0UmVxdWVzdBorLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQWdlbnRXYWxsZXRSZXNwb25zZSIEiLUYAxJ8ChNXaXRoZHJhd0FnZW50V2FsbGV0EjIubmlnaHRfc2hhcmVzLm1hcmtldC52MS5XaXRoZHJhd0FnZW50V2FsbGV0UmVxdWVzdBorLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQWdlbnRXYWxsZXRSZXNwb25zZSIEiLUYAxJyCg5TZXRBZ2VudEJ1ZGdldBItLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuU2V0QWdlbnRCdWRnZXRSZXF1ZXN0GisubmlnaHRfc2hhcmVzLm1hcmtldC52MS5BZ2VudFdhbGxldFJlc3BvbnNlIgSItRgDEmMKCERpc2NvdmVyEicubmlnaHRfc2hhcmVzLm1hcmtldC52MS5EaXNjb3ZlclJlcXVlc3QaKC5uaWdodF9zaGFyZXMubWFya2V0LnYxLkRpc2NvdmVyUmVzcG9uc2UiBIi1GAESYwoIR2V0TmlnaHQSJy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkdldE5pZ2h0UmVxdWVzdBooLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuR2V0TmlnaHRSZXNwb25zZSIEiLUYARJgCgdHZXRCb29rEiYubmlnaHRfc2hhcmVzLm1hcmtldC52MS5HZXRCb29rUmVxdWVzdBonLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuR2V0Qm9va1Jlc3BvbnNlIgSItRgBEmMKCExpc3RUYXBlEicubmlnaHRfc2hhcmVzLm1hcmtldC52MS5MaXN0VGFwZVJlcXVlc3QaKC5uaWdodF9zaGFyZXMubWFya2V0LnYxLkxpc3RUYXBlUmVzcG9uc2UiBIi1GAESYwoIUXVvdGVCdXkSJy5uaWdodF9zaGFyZXMubWFya2V0LnYxLlF1b3RlQnV5UmVxdWVzdBooLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuUXVvdGVCdXlSZXNwb25zZSIEiLUYARJmCglRdW90ZVNlbGwSKC5uaWdodF9zaGFyZXMubWFya2V0LnYxLlF1b3RlU2VsbFJlcXVlc3QaKS5uaWdodF9zaGFyZXMubWFya2V0LnYxLlF1b3RlU2VsbFJlc3BvbnNlIgSItRgBElQKA0J1eRIiLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQnV5UmVxdWVzdBojLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQnV5UmVzcG9uc2UiBIi1GAMSVwoEU2VsbBIjLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuU2VsbFJlcXVlc3QaJC5uaWdodF9zaGFyZXMubWFya2V0LnYxLlNlbGxSZXNwb25zZSIEiLUYAxJgCgdQb3N0QXNrEiYubmlnaHRfc2hhcmVzLm1hcmtldC52MS5Qb3N0QXNrUmVxdWVzdBonLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuUG9zdEFza1Jlc3BvbnNlIgSItRgDEmYKCUNhbmNlbEFzaxIoLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQ2FuY2VsQXNrUmVxdWVzdBopLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQ2FuY2VsQXNrUmVzcG9uc2UiBIi1GAMSbwoMR2V0UG9ydGZvbGlvEisubmlnaHRfc2hhcmVzLm1hcmtldC52MS5HZXRQb3J0Zm9saW9SZXF1ZXN0GiwubmlnaHRfc2hhcmVzLm1hcmtldC52MS5HZXRQb3J0Zm9saW9SZXNwb25zZSIEiLUYAxJsCgtUb2dnbGVXYXRjaBIqLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuVG9nZ2xlV2F0Y2hSZXF1ZXN0GisubmlnaHRfc2hhcmVzLm1hcmtldC52MS5Ub2dnbGVXYXRjaFJlc3BvbnNlIgSItRgDEmYKCUxpc3RXYXRjaBIoLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuTGlzdFdhdGNoUmVxdWVzdBopLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuTGlzdFdhdGNoUmVzcG9uc2UiBIi1GAMSewoQQ3JlYXRlQWdlbnRPcmRlchIvLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQ3JlYXRlQWdlbnRPcmRlclJlcXVlc3QaMC5uaWdodF9zaGFyZXMubWFya2V0LnYxLkNyZWF0ZUFnZW50T3JkZXJSZXNwb25zZSIEiLUYAxJ+ChFBcHByb3ZlQWdlbnRPcmRlchIwLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQXBwcm92ZUFnZW50T3JkZXJSZXF1ZXN0GjEubmlnaHRfc2hhcmVzLm1hcmtldC52MS5BcHByb3ZlQWdlbnRPcmRlclJlc3BvbnNlIgSItRgDYgZwcm90bzM", [file_google_protobuf_timestamp, file_night_shares_auth_v1_access, file_night_shares_common_v1_money, file_night_shares_common_v1_night, file_night_shares_market_v1_analytics, file_night_shares_market_v1_book, file_night_shares_market_v1_portfolio]);
+  fileDesc("CiNuaWdodF9zaGFyZXMvbWFya2V0L3YxL21hcmtldC5wcm90bxIWbmlnaHRfc2hhcmVzLm1hcmtldC52MSKIAQoPRGlzY292ZXJSZXF1ZXN0EgwKBGNpdHkYASABKAkSMgoEc29ydBgCIAEoDjIkLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuRGlzY292ZXJTb3J0EhIKCnZhbHVlX29ubHkYAyABKAgSDAoEc29vbhgEIAEoCBIRCgl3YXRjaGxpc3QYBSABKAgiRQoQRGlzY292ZXJSZXNwb25zZRIxCgZuaWdodHMYASADKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLk5pZ2h0Q2FyZCJCCg9HZXROaWdodFJlcXVlc3QSLwoFbmlnaHQYASABKAsyIC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLk5pZ2h0S2V5Iq0CChBHZXROaWdodFJlc3BvbnNlEjAKBW5pZ2h0GAEgASgLMiEubmlnaHRfc2hhcmVzLm1hcmtldC52MS5OaWdodENhcmQSMQoFc3RhdHMYAiABKAsyIi5uaWdodF9zaGFyZXMubWFya2V0LnYxLk5pZ2h0U3RhdHMSOQoNcHJpY2VfaGlzdG9yeRgDIAMoCzIiLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuUHJpY2VQb2ludBI+ChFob3N0X3RyYWNrX3JlY29yZBgEIAEoCzIjLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuVHJhY2tSZWNvcmQSOQoObW9udGhfY2FsZW5kYXIYBSADKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLk5pZ2h0Q2FyZCJBCg5HZXRCb29rUmVxdWVzdBIvCgVuaWdodBgBIAEoCzIgLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuTmlnaHRLZXki1AIKD0dldEJvb2tSZXNwb25zZRI1Cgdob2xkZXJzGAcgAygLMiQubmlnaHRfc2hhcmVzLm1hcmtldC52MS5QdWJsaWNIb2xkZXISLwoEYXNrcxgBIAMoCzIhLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQm9va0xldmVsEi8KBGJpZHMYAiADKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLkJvb2tMZXZlbBIwCgpyZWNhbGxfY2FwGAMgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEjAKCmZhaXJfcHJpY2UYBCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFAoMbGF0ZV9mZWVfYnBzGAUgASgFEi4KCnJlbGVhc2VfYXQYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIkIKD0xpc3RUYXBlUmVxdWVzdBIvCgVuaWdodBgBIAEoCzIgLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuTmlnaHRLZXkiRQoQTGlzdFRhcGVSZXNwb25zZRIxCgZwcmludHMYASADKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLlRhcGVQcmludCJ0Cg9RdW90ZUJ1eVJlcXVlc3QSLwoFbmlnaHQYASABKAsyIC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLk5pZ2h0S2V5EjAKBHNpemUYAiABKAsyIi5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlJvb21OaWdodHMiRQoQUXVvdGVCdXlSZXNwb25zZRIxCgVxdW90ZRgBIAEoCzIiLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuUm91dGVRdW90ZSJ1ChBRdW90ZVNlbGxSZXF1ZXN0Ei8KBW5pZ2h0GAEgASgLMiAubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5OaWdodEtleRIwCgRzaXplGAIgASgLMiIubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Sb29tTmlnaHRzIkYKEVF1b3RlU2VsbFJlc3BvbnNlEjEKBXF1b3RlGAEgASgLMiIubmlnaHRfc2hhcmVzLm1hcmtldC52MS5Sb3V0ZVF1b3RlIqABCgpCdXlSZXF1ZXN0Ei8KBW5pZ2h0GAEgASgLMiAubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5OaWdodEtleRIwCgRzaXplGAIgASgLMiIubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Sb29tTmlnaHRzEi8KCW1heF90b3RhbBgDIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyJDCgtCdXlSZXNwb25zZRI0CglleGVjdXRpb24YASABKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLkV4ZWN1dGlvbiKhAQoLU2VsbFJlcXVlc3QSLwoFbmlnaHQYASABKAsyIC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLk5pZ2h0S2V5EjAKBHNpemUYAiABKAsyIi5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlJvb21OaWdodHMSLwoJbWluX3RvdGFsGAMgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjIkQKDFNlbGxSZXNwb25zZRI0CglleGVjdXRpb24YASABKAsyIS5uaWdodF9zaGFyZXMubWFya2V0LnYxLkV4ZWN1dGlvbiLPAQoRUHJlcGFyZUFza1JlcXVlc3QSLwoFbmlnaHQYASABKAsyIC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLk5pZ2h0S2V5EjAKBHNpemUYAiABKAsyIi5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlJvb21OaWdodHMSKwoFcHJpY2UYAyABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSKgoGZXhwaXJ5GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCJpChJQcmVwYXJlQXNrUmVzcG9uc2USKgoFb3JkZXIYASABKAsyGy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkFzaxIXCg90eXBlZF9kYXRhX2pzb24YAiABKAkSDgoGZGlnZXN0GAMgASgJIhYKFENhbmNlbEFsbEFza3NSZXF1ZXN0Ij8KFUNhbmNlbEFsbEFza3NSZXNwb25zZRINCgVub25jZRgBIAEoBBIXCg9jYW5jZWxsZWRfY291bnQYAiABKA0i/QEKDlBvc3RBc2tSZXF1ZXN0Ei8KBW5pZ2h0GAEgASgLMiAubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5OaWdodEtleRIwCgRzaXplGAIgASgLMiIubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Sb29tTmlnaHRzEisKBXByaWNlGAMgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEioKBmV4cGlyeRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASEgoFbm9uY2UYBSABKARIAIgBARIRCglzaWduYXR1cmUYBiABKAlCCAoGX25vbmNlInUKD1Bvc3RBc2tSZXNwb25zZRIoCgNhc2sYASABKAsyGy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkFzaxIbChNpc19hYm92ZV90d2ljZV9mYWlyGAIgASgIEhsKE2lzX2Fib3ZlX3JlY2FsbF9jYXAYAyABKAgiIgoQQ2FuY2VsQXNrUmVxdWVzdBIOCgZhc2tfaWQYASABKAkiEwoRQ2FuY2VsQXNrUmVzcG9uc2UiFQoTR2V0UG9ydGZvbGlvUmVxdWVzdCKYAwoUR2V0UG9ydGZvbGlvUmVzcG9uc2USMQoIaG9sZGluZ3MYASADKAsyHy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkhvbGRpbmcSLQoIbGlzdGluZ3MYAiADKAsyGy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkFzaxIyCgxyZWFsaXNlZF9wbmwYAyABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSNAoOdW5yZWFsaXNlZF9wbmwYBCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSPwoMdHJhY2tfcmVjb3JkGAUgASgLMikubmlnaHRfc2hhcmVzLm1hcmtldC52MS5UcmFkZXJUcmFja1JlY29yZBI4CgxhZ2VudF9vcmRlcnMYBiADKAsyIi5uaWdodF9zaGFyZXMubWFya2V0LnYxLkFnZW50T3JkZXISOQoMYWdlbnRfd2FsbGV0GAcgASgLMiMubmlnaHRfc2hhcmVzLm1hcmtldC52MS5BZ2VudFdhbGxldCJFChJUb2dnbGVXYXRjaFJlcXVlc3QSLwoFbmlnaHQYASABKAsyIC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLk5pZ2h0S2V5IikKE1RvZ2dsZVdhdGNoUmVzcG9uc2USEgoKaXNfd2F0Y2hlZBgBIAEoCCISChBMaXN0V2F0Y2hSZXF1ZXN0IkYKEUxpc3RXYXRjaFJlc3BvbnNlEjEKBm5pZ2h0cxgBIAMoCzIhLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuTmlnaHRDYXJkIqoBChdDcmVhdGVBZ2VudE9yZGVyUmVxdWVzdBIvCgVuaWdodBgBIAEoCzIgLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuTmlnaHRLZXkSMAoEc2l6ZRgCIAEoCzIiLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuUm9vbU5pZ2h0cxIsCgZidWRnZXQYAyABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMiTQoYQ3JlYXRlQWdlbnRPcmRlclJlc3BvbnNlEjEKBW9yZGVyGAEgASgLMiIubmlnaHRfc2hhcmVzLm1hcmtldC52MS5BZ2VudE9yZGVyIkgKGEFwcHJvdmVBZ2VudE9yZGVyUmVxdWVzdBIQCghvcmRlcl9pZBgBIAEoCRIaChJ2ZXJpZmljYXRpb25fdG9rZW4YAiABKAkihAEKGUFwcHJvdmVBZ2VudE9yZGVyUmVzcG9uc2USMQoFb3JkZXIYASABKAsyIi5uaWdodF9zaGFyZXMubWFya2V0LnYxLkFnZW50T3JkZXISNAoJZXhlY3V0aW9uGAIgASgLMiEubmlnaHRfc2hhcmVzLm1hcmtldC52MS5FeGVjdXRpb24i0AIKC0FnZW50V2FsbGV0Eg8KB2FkZHJlc3MYASABKAkSLQoHYmFsYW5jZRgCIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIyCgx0b3RhbF9idWRnZXQYAyABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSMwoNcGVyX29yZGVyX2NhcBgEIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIrCgVzcGVudBgFIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxI4Cg5hbGxvd2VkX25pZ2h0cxgGIAMoCzIgLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuTmlnaHRLZXkSMQoIaG9sZGluZ3MYByADKAsyHy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkhvbGRpbmciSgoTQWdlbnRXYWxsZXRSZXNwb25zZRIzCgZ3YWxsZXQYASABKAsyIy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkFnZW50V2FsbGV0IhcKFUdldEFnZW50V2FsbGV0UmVxdWVzdCJGChZGdW5kQWdlbnRXYWxsZXRSZXF1ZXN0EiwKBmFtb3VudBgBIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyJKChpXaXRoZHJhd0FnZW50V2FsbGV0UmVxdWVzdBIsCgZhbW91bnQYASABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMiugEKFVNldEFnZW50QnVkZ2V0UmVxdWVzdBIyCgx0b3RhbF9idWRnZXQYASABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSMwoNcGVyX29yZGVyX2NhcBgCIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxI4Cg5hbGxvd2VkX25pZ2h0cxgDIAMoCzIgLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuTmlnaHRLZXky5REKDU1hcmtldFNlcnZpY2USaQoKUHJlcGFyZUFzaxIpLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuUHJlcGFyZUFza1JlcXVlc3QaKi5uaWdodF9zaGFyZXMubWFya2V0LnYxLlByZXBhcmVBc2tSZXNwb25zZSIEiLUYAxJyCg1DYW5jZWxBbGxBc2tzEiwubmlnaHRfc2hhcmVzLm1hcmtldC52MS5DYW5jZWxBbGxBc2tzUmVxdWVzdBotLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQ2FuY2VsQWxsQXNrc1Jlc3BvbnNlIgSItRgDEnIKDkdldEFnZW50V2FsbGV0Ei0ubmlnaHRfc2hhcmVzLm1hcmtldC52MS5HZXRBZ2VudFdhbGxldFJlcXVlc3QaKy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkFnZW50V2FsbGV0UmVzcG9uc2UiBIi1GAMSdAoPRnVuZEFnZW50V2FsbGV0Ei4ubmlnaHRfc2hhcmVzLm1hcmtldC52MS5GdW5kQWdlbnRXYWxsZXRSZXF1ZXN0GisubmlnaHRfc2hhcmVzLm1hcmtldC52MS5BZ2VudFdhbGxldFJlc3BvbnNlIgSItRgDEnwKE1dpdGhkcmF3QWdlbnRXYWxsZXQSMi5uaWdodF9zaGFyZXMubWFya2V0LnYxLldpdGhkcmF3QWdlbnRXYWxsZXRSZXF1ZXN0GisubmlnaHRfc2hhcmVzLm1hcmtldC52MS5BZ2VudFdhbGxldFJlc3BvbnNlIgSItRgDEnIKDlNldEFnZW50QnVkZ2V0Ei0ubmlnaHRfc2hhcmVzLm1hcmtldC52MS5TZXRBZ2VudEJ1ZGdldFJlcXVlc3QaKy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkFnZW50V2FsbGV0UmVzcG9uc2UiBIi1GAMSYwoIRGlzY292ZXISJy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkRpc2NvdmVyUmVxdWVzdBooLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuRGlzY292ZXJSZXNwb25zZSIEiLUYARJjCghHZXROaWdodBInLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuR2V0TmlnaHRSZXF1ZXN0GigubmlnaHRfc2hhcmVzLm1hcmtldC52MS5HZXROaWdodFJlc3BvbnNlIgSItRgBEmAKB0dldEJvb2sSJi5uaWdodF9zaGFyZXMubWFya2V0LnYxLkdldEJvb2tSZXF1ZXN0GicubmlnaHRfc2hhcmVzLm1hcmtldC52MS5HZXRCb29rUmVzcG9uc2UiBIi1GAESYwoITGlzdFRhcGUSJy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkxpc3RUYXBlUmVxdWVzdBooLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuTGlzdFRhcGVSZXNwb25zZSIEiLUYARJjCghRdW90ZUJ1eRInLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuUXVvdGVCdXlSZXF1ZXN0GigubmlnaHRfc2hhcmVzLm1hcmtldC52MS5RdW90ZUJ1eVJlc3BvbnNlIgSItRgBEmYKCVF1b3RlU2VsbBIoLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuUXVvdGVTZWxsUmVxdWVzdBopLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuUXVvdGVTZWxsUmVzcG9uc2UiBIi1GAESVAoDQnV5EiIubmlnaHRfc2hhcmVzLm1hcmtldC52MS5CdXlSZXF1ZXN0GiMubmlnaHRfc2hhcmVzLm1hcmtldC52MS5CdXlSZXNwb25zZSIEiLUYAxJXCgRTZWxsEiMubmlnaHRfc2hhcmVzLm1hcmtldC52MS5TZWxsUmVxdWVzdBokLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuU2VsbFJlc3BvbnNlIgSItRgDEmAKB1Bvc3RBc2sSJi5uaWdodF9zaGFyZXMubWFya2V0LnYxLlBvc3RBc2tSZXF1ZXN0GicubmlnaHRfc2hhcmVzLm1hcmtldC52MS5Qb3N0QXNrUmVzcG9uc2UiBIi1GAMSZgoJQ2FuY2VsQXNrEigubmlnaHRfc2hhcmVzLm1hcmtldC52MS5DYW5jZWxBc2tSZXF1ZXN0GikubmlnaHRfc2hhcmVzLm1hcmtldC52MS5DYW5jZWxBc2tSZXNwb25zZSIEiLUYAxJvCgxHZXRQb3J0Zm9saW8SKy5uaWdodF9zaGFyZXMubWFya2V0LnYxLkdldFBvcnRmb2xpb1JlcXVlc3QaLC5uaWdodF9zaGFyZXMubWFya2V0LnYxLkdldFBvcnRmb2xpb1Jlc3BvbnNlIgSItRgDEmwKC1RvZ2dsZVdhdGNoEioubmlnaHRfc2hhcmVzLm1hcmtldC52MS5Ub2dnbGVXYXRjaFJlcXVlc3QaKy5uaWdodF9zaGFyZXMubWFya2V0LnYxLlRvZ2dsZVdhdGNoUmVzcG9uc2UiBIi1GAMSZgoJTGlzdFdhdGNoEigubmlnaHRfc2hhcmVzLm1hcmtldC52MS5MaXN0V2F0Y2hSZXF1ZXN0GikubmlnaHRfc2hhcmVzLm1hcmtldC52MS5MaXN0V2F0Y2hSZXNwb25zZSIEiLUYAxJ7ChBDcmVhdGVBZ2VudE9yZGVyEi8ubmlnaHRfc2hhcmVzLm1hcmtldC52MS5DcmVhdGVBZ2VudE9yZGVyUmVxdWVzdBowLm5pZ2h0X3NoYXJlcy5tYXJrZXQudjEuQ3JlYXRlQWdlbnRPcmRlclJlc3BvbnNlIgSItRgDEn4KEUFwcHJvdmVBZ2VudE9yZGVyEjAubmlnaHRfc2hhcmVzLm1hcmtldC52MS5BcHByb3ZlQWdlbnRPcmRlclJlcXVlc3QaMS5uaWdodF9zaGFyZXMubWFya2V0LnYxLkFwcHJvdmVBZ2VudE9yZGVyUmVzcG9uc2UiBIi1GANiBnByb3RvMw", [file_google_protobuf_timestamp, file_night_shares_auth_v1_access, file_night_shares_common_v1_money, file_night_shares_common_v1_night, file_night_shares_market_v1_analytics, file_night_shares_market_v1_book, file_night_shares_market_v1_portfolio]);
 
 /**
  * @generated from message night_shares.market.v1.DiscoverRequest
@@ -398,6 +398,100 @@ export const SellResponseSchema: GenMessage<SellResponse> = /*@__PURE__*/
   messageDesc(file_night_shares_market_v1_market, 15);
 
 /**
+ * @generated from message night_shares.market.v1.PrepareAskRequest
+ */
+export type PrepareAskRequest = Message<"night_shares.market.v1.PrepareAskRequest"> & {
+  /**
+   * @generated from field: night_shares.common.v1.NightKey night = 1;
+   */
+  night?: NightKey | undefined;
+
+  /**
+   * @generated from field: night_shares.common.v1.RoomNights size = 2;
+   */
+  size?: RoomNights | undefined;
+
+  /**
+   * @generated from field: night_shares.common.v1.Usdc price = 3;
+   */
+  price?: Usdc | undefined;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp expiry = 4;
+   */
+  expiry?: Timestamp | undefined;
+};
+
+/**
+ * Describes the message night_shares.market.v1.PrepareAskRequest.
+ * Use `create(PrepareAskRequestSchema)` to create a new message.
+ */
+export const PrepareAskRequestSchema: GenMessage<PrepareAskRequest> = /*@__PURE__*/
+  messageDesc(file_night_shares_market_v1_market, 16);
+
+/**
+ * @generated from message night_shares.market.v1.PrepareAskResponse
+ */
+export type PrepareAskResponse = Message<"night_shares.market.v1.PrepareAskResponse"> & {
+  /**
+   * @generated from field: night_shares.market.v1.Ask order = 1;
+   */
+  order?: Ask | undefined;
+
+  /**
+   * @generated from field: string typed_data_json = 2;
+   */
+  typedDataJson: string;
+
+  /**
+   * @generated from field: string digest = 3;
+   */
+  digest: string;
+};
+
+/**
+ * Describes the message night_shares.market.v1.PrepareAskResponse.
+ * Use `create(PrepareAskResponseSchema)` to create a new message.
+ */
+export const PrepareAskResponseSchema: GenMessage<PrepareAskResponse> = /*@__PURE__*/
+  messageDesc(file_night_shares_market_v1_market, 17);
+
+/**
+ * @generated from message night_shares.market.v1.CancelAllAsksRequest
+ */
+export type CancelAllAsksRequest = Message<"night_shares.market.v1.CancelAllAsksRequest"> & {
+};
+
+/**
+ * Describes the message night_shares.market.v1.CancelAllAsksRequest.
+ * Use `create(CancelAllAsksRequestSchema)` to create a new message.
+ */
+export const CancelAllAsksRequestSchema: GenMessage<CancelAllAsksRequest> = /*@__PURE__*/
+  messageDesc(file_night_shares_market_v1_market, 18);
+
+/**
+ * @generated from message night_shares.market.v1.CancelAllAsksResponse
+ */
+export type CancelAllAsksResponse = Message<"night_shares.market.v1.CancelAllAsksResponse"> & {
+  /**
+   * @generated from field: uint64 nonce = 1;
+   */
+  nonce: bigint;
+
+  /**
+   * @generated from field: uint32 cancelled_count = 2;
+   */
+  cancelledCount: number;
+};
+
+/**
+ * Describes the message night_shares.market.v1.CancelAllAsksResponse.
+ * Use `create(CancelAllAsksResponseSchema)` to create a new message.
+ */
+export const CancelAllAsksResponseSchema: GenMessage<CancelAllAsksResponse> = /*@__PURE__*/
+  messageDesc(file_night_shares_market_v1_market, 19);
+
+/**
  * @generated from message night_shares.market.v1.PostAskRequest
  */
 export type PostAskRequest = Message<"night_shares.market.v1.PostAskRequest"> & {
@@ -415,6 +509,21 @@ export type PostAskRequest = Message<"night_shares.market.v1.PostAskRequest"> & 
    * @generated from field: night_shares.common.v1.Usdc price = 3;
    */
   price?: Usdc | undefined;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp expiry = 4;
+   */
+  expiry?: Timestamp | undefined;
+
+  /**
+   * @generated from field: optional uint64 nonce = 5;
+   */
+  nonce?: bigint | undefined;
+
+  /**
+   * @generated from field: string signature = 6;
+   */
+  signature: string;
 };
 
 /**
@@ -422,7 +531,7 @@ export type PostAskRequest = Message<"night_shares.market.v1.PostAskRequest"> & 
  * Use `create(PostAskRequestSchema)` to create a new message.
  */
 export const PostAskRequestSchema: GenMessage<PostAskRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 16);
+  messageDesc(file_night_shares_market_v1_market, 20);
 
 /**
  * @generated from message night_shares.market.v1.PostAskResponse
@@ -449,7 +558,7 @@ export type PostAskResponse = Message<"night_shares.market.v1.PostAskResponse"> 
  * Use `create(PostAskResponseSchema)` to create a new message.
  */
 export const PostAskResponseSchema: GenMessage<PostAskResponse> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 17);
+  messageDesc(file_night_shares_market_v1_market, 21);
 
 /**
  * @generated from message night_shares.market.v1.CancelAskRequest
@@ -466,7 +575,7 @@ export type CancelAskRequest = Message<"night_shares.market.v1.CancelAskRequest"
  * Use `create(CancelAskRequestSchema)` to create a new message.
  */
 export const CancelAskRequestSchema: GenMessage<CancelAskRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 18);
+  messageDesc(file_night_shares_market_v1_market, 22);
 
 /**
  * @generated from message night_shares.market.v1.CancelAskResponse
@@ -479,7 +588,7 @@ export type CancelAskResponse = Message<"night_shares.market.v1.CancelAskRespons
  * Use `create(CancelAskResponseSchema)` to create a new message.
  */
 export const CancelAskResponseSchema: GenMessage<CancelAskResponse> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 19);
+  messageDesc(file_night_shares_market_v1_market, 23);
 
 /**
  * @generated from message night_shares.market.v1.GetPortfolioRequest
@@ -492,7 +601,7 @@ export type GetPortfolioRequest = Message<"night_shares.market.v1.GetPortfolioRe
  * Use `create(GetPortfolioRequestSchema)` to create a new message.
  */
 export const GetPortfolioRequestSchema: GenMessage<GetPortfolioRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 20);
+  messageDesc(file_night_shares_market_v1_market, 24);
 
 /**
  * @generated from message night_shares.market.v1.GetPortfolioResponse
@@ -539,7 +648,7 @@ export type GetPortfolioResponse = Message<"night_shares.market.v1.GetPortfolioR
  * Use `create(GetPortfolioResponseSchema)` to create a new message.
  */
 export const GetPortfolioResponseSchema: GenMessage<GetPortfolioResponse> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 21);
+  messageDesc(file_night_shares_market_v1_market, 25);
 
 /**
  * @generated from message night_shares.market.v1.ToggleWatchRequest
@@ -556,7 +665,7 @@ export type ToggleWatchRequest = Message<"night_shares.market.v1.ToggleWatchRequ
  * Use `create(ToggleWatchRequestSchema)` to create a new message.
  */
 export const ToggleWatchRequestSchema: GenMessage<ToggleWatchRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 22);
+  messageDesc(file_night_shares_market_v1_market, 26);
 
 /**
  * @generated from message night_shares.market.v1.ToggleWatchResponse
@@ -573,7 +682,7 @@ export type ToggleWatchResponse = Message<"night_shares.market.v1.ToggleWatchRes
  * Use `create(ToggleWatchResponseSchema)` to create a new message.
  */
 export const ToggleWatchResponseSchema: GenMessage<ToggleWatchResponse> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 23);
+  messageDesc(file_night_shares_market_v1_market, 27);
 
 /**
  * @generated from message night_shares.market.v1.ListWatchRequest
@@ -586,7 +695,7 @@ export type ListWatchRequest = Message<"night_shares.market.v1.ListWatchRequest"
  * Use `create(ListWatchRequestSchema)` to create a new message.
  */
 export const ListWatchRequestSchema: GenMessage<ListWatchRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 24);
+  messageDesc(file_night_shares_market_v1_market, 28);
 
 /**
  * @generated from message night_shares.market.v1.ListWatchResponse
@@ -603,7 +712,7 @@ export type ListWatchResponse = Message<"night_shares.market.v1.ListWatchRespons
  * Use `create(ListWatchResponseSchema)` to create a new message.
  */
 export const ListWatchResponseSchema: GenMessage<ListWatchResponse> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 25);
+  messageDesc(file_night_shares_market_v1_market, 29);
 
 /**
  * @generated from message night_shares.market.v1.CreateAgentOrderRequest
@@ -630,7 +739,7 @@ export type CreateAgentOrderRequest = Message<"night_shares.market.v1.CreateAgen
  * Use `create(CreateAgentOrderRequestSchema)` to create a new message.
  */
 export const CreateAgentOrderRequestSchema: GenMessage<CreateAgentOrderRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 26);
+  messageDesc(file_night_shares_market_v1_market, 30);
 
 /**
  * @generated from message night_shares.market.v1.CreateAgentOrderResponse
@@ -647,7 +756,7 @@ export type CreateAgentOrderResponse = Message<"night_shares.market.v1.CreateAge
  * Use `create(CreateAgentOrderResponseSchema)` to create a new message.
  */
 export const CreateAgentOrderResponseSchema: GenMessage<CreateAgentOrderResponse> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 27);
+  messageDesc(file_night_shares_market_v1_market, 31);
 
 /**
  * @generated from message night_shares.market.v1.ApproveAgentOrderRequest
@@ -669,7 +778,7 @@ export type ApproveAgentOrderRequest = Message<"night_shares.market.v1.ApproveAg
  * Use `create(ApproveAgentOrderRequestSchema)` to create a new message.
  */
 export const ApproveAgentOrderRequestSchema: GenMessage<ApproveAgentOrderRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 28);
+  messageDesc(file_night_shares_market_v1_market, 32);
 
 /**
  * @generated from message night_shares.market.v1.ApproveAgentOrderResponse
@@ -691,7 +800,7 @@ export type ApproveAgentOrderResponse = Message<"night_shares.market.v1.ApproveA
  * Use `create(ApproveAgentOrderResponseSchema)` to create a new message.
  */
 export const ApproveAgentOrderResponseSchema: GenMessage<ApproveAgentOrderResponse> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 29);
+  messageDesc(file_night_shares_market_v1_market, 33);
 
 /**
  * Agent holdings are attributed purchases within the shared human position.
@@ -740,7 +849,7 @@ export type AgentWallet = Message<"night_shares.market.v1.AgentWallet"> & {
  * Use `create(AgentWalletSchema)` to create a new message.
  */
 export const AgentWalletSchema: GenMessage<AgentWallet> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 30);
+  messageDesc(file_night_shares_market_v1_market, 34);
 
 /**
  * @generated from message night_shares.market.v1.AgentWalletResponse
@@ -757,7 +866,7 @@ export type AgentWalletResponse = Message<"night_shares.market.v1.AgentWalletRes
  * Use `create(AgentWalletResponseSchema)` to create a new message.
  */
 export const AgentWalletResponseSchema: GenMessage<AgentWalletResponse> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 31);
+  messageDesc(file_night_shares_market_v1_market, 35);
 
 /**
  * @generated from message night_shares.market.v1.GetAgentWalletRequest
@@ -770,7 +879,7 @@ export type GetAgentWalletRequest = Message<"night_shares.market.v1.GetAgentWall
  * Use `create(GetAgentWalletRequestSchema)` to create a new message.
  */
 export const GetAgentWalletRequestSchema: GenMessage<GetAgentWalletRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 32);
+  messageDesc(file_night_shares_market_v1_market, 36);
 
 /**
  * @generated from message night_shares.market.v1.FundAgentWalletRequest
@@ -787,7 +896,7 @@ export type FundAgentWalletRequest = Message<"night_shares.market.v1.FundAgentWa
  * Use `create(FundAgentWalletRequestSchema)` to create a new message.
  */
 export const FundAgentWalletRequestSchema: GenMessage<FundAgentWalletRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 33);
+  messageDesc(file_night_shares_market_v1_market, 37);
 
 /**
  * @generated from message night_shares.market.v1.WithdrawAgentWalletRequest
@@ -804,7 +913,7 @@ export type WithdrawAgentWalletRequest = Message<"night_shares.market.v1.Withdra
  * Use `create(WithdrawAgentWalletRequestSchema)` to create a new message.
  */
 export const WithdrawAgentWalletRequestSchema: GenMessage<WithdrawAgentWalletRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 34);
+  messageDesc(file_night_shares_market_v1_market, 38);
 
 /**
  * @generated from message night_shares.market.v1.SetAgentBudgetRequest
@@ -831,12 +940,28 @@ export type SetAgentBudgetRequest = Message<"night_shares.market.v1.SetAgentBudg
  * Use `create(SetAgentBudgetRequestSchema)` to create a new message.
  */
 export const SetAgentBudgetRequestSchema: GenMessage<SetAgentBudgetRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_market_v1_market, 35);
+  messageDesc(file_night_shares_market_v1_market, 39);
 
 /**
  * @generated from service night_shares.market.v1.MarketService
  */
 export const MarketService: GenService<{
+  /**
+   * @generated from rpc night_shares.market.v1.MarketService.PrepareAsk
+   */
+  prepareAsk: {
+    methodKind: "unary";
+    input: typeof PrepareAskRequestSchema;
+    output: typeof PrepareAskResponseSchema;
+  },
+  /**
+   * @generated from rpc night_shares.market.v1.MarketService.CancelAllAsks
+   */
+  cancelAllAsks: {
+    methodKind: "unary";
+    input: typeof CancelAllAsksRequestSchema;
+    output: typeof CancelAllAsksResponseSchema;
+  },
   /**
    * @generated from rpc night_shares.market.v1.MarketService.GetAgentWallet
    */

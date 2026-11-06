@@ -135,7 +135,7 @@ test("failed position writes roll back inventory reservations and ask changes", 
     const listed = d.ports.inventory.get(d.key);
     const escrowed = { ...d.repo.position(d.user.humanId, d.key) };
     d.ports.db.exec(
-      "CREATE TRIGGER reject_cancel BEFORE UPDATE OF free ON market_positions BEGIN SELECT RAISE(ABORT, 'reject cancel'); END",
+      "CREATE TRIGGER reject_cancel BEFORE UPDATE OF status ON market_signed_asks BEGIN SELECT RAISE(ABORT, 'reject cancel'); END",
     );
     expect(() =>
       cancelAsk(d, d.user, `${d.key}|${d.user.walletAddress}`),

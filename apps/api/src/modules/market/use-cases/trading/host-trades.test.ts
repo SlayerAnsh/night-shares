@@ -79,8 +79,8 @@ test("nonpeak cap combines main, agent and alternate host wallet with listed tok
       walletAddress: await d.ports.walletProvider.linkWallet("host-extra"),
     };
     await buy(d, alternate, d.key, 10, 200000000n);
-    expect(d.repo.position(d.user.humanId, d.key).escrow).toBe(10);
-    expect(d.repo.position(d.user.humanId, d.key).free).toBe(20);
+    expect(d.repo.position(d.user.humanId, d.key).escrow).toBe(0);
+    expect(d.repo.position(d.user.humanId, d.key).free).toBe(30);
     await expect(buy(d, alternate, d.key, 1, 200000000n)).rejects.toThrow(
       "Per-human cap exceeded.",
     );

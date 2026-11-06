@@ -64,12 +64,12 @@ test("seeded market maker receives seller proceeds", async () => {
   await buy(d, d.user, d.key, 5, toMicros(10));
   expect((await d.ports.walletProvider.balance(maker)) - before).toBe(496000n);
 });
-test("escrowed holdings still count toward the human cap", async () => {
+test("listed holdings still count toward the human cap", async () => {
   const d = await fixture();
   await buy(d, d.user, d.key, 5, 10n ** 12n);
   postAsk(d, d.user, d.key, 5, 1000000n);
   await expect(buy(d, d.user, d.key, 26, 10n ** 12n)).rejects.toThrow("cap");
-  expect(d.repo.position(d.user.humanId, d.key).free).toBe(0);
+  expect(d.repo.position(d.user.humanId, d.key).free).toBe(5);
 });
 test("one-micro ask skips rounded-zero fee transfers", async () => {
   const d = await fixture();

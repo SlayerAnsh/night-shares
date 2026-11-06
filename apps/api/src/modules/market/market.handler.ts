@@ -2,6 +2,8 @@ import type { ServiceImpl } from "@connectrpc/connect";
 import type { MarketService } from "@night-shares/proto/market/v1/market_pb";
 import { optionalUser, requireUser } from "../../server/auth-context";
 import { DomainError } from "../../shared/errors/domain-error";
+import { cancelAllAsks } from "./orders/cancel-all";
+import { prepareAsk } from "./orders/prepare";
 import { approveAgentOrder } from "./use-cases/account/approve-agent-order";
 import { cancelAsk } from "./use-cases/account/cancel-ask";
 import { createAgentOrder } from "./use-cases/account/create-agent-order";
@@ -33,6 +35,16 @@ export function createMarketHandler(
   deps: Deps,
 ): ServiceImpl<typeof MarketService> {
   return {
+    prepareAsk: (r, ctx) =>
+      prepareAsk(
+        deps,
+        requireUser(ctx),
+        nightKey(r.night),
+        quantity(r.size),
+        money(r.price),
+        r.expiry,
+      ),
+    cancelAllAsks: (_, ctx) => cancelAllAsks(deps, requireUser(ctx)),
     discover: (r, ctx) => discover(deps, r, optionalUser(ctx)),
     getNight: (r) => getNight(deps, nightKey(r.night)),
     getBook: (r) => getBook(deps, nightKey(r.night)),
@@ -87,6 +99,7 @@ export function createMarketHandler(
           nightKey(r.night),
           quantity(r.size),
           money(r.price),
+          { expiry: r.expiry, nonce: r.nonce, signature: r.signature },
         ),
       );
     },

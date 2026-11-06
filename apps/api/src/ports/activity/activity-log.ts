@@ -5,6 +5,8 @@ export type ActivityKind =
   | "trader_bought"
   | "trader_sold_back"
   | "ask_filled"
+  | "ask_expired"
+  | "asks_cancelled_all"
   | "ask_posted"
   | "ask_cancelled"
   | "nights_opened"

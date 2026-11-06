@@ -109,12 +109,18 @@ Auth column: the `access` option on each RPC.
 | QuoteBuy / QuoteSell | PUBLIC | Route preview: fills, average, fee, cap used, late fee, cutoff refund |
 | Buy | ORB | Execute a buy. Enforces the combined per-human cap across controlled wallets |
 | Sell | ORB | Sell back to the pool with late fee |
-| PostAsk / CancelAsk | ORB | Park an ask. Warns past 2 times fair price or above recall cap |
+| PrepareAsk | ORB | Return order fields, EIP-712 typed data JSON and digest for the caller's current maker nonce |
+| PostAsk / CancelAsk | ORB | Sign and list an off chain ask without escrow, or cancel one listing. Warns past 2 times fair price or above recall cap |
+| CancelAllAsks | ORB | Increment the caller wallet's nonce and cancel all its open asks |
 | GetPortfolio | ORB | Holdings, listings, realised and unrealised P&L, track record |
 | ToggleWatch / ListWatch | ORB | Watchlist |
 | GetAgentWallet / FundAgentWallet / WithdrawAgentWallet | ORB | Read, fund or withdraw the separate agent ledger balance |
 | SetAgentBudget | ORB | Set lifetime and per-order spend caps and an optional night allowlist |
 | CreateAgentOrder / ApproveAgentOrder | ORB | Agent wallet orders. Orders over 1,000 USDC need a VerifyAction token |
+
+Trader asks use EIP-712 domain `NightShares`, version `1`, with chain ID and verifying contract from configuration. `Order` fields are `night:bytes32`, `size:uint256` (NightToken base units, tenths times 1e17), `price:uint256` (micro USDC per whole room night), `expiry:uint64` (Unix seconds; the API rounds expiry down to whole seconds), `nonce:uint256`, and `maker:address`. A fill costs `ceil(size * price / 1e18)` micro USDC; the taker pays it and the maker receives the same gross amount, with fees separate. `night` is Keccak-256 of the UTF-8 NightKey ID `<propertyId>:<roomTypeId>:<date>`. Typed data JSON encodes integers as decimal strings. Expiry defaults to 24 hours and must be in the future, at most seven days away. `PrepareAsk` returns the same fields carried by `Ask`; explicit `PostAsk` signatures must include the prepared expiry and nonce. Empty signatures are signed custodially only with mock adapters.
+
+SQLite migration 330 stores per-wallet nonces in `market_maker_nonces` and signed ask metadata and remaining quantities in `market_signed_asks`. Posting leaves tokens available for sells and recall. Every trader, guest and agent fill checks current maker holdings, limits execution to available tenths, skips invalid orders, and retains existing model cap and maker rebate rules. Book, discovery and quote reads exclude expired and stale orders without waiting for the expiry job. Reservation and position updates share one synchronous SQLite transaction; wallet settlement follows, with synchronous compensation on failure. Seeded mock market-maker inventory retains its existing simulation behavior. Chain execution remains mock.
 
 ### host.v1.HostService
 

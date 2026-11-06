@@ -5,6 +5,16 @@
 import { MarketService } from "./market_pb";
 
 /**
+ * @generated from rpc night_shares.market.v1.MarketService.PrepareAsk
+ */
+export const prepareAsk = MarketService.method.prepareAsk;
+
+/**
+ * @generated from rpc night_shares.market.v1.MarketService.CancelAllAsks
+ */
+export const cancelAllAsks = MarketService.method.cancelAllAsks;
+
+/**
  * @generated from rpc night_shares.market.v1.MarketService.GetAgentWallet
  */
 export const getAgentWallet = MarketService.method.getAgentWallet;

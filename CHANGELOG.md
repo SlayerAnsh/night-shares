@@ -6,6 +6,8 @@ All notable changes to this monorepo. Newest first.
 
 ### Added
 
+- Signed trader asks: EIP-712 orders (`PrepareAsk`, signed `PostAsk`, `CancelAllAsks`) with per maker nonces, 24 hour default expiry, no escrow, and fills limited to the maker's current holding. The order encoding matches the contracts package (token base units, uint64 seconds, Keccak-256 night key). An `OrderSigner` port has a mock HMAC adapter; mock mode signs custodially when no signature is sent.
+- Walk reports carry `evidenceHash` (SHA-256 of tag UID, tag counter, tap time and booking ID) and a typed `WalkAttestation` for the API attester. Reception tags keep a monotonic per tag counter.
 - Web visual base: global base CSS and React primitives in `packages/design-system` (Button, IconButton, Card, Field, Input, Select, Stepper, Pill, Badge, Chip, Stat, Segmented, Tabs, Switch, Dialog, Table, EmptyState, Spinner, Skeleton, Photo, Display, Eyebrow), CSS Modules on tokens only, fonts through `next/font`, the shared app shell and nav (brand, Stay, Trade and Host switcher, section links, World ID account menu with sign out), the landing page and the World ID sign in page styled after the mock.
 - Automatic per-property host payout sweeps on every job tick, net of double-sale debt, with idempotent reservations and failure compensation.
 - Agent wallets with funding, withdrawals, lifetime and per-order budgets, optional night allowlists, and fresh World ID approval for orders over 1,000 USDC.
@@ -26,6 +28,7 @@ All notable changes to this monorepo. Newest first.
 
 ### Changed
 
+- `GetPriceCalendar` returns every night in the window; sold out or closed nights carry `is_sold_out` instead of failing the whole request.
 - Opened nights fix price, curve and room count; all rooms are recorded under `NightVault`.
 - Market model synced to `3d84c7b5d2cb`: guest recall uses actual trader holdings, largest holder first; `CAP_HUMAN` applies a 30% cap on every night across all wallets a human controls, including agents.
 - Hosts trade under the same rules, pay the full fee on their own nights, and route their host fee share to `rebate_pool`. Host holdings are public and host sell backs appear in analytics.
@@ -42,6 +45,7 @@ All notable changes to this monorepo. Newest first.
 
 ### Security
 
+- `IssueReceptionTag` is disabled unless `DEV_TAG_ISSUER=true`, which requires `ADAPTERS=mock`, so guests cannot mint their own proof of presence.
 - Host fee routing requires nonempty owner and human identities; empty identities cannot match a host. Host night recall previews are bounded by trader holdings.
 - Rate-limit eviction preserves throttled buckets, removes stale or fully refilled entries first, and shares a bounded overflow bucket when full. Identity IP quotas group IPv6 by /48; general IP quotas use /64.
 - Forwarded addresses require `TRUST_PROXY=true` and a socket peer in `TRUSTED_PROXIES`; `TRUSTED_PROXY_HOPS` selects from the right. No proxies are trusted by default, preventing spoofed quota bypass.

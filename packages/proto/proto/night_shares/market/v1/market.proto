@@ -11,6 +11,12 @@ import "night_shares/market/v1/book.proto";
 import "night_shares/market/v1/portfolio.proto";
 
 service MarketService {
+  rpc PrepareAsk(PrepareAskRequest) returns (PrepareAskResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc CancelAllAsks(CancelAllAsksRequest) returns (CancelAllAsksResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
   rpc GetAgentWallet(GetAgentWalletRequest) returns (AgentWalletResponse) {
     option (night_shares.auth.v1.access) = ACCESS_ORB;
   }
@@ -154,10 +160,30 @@ message SellResponse {
   Execution execution = 1;
 }
 
+message PrepareAskRequest {
+  night_shares.common.v1.NightKey night = 1;
+  night_shares.common.v1.RoomNights size = 2;
+  night_shares.common.v1.Usdc price = 3;
+  google.protobuf.Timestamp expiry = 4;
+}
+message PrepareAskResponse {
+  Ask order = 1;
+  string typed_data_json = 2;
+  string digest = 3;
+}
+message CancelAllAsksRequest {}
+message CancelAllAsksResponse {
+  uint64 nonce = 1;
+  uint32 cancelled_count = 2;
+}
+
 message PostAskRequest {
   night_shares.common.v1.NightKey night = 1;
   night_shares.common.v1.RoomNights size = 2;
   night_shares.common.v1.Usdc price = 3;
+  google.protobuf.Timestamp expiry = 4;
+  optional uint64 nonce = 5;
+  string signature = 6;
 }
 
 message PostAskResponse {

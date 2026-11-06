@@ -1,6 +1,9 @@
 import { parseDate } from "../shared/dates";
 import { loadServerConfig, type ServerConfig } from "./server-config";
 export type Config = Partial<ServerConfig> & {
+  orderChainId?: number;
+  orderVerifyingContract?: string;
+  orderMockSecret?: string;
   devTagIssuer?: boolean;
   receptionTagSecret?: string;
   jobIntervalMs?: number;
@@ -18,6 +21,14 @@ export type Config = Partial<ServerConfig> & {
 export function loadConfig(
   env: Record<string, string | undefined> = process.env,
 ): Config {
+  const orderChainId = Number(env.ORDER_CHAIN_ID ?? "5042002");
+  if (!Number.isSafeInteger(orderChainId) || orderChainId <= 0)
+    throw new Error("ORDER_CHAIN_ID must be a positive safe integer.");
+  const orderVerifyingContract =
+    env.ORDER_VERIFYING_CONTRACT ??
+    "0x0000000000000000000000000000000000000000";
+  if (!/^0x[0-9a-fA-F]{40}$/.test(orderVerifyingContract))
+    throw new Error("ORDER_VERIFYING_CONTRACT must be an Ethereum address.");
   const rawDevTagIssuer = env.DEV_TAG_ISSUER ?? "false";
   if (rawDevTagIssuer !== "true" && rawDevTagIssuer !== "false")
     throw new Error("DEV_TAG_ISSUER must be true or false.");
@@ -79,6 +90,9 @@ export function loadConfig(
     throw new Error("DB_PATH must be a nonempty SQLite file path or :memory:.");
   return {
     ...loadServerConfig(env),
+    orderChainId,
+    orderVerifyingContract,
+    orderMockSecret: env.ORDER_MOCK_SECRET || undefined,
     receptionTagSecret,
     devTagIssuer,
     jobIntervalMs,
