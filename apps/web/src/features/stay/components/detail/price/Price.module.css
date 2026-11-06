@@ -1,0 +1,125 @@
+/* .lines, .nights-list and .g-why from mock/v2/guest.html. */
+.mono {
+  font-family: var(--mono);
+  font-feature-settings: "tnum";
+}
+
+.lines {
+  margin-top: var(--sp-18);
+  display: grid;
+  gap: var(--sp-10);
+  font-size: var(--fs-15);
+}
+
+.lines > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-12);
+}
+
+.tot {
+  border-top: 1px solid var(--line);
+  padding-top: var(--sp-14);
+  margin-top: var(--sp-4);
+  font-weight: var(--fw-extrabold);
+  font-size: var(--fs-17);
+}
+
+.lines > .fee {
+  margin-top: calc(-1 * var(--sp-4));
+  color: var(--muted);
+  font-size: var(--fs-12-5);
+}
+
+.breakdown {
+  margin-top: calc(-1 * var(--sp-4));
+}
+
+.breakdown summary,
+.why summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-block;
+}
+
+.breakdown summary::-webkit-details-marker,
+.why summary::-webkit-details-marker {
+  display: none;
+}
+
+.breakdown summary {
+  color: var(--accent);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-13);
+}
+
+.breakdown summary:hover {
+  text-decoration: underline;
+}
+
+.nights {
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+  display: grid;
+  gap: var(--sp-4);
+  padding: var(--sp-10) var(--sp-12);
+  background: var(--surface-2);
+  border-radius: var(--r-sm);
+  margin-top: var(--sp-6);
+}
+
+.nights > div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.why {
+  margin-top: var(--sp-14);
+  font-size: var(--fs-14);
+}
+
+.why summary {
+  font-weight: var(--fw-bold);
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-decoration-color: var(--line-2);
+  text-underline-offset: 3px;
+}
+
+.whyBody {
+  margin-top: var(--sp-10);
+  padding: var(--sp-14) var(--sp-16);
+  border-radius: var(--r-14);
+  background: var(--surface-2);
+  display: grid;
+  gap: var(--sp-10);
+}
+
+.whyBody p {
+  margin: 0;
+  font-size: var(--fs-14);
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+.whyRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-14);
+}
+
+.whyRow b {
+  display: block;
+  font-size: var(--fs-14);
+}
+
+.whyRow div span {
+  font-size: var(--fs-12-5);
+  color: var(--muted);
+}
+
+.whyTot {
+  border-top: 1px solid var(--line);
+  padding-top: var(--sp-10);
+}

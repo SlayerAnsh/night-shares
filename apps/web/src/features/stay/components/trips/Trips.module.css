@@ -1,0 +1,378 @@
+/* My trips (.trips-head, .trip, .trip-facts, .trip-foot, .g-walk) from mock/v2/guest.html. */
+/* The app shell already sets the page width and gutter (.wrap). */
+.wrap {
+  padding-bottom: 40px;
+}
+
+.mono {
+  font-family: var(--mono);
+  font-feature-settings: "tnum";
+}
+
+.muted {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-13-5);
+}
+
+.head {
+  margin-bottom: var(--sp-8);
+}
+
+.head .muted {
+  margin-top: var(--sp-8);
+  font-size: var(--fs-15);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--ls-display);
+  line-height: var(--lh-display);
+  text-transform: uppercase;
+  font-size: clamp(48px, 6vw, 80px);
+}
+
+.h {
+  font-size: var(--fs-20);
+  margin: var(--sp-32) 0 var(--sp-14);
+}
+
+.empty {
+  padding: 40px var(--sp-20);
+  border: 1px dashed var(--line-2);
+  border-radius: var(--r-lg);
+}
+
+.trip {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: var(--sp-20);
+  align-items: start;
+  padding: var(--sp-16);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  margin-bottom: var(--sp-14);
+}
+
+.past {
+  background: transparent;
+}
+
+.tripPhoto {
+  height: 170px;
+  border-radius: var(--r-14);
+}
+
+.past .tripPhoto {
+  opacity: 0.75;
+}
+
+.tripBody {
+  min-width: 0;
+}
+
+.skelGap {
+  margin-top: var(--sp-12);
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--sp-12);
+}
+
+.top h3 {
+  margin: 0;
+  font-size: var(--fs-19);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-14);
+  margin: var(--sp-16) 0;
+}
+
+.facts span {
+  display: block;
+  font-size: var(--fs-12);
+  font-weight: var(--fw-extrabold);
+  color: var(--muted);
+}
+
+.facts b {
+  display: block;
+  font-size: var(--fs-14-5);
+  margin-top: var(--sp-2);
+  overflow-wrap: anywhere;
+}
+
+.facts em {
+  display: block;
+  font-style: normal;
+  font-size: var(--fs-12-5);
+  color: var(--ink-2);
+}
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-12);
+  padding-top: var(--sp-12);
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-12);
+  flex-wrap: wrap;
+}
+
+.link {
+  color: var(--accent);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-13);
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.hint {
+  margin: var(--sp-10) 0 0;
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.checkin {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-10);
+  flex-wrap: wrap;
+  margin-top: var(--sp-12);
+}
+
+.seed {
+  width: 180px;
+}
+
+.seed input {
+  height: 34px;
+}
+
+.checkin > p {
+  flex-basis: 100%;
+}
+
+.walk {
+  margin-top: var(--sp-12);
+  padding: var(--sp-12) var(--sp-14);
+  border-radius: var(--r-14);
+  background: var(--neg-soft);
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.walk b {
+  font-size: var(--fs-14-5);
+  color: var(--neg);
+}
+
+.walk > span {
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+}
+
+.receipt {
+  margin-top: var(--sp-12);
+  padding: var(--sp-14) var(--sp-16);
+  border-radius: var(--r-14);
+  background: var(--surface-2);
+}
+
+.lines {
+  display: grid;
+  gap: var(--sp-10);
+  margin: 0;
+  font-size: var(--fs-14);
+}
+
+.lines > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-12);
+}
+
+.lines dt {
+  color: var(--ink-2);
+}
+
+.lines dd {
+  margin: 0;
+  text-align: right;
+  min-width: 0;
+}
+
+.addr {
+  overflow-wrap: anywhere;
+  font-size: var(--fs-12-5);
+}
+
+.tot {
+  border-top: 1px solid var(--line);
+  padding-top: var(--sp-10);
+  font-weight: var(--fw-extrabold);
+}
+
+.tot dt {
+  color: var(--ink);
+}
+
+/* Walk report dialog */
+.gwalk {
+  display: grid;
+  gap: var(--sp-14);
+}
+
+.amt {
+  padding: var(--sp-16);
+  border-radius: var(--r);
+  background: var(--surface-2);
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.amt span {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-extrabold);
+  color: var(--muted);
+}
+
+.amt b {
+  font-size: var(--fs-28);
+}
+
+.amt em {
+  font-style: normal;
+  font-size: var(--fs-13-5);
+  color: var(--ink-2);
+}
+
+.note {
+  margin: 0;
+  font-size: var(--fs-13-5);
+  color: var(--ink-2);
+}
+
+.warn {
+  margin: 0;
+  padding: var(--sp-10) var(--sp-12);
+  border-radius: var(--r-12);
+  background: var(--neg-soft);
+  color: var(--neg);
+  font-size: var(--fs-13-5);
+  font-weight: var(--fw-bold);
+}
+
+.walkCta {
+  display: flex;
+  gap: var(--sp-10);
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Saved stays */
+.saved {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--sp-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.savedItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-12);
+  padding: var(--sp-10);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--surface);
+}
+
+.savedItem > div {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+
+.savedPhoto {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-sm);
+  flex: none;
+}
+
+.savedName {
+  font-weight: var(--fw-bold);
+  color: var(--ink);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.savedName:hover {
+  text-decoration: underline;
+}
+
+.other {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-20);
+  flex-wrap: wrap;
+  margin-top: 48px;
+  padding-top: var(--sp-18);
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-13-5);
+  color: var(--muted);
+}
+
+.other a {
+  font-weight: var(--fw-bold);
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-decoration-color: var(--line-2);
+  text-underline-offset: 3px;
+}
+
+.other a:hover {
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  .trip {
+    grid-template-columns: 1fr;
+  }
+
+  .tripPhoto {
+    height: 140px;
+  }
+
+  .facts {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .walkCta > * {
+    flex: 1 1 100%;
+  }
+}

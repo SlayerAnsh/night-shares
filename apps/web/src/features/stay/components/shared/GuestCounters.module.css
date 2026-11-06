@@ -1,0 +1,25 @@
+/* .grow from mock/v2/guest.html. */
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-12);
+  padding: var(--sp-14) 0;
+}
+
+.row + .row {
+  border-top: 1px solid var(--line);
+}
+
+.row b {
+  display: block;
+}
+
+.row span {
+  font-size: var(--fs-13);
+  color: var(--muted);
+}
+
+.done {
+  margin-top: var(--sp-8);
+}

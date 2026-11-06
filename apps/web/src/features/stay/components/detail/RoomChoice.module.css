@@ -1,0 +1,83 @@
+/* .room from mock/v2/guest.html. */
+.room {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-16);
+  padding: var(--sp-16) var(--sp-18);
+  border: 1.5px solid var(--line-2);
+  border-radius: var(--r);
+  width: 100%;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-150),
+    background var(--dur-150);
+}
+
+.room:hover {
+  border-color: var(--ink-2);
+}
+
+.on {
+  background: var(--surface-2);
+}
+
+.room:has(.input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--line-2);
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+
+.on .radio {
+  border-color: var(--ink);
+}
+
+.on .radio::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.text {
+  min-width: 0;
+}
+
+.text b {
+  display: block;
+}
+
+.text span {
+  font-size: var(--fs-13-5);
+  color: var(--muted);
+}
+
+.price {
+  margin-left: auto;
+  text-align: right;
+  font-weight: var(--fw-extrabold);
+  white-space: nowrap;
+}
+
+.sub {
+  display: block;
+  color: var(--muted);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-12-5);
+}

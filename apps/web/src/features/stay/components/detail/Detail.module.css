@@ -1,0 +1,188 @@
+/* Detail layout from mock/v2/guest.html (.d-head, .d-body, .d-sec). */
+/* The app shell already sets the page width and gutter (.wrap). */
+.wrap {
+  padding-bottom: 40px;
+}
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-20);
+  margin-bottom: var(--sp-20);
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: var(--fw-regular);
+  letter-spacing: var(--ls-display);
+  line-height: var(--lh-display);
+  text-transform: uppercase;
+  font-size: clamp(48px, 6vw, 80px);
+}
+
+.meta {
+  display: flex;
+  gap: var(--sp-14);
+  align-items: center;
+  color: var(--ink-2);
+  font-weight: var(--fw-semibold);
+  margin-top: var(--sp-8);
+  flex-wrap: wrap;
+}
+
+.rate {
+  display: inline-flex;
+  gap: var(--sp-4);
+  align-items: center;
+  font-weight: var(--fw-bold);
+  color: var(--ink);
+}
+
+.rate svg {
+  width: 13px;
+  height: 13px;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 56px;
+  margin-top: 40px;
+  align-items: start;
+}
+
+.sec {
+  padding: 30px 0;
+  border-top: 1px solid var(--line);
+}
+
+.sec:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.sec h2 {
+  font-size: var(--fs-22);
+  margin: 0 0 var(--sp-14);
+}
+
+.sec p {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: var(--fs-16);
+  line-height: 1.65;
+}
+
+.sec p.lead {
+  margin: -6px 0 var(--sp-18);
+  font-size: var(--fs-14);
+}
+
+.hl3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-14);
+  margin-top: 22px;
+}
+
+.hl3 div {
+  padding: var(--sp-16);
+  border-radius: var(--r);
+  background: var(--surface-2);
+}
+
+.hl3 b {
+  display: block;
+  font-size: var(--fs-14-5);
+}
+
+.hl3 span {
+  font-size: var(--fs-13-5);
+  color: var(--ink-2);
+}
+
+.amen {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--sp-12) var(--sp-24);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.amen li {
+  display: flex;
+  gap: var(--sp-12);
+  align-items: center;
+  font-size: var(--fs-15);
+}
+
+.amen svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  color: var(--pos);
+}
+
+.record {
+  display: grid;
+  gap: var(--sp-8);
+  margin: var(--sp-14) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.record li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-12);
+  padding: var(--sp-10) var(--sp-12);
+  border-radius: var(--r-12);
+  background: var(--surface-2);
+  font-size: var(--fs-14);
+}
+
+.inlineCal {
+  padding: 22px 22px var(--sp-16);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  scroll-margin: 120px;
+}
+
+@media (max-width: 1060px) {
+  .body {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .body {
+    gap: var(--sp-32);
+    margin-top: var(--sp-28);
+  }
+
+  .hl3,
+  .amen {
+    grid-template-columns: 1fr;
+  }
+
+  .inlineCal {
+    padding: var(--sp-16) var(--sp-12) var(--sp-12);
+  }
+}
+
+.rooms {
+  display: grid;
+  gap: var(--sp-10);
+}
+
+fieldset.rooms {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}

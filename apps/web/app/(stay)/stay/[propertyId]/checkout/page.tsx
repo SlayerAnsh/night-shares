@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { CheckoutScreen } from "../../../../../src/features/stay/components/checkout/CheckoutScreen";
+import { PageLoading } from "../../../../../src/features/stay/components/shared/PageLoading";
 export default async function Page({
   params,
 }: {
@@ -7,7 +8,7 @@ export default async function Page({
 }) {
   const { propertyId } = await params;
   return (
-    <Suspense fallback={<p>Loading stay…</p>}>
+    <Suspense fallback={<PageLoading label="Loading stay" />}>
       <CheckoutScreen propertyId={propertyId} />
     </Suspense>
   );

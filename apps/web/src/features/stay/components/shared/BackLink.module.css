@@ -1,0 +1,19 @@
+/* .back from mock/v2/guest.html. */
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  font-weight: var(--fw-bold);
+  color: var(--ink-2);
+  margin: var(--sp-28) 0 var(--sp-18);
+  text-decoration: none;
+}
+
+.back svg {
+  width: 16px;
+  height: 16px;
+}
+
+.back:hover {
+  color: var(--ink);
+}

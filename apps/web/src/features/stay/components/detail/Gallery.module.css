@@ -1,0 +1,135 @@
+/* .gallery and .lb from mock/v2/guest.html. */
+.gallery {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: 220px 220px;
+  gap: var(--sp-10);
+  position: relative;
+}
+
+.cell {
+  display: block;
+  padding: 0;
+  border-radius: var(--r-14);
+  overflow: hidden;
+  cursor: zoom-in;
+}
+
+.cell:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+}
+
+.cell:first-child,
+.first {
+  grid-row: span 2;
+  border-radius: var(--r-lg) var(--r-14) var(--r-14) var(--r-lg);
+}
+
+.cell:nth-child(3) {
+  border-top-right-radius: var(--r-lg);
+}
+
+.cell:nth-child(5) {
+  border-bottom-right-radius: var(--r-lg);
+}
+
+.all {
+  position: absolute;
+  right: var(--sp-16);
+  bottom: var(--sp-16);
+}
+
+.skelGap {
+  margin: var(--sp-12) 0 var(--sp-20);
+}
+
+.skelGallery > span {
+  height: 100%;
+}
+
+.lightbox {
+  width: min(1100px, calc(100% - 32px));
+}
+
+.lb {
+  position: relative;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--inverse);
+}
+
+.lbPhoto {
+  height: min(70vh, 640px);
+}
+
+.prev,
+.next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.prev {
+  left: var(--sp-14);
+}
+
+.next {
+  right: var(--sp-14);
+}
+
+.prev svg,
+.next svg {
+  width: 16px;
+  height: 16px;
+}
+
+.count {
+  position: absolute;
+  bottom: var(--sp-14);
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--on-accent);
+  font-family: var(--mono);
+  font-size: var(--fs-13);
+  background: var(--scrim);
+  padding: var(--sp-4) var(--sp-10);
+  border-radius: var(--r-8);
+}
+
+@media (max-width: 760px) {
+  .gallery {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 240px 140px;
+  }
+
+  .cell:first-child,
+  .first {
+    grid-column: span 2;
+    grid-row: auto;
+    border-radius: var(--r-lg);
+  }
+
+  .cell:nth-child(n + 4),
+  .skelGallery > span:nth-child(n + 4) {
+    display: none;
+  }
+
+  .cell:nth-child(2) {
+    border-bottom-left-radius: var(--r-lg);
+  }
+
+  .cell:nth-child(3) {
+    border-top-right-radius: var(--r-14);
+    border-bottom-right-radius: var(--r-lg);
+  }
+
+  .lbPhoto {
+    height: 60vh;
+  }
+}
