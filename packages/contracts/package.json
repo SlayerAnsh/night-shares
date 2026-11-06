@@ -1,0 +1,9 @@
+{
+  "name": "@night-shares/contracts",
+  "private": true,
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "deps": "sh script/install-deps.sh"
+  }
+}
