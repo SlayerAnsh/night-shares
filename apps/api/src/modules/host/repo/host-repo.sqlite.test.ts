@@ -52,7 +52,7 @@ test("host ownership, imports, withdrawals and opened nights survive a file data
       f.repo.connections("other").set("prop_salinas", imported);
     }
     f.ports.inventory.update(key, (record) => ({ ...record, stopped: true }));
-    f.use.openNights(user.id, selection);
+    await f.use.openNights(user.id, selection);
     const night = f.ports.inventory.get(key);
     expect(night.openedAt).toBe(f.ports.clock.now());
     await f.use.withdraw(user, "prop_velana", 1n);
@@ -79,7 +79,7 @@ test("host ownership, imports, withdrawals and opened nights survive a file data
   }
 });
 
-test("connection maps write through without retaining rolled back or stale values", () => {
+test("connection maps write through without retaining rolled back or stale values", async () => {
   const f = open(":memory:");
   try {
     const map = f.repo.connections("host");

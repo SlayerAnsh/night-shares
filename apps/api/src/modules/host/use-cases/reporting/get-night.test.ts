@@ -1,9 +1,9 @@
 import { expect, test } from "bun:test";
 import { fixture } from "../fixture";
 
-test("night shows real shared activity and selected release cutoff", () => {
+test("night shows real shared activity and selected release cutoff", async () => {
   const f = fixture();
-  f.use.openNights(f.userId, f.selection);
+  await f.use.openNights(f.userId, f.selection);
   const result = f.use.getNight(f.userId, "prop_velana", "2026-12-24");
   expect(result.roomTypes).toHaveLength(2);
   expect(result.activity[0]?.kind).toBe("nights_edited");

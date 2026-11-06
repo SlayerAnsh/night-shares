@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test";
 import { fixture } from "../fixture";
 
-test("host edits allotment without losing asks or booked and held rooms", () => {
+test("host edits allotment without losing asks or booked and held rooms", async () => {
   const f = fixture(),
     before = f.ports.inventory.get(f.key);
   f.selection.allotmentPercent = 10;
-  const nights = f.use.openNights(f.userId, f.selection);
+  const nights = await f.use.openNights(f.userId, f.selection);
   const after = f.ports.inventory.get(f.key);
   expect(after.state.S).toBeGreaterThanOrEqual(
     after.state.booked + after.state.held,
@@ -17,10 +17,10 @@ test("host edits allotment without losing asks or booked and held rooms", () => 
     "nights_edited",
   );
 });
-test("opening stopped nights clears stopped and records opening time", () => {
+test("opening stopped nights clears stopped and records opening time", async () => {
   const f = fixture();
   f.ports.inventory.update(f.key, (r) => ({ ...r, stopped: true }));
-  f.use.openNights(f.userId, f.selection);
+  await f.use.openNights(f.userId, f.selection);
   expect(f.ports.inventory.get(f.key).stopped).toBe(false);
   expect(f.ports.activity.list({ nightKey: f.key })[0]?.kind).toBe(
     "nights_opened",

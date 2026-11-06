@@ -22,8 +22,8 @@ export function createHostHandler(
     getHotel: (r, ctx) => use.getHotel(host(ctx).id, r.propertyId, r.month),
     previewOpenNights: (r, ctx) =>
       use.previewOpenNights(host(ctx).id, r.selection),
-    openNights: (r, ctx) => ({
-      nights: use.openNights(host(ctx).id, r.selection),
+    openNights: async (r, ctx) => ({
+      nights: await use.openNights(host(ctx).id, r.selection),
     }),
     stopSelling: (r, ctx) => use.stopSelling(host(ctx).id, r.nights),
     getNight: (r, ctx) => use.getNight(host(ctx).id, r.propertyId, r.date),

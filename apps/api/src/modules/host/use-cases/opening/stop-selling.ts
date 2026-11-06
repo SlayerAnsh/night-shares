@@ -7,6 +7,7 @@ import { stop } from "../../../inventory/mutations/stop";
 import { mapNight } from "../../mappers/night";
 import type { HostDeps } from "../deps";
 import { propertyOf } from "../property";
+import { pushChange } from "./push-change";
 export function createStopSelling(deps: HostDeps) {
   return (userId: string, nights: NightKey[]) => {
     if (!nights.length || nights.length > 480)
@@ -29,34 +30,38 @@ export function createStopSelling(deps: HostDeps) {
         }),
       ),
     ];
-    let roomsTakenBack = 0;
-    const result = keys.map((key) => {
-      let taken = 0,
-        changed = false;
-      const updated = deps.ports.inventory.update(key, (current) => {
-        changed = !current.stopped;
-        taken = current.stopped
-          ? 0
-          : Math.max(
-              0,
-              toTenths(
-                current.state.S - current.state.booked - current.state.held,
-              ),
-            );
-        return stop(current);
-      });
-      roomsTakenBack += taken;
-      if (changed)
-        deps.ports.activity.append({
-          nightKey: key,
-          propertyId: updated.propertyId,
-          kind: "selling_stopped",
-          tenths: taken,
-          actor: "host",
-          userId,
+    return pushChange(deps, keys, userId, (publish) => {
+      let roomsTakenBack = 0;
+      const result = keys.map((key) => {
+        let taken = 0,
+          changed = false;
+        const updated = deps.ports.inventory.update(key, (current) => {
+          changed = !current.stopped;
+          taken = current.stopped
+            ? 0
+            : Math.max(
+                0,
+                toTenths(
+                  current.state.S - current.state.booked - current.state.held,
+                ),
+              );
+          return stop(current);
         });
-      return mapNight(updated, deps.repo);
+        roomsTakenBack += taken;
+        if (changed)
+          publish.push(() =>
+            deps.ports.activity.append({
+              nightKey: key,
+              propertyId: updated.propertyId,
+              kind: "selling_stopped",
+              tenths: taken,
+              actor: "host",
+              userId,
+            }),
+          );
+        return mapNight(updated, deps.repo);
+      });
+      return { nights: result, roomsTakenBack: { tenths: roomsTakenBack } };
     });
-    return { nights: result, roomsTakenBack: { tenths: roomsTakenBack } };
   };
 }

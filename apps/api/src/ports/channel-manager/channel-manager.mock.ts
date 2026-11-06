@@ -14,8 +14,15 @@ export function createMockChannelManager({
   ids: IdGenerator;
   clock: Clock;
 }): ChannelManager {
+  let failPush = false;
   const reservations = new Map<string, string>();
   return {
+    setPushFailure(fail) {
+      failPush = fail;
+    },
+    async pushInventory() {
+      if (failPush) throw new Error("Mock hotel push failed.");
+    },
     async connect({ propertyId, pms }) {
       if (!["mews", "cloudbeds", "siteminder"].includes(pms.toLowerCase()))
         throw new DomainError("INVALID_ARGUMENT", "Unsupported PMS.");
@@ -33,6 +40,7 @@ export function createMockChannelManager({
       };
     },
     async pushReservation(input) {
+      if (failPush) throw new Error("Mock hotel push failed.");
       const property = catalog.get(input.propertyId);
       if (!property || !catalog.getRoomType(input.propertyId, input.roomTypeId))
         throw new DomainError("NOT_FOUND", "Property or room type not found.");

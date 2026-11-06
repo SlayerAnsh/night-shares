@@ -9,6 +9,7 @@ import { createMarketModule } from "../modules/market/module";
 import { createStayModule } from "../modules/stay/module";
 import { createWalletModule } from "../modules/wallet/module";
 import { createSqliteActivityLog } from "../ports/activity/activity-log.sqlite";
+import { bookingReportFor } from "../ports/booking-report/booking-report.mock";
 import { createMockChannelManager } from "../ports/channel-manager/channel-manager.mock";
 import { createMockClock } from "../ports/clock/clock.mock";
 import { createSystemClock } from "../ports/clock/clock.system";
@@ -41,34 +42,36 @@ export function buildContainer(config: Config) {
       : createRandomIdGenerator();
   const catalog = createMemoryCatalogRepo();
   const walletProvider = createSqliteWalletProvider({ db, ids, clock });
-  const ports: Ports = {
-    db,
-    clock,
-    ids,
-    catalog,
-    walletProvider,
-    activity: createSqliteActivityLog({ db, ids, clock }),
-    verifications: createSqliteVerificationStore({ db, clock }),
-    inventory: createSqliteInventoryRepo({ db, catalog, clock }),
-    sessions: createSqliteSessionStore({ db, clock }),
-    identityVerifier:
-      config.worldIdMode === "world-id"
-        ? createWorldIdIdentityVerifier({
-            db,
-            clock,
-            ids,
-            appId: config.worldIdAppId ?? "",
-            action: config.worldIdAction,
-            verifyUrl: config.worldIdVerifyUrl,
-          })
-        : createMockIdentityVerifier({
-            db,
-            clock,
-            ids,
-            action: config.worldIdAction,
-          }),
-    channelManager: createMockChannelManager({ catalog, clock, ids }),
-  };
+  const ports: Ports & { bookingReport: ReturnType<typeof bookingReportFor> } =
+    {
+      bookingReport: bookingReportFor({ db, ids }),
+      db,
+      clock,
+      ids,
+      catalog,
+      walletProvider,
+      activity: createSqliteActivityLog({ db, ids, clock }),
+      verifications: createSqliteVerificationStore({ db, clock }),
+      inventory: createSqliteInventoryRepo({ db, catalog, clock }),
+      sessions: createSqliteSessionStore({ db, clock }),
+      identityVerifier:
+        config.worldIdMode === "world-id"
+          ? createWorldIdIdentityVerifier({
+              db,
+              clock,
+              ids,
+              appId: config.worldIdAppId ?? "",
+              action: config.worldIdAction,
+              verifyUrl: config.worldIdVerifyUrl,
+            })
+          : createMockIdentityVerifier({
+              db,
+              clock,
+              ids,
+              action: config.worldIdAction,
+            }),
+      channelManager: createMockChannelManager({ catalog, clock, ids }),
+    };
   const modules = {
     identity: createIdentityModule(ports),
     catalog: createCatalogModule(ports),

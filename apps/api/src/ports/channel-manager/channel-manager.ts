@@ -10,6 +10,10 @@ export type Reservation = {
   guestEmail: string;
 };
 export interface ChannelManager {
+  pushInventory(
+    nights: { nightKey: string; allotmentTenths: number; stopped: boolean }[],
+  ): Promise<void>;
+  setPushFailure?(fail: boolean): void;
   connect(input: {
     propertyId: string;
     pms: string;
