@@ -8,6 +8,7 @@ export const fontFamily = {
 // Every font-size the v2 mock uses, keyed by pixel value ("13.5" becomes --fs-13-5).
 // Consolidate into a shorter scale once the mock is approved.
 export const fontSize = {
+  "8": "8px", // trade sort arrows
   "10": "10px",
   "10.5": "10.5px",
   "11": "11px",

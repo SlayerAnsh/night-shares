@@ -1,7 +1,16 @@
 import { describe, expect, test } from "bun:test";
-import { buildCss, darkVars, lightVars, staticVars } from "./build-css";
+import {
+  buildCss,
+  darkVars,
+  lightVars,
+  staticVars,
+  tradeDarkVars,
+  tradeLightVars,
+} from "./build-css";
 
-// Every custom property defined in mock/v2/assets/styles.css and login.css.
+// Every custom property defined in mock/v2/assets/*.css (styles, login, trade;
+// host defines none). Left out on purpose: --m in styles.css, a per element
+// month count that NS.calendar sets inline, so it is a component parameter.
 const mockVars = [
   "bg",
   "surface",
@@ -41,6 +50,12 @@ const mockVars = [
   "w-btn-ink",
   "w-ok",
   "w-font",
+  // trade.css
+  "subtle",
+  "accent-btn",
+  "on-accent",
+  "info",
+  "w6",
 ];
 
 const css = buildCss();
@@ -82,6 +97,27 @@ describe("buildCss", () => {
 
   test("light and dark define the same theme tokens", () => {
     expect(Object.keys(darkVars).sort()).toEqual(Object.keys(lightVars).sort());
+  });
+
+  test("trade scope overrides base tokens in light and dark", () => {
+    const light = block('[data-app="trade"]');
+    for (const [name, value] of Object.entries(tradeLightVars))
+      expect(light).toContain(`--${name}: ${value};`);
+    for (const selector of [
+      '[data-theme="dark"][data-app="trade"], [data-theme="dark"] [data-app="trade"]',
+      ':root:not([data-theme="light"])[data-app="trade"], :root:not([data-theme="light"]) [data-app="trade"]',
+    ]) {
+      const dark = block(selector);
+      for (const [name, value] of Object.entries(tradeDarkVars))
+        expect(dark).toContain(`--${name}: ${value};`);
+    }
+  });
+
+  test("trade light and dark define the same colors", () => {
+    const colors = Object.keys(tradeLightVars).filter(
+      (name) => !["sans", "mono", "w6", "r"].includes(name),
+    );
+    expect(Object.keys(tradeDarkVars).sort()).toEqual(colors.sort());
   });
 
   test("emits shared keyframes", () => {

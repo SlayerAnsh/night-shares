@@ -1,6 +1,12 @@
 export { buildCss } from "./css/build-css";
 export { darkTheme } from "./themes/dark";
 export { lightTheme, type ThemeToken } from "./themes/light";
+export {
+  type TradeToken,
+  tradeDark,
+  tradeLight,
+  tradeStatic,
+} from "./themes/trade";
 export { worldIdDark, worldIdFont, worldIdLight } from "./themes/world-id";
 export { breakpoints } from "./tokens/breakpoints";
 export { type ColorToken, colorDark, colorLight } from "./tokens/color";

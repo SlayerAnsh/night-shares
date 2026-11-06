@@ -24,6 +24,7 @@ export const colorLight = {
   scrim: "rgba(14,12,20,.48)", // .modal-bg overlay
   inverse: "#16131F", // .toast background
   "inverse-ink": "#F4F1E8", // .toast text
+  "cmdk-scrim": "rgba(22,19,31,.38)", // .cmdk-back, behind the command palette
 } as const;
 
 export type ColorToken = keyof typeof colorLight;
@@ -46,10 +47,11 @@ export const colorDark = {
   "pos-soft": "rgba(44,192,124,.12)",
   neg: "#F2604A",
   "neg-soft": "rgba(242,96,74,.12)",
-  // styles.css has no dark --warn. trade.css hard-codes #E9B23A for every dark warn use.
-  warn: "#E9B23A",
+  // styles.css does not redefine --warn in .theme-dark, so dark inherits the light value.
+  warn: "#B87A0A",
   "on-accent": "#FFFFFF",
   scrim: "rgba(14,12,20,.48)",
   inverse: "#F4F1E8",
   "inverse-ink": "#16131F",
+  "cmdk-scrim": "rgba(0,0,0,.62)",
 } as const satisfies Record<ColorToken, string>;

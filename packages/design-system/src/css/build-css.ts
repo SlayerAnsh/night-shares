@@ -1,5 +1,6 @@
 import { darkTheme } from "../themes/dark";
 import { lightTheme } from "../themes/light";
+import { tradeDark, tradeLight, tradeStatic } from "../themes/trade";
 import { worldIdDark, worldIdFont, worldIdLight } from "../themes/world-id";
 import { duration, easing, keyframes } from "../tokens/motion";
 import { radius } from "../tokens/radius";
@@ -50,6 +51,19 @@ export const darkVars: Record<string, string> = {
   ...worldIdDark,
 };
 
+// Trader app overrides, scoped by an attribute on <html> or any wrapper.
+export const tradeScope = '[data-app="trade"]';
+export const tradeLightVars: Record<string, string> = {
+  ...tradeStatic,
+  ...tradeLight,
+};
+export const tradeDarkVars: Record<string, string> = { ...tradeDark };
+
+// Matches the scope on the themed element itself and on any descendant.
+function within(theme: string): string {
+  return `${theme}${tradeScope}, ${theme} ${tradeScope}`;
+}
+
 function declarations(vars: Tokens, indent: string): string {
   return Object.entries(vars)
     .map(([name, value]) => `${indent}--${name}: ${value};`)
@@ -66,6 +80,10 @@ export function buildCss(): string {
     `[data-theme="dark"] {\n${declarations(darkVars, "  ")}\n  color-scheme: dark;\n}`,
     "@media (prefers-color-scheme: dark) {",
     `  :root:not([data-theme="light"]) {\n${declarations(darkVars, "    ")}\n    color-scheme: dark;\n  }\n}`,
+    `${tradeScope} {\n${declarations(tradeLightVars, "  ")}\n}`,
+    `${within('[data-theme="dark"]')} {\n${declarations(tradeDarkVars, "  ")}\n}`,
+    "@media (prefers-color-scheme: dark) {",
+    `  ${within(':root:not([data-theme="light"])')} {\n${declarations(tradeDarkVars, "    ")}\n  }\n}`,
     ...frames,
     "",
   ].join("\n");

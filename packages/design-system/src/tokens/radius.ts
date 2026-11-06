@@ -4,7 +4,9 @@ export const radius = {
   "r-sm": "10px",
   r: "16px",
   "r-lg": "22px",
-  "r-6": "6px", // badges
+  "r-3": "3px", // kbd hints in the command palette, trade --r
+  "r-4": "4px", // app switcher tabs, palette options, bars
+  "r-6": "6px", // badges, app switcher, command palette
   "r-8": "8px",
   "r-12": "12px", // buttons, inputs, segmented control
   "r-14": "14px", // large button
