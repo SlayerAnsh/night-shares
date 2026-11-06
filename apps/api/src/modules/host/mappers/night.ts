@@ -25,7 +25,12 @@ export function releaseMs(date: string, policy: ReleasePolicy) {
 }
 export function guestMicros(record: NightRecord) {
   if (record.stopped || record.state.S - record.state.booked < 1) return 0n;
-  return toMicros(routeBuy(book(record.state), 1, { guest: true }).total);
+  return toMicros(
+    routeBuy(book(record.state), 1, {
+      guest: true,
+      recallable: record.state.held,
+    }).total,
+  );
 }
 export function mapNight(record: NightRecord, repo: HostRepo) {
   const s = record.state;

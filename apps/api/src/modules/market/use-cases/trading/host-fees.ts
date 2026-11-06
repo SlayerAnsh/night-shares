@@ -17,9 +17,9 @@ export function hostIdentity(ports: Ports, propertyId: string) {
   const identity = ports.db
     .query<User, [string, string]>(
       `SELECT id, human_id AS humanId, wallet_address AS walletAddress, level FROM identity_users
-     WHERE id = ? OR human_id = ? UNION ALL
+     WHERE (?1 <> '' AND id = ?1) OR (?2 <> '' AND human_id = ?2) UNION ALL
      SELECT id, human_id AS humanId, wallet_address AS walletAddress, 'orb' AS level FROM market_holders
-     WHERE id = ?1 OR human_id = ?2 LIMIT 1`,
+     WHERE (?1 <> '' AND id = ?1) OR (?2 <> '' AND human_id = ?2) LIMIT 1`,
     )
     .get(owner?.id ?? "", humanId);
   return {
@@ -31,7 +31,10 @@ export function hostIdentity(ports: Ports, propertyId: string) {
 
 export function isHost(ports: Ports, propertyId: string, user: User) {
   const host = hostIdentity(ports, propertyId);
-  return host.id === user.id || host.humanId === user.humanId;
+  return (
+    (!!host.id && !!user.id && host.id === user.id) ||
+    (!!host.humanId && !!user.humanId && host.humanId === user.humanId)
+  );
 }
 
 export function tradeFeePayments(
@@ -54,7 +57,7 @@ export function tradeFeePayments(
   const own =
     typeof trader === "string"
       ? [host.walletAddress, `agent:${host.walletAddress}`].includes(trader) ||
-        (alias != null && alias.humanId === host.humanId)
+        (!!alias?.humanId && !!host.humanId && alias.humanId === host.humanId)
       : isHost(ports, propertyId, trader);
   const payments: { to: string; amount: bigint }[] = feePayments(
     notional,

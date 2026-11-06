@@ -15,7 +15,7 @@ for (const src of ["pool", "trader"] as const) {
         recall: 150,
       },
       1,
-      { guest: true },
+      { guest: true, recallable: src === "trader" ? 1 : 0 },
     );
     const payments = settlement(route);
     const paidTo = (to: string) =>
@@ -44,7 +44,7 @@ test("fractional booking fills reconcile fee rounding without changing total", (
       recall: 20,
     },
     1,
-    { guest: true },
+    { guest: true, recallable: 0.3 },
   );
   expect(settlement(route).reduce((sum, p) => sum + p.amount, 0n)).toBe(
     toMicros(route.total),
