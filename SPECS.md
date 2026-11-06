@@ -246,13 +246,17 @@ Status: design only. No contracts exist yet. When `WalletProvider` gets a real A
 - No Chainlink CRE in this build; CRE is a later upgrade for the double sale report only. The report source sits behind a neutral port, so swapping the API attester for a CRE workflow does not touch the contracts' rules or the pricing. The four oracle jobs move off chain or into the pool:
   - Price: every on chain settlement uses the pool's own price, by redeeming the token into the pool. P* stays an off chain guide for the UI and agents, clamped by the host's usual rate from the channel manager. No ADR feed.
   - Double sale, booking honoured, occupancy: the API detects them through the `ChannelManager` port and World ID check ins. Only the double sale needs the chain; the API's attester key signs that report for `Settlement`. This is a trusted operator, the same trust as `HumanRegistry`, and is stated in the README.
+- The host has no control over a night's tokens once it opens. All S tokens are minted into the pool at open as positions owned by `NightVault`, a contract with no admin. F, k and S cannot change after open. Earned USDC (below P(b)) is paid to the host's payout address automatically; anyone may trigger the sweep, but the money can only go to the host. There is no stop selling.
+- The host trades like anyone else. To take rooms back it buys through the pool and burns them. On its own trades it pays the full 1.3% (its 1% host share goes to `RebatePool`), its holdings are shown on every night page, and the per human cap counts all its wallets as one human. It may sell back; analytics flags nights where the owner trades. Taking rooms back is cheap before traders hold any (only the fee) and costly after, because every buy lifts the price under all held tokens: for F 6,000, k 1.2, S 15, buying back 3 rooms costs 264 at q 0, 427 at q 6 with nothing held, 9,431 at q 6 with 4 held.
+- Per human cap: 30% of S on every night (`CAP_HUMAN`, `capOf(S)`), not only peak nights.
+- Guests come first through callable holdings, not a guest tranche. There is no guest only share. A guest's buy fills from the pool and trader asks at or under the recall strike X; anything left is taken from trader holdings at X (the holder gets X minus 1.3%), largest holder first. Only guests can recall. If nothing is left in the pool, in asks or in holdings, the night is sold out. A trader's upside on a night is therefore capped at X.
 - Settlement is 1:1 redemption into the pool. One token goes back into its pool and the holder receives the pool's bid for it, paid from that token's own reserve slice. The pool can always pay it, because that USDC is already in the host's positions. No oracle price and no outside funds are needed for the holder's principal.
 
 ### Proposed shape (follows from the two decisions above)
 
 **One pool per night.** A v4 pool trades exactly one currency pair, so each (property, room type, date) gets its own `NightToken` (ERC-20, 18 decimals, mint cap S) and its own pool against USDC. Pools on the v4 singleton cost only storage, so thousands of nights are fine. This replaces "one pool per room type for the whole calendar" in the pitch.
 
-**The host curve as a liquidity ladder.** `HostVault` adds S single sided positions, one per room. Room i spans prices P(i) to P(i+1), where P(q) = F·e^(kq/S), with liquidity
+**The host curve as a liquidity ladder.** `NightVault` adds S single sided positions, one per room. Room i spans prices P(i) to P(i+1), where P(q) = F·e^(kq/S), with liquidity
 
 ```
 L_i = 1 / (1/√P(i) − 1/√P(i+1))      (room nights, in token units)
@@ -268,32 +272,32 @@ Why it matches the model: with continuous liquidity L(P) = 2S·√P / k, a v4 ra
 
 The 7th room costs 10,092 on chain against 10,095 exact. Tick spacing 1 (0.01%) keeps boundary rounding below that error. Sell back is an ordinary swap down the same ladder, so a round trip loses only fees, as in the model.
 
-**Reserve and withdraw fall out of the pool.** USDC paid by buyers sits in the host's crossed positions, so the pool's USDC is the reserve R. Let b be the burned count (booked plus voided). Only h = q − b tokens exist outside the pool, so the price can never fall below P(b). The USDC in positions entirely below P(b) equals C(0, b) = R − L. Withdraw means removing those positions. b only grows: a guest booking moves q and b up by one, a trader buy moves q and h, a sell back moves both down. Stop selling means removing positions entirely above the current price; those hold only unsold night tokens, which are burned, so allotment can never drop below booked plus held.
+**Reserve and withdraw fall out of the pool.** USDC paid by buyers sits in the host's crossed positions, so the pool's USDC is the reserve R. Let b be the burned count (booked plus voided). Only h = q − b tokens exist outside the pool, so the price can never fall below P(b). The USDC in positions entirely below P(b) equals C(0, b) = R − L. `NightVault` sweeps those positions to the host automatically. b only grows: a guest booking moves q and b up by one, a trader buy moves q and h, a sell back moves both down, a recall moves b up and h down. Positions above the current price are never removed before cutoff.
 
 **Fees in USDC, taken by the hook.** The pool's LP fee is 0. v4 LP fees are charged in the input currency, so a sell back would pay the host in night token dust. The hook takes its fee from whichever side of the swap is USDC: `beforeSwapReturnDelta` when USDC is the specified currency (exact input buy), `afterSwapReturnDelta` when USDC is unspecified (exact output buy, exact input sell). A buy pays `FEE` (1.0% host, 0.2% platform, 0.1% cover fund). A sell back pays `lateFee(hoursLeft)`.
 
-**Who is trading.** The hook accepts swaps only from allowlisted routers (`BookingRouter`, `TradeRouter`) and reads the end user with the v4 periphery `IMsgSender(sender).msgSender()`. Aggregators cannot route into these pools; that is the price of World ID caps and the guest tranche. The per human cap lives in `NightToken._update`, so plain transfers cannot dodge it. `HumanRegistry` maps wallets to World ID nullifiers and is written by the verifier backend (trusted, as stated in the pitch).
+**Who is trading.** The hook accepts swaps only from allowlisted routers (`BookingRouter`, `TradeRouter`) and reads the end user with the v4 periphery `IMsgSender(sender).msgSender()`. Aggregators cannot route into these pools; that is the price of World ID caps and guest recall. The per human cap lives in `NightToken._update`, so plain transfers cannot dodge it. `HumanRegistry` maps wallets to World ID nullifiers and is written by the verifier backend (trusted, as stated in the pitch).
 
 **Hook callbacks**
 
 | Callback | Rule |
 | --- | --- |
-| `beforeInitialize` | Only `NightFactory`. Checks LP fee 0, tick spacing 1, NightToken and USDC pair. Stores F, k, S, guest tranche, cutoff and host |
-| `beforeAddLiquidity` | Only `HostVault` (opening nights, adding rooms) |
-| `beforeRemoveLiquidity` | `HostVault`: positions entirely below P(b) (withdraw), or entirely above the current price (stop selling). `Settlement`: double sale and cutoff |
+| `beforeInitialize` | Only `NightFactory`. Checks LP fee 0, tick spacing 1, NightToken and USDC pair. Stores F, k, S, cutoff and host payout address |
+| `beforeAddLiquidity` | Only `NightVault`, once, at open |
+| `beforeRemoveLiquidity` | `NightVault`: positions entirely below P(b), paid to the host. `Settlement`: double sale and cutoff. Nothing else |
 | `beforeSwap` | Revert when paused or at or after cutoff, or when the router is not allowlisted. Resolve the user. Traders need World ID Orb. Take the fee when USDC is specified |
-| `afterSwap` | Traders: revert if the new price is above P(S − tranche), which keeps the guest tranche for guests. Take the fee when USDC is unspecified. Emit the trade for the indexer |
+| `afterSwap` | Take the fee when USDC is unspecified. Emit the trade for the indexer |
 | `beforeDonate` | Always revert |
 
 **Contracts**
 
 | Contract | Job |
 | --- | --- |
-| `NightFactory` | Clones a `NightToken` per night, initializes its pool, asks `HostVault` for the ladder |
-| `NightToken` | ERC-20 per night. Mint cap S. Burn by `BookingRouter` and `Settlement`. Per human cap in `_update` |
+| `NightFactory` | Clones a `NightToken` per night, initializes its pool, has `NightVault` add the ladder |
+| `NightToken` | ERC-20 per night. All S minted at open into the pool. Burn by `BookingRouter` and `Settlement`. Per human cap in `_update`. `recall(amount)`, callable only by `BookingRouter`: moves tokens from the largest holders (an on chain ordered list of holders) and pays each X minus 1.3% in the same transaction |
 | `NightHook` | The callbacks above. Owner only pause |
-| `HostVault` | Owns the ladder positions, calls `PoolManager.unlock` directly (no position NFTs). Withdraw and stop selling |
-| `BookingRouter` | `buyAndRedeem(night, maxPrice)`: exact output 1.0 through the pool, burn in the same transaction |
+| `NightVault` | Owns the ladder positions, calls `PoolManager.unlock` directly (no position NFTs). No admin. Permissionless sweep of earned USDC to the host |
+| `BookingRouter` | `buyAndRedeem(night, maxPrice)`: fills 1.0 from the pool and trader asks at or under X, recalls the rest at X, burns in the same transaction. Reverts if the night is sold out or above `maxPrice` |
 | `TradeRouter` | Buys and sells for traders. Fills signed trader asks and agent quotes cheapest first alongside the pool leg, matching `routeBuy` |
 | `Settlement` | Accepts reports signed by the API attester key. Double sale: redeems each affected token into the pool with no fee (the holder gets the pool bid), then pays a penalty of the same size from the host's pending payouts, then `CoverFund`, as host debt netted from future payouts. Cutoff: freezes the pool, redeems every outstanding token into the pool at the bid minus `lateFee(0)` (30%, shared pro rata, `cutoffRefund`), sends the 30% haircut to `RebatePool`, then removes all host positions and returns the unsold rooms and remaining USDC to the host |
 | `CoverFund` | Receives the cover share of every fee. Backs only the double sale penalty, never the holder's principal |
@@ -303,7 +307,7 @@ The 7th room costs 10,092 on chain against 10,095 exact. Tick spacing 1 (0.01%) 
 ### Open decisions
 
 1. Quote parity: `market-model` prices on the exact exponential, the chain on the ladder (up to 0.03% apart per room). Recommended: switch `market-model` to ladder math so quotes match the chain to the micro.
-2. Recall at the cap: when a guest finds no fill under the recall strike, whose tokens are recalled and how. Needs a recall right in `NightToken`.
+2. Decided: guests recall from trader holdings at X, largest holder first (see Decided above). The guest tranche is removed.
 3. Decided: the late fee above the base 1.3% and the 30% cutoff haircut go to `RebatePool`, never the host. The host controls guest routing (own site, desk, rooms outside the allotment), so it must not earn when trader held nights go unsold. The host earns only fees and sales.
 4. Trader asks on chain: signed orders through `TradeRouter` (recommended first) or v4 range orders managed by the hook.
 5. Decided: the cutoff haircut is `lateFee(0)` = `LATE_MAX` (30%). Every unsold holder gets 70% of the average bid of the held reserve, `cutoffRefund` in `market-model` (for example q 6, h 4: L = 33,192, each room night gets 5,809, the pool keeps 9,958). The parked ask condition, `REFUND_AT_FAIR` and `unsoldRefund` are removed. The haircut goes to `RebatePool` (decision 3).
