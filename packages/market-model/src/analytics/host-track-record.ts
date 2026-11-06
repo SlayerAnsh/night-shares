@@ -1,5 +1,3 @@
-import { BOND } from "../constants";
-import { floorFromRate } from "../curve";
 import { hash } from "../random/hash";
 import { rng } from "../random/rng";
 export function hostTrackRecord(property: {
@@ -26,6 +24,5 @@ export function hostTrackRecord(property: {
     refundBps: Math.round((0.32 + random() * 0.16) * 10000),
     honouredBps: Math.round((0.975 + random() * 0.024) * 10000),
     incidents: random() < 0.7 ? 0 : 1 + Math.floor(random() * 2),
-    securityHold: BOND * floorFromRate(property.base) * property.rooms,
   };
 }

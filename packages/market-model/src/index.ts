@@ -10,6 +10,7 @@ export * from "./dates";
 export * from "./fees";
 export * from "./night/night-state";
 export * from "./night/usual-rate";
+export * from "./offline-sale-cover";
 export * from "./payout/host-payout";
 export * from "./random/hash";
 export * from "./random/rng";

@@ -1,6 +1,6 @@
 # @night-shares/market-model
 
-Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `3099c47b5452`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
+Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `4b697be65422`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
 
 ## Public API
 
@@ -25,7 +25,6 @@ nightPrice(property: RateProperty, date: string): number
 nightState(input: NightStateInput): NightState
 hostPayout(state: PayoutInput): {
   gross: number; availableNow: number; heldForTraders: number;
-  bondHeld: number; bondTarget: number;
 }
 hash(value: string): number
 rng(seed: number): () => number
@@ -36,7 +35,7 @@ toTenths(roomNights: number): number
 fromTenths(tenths: number): number
 ```
 
-Constants: `FEE`, `HOST_FEE`, `PLATFORM_FEE`, `PRESETS`, `FLOOR_RATIO`, `RECALL_MARKUP`, `RECALL_MIN_MARKUP`, `GUEST_TRANCHE`, `CAP_PEAK`, `LATE_HOURS`, `LATE_MAX`, `BOND`, `PSTAR_BAND`, `PSTAR_MAX_MOVE_PER_HOUR`, `REFUND_AT_FAIR`, `SLICE`.
+Constants: `FEE`, `HOST_FEE`, `PLATFORM_FEE`, `PRESETS`, `FLOOR_RATIO`, `RECALL_MARKUP`, `RECALL_MIN_MARKUP`, `GUEST_TRANCHE`, `CAP_PEAK`, `LATE_HOURS`, `LATE_MAX`, `COVER_FUND`, `PSTAR_BAND`, `PSTAR_MAX_MOVE_PER_HOUR`, `REFUND_AT_FAIR`, `SLICE`.
 
 Types: `RateProperty`, `NightProperty`, `NightStateInput`, `NightState`, `PayoutInput`, `TraderAsk`, `PoolAsk`, `TraderLevel`, `Ask`, `Bid`, `BookInput`, `Book`, `Fill`, `BuyResult`.
 
@@ -60,6 +59,12 @@ Guests never pay above the recall cap: routing stops at the first ask priced abo
 
 `askFillProceeds` returns gross proceeds, the base fee and net proceeds for a fill (size defaults to one). Trader and recall fills carry `sellerFee` and `sellerNet`; pool fills omit these fields. `routeBuy` returns `sellerFees` and `sellerNet` totals, both zero when no sellers fill. Buyer charges are unchanged.
 
+## Offline double sale cover
+
+`offlineSaleCover({ pstar, reserveSlice = 0, pending = 0 })` pays the holder the fair price from the token reserve slice, then pending host payouts, then the cover fund. Remaining pending payouts pay a penalty of one fair price. `hostDebt` combines the fund advance and unpaid penalty; `hostTotal` is twice the fair price. The result includes `toHolder`, `fromReserve`, `fromPending`, `fromFund`, `penalty`, `penaltyFromPending`, `hostDebt` and `hostTotal`.
+
+For `pstar: 16000`, `reserveSlice: 11000` and `pending: 3000`, the fund advances 2000 and host debt is 18000. `COVER_FUND` is 0.001 of trade notional, carved out of `PLATFORM_FEE`; total `FEE` remains 0.013. Host payouts hold only trader reserves. Parity tests cover 100 waterfall combinations, default balances and 12 payout edge cases.
+
 ## Recall markup floor
 
 `RECALL_MIN_MARKUP` is 0.05. `recallStrike` throws `RangeError("recall markup m must be at least 5%")` below this floor and accepts exactly 0.05. The default markup remains 0.25.
@@ -74,6 +79,6 @@ Read the changed `model.js` and its dependencies in `shared.js`. Review formula 
 
 ## Analytics
 
-`priceHistory(modelId, roomIndex, date, state)` returns deterministic fair and market price series. `hostTrackRecord(property)` returns host performance in basis points and a USD security hold. `nightAnalytics(state, book, history, modelId, date, hoursLeft, bookedBps)` returns estimated and annualized returns, risk score and level, volatility, sell-through, liquidity, daily change, exit value and refund.
+`priceHistory(modelId, roomIndex, date, state)` returns deterministic fair and market price series. `hostTrackRecord(property)` returns host performance in basis points. `nightAnalytics(state, book, history, modelId, date, hoursLeft, bookedBps)` returns estimated and annualized returns, risk score and level, volatility, sell-through, liquidity, daily change, exit value and refund.
 
 These pure calculations originate in `mock/v2/assets/trade.js`, not `model.js`, and are outside the model.js parity suite. Focused unit tests cover them. API mappers convert USD to micros and map results into protobuf messages.

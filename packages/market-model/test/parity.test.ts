@@ -8,7 +8,7 @@ const dates = Array.from({ length: 60 }, (_, i) =>
 );
 
 test("original model fingerprint and all exported constants match", () => {
-  expect(modelSha.slice(0, 12)).toBe("3099c47b5452");
+  expect(modelSha.slice(0, 12)).toBe("4b697be65422");
   expect(shared.props).toHaveLength(6);
   expect(shared.today.getFullYear()).toBe(2026);
   expect(shared.today.getMonth()).toBe(11);
@@ -164,4 +164,25 @@ test("recall markup floor and RangeError behavior match the source", () => {
     });
     expect(model.recallStrike(100, 0, 0.05)).toBe(105);
   }
+});
+
+test("offline sale cover waterfall matches across balances and fair prices", () => {
+  for (const pstar of [0, 0.01, 100, 16000])
+    for (const reserveSlice of [-1, 0, 30, 11000, 32000])
+      for (const pending of [-1, 0, 50, 3000, 50000]) {
+        const input = { pstar, reserveSlice, pending };
+        compare(port.offlineSaleCover(input), original.offlineSaleCover(input));
+      }
+  compare(
+    port.offlineSaleCover({ pstar: 100 }),
+    original.offlineSaleCover({ pstar: 100 }),
+  );
+});
+
+test("host payout matches with empty, fully held and fully booked inventory", () => {
+  for (const q of [0, 0.5, 4, 10])
+    for (const held of [0, q / 2, q]) {
+      const state = { F: 100, k: 0.6, S: 10, q, held };
+      compare(port.hostPayout(state), original.hostPayout(state));
+    }
 });
