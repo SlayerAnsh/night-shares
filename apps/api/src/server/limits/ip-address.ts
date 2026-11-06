@@ -75,7 +75,10 @@ export function isTrustedProxy(address: string, ranges: readonly string[]) {
   });
 }
 
-export function normalizeIpKey(address: string): string {
+export function normalizeIpKey(
+  address: string,
+  ipv6Prefix: 48 | 64 = 64,
+): string {
   const parsed = parseIp(address);
   if (!parsed) return address;
   const ip = unmap(parsed);
@@ -84,5 +87,8 @@ export function normalizeIpKey(address: string): string {
       .map((shift) => Number((ip.value >> shift) & 255n))
       .join(".");
   }
-  return `${[112n, 96n, 80n, 64n].map((shift) => ((ip.value >> shift) & 65535n).toString(16)).join(":")}::/64`;
+  return `${[112n, 96n, 80n, 64n]
+    .slice(0, ipv6Prefix / 16)
+    .map((shift) => ((ip.value >> shift) & 65535n).toString(16))
+    .join(":")}::/${ipv6Prefix}`;
 }

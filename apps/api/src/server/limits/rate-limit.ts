@@ -8,16 +8,17 @@ export function createRateLimits(
   config: ServerConfig,
   now = () => performance.now(),
 ) {
-  const bucket = (capacity: number) =>
+  const bucket = (capacity: number, ipv6Prefix: 48 | 64 = 64) =>
     createTokenBucket({
       capacity,
+      ipv6Prefix,
       windowMs: config.rateLimitWindowMs,
       maxBuckets: config.rateLimitMaxBuckets,
       now,
     });
   const ip = bucket(config.rateLimitPerIp);
   const user = bucket(config.rateLimitPerUser);
-  const identityIp = bucket(config.rateLimitIdentity);
+  const identityIp = bucket(config.rateLimitIdentity, 48);
   const identityUser = bucket(config.rateLimitIdentity);
   const sensitive = new Set(["StartSignIn", "CompleteSignIn", "VerifyAction"]);
   const isIdentity = (path: string) => {
