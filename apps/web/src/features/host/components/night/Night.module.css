@@ -1,0 +1,123 @@
+/* Night view, from .night-head, .n-grid, .rt-* and .tl in host.css. */
+.head {
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-12);
+}
+
+.row h1 {
+  font-size: var(--fs-64);
+  padding-top: var(--sp-6);
+}
+
+.badges {
+  display: flex;
+  gap: var(--sp-6);
+  flex-wrap: wrap;
+  margin-top: var(--sp-8);
+}
+
+.side {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-16);
+  flex-wrap: wrap;
+}
+
+.cdown {
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-10) var(--sp-16);
+  border-radius: var(--r-14);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  min-width: 0;
+}
+
+.cdown b {
+  font-size: var(--fs-17);
+}
+
+.cdown span:last-child {
+  font-size: var(--fs-12-5);
+  color: var(--muted);
+  font-weight: var(--fw-semibold);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: var(--sp-18);
+  align-items: start;
+}
+
+.main,
+.aside {
+  display: grid;
+  gap: var(--sp-18);
+  min-width: 0;
+}
+
+.sec {
+  padding: var(--sp-20) 22px;
+  min-width: 0;
+}
+
+.secH {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--sp-12);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-14);
+}
+
+.secH h2 {
+  margin: 0;
+  font-size: var(--fs-18);
+}
+
+.lock {
+  margin: 0 0 var(--sp-14);
+  color: var(--ink-2);
+}
+
+.form {
+  max-width: 640px;
+  padding: var(--sp-20);
+}
+
+.form h2 {
+  margin: var(--sp-4) 0;
+  font-size: var(--fs-24);
+}
+
+.form .btn {
+  margin-top: var(--sp-16);
+}
+
+@media (max-width: 1180px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .row h1 {
+    font-size: var(--fs-44);
+  }
+
+  .side,
+  .cdown,
+  .side > a {
+    width: 100%;
+  }
+
+  .sec {
+    padding: var(--sp-16);
+  }
+}

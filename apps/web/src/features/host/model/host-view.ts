@@ -64,12 +64,14 @@ export function occupancyPercent(row: Occupancy) {
 }
 
 export function sumPayouts(rows: Payout[]) {
-  const sum = (field: "availableNow" | "heldForTraders" | "fees") =>
-    rows.reduce((total, row) => total + (row[field]?.micros ?? 0n), 0n);
+  const sum = (
+    field: "availableNow" | "heldForTraders" | "fees" | "sweptTotal",
+  ) => rows.reduce((total, row) => total + (row[field]?.micros ?? 0n), 0n);
   return {
     availableNow: { micros: sum("availableNow") },
     heldForTraders: { micros: sum("heldForTraders") },
     fees: { micros: sum("fees") },
+    sweptTotal: { micros: sum("sweptTotal") },
   };
 }
 

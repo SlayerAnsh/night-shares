@@ -1,0 +1,87 @@
+.box {
+  padding: var(--sp-28) var(--sp-24);
+  text-align: center;
+  color: var(--ink-2);
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semibold);
+}
+
+.box h2 {
+  margin: 0 0 var(--sp-4);
+  font-size: var(--fs-17);
+  color: var(--ink);
+}
+
+.box p {
+  margin: 0 auto;
+  max-width: 460px;
+}
+
+.action {
+  margin-top: var(--sp-14);
+}
+
+.alert {
+  margin: var(--sp-8) 0 0;
+  padding: var(--sp-10) var(--sp-14);
+  border-radius: var(--r-sm);
+  background: var(--neg-soft);
+  color: var(--neg);
+  font-size: var(--fs-13-5);
+  font-weight: var(--fw-bold);
+}
+
+.skeleton {
+  display: grid;
+  gap: var(--sp-14);
+  margin-top: var(--sp-24);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--sp-14);
+}
+
+.block {
+  height: var(--h, 110px);
+  border-radius: var(--r-lg);
+  background: linear-gradient(
+    90deg,
+    var(--surface-2) 0%,
+    var(--surface-3) 50%,
+    var(--surface-2) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.spin {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.7s linear infinite;
+  vertical-align: -3px;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .block,
+  .spin {
+    animation: none;
+  }
+}

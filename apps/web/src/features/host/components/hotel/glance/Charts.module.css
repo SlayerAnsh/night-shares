@@ -1,0 +1,174 @@
+.dWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-12);
+}
+
+.donut {
+  flex: none;
+  width: 112px;
+  height: 112px;
+}
+
+.donut circle {
+  fill: none;
+  stroke-width: 18;
+}
+
+.segB {
+  stroke: var(--pos);
+}
+
+.segH {
+  stroke: var(--accent);
+}
+
+.hatch {
+  stroke: var(--line-2);
+  stroke-width: 3;
+}
+
+.hatchBg {
+  fill: var(--surface);
+}
+
+.segBase {
+  stroke: var(--surface-3);
+}
+
+.dV {
+  font-family: var(--display);
+  font-size: var(--fs-30);
+  fill: var(--ink);
+}
+
+.dL {
+  font-size: var(--fs-11);
+  font-weight: var(--fw-bold);
+  fill: var(--muted);
+  font-family: var(--sans);
+}
+
+.dList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-6);
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-12-5);
+  color: var(--ink-2);
+}
+
+.dList li {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-8);
+}
+
+.dList span {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dList b {
+  font-family: var(--mono);
+  color: var(--ink);
+}
+
+.wdChart {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--sp-6);
+  height: 160px;
+}
+
+.wd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  min-width: 0;
+}
+
+.wdV {
+  font-family: var(--mono);
+  font-size: var(--fs-11);
+  font-weight: var(--fw-bold);
+  text-align: center;
+  color: var(--ink-2);
+}
+
+.wdBar {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  background: var(--surface-2);
+  border-radius: var(--r-6);
+  overflow: hidden;
+}
+
+.wdBar i {
+  display: block;
+  width: 100%;
+  background: color-mix(in srgb, var(--pos) 55%, var(--surface-3));
+  border-radius: var(--r-6) var(--r-6) 0 0;
+}
+
+.top .wdBar i {
+  background: var(--pos);
+}
+
+.top .wdV {
+  color: var(--pos);
+}
+
+.wdL {
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  color: var(--ink-2);
+  text-align: center;
+}
+
+.pl {
+  min-height: 210px;
+}
+
+.pl svg {
+  display: block;
+  max-width: 100%;
+}
+
+.grid {
+  stroke: var(--line);
+}
+
+.ax {
+  fill: var(--muted);
+  font-size: var(--fs-11-5);
+  font-family: var(--sans);
+  font-weight: var(--fw-semibold);
+}
+
+.mkt {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.usual {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+
+.above {
+  fill: color-mix(in srgb, var(--accent) 16%, transparent);
+  stroke: none;
+}

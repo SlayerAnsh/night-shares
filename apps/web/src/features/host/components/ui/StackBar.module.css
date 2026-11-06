@@ -1,0 +1,65 @@
+/* Stacked bar: booked, held by traders, still on sale, not open. */
+.bar {
+  display: flex;
+  height: 6px;
+  border-radius: var(--r-4);
+  background: var(--surface-3);
+  overflow: hidden;
+  gap: 1px;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+}
+
+.big {
+  height: 10px;
+  border-radius: var(--r-6);
+  margin: var(--sp-10) 0 var(--sp-8);
+}
+
+.b {
+  background: var(--pos);
+}
+
+.h {
+  background: var(--accent);
+}
+
+.s {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--line-2) 0 3px,
+    transparent 3px 6px
+  );
+}
+
+.o {
+  box-sizing: border-box;
+  border: 1px dashed var(--muted);
+  border-radius: 0 var(--r-4) var(--r-4) 0;
+  background: var(--surface);
+}
+
+/* Legend swatches share the same fills. */
+.key {
+  display: inline-block;
+  width: 14px;
+  height: 10px;
+  border-radius: var(--r-3);
+  vertical-align: -1px;
+  margin-right: var(--sp-6);
+}
+
+.keyOff {
+  border: 1px dashed var(--line-2);
+}
+
+.keyPart {
+  width: 20px;
+  background: linear-gradient(90deg, var(--pos) 0 50%, var(--surface) 50%);
+  border: 1px dashed var(--muted);
+  border-left: 1px solid var(--pos);
+  box-sizing: border-box;
+}

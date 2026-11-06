@@ -3,12 +3,19 @@ import type {
   HotelSummary,
   Payout,
 } from "@night-shares/proto/host/v1/hotel_pb";
-import { formatUsdc } from "../../../../shared/format";
 import { useBalance, usePayout, usePortfolio } from "../../hooks/use-host-data";
 import { useHostSearch } from "../../hooks/use-host-search";
-import { formatInstant, sumPayouts } from "../../model/host-view";
-import { ErrorMessage, PayoutFacts } from "../shared/HostFacts";
+import { sumPayouts } from "../../model/host-view";
+import { usd } from "../../model/money";
+import { PayCard } from "../shared/PayCard";
+import { Crumbs } from "../ui/Crumbs";
+import { Kpis } from "../ui/Kpis";
+import page from "../ui/Page.module.css";
+import { ErrorNote, Loading, StateCard } from "../ui/QueryState";
+import ui from "../ui/ui.module.css";
 
+// Each hotel's payout is its own query, so rows chain: each one passes its
+// payout on, and the total renders once every hotel above it has loaded.
 function PropertyPayout({
   hotels,
   totals,
@@ -21,14 +28,15 @@ function PropertyPayout({
   const hotel = hotels[0];
   if (!hotel)
     return (
-      <section>
-        <h2>Total payout</h2>
-        {complete ? (
-          <PayoutFacts value={sumPayouts(totals)} />
-        ) : (
-          <p>Total unavailable until every hotel payout has loaded.</p>
-        )}
-      </section>
+      <PayCard
+        title="All hotels"
+        subtitle={
+          complete
+            ? "Every connected hotel, added up."
+            : "Total unavailable until every hotel payout has loaded."
+        }
+        payout={complete ? sumPayouts(totals) : undefined}
+      />
     );
   return (
     <PayoutRow
@@ -54,30 +62,21 @@ function PayoutRow({
   const query = usePayout(hotel.propertyId);
   return (
     <>
-      <section id={hotel.propertyId}>
-        <h2>
-          <a href={`/host/${hotel.propertyId}`}>{hotel.name}</a>
-        </h2>
-        {query.isPending && <p>Loading payout…</p>}
-        <ErrorMessage error={query.error} />
-        {query.data?.payout && (
-          <>
-            <PayoutFacts value={query.data.payout} />
-            <p>
-              Earned USDC sweeps automatically to your wallet. Swept:{" "}
-              {formatUsdc(query.data.payout.sweptTotal?.micros ?? 0n)}
-            </p>
-            {query.data.payout.lastSweepAt && (
-              <p>
-                Last sweep:{" "}
-                {formatUsdc(query.data.payout.lastSweepAmount?.micros ?? 0n)} at{" "}
-                {formatInstant(query.data.payout.lastSweepAt)}. Transaction:{" "}
-                {query.data.payout.lastSweepTransactionId}
-              </p>
-            )}
-          </>
+      <PayCard
+        id={hotel.propertyId}
+        title={hotel.name}
+        href={`/host/${hotel.propertyId}`}
+        subtitle={`${hotel.city} · open nights up to 60 days ahead`}
+        payout={query.data?.payout}
+      >
+        {query.isPending && (
+          <Loading
+            label={`Loading ${hotel.name} payout`}
+            rows={[[120, 120, 120, 120]]}
+          />
         )}
-      </section>
+        <ErrorNote error={query.error} />
+      </PayCard>
       <PropertyPayout
         hotels={remaining}
         totals={query.data?.payout ? [...totals, query.data.payout] : totals}
@@ -96,26 +95,67 @@ export function PayoutScreen() {
       Number(b.propertyId === selected) - Number(a.propertyId === selected),
   );
   const wallet = useBalance();
+  const kpis = portfolio.data?.kpis;
   return (
     <>
-      <a href="/host">All hotels</a>
-      <h1>Payout</h1>
+      <Crumbs parts={[["All hotels", "/host"], ["Payouts"]]} />
+      <div className={page.vHead}>
+        <div>
+          <h1 className={ui.display}>Payouts</h1>
+          <div className={page.sub}>
+            Paid in USDC to your wallet automatically as rooms sell. There is
+            nothing to withdraw.
+          </div>
+        </div>
+      </div>
       <section aria-live="polite">
-        <h2>Wallet balance</h2>
-        {wallet.isPending ? (
-          <p>Loading wallet…</p>
-        ) : (
-          wallet.data && <p>{formatUsdc(wallet.data.balance?.micros ?? 0n)}</p>
-        )}
-        <ErrorMessage error={wallet.error} />
+        <Kpis
+          label="Wallet and payouts"
+          tiles={[
+            {
+              label: "Wallet balance",
+              value: wallet.isPending
+                ? "…"
+                : wallet.data
+                  ? usd(wallet.data.balance?.micros)
+                  : "Unavailable",
+              detail: "USDC in your wallet now",
+              main: true,
+            },
+            {
+              label: "Available now",
+              value: usd(kpis?.availableNow?.micros),
+              detail: "sweeps to your wallet automatically",
+            },
+            {
+              label: "Revenue, next 30 nights",
+              value: usd(kpis?.revenue?.micros),
+              detail: "rooms booked by guests",
+            },
+            {
+              label: "Hotels",
+              value: String(portfolio.data?.hotels.length ?? "…"),
+              detail: "each paid out on its own",
+            },
+          ]}
+        />
+        <ErrorNote error={wallet.error} />
       </section>
-      {portfolio.isPending && <p>Loading hotels…</p>}
-      <ErrorMessage error={portfolio.error} />
-      {portfolio.data && (
-        <>
-          {!portfolio.data.hotels.length && <p>No hotels connected yet.</p>}
-          <PropertyPayout hotels={hotels} totals={[]} complete={true} />
-        </>
+      {portfolio.isPending && (
+        <Loading label="Loading hotels" rows={[[260], [260]]} />
+      )}
+      {!portfolio.isPending && !portfolio.data && (
+        <StateCard title="Payouts could not load" error={portfolio.error}>
+          Check your connection and reload the page.
+        </StateCard>
+      )}
+      {portfolio.data && !hotels.length && (
+        <StateCard title="No hotels connected yet">
+          Connect a channel manager on Your hotels to start earning.
+        </StateCard>
+      )}
+      {portfolio.data && hotels.length > 0 && (
+        <PropertyPayout hotels={hotels} totals={[]} complete={true} />
       )}
     </>
   );

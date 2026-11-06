@@ -1,0 +1,155 @@
+/* Onboarding card, from .onb in host.css. */
+.onb {
+  margin-top: 26px;
+  padding: var(--sp-32);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--sp-32);
+  align-items: start;
+  scroll-margin-top: calc(var(--nav-h) + var(--sp-16));
+}
+
+.onb h2 {
+  font-size: var(--fs-52);
+  line-height: 0.95;
+  margin: var(--sp-6) 0 var(--sp-12);
+}
+
+.lead {
+  font-size: var(--fs-16);
+  color: var(--ink-2);
+  margin: 0 0 var(--sp-20);
+  max-width: 520px;
+}
+
+.steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 22px;
+  display: grid;
+  gap: var(--sp-10);
+  counter-reset: s;
+}
+
+.steps li {
+  counter-increment: s;
+  display: flex;
+  gap: var(--sp-12);
+  align-items: center;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-14-5);
+}
+
+.steps li::before {
+  content: counter(s);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  font-size: var(--fs-13);
+  flex: none;
+}
+
+.steps li.done::before {
+  content: "✓";
+  background: var(--pos);
+  color: var(--on-accent);
+}
+
+.box {
+  border-radius: 18px;
+  background: var(--surface-2);
+  padding: var(--sp-20);
+  display: grid;
+  gap: var(--sp-12);
+}
+
+.field {
+  display: grid;
+  gap: var(--sp-6);
+}
+
+.field > span {
+  font-size: var(--fs-15);
+  font-weight: var(--fw-bold);
+}
+
+.select {
+  height: 40px;
+  padding: 0 var(--sp-12);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--ink);
+  width: 100%;
+  font: inherit;
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-14);
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.cre {
+  display: flex;
+  gap: var(--sp-10);
+  align-items: start;
+  font-size: var(--fs-12-5);
+  color: var(--ink-2);
+  margin: var(--sp-2) 0 0;
+}
+
+.cre::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pos);
+  margin-top: var(--sp-6);
+  flex: none;
+}
+
+.imp {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-14);
+}
+
+.imp th {
+  text-align: left;
+  font-size: var(--fs-12);
+  color: var(--muted);
+  font-weight: var(--fw-bold);
+  padding: var(--sp-6) 0;
+  border-bottom: 1px solid var(--line-2);
+}
+
+.imp td {
+  padding: var(--sp-10) 0;
+  border-bottom: 1px solid var(--line-2);
+}
+
+.imp td div {
+  font-size: var(--fs-12);
+}
+
+.done h3 {
+  margin: 0;
+  font-size: var(--fs-17);
+}
+
+@media (max-width: 720px) {
+  .onb {
+    grid-template-columns: 1fr;
+    padding: var(--sp-20);
+    gap: var(--sp-20);
+  }
+
+  .onb h2 {
+    font-size: var(--fs-40);
+  }
+}

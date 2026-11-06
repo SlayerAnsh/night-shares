@@ -1,77 +1,172 @@
 "use client";
+import { buttonClass } from "@night-shares/design-system";
 import type { HotelSummary } from "@night-shares/proto/host/v1/hotel_pb";
+import Link from "next/link";
+import { useState } from "react";
+import { useConnectOptions } from "../../hooks/use-connect-options";
 import { usePortfolio } from "../../hooks/use-host-data";
-import { ErrorMessage, Kpis } from "../shared/HostFacts";
-import { OccupancyTable } from "../shared/OccupancyTable";
+import { usd } from "../../model/money";
+import { WalkStrip } from "../shared/WalkStrip";
+import { Crumbs } from "../ui/Crumbs";
+import { Kpis } from "../ui/Kpis";
+import page from "../ui/Page.module.css";
+import { ErrorNote, Loading, StateCard } from "../ui/QueryState";
+import { Seg } from "../ui/Seg";
+import { Swatch } from "../ui/StackBar";
+import ui from "../ui/ui.module.css";
 import { ConnectHotel } from "./ConnectHotel";
-import { NextBusyNight } from "./NextBusyNight";
+import { HotelCard } from "./HotelCard";
+import { OffHotelCard } from "./OffHotelCard";
+import styles from "./Portfolio.module.css";
+import { WeekHeatmap } from "./WeekHeatmap";
 
-function HotelCard({ hotel, from }: { hotel: HotelSummary; from: string }) {
-  return (
-    <article>
-      <h3>
-        <a href={`/host/${hotel.propertyId}`}>{hotel.name}</a>
-      </h3>
-      <p>{hotel.city}</p>
-      <Kpis value={hotel.kpis} />
-      <div>
-        Next busy night:{" "}
-        <NextBusyNight
-          propertyId={hotel.propertyId}
-          from={from}
-          month={from.slice(0, 7)}
-        />
-      </div>
-    </article>
-  );
-}
+const SORTS = [
+  ["occ", "Occupancy"],
+  ["rev", "Revenue"],
+  ["name", "Name"],
+] as const;
+type Sort = (typeof SORTS)[number][0];
+
+const BY: Record<Sort, (a: HotelSummary, b: HotelSummary) => number> = {
+  occ: (a, b) => (b.kpis?.occupancyBps ?? 0) - (a.kpis?.occupancyBps ?? 0),
+  rev: (a, b) =>
+    Number((b.kpis?.revenue?.micros ?? 0n) - (a.kpis?.revenue?.micros ?? 0n)),
+  name: (a, b) => a.name.localeCompare(b.name),
+};
 
 export function PortfolioScreen() {
   const query = usePortfolio();
-  if (query.isPending) return <p>Loading your hotels…</p>;
-  if (!query.data) return <ErrorMessage error={query.error} />;
-  const { hotels, kpis, alerts, occupancy } = query.data;
+  const [sort, setSort] = useState<Sort>("occ");
+  const hotels = query.data?.hotels ?? [];
+  const connect = useConnectOptions(hotels.map((hotel) => hotel.propertyId));
+  const head = (
+    <>
+      <Crumbs parts={[["All hotels"]]} />
+      <div className={page.vHead}>
+        <div>
+          <h1 className={ui.display}>Your hotels</h1>
+          <div className={page.sub}>
+            {query.data
+              ? `${hotels.length} ${hotels.length === 1 ? "hotel" : "hotels"} connected to Night Shares.${connect.options.length ? ` ${connect.options.length} more can connect.` : ""}`
+              : "Loading your hotels."}
+          </div>
+        </div>
+        <div className={page.actions}>
+          <Link href="/host/payout" className={buttonClass()}>
+            See payouts
+          </Link>
+        </div>
+      </div>
+    </>
+  );
+  if (query.isPending)
+    return (
+      <>
+        {head}
+        <Loading
+          label="Loading your hotels"
+          rows={[[118, 118, 118, 118], [96], [420, 420, 420]]}
+        />
+      </>
+    );
+  if (!query.data)
+    return (
+      <>
+        {head}
+        <StateCard title="Your hotels could not load" error={query.error}>
+          Check your connection and reload the page.
+        </StateCard>
+      </>
+    );
+  const { kpis, alerts, occupancy } = query.data;
+  const from = occupancy[0]?.date ?? "";
   return (
     <>
-      <h1>Your hotels</h1>
-      <ErrorMessage error={query.error} />
-      <Kpis value={kpis} />
-      <a href="/host/payout">Withdraw all</a>
-      <section>
-        <h2>Needs your attention</h2>
-        {alerts.length ? (
-          <ul>
-            {alerts.map((alert) => (
-              <li key={`${alert.propertyId}:${alert.date}`}>
-                <a href={`/host/${alert.propertyId}/${alert.date}`}>
-                  {alert.message}
-                </a>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Nothing needs you right now</p>
-        )}
-      </section>
-      <section>
-        <h2>Hotels</h2>
-        {hotels.length ? (
-          hotels.map((hotel) => (
-            <HotelCard
-              key={hotel.propertyId}
-              hotel={hotel}
-              from={occupancy[0]?.date ?? ""}
-            />
-          ))
-        ) : (
-          <p>No hotels connected yet.</p>
-        )}
-      </section>
-      <OccupancyTable
-        rows={occupancy}
-        caption="Occupancy by week, next 8 weeks (all connected hotels)"
+      {head}
+      <ErrorNote error={query.error} />
+      <Kpis
+        label="Group totals"
+        tiles={[
+          {
+            label: "Available now",
+            value: usd(kpis?.availableNow?.micros),
+            detail: "Sweeps to your wallet automatically",
+            main: true,
+          },
+          {
+            label: "Revenue, next 30 nights",
+            value: usd(kpis?.revenue?.micros),
+            detail: "rooms booked by guests",
+          },
+          {
+            label: "Occupancy, next 30 nights",
+            value: `${Math.round((kpis?.occupancyBps ?? 0) / 100)}%`,
+            detail: "across connected hotels",
+          },
+          {
+            label: "Average rate",
+            value: usd(kpis?.averageRate?.micros),
+            detail: "per room night booked",
+          },
+        ]}
       />
-      <ConnectHotel owned={hotels.map((hotel) => hotel.propertyId)} />
+      <WalkStrip hotels={hotels} />
+      <div className={page.secHead}>
+        <h2>Hotels</h2>
+        <div className={styles.sort}>
+          <span>Sort by</span>
+          <Seg
+            label="Sort hotels by"
+            options={SORTS}
+            value={sort}
+            onChange={setSort}
+          />
+        </div>
+      </div>
+      <div className={styles.hotels}>
+        {[...hotels].sort(BY[sort]).map((hotel) => (
+          <HotelCard
+            key={hotel.propertyId}
+            hotel={hotel}
+            from={from}
+            alerts={alerts.filter((a) => a.propertyId === hotel.propertyId)}
+          />
+        ))}
+        {connect.options.map((property) => (
+          <OffHotelCard key={property.id} property={property} />
+        ))}
+        {!hotels.length && !connect.options.length && (
+          <StateCard title="No hotels connected yet">
+            Connect a channel manager below to start offering nights.
+          </StateCard>
+        )}
+        <div className={styles.legend}>
+          <span>
+            <Swatch fill="b" />
+            Booked
+          </span>
+          <span>
+            <Swatch fill="h" />
+            Held by traders
+          </span>
+          <span>
+            <Swatch fill="s" />
+            On sale
+          </span>
+          <span className={ui.muted}>One bar per night, next 30 nights</span>
+        </div>
+      </div>
+      {occupancy.length > 0 && <WeekHeatmap rows={occupancy} />}
+      <ConnectHotel
+        options={connect.options}
+        error={connect.error}
+        pending={connect.isPending}
+      />
+      <nav className={page.apps} aria-label="Other Night Shares apps">
+        <span>Other Night Shares apps</span>
+        <Link href="/stay">Book a stay</Link>
+        <Link href="/trade">Trade room nights</Link>
+      </nav>
     </>
   );
 }

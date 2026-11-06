@@ -1,0 +1,43 @@
+.crumbs {
+  padding-top: 26px;
+  position: relative;
+  z-index: var(--z-raised);
+}
+
+.crumbs ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-6);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--muted);
+}
+
+.crumbs li + li::before {
+  content: "/";
+  margin-right: var(--sp-6);
+  color: var(--line-2);
+}
+
+.crumbs a {
+  color: var(--ink-2);
+  text-decoration: none;
+}
+
+.crumbs a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.crumbs [aria-current] {
+  color: var(--ink);
+}
+
+@media (max-width: 720px) {
+  .crumbs {
+    padding-top: var(--sp-20);
+  }
+}

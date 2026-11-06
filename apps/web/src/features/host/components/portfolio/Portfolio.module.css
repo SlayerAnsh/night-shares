@@ -1,0 +1,246 @@
+/* Portfolio: hotel cards and the sort control, from .hotels and .hk in host.css. */
+.sort {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-10);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--muted);
+}
+
+.hotels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-16);
+}
+
+.hk {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: border-color var(--dur-150);
+  color: var(--ink);
+}
+
+.hk:hover {
+  border-color: var(--ink-2);
+}
+
+.hk:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.photo {
+  height: 128px;
+  flex: none;
+}
+
+.off .photo {
+  filter: grayscale(0.7);
+  opacity: 0.75;
+}
+
+.body {
+  padding: var(--sp-16) var(--sp-18) var(--sp-18);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-12);
+  flex: 1;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--sp-10);
+}
+
+.id {
+  min-width: 0;
+}
+
+.id h3 {
+  margin: 0;
+  font-size: var(--fs-17);
+  line-height: 1.25;
+}
+
+/* The whole card is one link: the title's link stretches over it. */
+.id h3 a {
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+}
+
+.id h3 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+}
+
+.id span {
+  font-size: var(--fs-12-5);
+  color: var(--muted);
+  font-weight: var(--fw-semibold);
+}
+
+.occ {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-10);
+}
+
+.occ b {
+  font-family: var(--display);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-44);
+  line-height: var(--lh-tight);
+}
+
+.occ span {
+  font-size: var(--fs-12-5);
+  color: var(--ink-2);
+  font-weight: var(--fw-bold);
+}
+
+.mini {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--sp-8);
+  margin: 0;
+}
+
+.mini div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.mini dt {
+  font-size: var(--fs-11-5);
+  color: var(--muted);
+  font-weight: var(--fw-bold);
+}
+
+.mini dd {
+  margin: 2px 0 0;
+  font-family: var(--mono);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-13-5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Links inside the card sit above the stretched card link. */
+.mini dd a,
+.body .alert a {
+  position: relative;
+  z-index: var(--z-sticky);
+  color: inherit;
+}
+
+.mini dd a:hover,
+.body .alert a:hover {
+  text-decoration: underline;
+}
+
+.walk {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-8);
+  font-size: var(--fs-12-5);
+  font-weight: var(--fw-bold);
+  color: var(--ink-2);
+}
+
+.walk b {
+  font-family: var(--mono);
+  font-size: var(--fs-13-5);
+  color: var(--ink);
+}
+
+.walk span {
+  margin-left: auto;
+  font-weight: var(--fw-semibold);
+  color: var(--muted);
+  font-size: var(--fs-11-5);
+}
+
+.walkWarn b {
+  color: var(--warn);
+}
+
+.alert {
+  margin: auto 0 0;
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--warn);
+  padding-top: var(--sp-10);
+  border-top: 1px solid var(--line);
+}
+
+.alert::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  margin-right: var(--sp-8);
+  vertical-align: 1px;
+}
+
+.calm {
+  color: var(--muted);
+  font-weight: var(--fw-semibold);
+}
+
+.offText {
+  margin: 0;
+  font-size: var(--fs-13-5);
+  color: var(--ink-2);
+}
+
+.cta {
+  align-self: flex-start;
+  margin-top: auto;
+  position: relative;
+  z-index: var(--z-sticky);
+}
+
+.legend {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-16);
+  font-size: var(--fs-12-5);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-2);
+}
+
+@media (max-width: 1180px) {
+  .hotels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .hotels {
+    grid-template-columns: 1fr;
+  }
+
+  .top {
+    flex-direction: column;
+    gap: var(--sp-8);
+  }
+
+  .mini {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

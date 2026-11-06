@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { HotelScreen } from "../../../../src/features/host/components/hotel/HotelScreen";
+import { Loading } from "../../../../src/features/host/components/ui/QueryState";
 export default async function Page({
   params,
 }: {
@@ -7,7 +8,7 @@ export default async function Page({
 }) {
   const { propertyId } = await params;
   return (
-    <Suspense fallback={<p>Loading hotel…</p>}>
+    <Suspense fallback={<Loading label="Loading hotel" />}>
       <HotelScreen propertyId={propertyId} />
     </Suspense>
   );

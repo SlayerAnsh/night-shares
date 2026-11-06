@@ -12,11 +12,16 @@ import { MarketService } from "@night-shares/proto/market/v1/market_pb";
 import { StayService } from "@night-shares/proto/stay/v1/stay_pb";
 import { WalletService } from "@night-shares/proto/wallet/v1/wallet_pb";
 import { getBalance } from "@night-shares/proto/wallet/v1/wallet-WalletService_connectquery";
-import { useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
 
 export const usePortfolio = () => useQuery(rpc.getPortfolio);
+// Keep the shown month while the next one loads, so paging the calendar does not flash.
 export const useHotel = (propertyId: string, month = "") =>
-  useQuery(rpc.getHotel, { propertyId, month });
+  useQuery(
+    rpc.getHotel,
+    { propertyId, month },
+    { placeholderData: keepPreviousData },
+  );
 export const useNight = (propertyId: string, date: string) =>
   useQuery(rpc.getNight, { propertyId, date });
 export const usePayout = (propertyId: string) =>

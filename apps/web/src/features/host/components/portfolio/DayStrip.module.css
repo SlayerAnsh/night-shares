@@ -1,0 +1,36 @@
+.days {
+  display: grid;
+  grid-template-columns: repeat(30, 1fr);
+  gap: 2px;
+  height: 30px;
+}
+
+.days span {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: var(--surface-3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.days i {
+  display: block;
+  flex: none;
+}
+
+.b {
+  background: var(--pos);
+}
+
+.h {
+  background: var(--accent);
+}
+
+.s {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--line-2) 0 2px,
+    var(--surface) 2px 4px
+  );
+}

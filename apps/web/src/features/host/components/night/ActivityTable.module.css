@@ -1,0 +1,66 @@
+.act {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-13);
+}
+
+.act td {
+  padding: var(--sp-8) 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.act tr:last-child td {
+  border-bottom: 0;
+}
+
+.act .when {
+  color: var(--muted);
+  white-space: nowrap;
+  padding-right: var(--sp-14);
+  font-size: var(--fs-12);
+  width: 1%;
+}
+
+.act .amt {
+  text-align: right;
+  font-family: var(--mono);
+  white-space: nowrap;
+  padding-left: var(--sp-8);
+}
+
+.act small {
+  display: block;
+  color: var(--muted);
+  font-size: var(--fs-11-5);
+}
+
+.ico {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: var(--sp-6);
+  vertical-align: 1px;
+  background: var(--line-2);
+}
+
+.guest {
+  background: var(--pos);
+}
+
+.trader {
+  background: var(--accent);
+}
+
+.back {
+  background: color-mix(in srgb, var(--accent) 45%, var(--line-2));
+}
+
+.fill {
+  background: var(--ink-2);
+}
+
+.walk {
+  background: var(--neg);
+}

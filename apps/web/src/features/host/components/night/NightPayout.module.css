@@ -1,0 +1,46 @@
+.pay {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-12);
+  padding: var(--sp-14) var(--sp-16);
+  border-radius: var(--r-14);
+  background: var(--ink);
+  color: var(--bg);
+  margin-bottom: var(--sp-14);
+}
+
+.pay span {
+  font-size: var(--fs-12-5);
+  font-weight: var(--fw-bold);
+  color: color-mix(in srgb, var(--bg) 72%, transparent);
+}
+
+.pay b {
+  font-family: var(--display);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-34);
+  line-height: var(--lh-tight);
+}
+
+.kv {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-12);
+  font-size: var(--fs-13-5);
+  color: var(--ink-2);
+}
+
+.kv + .kv {
+  margin-top: var(--sp-8);
+}
+
+.kv b {
+  color: var(--ink);
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+
+.kv b.pos {
+  color: var(--pos);
+}

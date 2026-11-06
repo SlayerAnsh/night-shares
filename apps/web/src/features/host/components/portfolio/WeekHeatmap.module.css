@@ -1,0 +1,96 @@
+/* Occupancy by week, from .wk-card in host.css. */
+.card {
+  margin-top: 26px;
+  padding: var(--sp-20);
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--sp-12);
+  flex-wrap: wrap;
+}
+
+.head h2 {
+  margin: 0;
+  font-size: var(--fs-20);
+}
+
+.head p {
+  margin: 2px 0 var(--sp-14);
+  font-size: var(--fs-13);
+}
+
+.head .sum {
+  margin: var(--sp-4) 0 var(--sp-14);
+  font-weight: var(--fw-bold);
+  color: var(--ink-2);
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.wk {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: var(--sp-4);
+  font-size: var(--fs-13);
+}
+
+.wk th {
+  font-weight: var(--fw-bold);
+  color: var(--muted);
+  font-size: var(--fs-12);
+  text-align: center;
+  padding: 0 var(--sp-4) var(--sp-4);
+  white-space: nowrap;
+}
+
+.wk th[scope="row"] {
+  text-align: left;
+  color: var(--ink);
+  font-size: var(--fs-13-5);
+  padding-right: var(--sp-12);
+}
+
+.wk td {
+  text-align: center;
+  font-family: var(--mono);
+  font-weight: var(--fw-bold);
+  padding: 9px var(--sp-4);
+  border-radius: var(--r-8);
+  background: color-mix(in srgb, var(--tone) var(--o), var(--surface-2));
+  color: var(--ink);
+}
+
+.wk td.hi {
+  color: var(--bg);
+}
+
+.wk tfoot th[scope="row"] {
+  color: var(--ink-2);
+}
+
+@media (max-width: 720px) {
+  .card {
+    padding: var(--sp-16);
+  }
+
+  .wk th:nth-child(n + 6),
+  .wk td:nth-child(n + 6) {
+    display: none;
+  }
+
+  .wk th[scope="row"] {
+    white-space: normal;
+    font-size: var(--fs-12-5);
+    padding-right: var(--sp-4);
+  }
+
+  .wk td {
+    font-size: var(--fs-12);
+    padding: var(--sp-8) 2px;
+  }
+}

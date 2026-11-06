@@ -1,0 +1,110 @@
+/* Host page frame: .wrap-wide, .v-head and .sec-head from the mock. */
+.page {
+  max-width: var(--wrap-wide-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter) 80px;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--fs-15);
+  line-height: var(--lh-body);
+}
+
+.page h1,
+.page h2,
+.page h3,
+.page h4 {
+  line-height: var(--lh-snug);
+}
+
+.vHead {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--sp-20);
+  padding: var(--sp-10) 0 22px;
+  flex-wrap: wrap;
+}
+
+.vHead h1 {
+  font-size: var(--fs-56);
+}
+
+.vHead h1:focus {
+  outline: none;
+}
+
+.sub {
+  font-size: var(--fs-14);
+  color: var(--ink-2);
+  font-weight: var(--fw-semibold);
+  margin-top: var(--sp-6);
+}
+
+.actions {
+  display: flex;
+  gap: var(--sp-10);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.secHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-12);
+  flex-wrap: wrap;
+  margin: 30px 0 var(--sp-14);
+}
+
+.secHead h2 {
+  margin: 0;
+  font-size: var(--fs-20);
+}
+
+.apps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-8) var(--sp-18);
+  margin-top: 40px;
+  padding-top: var(--sp-18);
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-13);
+  color: var(--muted);
+  font-weight: var(--fw-semibold);
+}
+
+.apps a {
+  color: var(--ink-2);
+  font-weight: var(--fw-bold);
+  text-decoration: none;
+}
+
+.apps a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 0 var(--sp-16) 60px;
+  }
+
+  .vHead {
+    padding: var(--sp-8) 0 var(--sp-16);
+    gap: var(--sp-14);
+  }
+
+  .vHead h1 {
+    font-size: var(--fs-42);
+  }
+
+  .actions {
+    width: 100%;
+  }
+
+  .actions > a,
+  .actions > button {
+    flex: 1;
+  }
+}

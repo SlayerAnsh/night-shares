@@ -1,105 +1,91 @@
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
-import {
-  DemandPreset,
-  ReleasePolicy,
-} from "@night-shares/proto/host/v1/opening_pb";
 import type { useOpening } from "../../hooks/use-opening";
+import { usd } from "../../model/money";
+import { Seg } from "../ui/Seg";
+import styles from "./Panel.module.css";
+
+const MODES = [
+  ["range", "Date range"],
+  ["picked", "Picked nights"],
+] as const;
+
+/** Which nights and which room types to open. */
 export function OpeningFields({
   property,
   opening: o,
-  disabled,
+  rateFor,
 }: {
   property: Property;
   opening: ReturnType<typeof useOpening>;
-  disabled: boolean;
+  rateFor: (roomTypeId: string) => bigint | undefined;
 }) {
   return (
-    <fieldset disabled={disabled}>
-      <legend>Nights and room types</legend>
-      <label>
-        Choose dates{" "}
-        <select
-          value={o.mode}
-          onChange={(e) => o.set({ mode: e.target.value })}
-        >
-          <option value="range">Date range</option>
-          <option value="picked">Picked dates</option>
-        </select>
-      </label>
-      {o.mode === "range" ? (
-        <>
-          <label>
-            From{" "}
-            <input
-              type="date"
-              value={o.start}
-              onChange={(e) => o.set({ from: e.target.value })}
-            />
-          </label>
-          <label>
-            Until (exclusive){" "}
-            <input
-              type="date"
-              value={o.end}
-              onChange={(e) => o.set({ to: e.target.value })}
-            />
-          </label>
-        </>
-      ) : (
-        <p>Pick nights using the calendar checkboxes.</p>
-      )}
-      <p>
-        {o.dates.length} nights selected
-        {o.dates.length > 0 ? `: ${o.dates.join(", ")}` : ""}
-      </p>
-      {property.roomTypes.map((room) => (
-        <label key={room.id}>
-          <input
-            type="checkbox"
-            checked={o.selection.roomTypeIds.includes(room.id)}
-            onChange={() => o.toggleRoom(room.id)}
-          />
-          {room.name}
-        </label>
-      ))}
-      <label>
-        Rooms offered (%){" "}
-        <input
-          type="number"
-          min={10}
-          max={100}
-          step={10}
-          required
-          value={o.selection.allotmentPercent}
-          onChange={(e) => o.set({ percent: e.target.value })}
+    <>
+      <div className={styles.fld}>
+        <div className={styles.fh}>
+          <b>Nights</b>
+          <span>{o.dates.length} selected</span>
+        </div>
+        <Seg
+          label="Choose dates"
+          options={MODES}
+          value={o.mode === "picked" ? "picked" : "range"}
+          full
+          onChange={(mode) => o.set({ mode })}
         />
-      </label>
-      <label>
-        Demand{" "}
-        <select
-          value={o.selection.demandPreset}
-          onChange={(e) => o.set({ demand: e.target.value })}
-        >
-          <option value={DemandPreset.CALM}>Calm</option>
-          <option value={DemandPreset.NORMAL}>Normal</option>
-          <option value={DemandPreset.PEAK}>Peak</option>
-        </select>
-      </label>
-      <label>
-        Release time{" "}
-        <select
-          value={o.selection.releasePolicy}
-          onChange={(e) => o.set({ release: e.target.value })}
-        >
-          <option value={ReleasePolicy.ARRIVAL_14}>Day of arrival, 2 pm</option>
-          <option value={ReleasePolicy.DAY_BEFORE_18}>
-            Day before arrival, 6 pm
-          </option>
-          <option value={ReleasePolicy.THREE_DAYS_BEFORE_12}>
-            Three days before arrival, noon
-          </option>
-        </select>
-      </label>
-    </fieldset>
+        {o.mode === "picked" ? (
+          <p className={styles.help}>
+            Pick nights on the calendar. Shift click picks a range.
+          </p>
+        ) : (
+          <div className={styles.dates}>
+            <label>
+              From
+              <input
+                className={styles.input}
+                type="date"
+                value={o.start}
+                onChange={(e) => o.set({ from: e.target.value })}
+              />
+            </label>
+            <label>
+              Until (exclusive)
+              <input
+                className={styles.input}
+                type="date"
+                value={o.end}
+                onChange={(e) => o.set({ to: e.target.value })}
+              />
+            </label>
+          </div>
+        )}
+      </div>
+      <div className={styles.fld}>
+        <div className={styles.fh}>
+          <b>Room types</b>
+        </div>
+        <div className={styles.chks}>
+          {property.roomTypes.map((room) => {
+            const rate = rateFor(room.id);
+            return (
+              <label key={room.id} className={styles.chk}>
+                <input
+                  type="checkbox"
+                  checked={o.selection.roomTypeIds.includes(room.id)}
+                  onChange={() => o.toggleRoom(room.id)}
+                />
+                <span className={styles.grow}>
+                  <b>{room.name}</b>
+                  <small>{room.spec}</small>
+                </span>
+                {rate !== undefined && (
+                  <span className={styles.rate}>{usd(rate)}</span>
+                )}
+              </label>
+            );
+          })}
+        </div>
+      </div>
+    </>
   );
 }

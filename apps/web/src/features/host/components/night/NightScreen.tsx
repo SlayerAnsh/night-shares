@@ -1,9 +1,19 @@
 "use client";
-import { formatRoomNights, formatUsdc } from "../../../../shared/format";
+import { buttonClass } from "@night-shares/design-system";
+import Link from "next/link";
 import { useNight, useProperty } from "../../hooks/use-host-data";
-import { activityLabel, activityRows } from "../../model/activity";
-import { formatInstant } from "../../model/host-view";
-import { ErrorMessage, PayoutFacts } from "../shared/HostFacts";
+import { shortNight, todayIso } from "../../model/calendar";
+import { Crumbs } from "../ui/Crumbs";
+import { cx } from "../ui/cx";
+import { Loading, StateCard } from "../ui/QueryState";
+import ui from "../ui/ui.module.css";
+import { ActivityTable } from "./ActivityTable";
+import styles from "./Night.module.css";
+import { NightHead } from "./NightHead";
+import { NightPayout } from "./NightPayout";
+import { ReleaseTimeline } from "./ReleaseTimeline";
+import { RoomBlock } from "./RoomBlock";
+import rooms from "./Rooms.module.css";
 
 export function NightScreen({
   propertyId,
@@ -13,107 +23,138 @@ export function NightScreen({
   date: string;
 }) {
   const query = useNight(propertyId, date);
-  const property = useProperty(propertyId);
+  const property = useProperty(propertyId).data?.property;
+  const hotel = property?.name ?? "Hotel";
+  const names = new Map(
+    property?.roomTypes.map((room) => [room.id, room.name]),
+  );
   const edit = `/host/${propertyId}?month=${date.slice(0, 7)}&mode=picked&dates=${date}#open-nights`;
+  const now = Date.now();
+  const isPast = date < todayIso(now);
+  const rows = query.data?.roomTypes ?? [];
   return (
     <>
-      <nav>
-        <a href="/host">All hotels</a> /{" "}
-        <a href={`/host/${propertyId}`}>
-          {property.data?.property?.name ?? "Hotel"}
-        </a>
-      </nav>
-      <h1>{date}</h1>
-      <a href={edit}>Edit rooms and demand</a>
-      {query.isPending && <p>Loading night…</p>}
-      <ErrorMessage error={query.error ?? property.error} />
-      {query.data && (
-        <>
-          <section>
-            <h2>Rooms</h2>
-            {!query.data.roomTypes.length && (
-              <p>
-                This night is not open yet. <a href={edit}>Open nights</a>
-              </p>
-            )}
-            {query.data.roomTypes.map((row) => (
-              <article key={row.night?.roomTypeId}>
-                <h3>
-                  {property.data?.property?.roomTypes.find(
-                    (room) => room.id === row.night?.roomTypeId,
-                  )?.name ?? row.night?.roomTypeId}
-                </h3>
-                <p>
-                  {row.isStopped
-                    ? "Stopped"
-                    : (row.allotment?.tenths ?? 0) === 0
-                      ? "Not open"
-                      : (row.onSale?.tenths ?? 0) > 0
-                        ? "Selling now"
-                        : "Sold out"}
+      <Crumbs
+        parts={[
+          ["All hotels", "/host"],
+          [hotel, `/host/${propertyId}`],
+          [shortNight(date)],
+        ]}
+      />
+      <NightHead propertyId={propertyId} date={date} rows={rows} now={now} />
+      {query.isPending && (
+        <Loading
+          label="Loading night"
+          rows={[
+            [420, 300],
+            [260, 300],
+          ]}
+        />
+      )}
+      {!query.isPending && !query.data && (
+        <StateCard title="This night could not load" error={query.error}>
+          Go back to the hotel calendar and pick the night again.
+        </StateCard>
+      )}
+      {query.data && !rows.length && (
+        <section className={cx(ui.card, styles.form)}>
+          <div className={ui.lbl}>
+            {isPast ? "Not offered" : "Not open yet"}
+          </div>
+          <h2>{isPast ? "This night was not offered" : "Open this night"}</h2>
+          <p className={ui.note}>
+            {isPast
+              ? "Nights in the past cannot be opened."
+              : "Pick room types, allotment and demand for this night on the hotel calendar."}
+          </p>
+          {!isPast && (
+            <Link
+              className={cx(buttonClass({ variant: "primary" }), styles.btn)}
+              href={edit}
+            >
+              Open nights
+            </Link>
+          )}
+        </section>
+      )}
+      {query.data && rows.length > 0 && (
+        <div className={styles.grid}>
+          <div className={styles.main}>
+            <section
+              className={cx(ui.card, styles.sec)}
+              aria-labelledby="h-rooms"
+            >
+              <div className={styles.secH}>
+                <h2 id="h-rooms">Rooms</h2>
+                {!isPast && (
+                  <Link
+                    className={buttonClass({
+                      variant: "secondary",
+                      size: "sm",
+                    })}
+                    href={edit}
+                  >
+                    Edit rooms and demand
+                  </Link>
+                )}
+              </div>
+              {!isPast && (
+                <p className={cx(ui.note, styles.lock)}>
+                  This night is open. Payouts sweep to your wallet
+                  automatically, and unsold rooms come back at release time.
                 </p>
-                <dl>
-                  <dt>Rooms offered</dt>
-                  <dd>{formatRoomNights(row.allotment?.tenths ?? 0)}</dd>
-                  <dt>Booked by guests</dt>
-                  <dd>{formatRoomNights(row.booked?.tenths ?? 0)}</dd>
-                  <dt>Held by traders</dt>
-                  <dd>{formatRoomNights(row.held?.tenths ?? 0)}</dd>
-                  <dt>Still on sale</dt>
-                  <dd>{formatRoomNights(row.onSale?.tenths ?? 0)}</dd>
-                  <dt>Usual rate</dt>
-                  <dd>{formatUsdc(row.usualRate?.micros ?? 0n)}</dd>
-                  <dt>Guest price</dt>
-                  <dd>{formatUsdc(row.guestPrice?.micros ?? 0n)}</dd>
-                  <dt>Demand</dt>
-                  <dd>
-                    {(
-                      { 1: "Calm", 2: "Normal", 3: "Peak" } as Record<
-                        number,
-                        string
-                      >
-                    )[row.demandPreset] ?? "Not set"}
-                  </dd>
-                  <dt>Release time</dt>
-                  <dd>{formatInstant(row.releaseAt)}</dd>
-                </dl>
-                <PayoutFacts value={row.payout} />
-              </article>
-            ))}
-          </section>
-          <section>
-            <h2>Market activity</h2>
-            {query.data.activity.length ? (
-              <ul>
-                {activityRows(query.data.activity).map((event) => (
-                  <li key={event.key}>
-                    {formatInstant(event.at)}: {activityLabel(event.kind)};{" "}
-                    {formatRoomNights(event.tenths)} rooms;{" "}
-                    {formatUsdc(event.micros)}
-                  </li>
+              )}
+              <div className={rooms.list}>
+                {rows.map((row) => (
+                  <RoomBlock
+                    key={row.night?.roomTypeId}
+                    row={row}
+                    name={
+                      names.get(row.night?.roomTypeId ?? "") ??
+                      row.night?.roomTypeId ??
+                      ""
+                    }
+                    isPast={isPast}
+                  />
                 ))}
-              </ul>
-            ) : (
-              <p>No activity yet.</p>
-            )}
-          </section>
-          <section>
-            <h2>Release timeline</h2>
-            <ol>
-              {query.data.releaseTimeline.map((event) => (
-                <li key={`${event.at?.seconds}:${event.description}`}>
-                  {formatInstant(event.at)}: {event.description}
-                </li>
-              ))}
-            </ol>
-            {!query.data.releaseTimeline.length && <p>No release scheduled.</p>}
-          </section>
-          <section>
-            <h2>Payout for this night</h2>
-            <PayoutFacts value={query.data.payout} />
-            <a href={`/host/payout?property=${propertyId}`}>Withdraw</a>
-          </section>
-        </>
+              </div>
+            </section>
+            <section
+              className={cx(ui.card, styles.sec)}
+              aria-labelledby="h-act"
+            >
+              <div className={styles.secH}>
+                <h2 id="h-act">Market activity</h2>
+              </div>
+              <ActivityTable events={query.data.activity} />
+            </section>
+          </div>
+          <aside className={styles.aside}>
+            <section
+              className={cx(ui.card, styles.sec)}
+              aria-labelledby="h-pay"
+            >
+              <div className={styles.secH}>
+                <h2 id="h-pay">Payout for this night</h2>
+              </div>
+              <NightPayout
+                payout={query.data.payout}
+                propertyId={propertyId}
+                hotel={hotel}
+              />
+            </section>
+            <section className={cx(ui.card, styles.sec)} aria-labelledby="h-tl">
+              <div className={styles.secH}>
+                <h2 id="h-tl">Release timeline</h2>
+              </div>
+              <ReleaseTimeline
+                events={query.data.releaseTimeline}
+                names={names}
+                now={now}
+              />
+            </section>
+          </aside>
+        </div>
       )}
     </>
   );

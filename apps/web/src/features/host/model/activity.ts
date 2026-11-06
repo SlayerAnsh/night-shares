@@ -47,3 +47,20 @@ export function activityRows(events: Activity[]) {
   }
   return [...rows.values()];
 }
+
+export type ActivityTone =
+  | "open"
+  | "guest"
+  | "trader"
+  | "back"
+  | "fill"
+  | "walk";
+
+export function activityTone(kind: string): ActivityTone {
+  if (kind.startsWith("double_sale")) return "walk";
+  if (kind === "guest_booked") return "guest";
+  if (kind === "trader_bought") return "trader";
+  if (kind === "trader_sold_back" || kind === "ask_cancelled") return "back";
+  if (kind === "ask_filled" || kind === "ask_posted") return "fill";
+  return "open";
+}

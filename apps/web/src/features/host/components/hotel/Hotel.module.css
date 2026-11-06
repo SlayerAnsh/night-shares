@@ -1,0 +1,72 @@
+/* Hotel view frame, from .hh-id, .filter-bar and .h-grid in host.css. */
+.id {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-14);
+  min-width: 0;
+}
+
+.id h1 {
+  font-size: var(--fs-48);
+}
+
+.photo {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--r-14);
+  flex: none;
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-12);
+  flex-wrap: wrap;
+  margin: 22px 0 var(--sp-14);
+  font-size: var(--fs-13);
+  font-weight: var(--fw-bold);
+  color: var(--ink-2);
+}
+
+.filter .hint {
+  font-weight: var(--fw-semibold);
+  color: var(--muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-18);
+  margin-top: var(--sp-18);
+  align-items: start;
+}
+
+.withPanel {
+  grid-template-columns: minmax(0, 1fr) 390px;
+}
+
+@media (max-width: 1180px) {
+  .withPanel {
+    grid-template-columns: 1fr;
+  }
+
+  /* Room for the bottom sheet under the calendar. */
+  .withPanel > :first-child {
+    margin-bottom: 40vh;
+  }
+}
+
+@media (max-width: 720px) {
+  .id h1 {
+    font-size: var(--fs-32);
+  }
+
+  .photo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .filter .hint {
+    display: none;
+  }
+}
