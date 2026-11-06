@@ -7,6 +7,7 @@ import { VerificationLevel } from "@night-shares/proto/identity/v1/user_pb";
 import { MarketService } from "@night-shares/proto/market/v1/market_pb";
 import { StayService } from "@night-shares/proto/stay/v1/stay_pb";
 import { WalletService } from "@night-shares/proto/wallet/v1/wallet_pb";
+import type { ServerConfig } from "../../src/config/server-config";
 import {
   buildContainer,
   type Container,
@@ -22,8 +23,13 @@ export async function createHarness(
     ids: "sequential",
     today: "2026-12-01",
   }),
+  serverConfig: Partial<ServerConfig> = {},
 ) {
-  const server = createServer(container);
+  const server = createServer(container, {
+    rateLimitEnabled: false,
+    logLevel: "silent",
+    ...serverConfig,
+  });
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
     server.listen(0, "127.0.0.1", resolve);
@@ -69,7 +75,7 @@ export async function createHarness(
       });
       const session = await clients.identity.completeSignIn({
         requestId: request.requestId,
-        proof: `mock:${seed}:${level}`,
+        proof: { case: "mockProof", value: `mock:${seed}:${level}` },
       });
       return { ...session, clients: clientsFor(session.sessionToken) };
     },

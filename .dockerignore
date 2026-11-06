@@ -1,0 +1,17 @@
+.git
+**/node_modules
+.pnpm-store
+**/.next
+**/.next-dev
+**/dist
+**/coverage
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+!**/.env.example
+**/data
+**/*.db
+**/*.db-*
+**/*.sqlite
+**/*.sqlite-*
+**/.DS_Store

@@ -2,7 +2,8 @@ import { expect, test } from "bun:test";
 import { loadConfig } from "./load-config";
 
 test("boot defaults use SQLite, system time and random ids", () => {
-  expect(loadConfig({})).toEqual({
+  expect(loadConfig({})).toMatchObject({
+    jobIntervalMs: 60000,
     port: 8787,
     adapters: "mock",
     today: undefined,
@@ -13,6 +14,7 @@ test("boot defaults use SQLite, system time and random ids", () => {
 });
 test("invalid environment values fail with their config key", () => {
   for (const [key, value] of Object.entries({
+    JOB_INTERVAL_MS: "0",
     PORT: "",
     DB_PATH: " ",
     TODAY: "2026-02-30",

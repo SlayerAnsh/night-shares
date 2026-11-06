@@ -4,6 +4,8 @@ import {
   type DomainErrorCode,
 } from "../../shared/errors/domain-error";
 
+import type { Logger } from "../logging/logger";
+
 const codes: Record<DomainErrorCode, Code> = {
   NOT_FOUND: Code.NotFound,
   INVALID_ARGUMENT: Code.InvalidArgument,
@@ -12,12 +14,18 @@ const codes: Record<DomainErrorCode, Code> = {
   UNAUTHENTICATED: Code.Unauthenticated,
   RESOURCE_EXHAUSTED: Code.ResourceExhausted,
 };
-export const errors: Interceptor = (next) => async (request) => {
-  try {
-    return await next(request);
-  } catch (error) {
-    if (error instanceof DomainError)
-      throw new ConnectError(error.message, codes[error.code]);
-    throw error;
-  }
-};
+export function createErrorsInterceptor(logger?: Logger): Interceptor {
+  return (next) => async (request) => {
+    try {
+      return await next(request);
+    } catch (error) {
+      if (error instanceof DomainError)
+        throw new ConnectError(error.message, codes[error.code]);
+      if (error instanceof ConnectError) throw error;
+      logger?.unexpected(error);
+      throw new ConnectError("An unexpected error occurred.", Code.Internal);
+    }
+  };
+}
+
+export const errors = createErrorsInterceptor();

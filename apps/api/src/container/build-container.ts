@@ -13,6 +13,7 @@ import { createMockChannelManager } from "../ports/channel-manager/channel-manag
 import { createMockClock } from "../ports/clock/clock.mock";
 import { createSystemClock } from "../ports/clock/clock.system";
 import { createMockIdentityVerifier } from "../ports/identity-verifier/identity-verifier.mock";
+import { createWorldIdIdentityVerifier } from "../ports/identity-verifier/identity-verifier.world-id";
 import { createMockIdGenerator } from "../ports/ids/id-generator.mock";
 import { createRandomIdGenerator } from "../ports/ids/id-generator.random";
 import { createSqliteSessionStore } from "../ports/sessions/session-store.sqlite";
@@ -50,7 +51,22 @@ export function buildContainer(config: Config) {
     verifications: createSqliteVerificationStore({ db, clock }),
     inventory: createSqliteInventoryRepo({ db, catalog, clock }),
     sessions: createSqliteSessionStore({ db, clock }),
-    identityVerifier: createMockIdentityVerifier({ clock, ids }),
+    identityVerifier:
+      config.worldIdMode === "world-id"
+        ? createWorldIdIdentityVerifier({
+            db,
+            clock,
+            ids,
+            appId: config.worldIdAppId ?? "",
+            action: config.worldIdAction,
+            verifyUrl: config.worldIdVerifyUrl,
+          })
+        : createMockIdentityVerifier({
+            db,
+            clock,
+            ids,
+            action: config.worldIdAction,
+          }),
     channelManager: createMockChannelManager({ catalog, clock, ids }),
   };
   const modules = {

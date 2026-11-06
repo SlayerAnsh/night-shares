@@ -32,7 +32,7 @@ test("night keys validate identity and calendar dates", () => {
   expect(() => parse(`${key}:extra`)).toThrow();
 });
 test("configuration validates adapters, ports and deterministic TODAY", () => {
-  expect(loadConfig({})).toEqual({
+  expect(loadConfig({})).toMatchObject({
     port: 8787,
     adapters: "mock",
     today: undefined,

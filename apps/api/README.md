@@ -35,13 +35,13 @@ From this directory, `bun src/main.ts` starts the server. Copy `.env.example` fo
 
 The wallet remains a mock of Arc contract interaction. Wallet balances and history persist, with 12,480 USDC seeded only for new user wallets and existing system balances retained across restarts. Channel manager remains mock. Module repositories will migrate separately; shared persistence alone does not persist their trips or positions yet. Memory adapters remain available for unit tests. `src/db/persistence.test.ts` verifies file restart safety and transaction rollback.
 
-`GET /healthz` returns JSON. `GET /docs` serves Swagger UI 5.32.1 from jsDelivr with a six-service selector. `GET /docs/openapi/<name>.yaml` serves the corresponding checked-in proto specification. Names are `identity`, `catalog`, `stay`, `market`, `host`, and `wallet`. Swagger assets require internet access. CORS allows `http://localhost:3000` and Connect preflight headers.
+`GET /healthz` returns JSON. `GET /docs` serves Swagger UI 5.32.1 from jsDelivr with a six-service selector. `GET /docs/openapi/<name>.yaml` serves the corresponding checked-in proto specification. Names are `identity`, `catalog`, `stay`, `market`, `host`, and `wallet`. Swagger assets require internet access. CORS defaults to `http://localhost:3000` and Connect preflight headers; `CORS_ORIGINS` overrides the origin allowlist.
 
 ## Shared contracts
 
 `buildContainer(config)` returns `{ ports, modules }`. `Ports` contains `clock`, `ids`, `identityVerifier`, `walletProvider`, `db`, `channelManager`, `sessions`, `catalog`, `inventory`, `activity`, and `verifications`. `verifications` issues a one time World ID action token (identity `VerifyAction`) that stay `CheckIn` and market `ApproveAgentOrder` consume; tokens expire after five minutes. Each `createXModule(ports)` returns `{ service, handler }`, retaining the specific generated descriptor type and a complete `ServiceImpl<typeof XService>`.
 
-The server installs interceptors in `[errors, auth]` order. Auth reads `getOption(request.method, access)` from `@bufbuild/protobuf` using `night_shares.auth.v1.access`. PUBLIC accepts anonymous calls, DEVICE requires a valid Bearer session, and ORB additionally requires `user.level === "orb"`. Missing sessions return Unauthenticated; insufficient or unconfigured access returns PermissionDenied. Valid sessions also populate public-call context. `optionalUser(ctx)` and `requireUser(ctx)` read the context. The outer error interceptor maps all six `DomainError` codes in one place and preserves existing Connect errors.
+The server installs interceptors in `[logging, errors, auth, user rate limit]` order. Auth reads `getOption(request.method, access)` from `@bufbuild/protobuf` using `night_shares.auth.v1.access`. PUBLIC accepts anonymous calls, DEVICE requires a valid Bearer session, and ORB additionally requires `user.level === "orb"`. Missing sessions return Unauthenticated; insufficient or unconfigured access returns PermissionDenied. Valid sessions also populate public-call context. `optionalUser(ctx)` and `requireUser(ctx)` read the context. The outer error interceptor maps all six `DomainError` codes in one place and preserves existing Connect errors.
 
 All port interfaces are in `src/ports`, except `CatalogRepo` and `InventoryRepo`, which live beside their shared implementations. External adapter methods are asynchronous. Catalog, inventory, activity and session operations are synchronous behind SQLite or memory adapters. Repositories return copies; inventory writes use `update(key, mutate)`. Missing catalog items return `undefined`; missing inventory property or room type raises `NOT_FOUND`.
 
@@ -54,7 +54,7 @@ All port interfaces are in `src/ports`, except `CatalogRepo` and `InventoryRepo`
 ## Mock adapters
 
 - Production IDs use a prefix and 128 random bits. Test IDs use deterministic per-prefix counters, such as `ids.next("bk")` yielding `bk_0001`.
-- Identity accepts exactly `mock:<seed>:<orb|device>`. Nullifiers hash the seed and action scope. Use a consistent action such as `signin` for stable human IDs. Requests expire after five minutes and successful verification consumes the request. An Orb request cannot complete with a Device proof. Action verification can omit the request ID.
+- Identity accepts exactly `mock:<seed>:<orb|device>` in mock mode. The subject and nullifier both preserve the seeded human ID. Every sign-in and action verification requires its own five-minute request ID, consumed before verification. An Orb request cannot complete with a Device proof. See World ID cloud verification below.
 - Sessions hold `{ id, humanId, level, walletAddress }`; `create(user)` returns a token, `get(token)` returns a copy, and `delete(token)` revokes it. Both memory and SQLite sessions hash random tokens and enforce seven-day expiry.
 - Wallet linking is stable per human ID and seeds 12,480 USDC only once. Transfers conserve bigint micro USDC and reject insufficient funds. The `SYSTEM_ADDRESSES` aliases `treasury`, `pool`, and `host` each start with 1 billion mock USDC. `linkWallet` can create additional host wallets. History uses transaction IDs and injected clock milliseconds. Equal timestamps place the latest entry first; self transfers appear once as outgoing. Initial balances are seeds, not transactions. Card payments and the onramp port have been removed.
 - Channel manager supports Mews, Cloudbeds and SiteMinder, imports seeded room types with bigint usual rates, and accepts reservations with guest details for hotel forwarding. Reservation references are idempotent by booking ID and formatted like `VEL-000001`. Guest details are not retained in this adapter.
@@ -98,3 +98,57 @@ WalletProvider.settle validates each source's aggregate debit across all legs be
 Market buys (including agent execution), sells and bookings synchronously route and reserve current inventory with position changes before awaiting one settlement containing every payment and fee. Failed settlement compensates inventory with inverse quantity and ask-fill mutations and reverses position changes. Booking compensation also releases the quote lock; trips and activity are published only after payment succeeds. Multi-night bookings reserve all dates without an intervening await. Locked-price subsidies pay recipients directly from treasury in the same batch, so validation never relies on incoming funds financing outgoing legs. Withdraw reserves the property's withdrawn amount before settling pool-to-host payment and reverses that reservation on failure.
 
 Concurrency coverage lives beside the use cases and in `test/e2e/security.test.ts`. Run unit tests with `cd apps/api && bun test src`. E2E uses the harness's ephemeral server and must run in an environment that permits port binding.
+
+## World ID cloud verification
+
+`WORLD_ID_MODE=mock|world-id` defaults to `mock`, independently of `ADAPTERS=mock`. The wallet and chain remain mock. Real mode requires `WORLD_ID_APP_ID=app_...` at boot. `WORLD_ID_ACTION` defaults to `night-shares-human`. Configure this one action in the Developer Portal as a Cloud action with **unlimited verifications**. Changing it changes every human's identifier and must be treated as an identity migration.
+
+`WORLD_ID_VERIFY_URL` defaults to `https://developer.world.org/api/v2/verify/{app_id}`. The adapter substitutes the configured app ID into that placeholder. An override may also be a complete HTTPS endpoint. No API secret is needed for this legacy cloud verify endpoint. Staging apps can configure their staging endpoint explicitly.
+
+The frozen identity contract uses the currently documented [legacy cloud verify API](https://docs.world.org/api-reference/developer-portal/verify-legacy). It sends `nullifier_hash`, `merkle_root`, `proof`, `verification_level`, the configured `action`, and server-computed `signal_hash`. The signal hash is the UTF-8 signal's Keccak-256 digest shifted right by eight bits, matching [IDKit's hashing implementation](https://github.com/worldcoin/idkit-js/blob/main/packages/core/src/lib/hashing.ts). It does not use SHA3-256. Success requires HTTP success, `success: true`, and matching response action and nullifier. Rejections, malformed responses, timeouts and transport errors become plain `UNAUTHENTICATED` errors. The fetch has a ten-second timeout. Proofs and upstream errors are never logged or persisted.
+
+The current [React SDK documentation](https://docs.world.org/world-id/idkit/react) describes the v4 request widget and signed RP contexts. This implementation deliberately uses the documented legacy cloud protocol and `@worldcoin/idkit` **2.4.2** in the web app, matching the frozen four-field proof contract. That package is deprecated, not the current v4 SDK. Its [npm publication metadata](https://registry.npmjs.org/@worldcoin%2fidkit) records publication on **2025-10-02**, more than two weeks before the 2026-11-07 integration date. Its exact core dependency is `@worldcoin/idkit-core` 2.1.0. Moving to v4 requires RP credentials, signed contexts and a new proof contract; this adapter does not claim v4 support.
+
+### Requests and identity binding
+
+1. `StartSignIn(level)` creates a five-minute request. `StartVerifyAction(action)` creates a separate authenticated request for `check_in` or `approve_agent_order`. Approval requires an Orb proof; check-in requires Device or stronger.
+2. Both return `request_id`, `app_id`, the fixed World ID `action`, `signal`, `expires_at` and `mode` (`MOCK` or `WORLD_ID`). StartSignIn retains `qr_payload` for mock clients.
+3. The signal is exactly `<purpose>:<nonce>`, with purpose `sign_in`, `check_in` or `approve_agent_order`. The client passes it unchanged to IDKit. Production IDs and nonces use the random ID generator. Do not select sequential IDs for a real deployment.
+4. `CompleteSignIn` and `VerifyAction` send `request_id` and a `proof` oneof: `mock_proof` or structured `world_id`. The old string proof field number 2 is reserved. Generated TypeScript uses `{ case: "mockProof", value: "mock:guest:device" }` or `{ case: "worldId", value: { merkleRoot, nullifierHash, proof, verificationLevel } }` as message initializers.
+5. SQLite migration `101-identity-requests.sql` stores the requested level, purpose, user binding, signal and expiry. An atomic `DELETE RETURNING` consumes the request before checking the proof or calling the cloud. Failed attempts also burn the nonce; retry starts a new request. A consumed request cannot race or replay, including after restart. No proof is stored.
+
+One action keeps the nullifier stable: the verified nullifier is the human subject for sign-in and every later verification. The signal binds the proof to this request and its purpose. Action requests additionally bind the signed-in user ID; the verified subject must equal that user's human ID before a one-time action token is issued. The client cannot choose a different cloud action or substitute its own signal. Mock verification follows the same request lifecycle while preserving existing seeded mock subjects.
+
+Run `bun test src/modules/identity src/ports/identity-verifier src/config` for unit coverage. Cloud tests stub fetch with the documented response shapes and cover binding, consumption, expiry, level checks, provider failures and concurrent replay. E2E requires the coordinator's port-capable environment and updated generated clients.
+
+## Production operations
+
+Boot validates operational settings through `src/config/server-config.ts`. The following defaults apply to each API process:
+
+| Environment key | Default | Behavior |
+| --- | --- | --- |
+| `LOG_LEVEL` | `info` | JSON output threshold: debug, info, warn, error or silent. |
+| `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated exact HTTP origins. An empty value disables cross-origin access. |
+| `TRUST_PROXY` | `false` | Accept the first valid IP in X-Forwarded-For only when true. |
+| `RATE_LIMIT_ENABLED` | `true` | Enable in-memory token buckets. |
+| `RATE_LIMIT_PER_IP` | `120` | General IP capacity per window. |
+| `RATE_LIMIT_PER_USER` | `120` | Authenticated user capacity per window, shared across sessions and IPs. |
+| `RATE_LIMIT_IDENTITY` | `10` | Additional shared IP and user budget for StartSignIn, CompleteSignIn and VerifyAction. |
+| `RATE_LIMIT_WINDOW_MS` | `60000` | Time to refill an empty bucket continuously. |
+| `RATE_LIMIT_MAX_BUCKETS` | `10000` | Maximum keys per bucket table. At capacity, expired entries are reclaimed; otherwise new keys are rejected. |
+| `MAX_REQUEST_BODY_BYTES` | `65536` | HTTP body limit, including chunked bodies. Oversized bodies return HTTP 413. |
+| `CONNECT_READ_MAX_BYTES` | `65536` | Connect decoded message limit, capped by the HTTP body limit. |
+| `REQUEST_TIMEOUT_MS` | `30000` | HTTP request deadline and maximum Connect deadline. Also bounds header and socket waits. |
+| `SHUTDOWN_TIMEOUT_MS` | `10000` | Maximum shutdown drain period before connections close and the process exits unsuccessfully. |
+
+RPC JSON lines include method, Connect code (or HTTP status for rejection before dispatch), durationMs and authenticated userId when available. HTTP lines cover non-RPC routes using fixed route labels without query strings. Unexpected RPC exceptions produce one error record with stack locations and a generic client message. Error messages, causes, headers and request bodies are excluded because they may contain tokens, proofs, emails or names. DomainError and ConnectError failures do not emit unexpected-error records.
+
+The interceptor order is logging, errors, auth, user rate limit. IP limits run before RPC decoding and authentication. Rejections use RESOURCE_EXHAUSTED and a plain message. Buckets reset on restart and are not distributed across replicas. Health probes are exempt from rate quotas. The e2e harness disables quotas and logging by default; `createHarness(container, serverConfig)` can explicitly enable them. `test/e2e/ops.test.ts` includes enabled-limit coverage.
+
+`GET /healthz` reports process liveness. `GET /readyz` verifies SQLite is reachable and all shipped migration names and versions are recorded. Readiness checks do not apply migrations or write data. Both return JSON; readiness failures return 503. Boot applies migrations before listening.
+
+SIGTERM and SIGINT stop admission, close idle connections, stop the scheduler and wait for active requests and registered shutdown hooks before closing SQLite. Add scheduler or worker cleanup to `shutdownHooks` in `src/main.ts`. A forced timeout closes connections and SQLite and exits with code 1. Request cancellation cannot undo a settlement already started; existing reserve, await settlement, compensate ordering is unchanged. Wallet and chain remain mock.
+
+Use TRUST_PROXY only behind a trusted ingress that replaces client-supplied X-Forwarded-For and prevents direct API access. The bundled web proxy does not forward client IP headers, so its users share the API's IP budget. Adjust that budget for expected web traffic; authenticated user quotas still apply separately.
+
+The root compose file builds both applications from workspace sources, persists SQLite under `/data`, and waits for API readiness before starting the web service. See the Running in containers section in `../../DEVELOPER.md`. The API uses `oven/bun:1.3.5`, released [December 17, 2025](https://bun.sh/blog/bun-v1.3.5), and runs as the non-root bun user.
