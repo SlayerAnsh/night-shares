@@ -1,0 +1,23 @@
+import { Code, ConnectError, type Interceptor } from "@connectrpc/connect";
+import {
+  DomainError,
+  type DomainErrorCode,
+} from "../../shared/errors/domain-error";
+
+const codes: Record<DomainErrorCode, Code> = {
+  NOT_FOUND: Code.NotFound,
+  INVALID_ARGUMENT: Code.InvalidArgument,
+  FAILED_PRECONDITION: Code.FailedPrecondition,
+  PERMISSION_DENIED: Code.PermissionDenied,
+  UNAUTHENTICATED: Code.Unauthenticated,
+  RESOURCE_EXHAUSTED: Code.ResourceExhausted,
+};
+export const errors: Interceptor = (next) => async (request) => {
+  try {
+    return await next(request);
+  } catch (error) {
+    if (error instanceof DomainError)
+      throw new ConnectError(error.message, codes[error.code]);
+    throw error;
+  }
+};

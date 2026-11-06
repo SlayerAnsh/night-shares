@@ -15,6 +15,31 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
 
+  apps/api:
+    dependencies:
+      '@bufbuild/protobuf':
+        specifier: 2.17.0
+        version: 2.17.0
+      '@connectrpc/connect':
+        specifier: 2.3.0
+        version: 2.3.0(@bufbuild/protobuf@2.17.0)
+      '@connectrpc/connect-node':
+        specifier: 2.3.0
+        version: 2.3.0(@bufbuild/protobuf@2.17.0)(@connectrpc/connect@2.3.0(@bufbuild/protobuf@2.17.0))
+      '@night-shares/market-model':
+        specifier: workspace:*
+        version: link:../../packages/market-model
+      '@night-shares/proto':
+        specifier: workspace:*
+        version: link:../../packages/proto
+    devDependencies:
+      '@types/bun':
+        specifier: 1.3.5
+        version: 1.3.5
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+
   packages/design-system:
     devDependencies:
       '@types/bun':
@@ -140,6 +165,13 @@ packages:
   '@bufbuild/protoplugin@2.17.0':
     resolution: {integrity: sha512-4ExU8AGygKkwIx3U8D5kyBOn9rcCM1qnj4wCP95RbP1CRe73QvVGHQ/lOp6IQiyvQMh9BGrYGht+ZDa8gwC2fg==}
 
+  '@connectrpc/connect-node@2.3.0':
+    resolution: {integrity: sha512-kcQgV4GqFIESsl0MOHInC9/wNYU4aJDvG1OfGR5Lq6/l0gqycSGqEk+fixXGcUtPLc8vJBgS4V1nTmWlh4o9gw==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      '@bufbuild/protobuf': ^2.7.0
+      '@connectrpc/connect': 2.3.0
+
   '@connectrpc/connect@2.3.0':
     resolution: {integrity: sha512-rjAn8L9KbAZrkwiB8m1qzDsLs74hkYmwwM2iSWuxTPVOTRm/EZw31smKbQqPU50AXqJC5eKKpEnA6Uf/swQOgQ==}
     peerDependencies:
@@ -256,6 +288,11 @@ snapshots:
       typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
+
+  '@connectrpc/connect-node@2.3.0(@bufbuild/protobuf@2.17.0)(@connectrpc/connect@2.3.0(@bufbuild/protobuf@2.17.0))':
+    dependencies:
+      '@bufbuild/protobuf': 2.17.0
+      '@connectrpc/connect': 2.3.0(@bufbuild/protobuf@2.17.0)
 
   '@connectrpc/connect@2.3.0(@bufbuild/protobuf@2.17.0)':
     dependencies:

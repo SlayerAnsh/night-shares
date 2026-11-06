@@ -1,0 +1,20 @@
+import type { CatalogRepo } from "../modules/catalog-data/catalog-repo";
+import type { InventoryRepo } from "../modules/inventory/inventory-repo";
+import type { ChannelManager } from "../ports/channel-manager/channel-manager";
+import type { Clock } from "../ports/clock/clock";
+import type { IdentityVerifier } from "../ports/identity-verifier/identity-verifier";
+import type { IdGenerator } from "../ports/ids/id-generator";
+import type { Onramp } from "../ports/onramp/onramp";
+import type { SessionStore } from "../ports/sessions/session-store";
+import type { WalletProvider } from "../ports/wallet-provider/wallet-provider";
+export type Ports = {
+  clock: Clock;
+  ids: IdGenerator;
+  identityVerifier: IdentityVerifier;
+  walletProvider: WalletProvider;
+  onramp: Onramp;
+  channelManager: ChannelManager;
+  sessions: SessionStore;
+  catalog: CatalogRepo;
+  inventory: InventoryRepo;
+};
