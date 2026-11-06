@@ -243,7 +243,7 @@ Status: design only. No contracts exist yet. When `WalletProvider` gets a real A
 
 - Hosts lock nothing beyond the traded nights (see Market state above). No bond.
 - The Uniswap v4 pool prices every trade with standard concentrated liquidity math. Hooks enforce policy and take fees. They never replace the pool's pricing (no custom curve through `beforeSwapReturnDelta`).
-- No Chainlink CRE. The four oracle jobs move off chain or into the pool:
+- No Chainlink CRE in this build; CRE is a later upgrade for the double sale report only. The report source sits behind a neutral port, so swapping the API attester for a CRE workflow does not touch the contracts' rules or the pricing. The four oracle jobs move off chain or into the pool:
   - Price: every on chain settlement uses the pool's own price, by redeeming the token into the pool. P* stays an off chain guide for the UI and agents, clamped by the host's usual rate from the channel manager. No ADR feed.
   - Double sale, booking honoured, occupancy: the API detects them through the `ChannelManager` port and World ID check ins. Only the double sale needs the chain; the API's attester key signs that report for `Settlement`. This is a trusted operator, the same trust as `HumanRegistry`, and is stated in the README.
 - Settlement is 1:1 redemption into the pool. One token goes back into its pool and the holder receives the pool's bid for it, paid from that token's own reserve slice. The pool can always pay it, because that USDC is already in the host's positions. No oracle price and no outside funds are needed for the holder's principal.
@@ -305,7 +305,7 @@ The 7th room costs 10,092 on chain against 10,095 exact. Tick spacing 1 (0.01%) 
 2. Recall at the cap: when a guest finds no fill under the recall strike, whose tokens are recalled and how. Needs a recall right in `NightToken`.
 3. The late fee above the base 1.3%: to the host (recommended, a late sell back leaves the host less time to resell) or to the cover fund.
 4. Trader asks on chain: signed orders through `TradeRouter` (recommended first) or v4 range orders managed by the hook.
-5. Decided: the cutoff haircut is `lateFee(0)` = `LATE_MAX` (30%). Every unsold holder gets 70% of the average bid of the held reserve, `cutoffRefund` in `market-model` (for example q 6, h 4: L = 33,192, each room night gets 5,809, the pool keeps 9,958). The parked ask condition and `REFUND_AT_FAIR` go away; `unsoldRefund` stays only until the mock trade page moves over. How the haircut splits between host and fee shares follows decision 3.
+5. Decided: the cutoff haircut is `lateFee(0)` = `LATE_MAX` (30%). Every unsold holder gets 70% of the average bid of the held reserve, `cutoffRefund` in `market-model` (for example q 6, h 4: L = 33,192, each room night gets 5,809, the pool keeps 9,958). The parked ask condition, `REFUND_AT_FAIR` and `unsoldRefund` are removed. How the haircut splits between host and fee shares follows decision 3.
 6. Double sale penalty size: 1× the pool bid (the cover order in `offlineSaleCover`, called with the pool bid in place of P*) or larger.
 7. Token order: `currency0` is the lower address. Either mine the `NightToken` CREATE2 salt to fix the order, or make the ladder math handle both.
 
