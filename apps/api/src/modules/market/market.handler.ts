@@ -13,7 +13,7 @@ import {
 import { createAgentOrder } from "./use-cases/account/create-agent-order";
 import { getPortfolio } from "./use-cases/account/get-portfolio";
 import { listWatch } from "./use-cases/account/list-watch";
-import { postAsk } from "./use-cases/account/post-ask";
+import { postAskWithCustody } from "./use-cases/account/post-ask";
 import { toggleWatch } from "./use-cases/account/toggle-watch";
 import { getAgentCheckpoint } from "./use-cases/agent/get-checkpoint";
 import { setAgentBudget } from "./use-cases/agent/set-budget";
@@ -102,7 +102,7 @@ export function createMarketHandler(
     postAsk: (r, ctx) => {
       const user = requireUser(ctx);
       return deps.repo.exclusive(user.humanId, async () =>
-        postAsk(
+        postAskWithCustody(
           deps,
           user,
           nightKey(r.night),

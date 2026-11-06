@@ -3,6 +3,7 @@ import { createJobRegistry } from "../../src/jobs/registry";
 import { createJobRunner } from "../../src/jobs/runner";
 import { cutoffAt } from "../../src/modules/market/cutoff";
 import type { MockClock } from "../../src/ports/clock/clock.mock";
+import { SYSTEM_ADDRESSES } from "../../src/ports/wallet-provider/wallet-provider";
 import { createHarness } from "./harness";
 
 test("clock-driven cutoff releases holdings through the job registry", async () => {
@@ -32,7 +33,14 @@ test("clock-driven cutoff releases holdings through the job registry", async () 
       onError: () => {},
     });
     await runner.tick();
-    expect(await clients.wallet.getBalance({})).toEqual(balance);
+    const afterCutoff = await clients.wallet.getBalance({});
+    expect(afterCutoff.balance).toEqual(balance.balance);
+    expect(afterCutoff.walletAddress).toBe(balance.walletAddress);
+    const names = Object.values(SYSTEM_ADDRESSES).sort();
+    expect(balance.systemWallets.map((wallet) => wallet.name)).toEqual(names);
+    expect(afterCutoff.systemWallets.map((wallet) => wallet.name)).toEqual(
+      names,
+    );
     const claims = await clients.market.listCutoffClaims({});
     expect(claims.claims).toHaveLength(1);
     expect(claims.claims[0]?.claimedAt).toBeUndefined();
@@ -43,11 +51,14 @@ test("clock-driven cutoff releases holdings through the job registry", async () 
       false,
     );
     const paid = await clients.wallet.getBalance({});
-    expect(paid).not.toEqual(balance);
+    expect(paid.balance?.micros).toBe(
+      (balance.balance?.micros ?? 0n) +
+        (claims.claims[0]?.amount?.micros ?? 0n),
+    );
     expect((await clients.market.claimCutoff({ night })).alreadyClaimed).toBe(
       true,
     );
-    expect(await clients.wallet.getBalance({})).toEqual(paid);
+    expect((await clients.wallet.getBalance({})).balance).toEqual(paid.balance);
     expect(
       (await clients.market.listCutoffClaims({})).claims[0]?.claimedAt,
     ).toBeDefined();

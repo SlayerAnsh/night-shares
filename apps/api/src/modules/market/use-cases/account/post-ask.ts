@@ -1,12 +1,45 @@
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import { recallStrike, toMicros } from "@night-shares/market-model";
 import { transaction } from "../../../../db/transaction";
+import { custodialSigner } from "../../../../ports/order-signer/order-signer";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { prepareAsk } from "../../orders/prepare";
 import { orderSettings } from "../../orders/settings";
 import { assertOpen, type Deps, syncPosition } from "../context";
 import { humanWallets } from "../human-wallets";
+// RPC callers await custody before entering the synchronous insertion transaction.
+export async function postAskWithCustody(
+  ...[deps, user, key, size, price, options = {}]: Parameters<typeof postAsk>
+) {
+  if (options.signature) return postAsk(deps, user, key, size, price, options);
+  const prepared = prepareAsk(
+    deps,
+    user,
+    key,
+    size,
+    price,
+    options.expiry,
+    options.nonce,
+  );
+  const settings = orderSettings(deps.ports);
+  const signer = custodialSigner(deps.ports) ?? settings.signer;
+  const signature = settings.custodial
+    ? await signer.signCustodial(
+        user.walletAddress,
+        prepared.digest,
+        prepared.typedDataJson,
+      )
+    : "";
+  if (!signature)
+    throw new DomainError("INVALID_ARGUMENT", "Invalid ask signature.");
+  return postAsk(deps, user, key, size, price, {
+    signature,
+    expiry: prepared.order.expiry,
+    nonce: prepared.order.nonce,
+  });
+}
+
 export function postAsk(
   deps: Deps,
   user: User,
@@ -15,6 +48,30 @@ export function postAsk(
   price: bigint,
   options: { expiry?: Timestamp; nonce?: bigint; signature?: string } = {},
 ) {
+  const preparedSignature = prepareAsk(
+    deps,
+    user,
+    key,
+    size,
+    price,
+    options.expiry,
+    options.nonce,
+  );
+  const settings = orderSettings(deps.ports);
+  const custody = custodialSigner(deps.ports);
+  if (custody && !options.signature)
+    throw new DomainError(
+      "FAILED_PRECONDITION",
+      "Custodial signing must be awaited before posting.",
+    );
+  const signature =
+    options.signature ||
+    (settings.custodial
+      ? settings.signer.signCustodial(
+          user.walletAddress,
+          preparedSignature.digest,
+        )
+      : "");
   return transaction(deps.ports.db, () => {
     if (
       deps.ports.db
@@ -36,16 +93,17 @@ export function postAsk(
       key,
       size,
       price,
-      options.expiry,
-      options.nonce,
+      preparedSignature.order.expiry,
+      preparedSignature.order.nonce,
     );
-    const settings = orderSettings(deps.ports);
-    const signature =
-      options.signature ||
-      (settings.custodial
-        ? settings.signer.signCustodial(user.walletAddress, prepared.digest)
-        : "");
-    if (!settings.signer.verify(user.walletAddress, prepared.digest, signature))
+    if (
+      !(custody ?? settings.signer).verify(
+        user.walletAddress,
+        prepared.digest,
+        signature,
+        prepared.typedDataJson,
+      )
+    )
       throw new DomainError("INVALID_ARGUMENT", "Invalid ask signature.");
     if (options.signature && (options.nonce === undefined || !options.expiry))
       throw new DomainError(

@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file night_shares/wallet/v1/wallet.proto.
  */
 export const file_night_shares_wallet_v1_wallet: GenFile = /*@__PURE__*/
-  fileDesc("CiNuaWdodF9zaGFyZXMvd2FsbGV0L3YxL3dhbGxldC5wcm90bxIWbmlnaHRfc2hhcmVzLndhbGxldC52MSITChFHZXRCYWxhbmNlUmVxdWVzdCJbChJHZXRCYWxhbmNlUmVzcG9uc2USLQoHYmFsYW5jZRgBIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIWCg53YWxsZXRfYWRkcmVzcxgCIAEoCSIZChdMaXN0VHJhbnNhY3Rpb25zUmVxdWVzdCJVChhMaXN0VHJhbnNhY3Rpb25zUmVzcG9uc2USOQoMdHJhbnNhY3Rpb25zGAEgAygLMiMubmlnaHRfc2hhcmVzLndhbGxldC52MS5UcmFuc2FjdGlvbjL3AQoNV2FsbGV0U2VydmljZRJpCgpHZXRCYWxhbmNlEikubmlnaHRfc2hhcmVzLndhbGxldC52MS5HZXRCYWxhbmNlUmVxdWVzdBoqLm5pZ2h0X3NoYXJlcy53YWxsZXQudjEuR2V0QmFsYW5jZVJlc3BvbnNlIgSItRgCEnsKEExpc3RUcmFuc2FjdGlvbnMSLy5uaWdodF9zaGFyZXMud2FsbGV0LnYxLkxpc3RUcmFuc2FjdGlvbnNSZXF1ZXN0GjAubmlnaHRfc2hhcmVzLndhbGxldC52MS5MaXN0VHJhbnNhY3Rpb25zUmVzcG9uc2UiBIi1GAJiBnByb3RvMw", [file_night_shares_auth_v1_access, file_night_shares_common_v1_money, file_night_shares_wallet_v1_transaction]);
+  fileDesc("CiNuaWdodF9zaGFyZXMvd2FsbGV0L3YxL3dhbGxldC5wcm90bxIWbmlnaHRfc2hhcmVzLndhbGxldC52MSITChFHZXRCYWxhbmNlUmVxdWVzdCLrAQoSR2V0QmFsYW5jZVJlc3BvbnNlEi0KB2JhbGFuY2UYASABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFgoOd2FsbGV0X2FkZHJlc3MYAiABKAkSOgoUb25jaGFpbl91c2RjX2JhbGFuY2UYAyABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFAoMZXhwbG9yZXJfdXJsGAQgASgJEjwKDnN5c3RlbV93YWxsZXRzGAUgAygLMiQubmlnaHRfc2hhcmVzLndhbGxldC52MS5TeXN0ZW1XYWxsZXQiSgoMU3lzdGVtV2FsbGV0EgwKBG5hbWUYASABKAkSFgoOd2FsbGV0X2FkZHJlc3MYAiABKAkSFAoMZXhwbG9yZXJfdXJsGAMgASgJIhkKF0xpc3RUcmFuc2FjdGlvbnNSZXF1ZXN0IlUKGExpc3RUcmFuc2FjdGlvbnNSZXNwb25zZRI5Cgx0cmFuc2FjdGlvbnMYASADKAsyIy5uaWdodF9zaGFyZXMud2FsbGV0LnYxLlRyYW5zYWN0aW9uMvcBCg1XYWxsZXRTZXJ2aWNlEmkKCkdldEJhbGFuY2USKS5uaWdodF9zaGFyZXMud2FsbGV0LnYxLkdldEJhbGFuY2VSZXF1ZXN0GioubmlnaHRfc2hhcmVzLndhbGxldC52MS5HZXRCYWxhbmNlUmVzcG9uc2UiBIi1GAISewoQTGlzdFRyYW5zYWN0aW9ucxIvLm5pZ2h0X3NoYXJlcy53YWxsZXQudjEuTGlzdFRyYW5zYWN0aW9uc1JlcXVlc3QaMC5uaWdodF9zaGFyZXMud2FsbGV0LnYxLkxpc3RUcmFuc2FjdGlvbnNSZXNwb25zZSIEiLUYAmIGcHJvdG8z", [file_night_shares_auth_v1_access, file_night_shares_common_v1_money, file_night_shares_wallet_v1_transaction]);
 
 /**
  * @generated from message night_shares.wallet.v1.GetBalanceRequest
@@ -43,6 +43,23 @@ export type GetBalanceResponse = Message<"night_shares.wallet.v1.GetBalanceRespo
    * @generated from field: string wallet_address = 2;
    */
   walletAddress: string;
+
+  /**
+   * Absent when the optional Arc RPC read is unavailable.
+   *
+   * @generated from field: night_shares.common.v1.Usdc onchain_usdc_balance = 3;
+   */
+  onchainUsdcBalance?: Usdc | undefined;
+
+  /**
+   * @generated from field: string explorer_url = 4;
+   */
+  explorerUrl: string;
+
+  /**
+   * @generated from field: repeated night_shares.wallet.v1.SystemWallet system_wallets = 5;
+   */
+  systemWallets: SystemWallet[];
 };
 
 /**
@@ -51,6 +68,33 @@ export type GetBalanceResponse = Message<"night_shares.wallet.v1.GetBalanceRespo
  */
 export const GetBalanceResponseSchema: GenMessage<GetBalanceResponse> = /*@__PURE__*/
   messageDesc(file_night_shares_wallet_v1_wallet, 1);
+
+/**
+ * @generated from message night_shares.wallet.v1.SystemWallet
+ */
+export type SystemWallet = Message<"night_shares.wallet.v1.SystemWallet"> & {
+  /**
+   * @generated from field: string name = 1;
+   */
+  name: string;
+
+  /**
+   * @generated from field: string wallet_address = 2;
+   */
+  walletAddress: string;
+
+  /**
+   * @generated from field: string explorer_url = 3;
+   */
+  explorerUrl: string;
+};
+
+/**
+ * Describes the message night_shares.wallet.v1.SystemWallet.
+ * Use `create(SystemWalletSchema)` to create a new message.
+ */
+export const SystemWalletSchema: GenMessage<SystemWallet> = /*@__PURE__*/
+  messageDesc(file_night_shares_wallet_v1_wallet, 2);
 
 /**
  * @generated from message night_shares.wallet.v1.ListTransactionsRequest
@@ -63,7 +107,7 @@ export type ListTransactionsRequest = Message<"night_shares.wallet.v1.ListTransa
  * Use `create(ListTransactionsRequestSchema)` to create a new message.
  */
 export const ListTransactionsRequestSchema: GenMessage<ListTransactionsRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_wallet_v1_wallet, 2);
+  messageDesc(file_night_shares_wallet_v1_wallet, 3);
 
 /**
  * @generated from message night_shares.wallet.v1.ListTransactionsResponse
@@ -80,7 +124,7 @@ export type ListTransactionsResponse = Message<"night_shares.wallet.v1.ListTrans
  * Use `create(ListTransactionsResponseSchema)` to create a new message.
  */
 export const ListTransactionsResponseSchema: GenMessage<ListTransactionsResponse> = /*@__PURE__*/
-  messageDesc(file_night_shares_wallet_v1_wallet, 3);
+  messageDesc(file_night_shares_wallet_v1_wallet, 4);
 
 /**
  * @generated from service night_shares.wallet.v1.WalletService

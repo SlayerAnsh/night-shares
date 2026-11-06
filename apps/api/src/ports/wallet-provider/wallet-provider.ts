@@ -1,3 +1,4 @@
+import type { WalletCustody } from "../wallet-custody/wallet-custody";
 export type WalletTransaction = {
   id: string;
   at: number;
@@ -14,6 +15,9 @@ export type SettlementLeg = {
   memo: string;
 };
 export interface WalletProvider {
+  custody?: WalletCustody;
+  onchainUsdcBalance?: (address: string) => Promise<bigint | null>;
+  explorerUrl?: string;
   settle(legs: SettlementLeg[]): Promise<string[]>;
   linkWallet(humanId: string): Promise<string>;
   balance(address: string): Promise<bigint>;

@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { ARC_NETWORKS } from "../config/arc-networks";
 import type { Config } from "../config/load-config";
 import { openDatabase } from "../db/open-database";
 import { createCatalogModule } from "../modules/catalog/module";
@@ -22,10 +23,16 @@ import { createMockIdentityVerifier } from "../ports/identity-verifier/identity-
 import { createWorldIdIdentityVerifier } from "../ports/identity-verifier/identity-verifier.world-id";
 import { createMockIdGenerator } from "../ports/ids/id-generator.mock";
 import { createRandomIdGenerator } from "../ports/ids/id-generator.random";
+import { configureCustodialSigner } from "../ports/order-signer/order-signer";
 import { createMockOrderSigner } from "../ports/order-signer/order-signer.mock";
+import { createPrivyOrderSigner } from "../ports/order-signer/order-signer.privy";
 import { createMockReceptionTag } from "../ports/reception-tag/reception-tag.mock";
 import { createSqliteSessionStore } from "../ports/sessions/session-store.sqlite";
 import { createSqliteVerificationStore } from "../ports/verifications/verification-store.sqlite";
+import { createOnchainUsdcBalance } from "../ports/wallet-custody/onchain-usdc-balance";
+import { createMockWalletCustody } from "../ports/wallet-custody/wallet-custody.mock";
+import { createPrivyWalletCustody } from "../ports/wallet-custody/wallet-custody.privy";
+import { persistWalletCustody } from "../ports/wallet-custody/wallet-custody.sqlite";
 import { createSqliteWalletProvider } from "../ports/wallet-provider/wallet-provider.sqlite";
 import { parseDate } from "../shared/dates";
 import type { Ports } from "./ports";
@@ -38,6 +45,14 @@ export function buildContainer(config: Config) {
     );
   if (config.adapters !== "mock")
     throw new Error("Only mock adapters are available.");
+  const custodyAdapter =
+    config.walletCustody === "privy"
+      ? createPrivyWalletCustody({
+          appId: config.privyAppId ?? "",
+          appSecret: config.privyAppSecret ?? "",
+          authorizationKey: config.privyAuthorizationKey,
+        })
+      : createMockWalletCustody();
   // Older unit fixtures omit these options. Boot config always supplies them.
   const testing = process.env.NODE_ENV === "test";
   const db = openDatabase(
@@ -61,7 +76,23 @@ export function buildContainer(config: Config) {
     db,
   );
   const catalog = createMemoryCatalogRepo();
-  const walletProvider = createSqliteWalletProvider({ db, ids, clock });
+  const custody = persistWalletCustody(
+    db,
+    config.walletCustody ?? "mock",
+    custodyAdapter,
+  );
+  const walletProvider = createSqliteWalletProvider({
+    db,
+    ids,
+    clock,
+    custody,
+  });
+  const network = config.arcNetwork ?? "mainnet";
+  walletProvider.explorerUrl = ARC_NETWORKS[network].explorerUrl;
+  walletProvider.onchainUsdcBalance = createOnchainUsdcBalance(
+    network,
+    config.arcRpcUrl,
+  );
   const ports: Ports & { bookingReport: ReturnType<typeof bookingReportFor> } =
     {
       receptionTag,
@@ -100,10 +131,17 @@ export function buildContainer(config: Config) {
             }),
       channelManager: createMockChannelManager({ catalog, clock, ids }),
     };
+  if (config.walletCustody === "privy")
+    configureCustodialSigner(ports, createPrivyOrderSigner({ db, custody }));
   configureAgentPass(ports, config);
   configureOrders(ports, {
     domain: {
-      chainId: config.orderChainId ?? defaultDomain.chainId,
+      // Legacy hand-built mock fixtures predate ARC_NETWORK. Boot always sets it.
+      chainId:
+        config.orderChainId ??
+        (config.arcNetwork
+          ? ARC_NETWORKS[network].chainId
+          : defaultDomain.chainId),
       verifyingContract: (config.orderVerifyingContract ??
         defaultDomain.verifyingContract) as `0x${string}`,
     },

@@ -1,5 +1,6 @@
 # Changelog
 
+- Added persisted wallet custody adapters, Privy EIP-712 signer, Arc network configuration and additive on-chain balance fields; asynchronous PostAsk integration remains pending.
 All notable changes to this monorepo. Newest first.
 
 ## Unreleased

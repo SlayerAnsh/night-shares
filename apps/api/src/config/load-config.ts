@@ -3,9 +3,16 @@ import {
   agentPassConfig,
 } from "../ports/agent-pass/config";
 import { parseDate } from "../shared/dates";
+import { ARC_NETWORKS } from "./arc-networks";
 import { loadServerConfig, type ServerConfig } from "./server-config";
 export type Config = Partial<ServerConfig> &
   AgentPassConfig & {
+    walletCustody?: "mock" | "privy";
+    privyAppId?: string;
+    privyAppSecret?: string;
+    privyAuthorizationKey?: string;
+    arcNetwork?: "mainnet" | "testnet";
+    arcRpcUrl?: string;
     orderChainId?: number;
     orderVerifyingContract?: string;
     orderMockSecret?: string;
@@ -31,7 +38,33 @@ export type Config = Partial<ServerConfig> &
 export function loadConfig(
   env: Record<string, string | undefined> = process.env,
 ): Config {
-  const orderChainId = Number(env.ORDER_CHAIN_ID ?? "5042002");
+  const walletCustody = env.WALLET_CUSTODY ?? "mock";
+  if (walletCustody !== "mock" && walletCustody !== "privy")
+    throw new Error("WALLET_CUSTODY must be mock or privy.");
+  const privyAppId = env.PRIVY_APP_ID?.trim();
+  const privyAppSecret = env.PRIVY_APP_SECRET?.trim();
+  if (walletCustody === "privy" && (!privyAppId || !privyAppSecret))
+    throw new Error(
+      "PRIVY_APP_ID and PRIVY_APP_SECRET are required in privy mode.",
+    );
+  const arcNetwork = env.ARC_NETWORK ?? "mainnet";
+  if (arcNetwork !== "mainnet" && arcNetwork !== "testnet")
+    throw new Error("ARC_NETWORK must be mainnet or testnet.");
+  const arcRpcUrl = env.ARC_RPC_URL ?? ARC_NETWORKS[arcNetwork].rpcUrl;
+  try {
+    const url = new URL(arcRpcUrl);
+    if (
+      !["http:", "https:"].includes(url.protocol) ||
+      url.username ||
+      url.password
+    )
+      throw new Error();
+  } catch {
+    throw new Error("ARC_RPC_URL must be an HTTP(S) URL without credentials.");
+  }
+  const orderChainId = Number(
+    env.ORDER_CHAIN_ID ?? ARC_NETWORKS[arcNetwork].chainId,
+  );
   if (!Number.isSafeInteger(orderChainId) || orderChainId <= 0)
     throw new Error("ORDER_CHAIN_ID must be a positive safe integer.");
   const orderVerifyingContract =
@@ -134,6 +167,12 @@ export function loadConfig(
   return {
     ...loadServerConfig(env),
     ...agentPassConfig(env),
+    walletCustody,
+    privyAppId,
+    privyAppSecret,
+    privyAuthorizationKey: env.PRIVY_AUTHORIZATION_KEY?.trim() || undefined,
+    arcNetwork,
+    arcRpcUrl,
     orderChainId,
     orderVerifyingContract,
     orderMockSecret: env.ORDER_MOCK_SECRET || undefined,

@@ -48,7 +48,13 @@ API settings come from `apps/api/src/config/load-config.ts` and `server-config.t
 | `AGENT_PASS_REDIRECT_URI` | `http://localhost:8787/agent-pass/callback` | Exact portal callback. OIDC requires `https://<public-api-host>/agent-pass/callback`, with the deployed API hostname substituted |
 | `AGENT_PASS_ACR` | `https://world.org/oidc/acr/orb` | Exact required Orb class; weaker classes fail startup |
 | `WEB_ORIGIN` | `http://localhost:3000` | Browser return origin. OIDC requires HTTPS. Returns to `/trade/portfolio?checkpoint=<status>` |
-| `ORDER_CHAIN_ID` | `5042002` | Positive EIP-712 domain chain ID |
+| `WALLET_CUSTODY` | `mock` | `mock` or `privy`; Privy enables server wallets and EIP-712 order signing |
+| `PRIVY_APP_ID` | empty | Server wallet app ID, required in Privy mode |
+| `PRIVY_APP_SECRET` | empty | Full-access backend secret, required in Privy mode; never log or expose to browsers |
+| `PRIVY_AUTHORIZATION_KEY` | unset | Optional server-only `wallet-auth:` P-256 private key; new wallets assign its public key as owner |
+| `ARC_NETWORK` | `mainnet` | `mainnet` (5042) or `testnet` (5042002) |
+| `ARC_RPC_URL` | network RPC | Defaults to `https://rpc.mainnet.arc.io` or `https://rpc.testnet.arc.io` |
+| `ORDER_CHAIN_ID` | network chain ID | Positive EIP-712 domain chain ID; explicit overrides win |
 | `ORDER_VERIFYING_CONTRACT` | `0x0000000000000000000000000000000000000000` | EIP-712 verifying contract address |
 | `ORDER_MOCK_SECRET` | `night-shares-dev-order-secret` | HMAC-SHA256 secret for mock order signatures |
 | `DEV_TAG_ISSUER` | `false` | Set `DEV_TAG_ISSUER=true` for the local demo only. Enables guest tag issuance with `ADAPTERS=mock`; startup fails otherwise. Real presence requires platform provisioned NFC tags |
@@ -87,6 +93,14 @@ Server booleans accept only `true` or `false`. Server integer limits and timeout
 For real identity verification, set `WORLD_ID_MODE=world-id` and a valid app ID. The web receives mode, app ID, action and signal from API requests and uses IDKit automatically; no public web environment keys are required. The fixed action preserves the human identifier, while a `purpose:nonce` signal and single-use SQLite request prevent replay. Sensitive flows start with `StartVerifyAction`.
 
 `GET /healthz` reports liveness. `GET /readyz` checks SQLite access and all expected migrations. JSON logs cover requests and errors. SIGINT and SIGTERM stop new work, drain requests and jobs, then close SQLite; expiration of the shutdown deadline exits with code 1.
+
+## Wallet custody and Arc
+
+The PostAsk RPC prepares typed data and awaits custodial signing before opening its SQLite transaction. The transaction rechecks nonce and expiry and verifies the signature before inserting. Privy verification uses synchronous secp256k1 recovery and viem hashing/address conversion so no asynchronous work holds the transaction open. The existing mock signer remains unchanged. Legacy hand-built mock container fixtures without `arcNetwork` retain the historical testnet signing domain; normal boot uses `loadConfig`, which defaults to mainnet.
+
+Create a Privy app and obtain its app ID and a full-access app secret from the dashboard. Server wallet API access must be available for that app. No Privy login UI or JWT authentication setup is required: World ID remains the only login. If using an authorization key, provision a P-256 key in the dashboard and set `PRIVY_AUTHORIZATION_KEY`; the adapter assigns its public key to newly created wallets. Changing this key does not transfer ownership of existing wallets. Any wallet policies must permit `eth_signTypedData_v4` for the NightShares domain and selected chain. These are custodial server wallets: the server controls signatures, not the user's World ID credential. See [Privy wallet creation](https://docs.privy.io/api-reference/wallets/create) and [authorization signatures](https://docs.privy.io/controls/authorization-keys/using-owners/sign/direct-implementation).
+
+Migration `390-wallet-custody.sql` persists owner, provider, wallet ID and address. Stable external IDs prevent duplicate wallets beyond Privy's 24-hour idempotency window. Existing mock users retain addresses; they cannot produce Privy signatures for those addresses. New users receive custody addresses, while system wallets are provisioned lazily on ledger use. `GetBalance.system_wallets` always returns every system name in sorted order, with empty address and explorer URL until provisioned. Reads never create wallets. Provisioning can fill those fields later without changing list membership or order; ledger aliases remain unchanged. Ledger balances and settlement remain mock, including the initial 12,480 USDC seed. `onchain_usdc_balance` is separate ERC-20 micro USDC (6 decimals); it is absent on RPC failure, represented as null in the use case. Native gas USDC uses 18 decimals. `explorer_url` follows the selected network. No transfers or contract writes are sent. Arc RPC reads retry error `-32014` with bounded exponential backoff; future log readers must limit ranges to 9,999 blocks.
 
 ## Scheduled jobs
 

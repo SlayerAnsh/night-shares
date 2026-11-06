@@ -5,6 +5,7 @@ import { DomainError } from "../../shared/errors/domain-error";
 import { fromUsd } from "../../shared/money";
 import type { Clock } from "../clock/clock";
 import type { IdGenerator } from "../ids/id-generator";
+import type { WalletCustody } from "../wallet-custody/wallet-custody";
 import {
   type SettlementLeg,
   SYSTEM_ADDRESSES,
@@ -17,10 +18,12 @@ export function createSqliteWalletProvider({
   db,
   clock,
   ids,
+  custody,
 }: {
   db: Database;
   clock: Clock;
   ids: IdGenerator;
+  custody?: WalletCustody;
 }): WalletProvider {
   const seed = db.query("INSERT OR IGNORE INTO wallet_balances VALUES (?, ?)");
   transaction(db, () => {
@@ -36,7 +39,19 @@ export function createSqliteWalletProvider({
     if (!row) throw new DomainError("NOT_FOUND", "Wallet not found.");
     return row.balance;
   }
+  async function ensureSystemWallet(address: string) {
+    if (Object.values(SYSTEM_ADDRESSES).some((name) => name === address))
+      await custody?.createWallet({ kind: "system", name: address });
+  }
+  // TODO: Replace this ledger settlement with an atomic Arc USDC transfer adapter
+  // once the contracts package deploys. Custody must never send transactions here.
   async function settle(legs: SettlementLeg[]): Promise<string[]> {
+    if (custody)
+      await Promise.all(
+        [...new Set(legs.flatMap((leg) => [leg.from, leg.to]))].map(
+          ensureSystemWallet,
+        ),
+      );
     return transaction(db, () => {
       const totals = new Map<string, bigint>();
       for (const leg of legs) {
@@ -69,12 +84,29 @@ export function createSqliteWalletProvider({
     });
   }
   return {
+    custody,
     async linkWallet(humanId) {
-      const address = `0x${createHash("sha256").update(humanId).digest("hex").slice(0, 40)}`;
+      const legacy = `0x${createHash("sha256").update(humanId).digest("hex").slice(0, 40)}`;
+      const existing = db
+        .query<{ address: string }, [string]>(
+          "SELECT wallet_address AS address FROM identity_users WHERE human_id = ?",
+        )
+        .get(humanId);
+      const legacyExists = db
+        .query("SELECT 1 FROM wallet_balances WHERE address = ?")
+        .get(legacy);
+      const address =
+        existing?.address ??
+        (legacyExists
+          ? legacy
+          : custody
+            ? (await custody.createWallet({ kind: "user", humanId })).address
+            : legacy);
       seed.run(address, fromUsd(12_480));
       return address;
     },
     async balance(address) {
+      await ensureSystemWallet(address);
       return balance(address);
     },
     async transactions(address) {

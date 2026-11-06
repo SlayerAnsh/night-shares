@@ -32,6 +32,9 @@ importers:
       '@night-shares/proto':
         specifier: workspace:*
         version: link:../../packages/proto
+      '@noble/curves':
+        specifier: 1.9.1
+        version: 1.9.1
       '@worldcoin/idkit-core':
         specifier: 4.6.0
         version: 4.6.0

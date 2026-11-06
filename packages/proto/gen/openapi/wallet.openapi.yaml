@@ -262,6 +262,18 @@ components:
         walletAddress:
           type: string
           title: wallet_address
+        onchainUsdcBalance:
+          title: onchain_usdc_balance
+          description: Absent when the optional Arc RPC read is unavailable.
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        explorerUrl:
+          type: string
+          title: explorer_url
+        systemWallets:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.wallet.v1.SystemWallet'
+          title: system_wallets
       title: GetBalanceResponse
       additionalProperties: false
     night_shares.wallet.v1.ListTransactionsRequest:
@@ -277,6 +289,20 @@ components:
             $ref: '#/components/schemas/night_shares.wallet.v1.Transaction'
           title: transactions
       title: ListTransactionsResponse
+      additionalProperties: false
+    night_shares.wallet.v1.SystemWallet:
+      type: object
+      properties:
+        name:
+          type: string
+          title: name
+        walletAddress:
+          type: string
+          title: wallet_address
+        explorerUrl:
+          type: string
+          title: explorer_url
+      title: SystemWallet
       additionalProperties: false
     night_shares.wallet.v1.Transaction:
       type: object

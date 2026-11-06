@@ -15,6 +15,7 @@
     "@connectrpc/connect-node": "2.3.0",
     "@night-shares/market-model": "workspace:*",
     "@night-shares/proto": "workspace:*",
+    "@noble/curves": "1.9.1",
     "@worldcoin/idkit-core": "4.6.0",
     "jose": "6.2.3",
     "viem": "^2.57.16"

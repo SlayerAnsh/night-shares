@@ -14,6 +14,12 @@ export function createWalletHandler(cases: {
       return {
         balance: { micros: result.balance },
         walletAddress: result.walletAddress,
+        onchainUsdcBalance:
+          result.onchainUsdcBalance === null
+            ? undefined
+            : { micros: result.onchainUsdcBalance },
+        explorerUrl: result.explorerUrl,
+        systemWallets: result.systemWallets,
       };
     },
     async listTransactions(_req, ctx) {
