@@ -25,6 +25,11 @@ export const getSession = IdentityService.method.getSession;
 export const signOut = IdentityService.method.signOut;
 
 /**
+ * @generated from rpc night_shares.identity.v1.IdentityService.StartVerifyAction
+ */
+export const startVerifyAction = IdentityService.method.startVerifyAction;
+
+/**
  * @generated from rpc night_shares.identity.v1.IdentityService.VerifyAction
  */
 export const verifyAction = IdentityService.method.verifyAction;

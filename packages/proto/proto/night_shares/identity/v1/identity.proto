@@ -19,6 +19,9 @@ service IdentityService {
   rpc SignOut(SignOutRequest) returns (SignOutResponse) {
     option (night_shares.auth.v1.access) = ACCESS_DEVICE;
   }
+  rpc StartVerifyAction(StartVerifyActionRequest) returns (StartVerifyActionResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_DEVICE;
+  }
   rpc VerifyAction(VerifyActionRequest) returns (VerifyActionResponse) {
     option (night_shares.auth.v1.access) = ACCESS_DEVICE;
   }
@@ -32,11 +35,20 @@ message StartSignInResponse {
   string request_id = 1;
   string qr_payload = 2;
   google.protobuf.Timestamp expires_at = 3;
+  string app_id = 4;
+  string action = 5;
+  string signal = 6;
+  WorldIdMode mode = 7;
 }
 
 message CompleteSignInRequest {
   string request_id = 1;
-  string proof = 2;
+  reserved 2;
+  reserved "proof";
+  oneof proof {
+    string mock_proof = 3;
+    WorldIdProof world_id = 4;
+  }
 }
 
 message CompleteSignInResponse {
@@ -56,10 +68,43 @@ message SignOutResponse {}
 
 message VerifyActionRequest {
   string action = 1;
-  string proof = 2;
+  string request_id = 5;
+  reserved 2;
+  reserved "proof";
+  oneof proof {
+    string mock_proof = 3;
+    WorldIdProof world_id = 4;
+  }
 }
 
 message VerifyActionResponse {
   string verification_token = 1;
   google.protobuf.Timestamp expires_at = 2;
+}
+
+// One fixed cloud action keeps the nullifier stable across purposes.
+enum WorldIdMode {
+  WORLD_ID_MODE_UNSPECIFIED = 0;
+  WORLD_ID_MODE_MOCK = 1;
+  WORLD_ID_MODE_WORLD_ID = 2;
+}
+
+message WorldIdProof {
+  string merkle_root = 1;
+  string nullifier_hash = 2;
+  string proof = 3;
+  string verification_level = 4;
+}
+
+message StartVerifyActionRequest {
+  string action = 1;
+}
+
+message StartVerifyActionResponse {
+  string request_id = 1;
+  string app_id = 2;
+  string action = 3;
+  string signal = 4;
+  google.protobuf.Timestamp expires_at = 5;
+  WorldIdMode mode = 6;
 }

@@ -1,11 +1,11 @@
 "use client";
 import { useMutation } from "@connectrpc/connect-query";
 import type { NightKey } from "@night-shares/proto/common/v1/night_pb";
-import { verifyAction } from "@night-shares/proto/identity/v1/identity-IdentityService_connectquery";
 import {
   approveAgentOrder,
   createAgentOrder,
 } from "@night-shares/proto/market/v1/market-MarketService_connectquery";
+import { useVerifyAction } from "../../../world-id/use-verify-action";
 import { parseMicros, parseTenths } from "../model/market";
 import { useAccount } from "./use-account";
 import { useUrlState } from "./use-url-state";
@@ -18,7 +18,7 @@ export function useAgentOrders(
   const size = params.get("agentSize") ?? "0.1";
   const budget = params.get("budget") ?? "100";
   const create = useMutation(createAgentOrder),
-    verify = useMutation(verifyAction),
+    verify = useVerifyAction(),
     approve = useMutation(approveAgentOrder);
   const tenths = parseTenths(size),
     micros = parseMicros(budget);

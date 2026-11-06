@@ -1,6 +1,5 @@
 "use client";
 import { useMutation, useQuery } from "@connectrpc/connect-query";
-import { verifyAction } from "@night-shares/proto/identity/v1/identity-IdentityService_connectquery";
 import {
   checkIn,
   getReceipt,
@@ -10,6 +9,7 @@ import { useIsFetching, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useRequireAccess } from "../../../session/require-access";
 import { useSession } from "../../../session/SessionProvider";
+import { useVerifyAction } from "../../../world-id/use-verify-action";
 export function useTrips() {
   const session = useSession();
   const access = useRequireAccess();
@@ -35,7 +35,7 @@ export function useTripActions(tripId: string) {
     { tripId },
     { enabled: showReceipt && session.isSignedIn },
   );
-  const verify = useMutation(verifyAction);
+  const verify = useVerifyAction();
   const check = useMutation(checkIn, {
     onSuccess: () => cache.invalidateQueries(),
   });

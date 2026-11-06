@@ -27,8 +27,13 @@ test("verifies the requested scope and issues an expiring one-time token", async
     const result = await createVerifyAction({
       identityVerifier,
       verifications,
-    })(user, action, "proof");
-    expect(verifyProof).toHaveBeenLastCalledWith({ proof: "proof", action });
+    })(user, action, "proof", "wid_1");
+    expect(verifyProof).toHaveBeenLastCalledWith({
+      proof: "proof",
+      action,
+      requestId: "wid_1",
+      userId: user.id,
+    });
     expect(result.expiresAt).toBe(301000);
     expect(
       verifications.consume({ token: result.token, userId: user.id, action }),

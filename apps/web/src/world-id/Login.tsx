@@ -1,4 +1,5 @@
 "use client";
+import { WorldIdMode } from "@night-shares/proto/identity/v1/identity_pb";
 import { type AccessLevel, canAccess } from "../session/access";
 import { Success } from "./Success";
 import { useLogin } from "./use-login";
@@ -63,6 +64,10 @@ export function Login({
               onClick={() => router.replace(next)}
             >
               Continue
+            </button>
+          ) : request?.mode === WorldIdMode.WORLD_ID ? (
+            <button type="button" disabled={busy} onClick={() => void scan()}>
+              Verify with World ID
             </button>
           ) : request ? (
             <>

@@ -69,7 +69,8 @@ test("invalid, expired and replayed proofs cannot create sessions", async () => 
   await expect(
     s.complete({ requestId: req.requestId, proof: "mock:alice:device" }),
   ).rejects.toMatchObject({ code: "UNAUTHENTICATED" });
-  const input = { requestId: req.requestId, proof: "mock:alice:orb" };
+  const fresh = await s.identityVerifier.startRequest("orb");
+  const input = { requestId: fresh.requestId, proof: "mock:alice:orb" };
   await s.complete(input);
   await expect(s.complete(input)).rejects.toMatchObject({
     code: "UNAUTHENTICATED",

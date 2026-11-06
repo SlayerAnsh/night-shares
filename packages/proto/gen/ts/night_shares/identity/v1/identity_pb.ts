@@ -2,8 +2,8 @@
 // @generated from file night_shares/identity/v1/identity.proto (package night_shares.identity.v1, syntax proto3)
 /* eslint-disable */
 
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import { fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import { enumDesc, fileDesc, messageDesc, serviceDesc } from "@bufbuild/protobuf/codegenv2";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
 import { file_night_shares_auth_v1_access } from "../../auth/v1/access_pb";
@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file night_shares/identity/v1/identity.proto.
  */
 export const file_night_shares_identity_v1_identity: GenFile = /*@__PURE__*/
-  fileDesc("CiduaWdodF9zaGFyZXMvaWRlbnRpdHkvdjEvaWRlbnRpdHkucHJvdG8SGG5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MSJQChJTdGFydFNpZ25JblJlcXVlc3QSOgoFbGV2ZWwYASABKA4yKy5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuVmVyaWZpY2F0aW9uTGV2ZWwibQoTU3RhcnRTaWduSW5SZXNwb25zZRISCgpyZXF1ZXN0X2lkGAEgASgJEhIKCnFyX3BheWxvYWQYAiABKAkSLgoKZXhwaXJlc19hdBgDIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiOgoVQ29tcGxldGVTaWduSW5SZXF1ZXN0EhIKCnJlcXVlc3RfaWQYASABKAkSDQoFcHJvb2YYAiABKAkiXQoWQ29tcGxldGVTaWduSW5SZXNwb25zZRIVCg1zZXNzaW9uX3Rva2VuGAEgASgJEiwKBHVzZXIYAiABKAsyHi5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuVXNlciITChFHZXRTZXNzaW9uUmVxdWVzdCJCChJHZXRTZXNzaW9uUmVzcG9uc2USLAoEdXNlchgBIAEoCzIeLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5Vc2VyIhAKDlNpZ25PdXRSZXF1ZXN0IhEKD1NpZ25PdXRSZXNwb25zZSI0ChNWZXJpZnlBY3Rpb25SZXF1ZXN0Eg4KBmFjdGlvbhgBIAEoCRINCgVwcm9vZhgCIAEoCSJiChRWZXJpZnlBY3Rpb25SZXNwb25zZRIaChJ2ZXJpZmljYXRpb25fdG9rZW4YASABKAkSLgoKZXhwaXJlc19hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAyyAQKD0lkZW50aXR5U2VydmljZRJwCgtTdGFydFNpZ25JbhIsLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5TdGFydFNpZ25JblJlcXVlc3QaLS5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuU3RhcnRTaWduSW5SZXNwb25zZSIEiLUYARJ5Cg5Db21wbGV0ZVNpZ25JbhIvLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5Db21wbGV0ZVNpZ25JblJlcXVlc3QaMC5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuQ29tcGxldGVTaWduSW5SZXNwb25zZSIEiLUYARJtCgpHZXRTZXNzaW9uEisubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLkdldFNlc3Npb25SZXF1ZXN0GiwubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLkdldFNlc3Npb25SZXNwb25zZSIEiLUYAhJkCgdTaWduT3V0EigubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlNpZ25PdXRSZXF1ZXN0GikubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlNpZ25PdXRSZXNwb25zZSIEiLUYAhJzCgxWZXJpZnlBY3Rpb24SLS5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuVmVyaWZ5QWN0aW9uUmVxdWVzdBouLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5WZXJpZnlBY3Rpb25SZXNwb25zZSIEiLUYAmIGcHJvdG8z", [file_google_protobuf_timestamp, file_night_shares_auth_v1_access, file_night_shares_identity_v1_user]);
+  fileDesc("CiduaWdodF9zaGFyZXMvaWRlbnRpdHkvdjEvaWRlbnRpdHkucHJvdG8SGG5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MSJQChJTdGFydFNpZ25JblJlcXVlc3QSOgoFbGV2ZWwYASABKA4yKy5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuVmVyaWZpY2F0aW9uTGV2ZWwi0gEKE1N0YXJ0U2lnbkluUmVzcG9uc2USEgoKcmVxdWVzdF9pZBgBIAEoCRISCgpxcl9wYXlsb2FkGAIgASgJEi4KCmV4cGlyZXNfYXQYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg4KBmFwcF9pZBgEIAEoCRIOCgZhY3Rpb24YBSABKAkSDgoGc2lnbmFsGAYgASgJEjMKBG1vZGUYByABKA4yJS5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuV29ybGRJZE1vZGUikwEKFUNvbXBsZXRlU2lnbkluUmVxdWVzdBISCgpyZXF1ZXN0X2lkGAEgASgJEhQKCm1vY2tfcHJvb2YYAyABKAlIABI6Cgh3b3JsZF9pZBgEIAEoCzImLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5Xb3JsZElkUHJvb2ZIAEIHCgVwcm9vZkoECAIQA1IFcHJvb2YiXQoWQ29tcGxldGVTaWduSW5SZXNwb25zZRIVCg1zZXNzaW9uX3Rva2VuGAEgASgJEiwKBHVzZXIYAiABKAsyHi5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuVXNlciITChFHZXRTZXNzaW9uUmVxdWVzdCJCChJHZXRTZXNzaW9uUmVzcG9uc2USLAoEdXNlchgBIAEoCzIeLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5Vc2VyIhAKDlNpZ25PdXRSZXF1ZXN0IhEKD1NpZ25PdXRSZXNwb25zZSKhAQoTVmVyaWZ5QWN0aW9uUmVxdWVzdBIOCgZhY3Rpb24YASABKAkSEgoKcmVxdWVzdF9pZBgFIAEoCRIUCgptb2NrX3Byb29mGAMgASgJSAASOgoId29ybGRfaWQYBCABKAsyJi5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuV29ybGRJZFByb29mSABCBwoFcHJvb2ZKBAgCEANSBXByb29mImIKFFZlcmlmeUFjdGlvblJlc3BvbnNlEhoKEnZlcmlmaWNhdGlvbl90b2tlbhgBIAEoCRIuCgpleHBpcmVzX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCJmCgxXb3JsZElkUHJvb2YSEwoLbWVya2xlX3Jvb3QYASABKAkSFgoObnVsbGlmaWVyX2hhc2gYAiABKAkSDQoFcHJvb2YYAyABKAkSGgoSdmVyaWZpY2F0aW9uX2xldmVsGAQgASgJIioKGFN0YXJ0VmVyaWZ5QWN0aW9uUmVxdWVzdBIOCgZhY3Rpb24YASABKAkixAEKGVN0YXJ0VmVyaWZ5QWN0aW9uUmVzcG9uc2USEgoKcmVxdWVzdF9pZBgBIAEoCRIOCgZhcHBfaWQYAiABKAkSDgoGYWN0aW9uGAMgASgJEg4KBnNpZ25hbBgEIAEoCRIuCgpleHBpcmVzX2F0GAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIzCgRtb2RlGAYgASgOMiUubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLldvcmxkSWRNb2RlKmAKC1dvcmxkSWRNb2RlEh0KGVdPUkxEX0lEX01PREVfVU5TUEVDSUZJRUQQABIWChJXT1JMRF9JRF9NT0RFX01PQ0sQARIaChZXT1JMRF9JRF9NT0RFX1dPUkxEX0lEEAIyzQUKD0lkZW50aXR5U2VydmljZRJwCgtTdGFydFNpZ25JbhIsLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5TdGFydFNpZ25JblJlcXVlc3QaLS5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuU3RhcnRTaWduSW5SZXNwb25zZSIEiLUYARJ5Cg5Db21wbGV0ZVNpZ25JbhIvLm5pZ2h0X3NoYXJlcy5pZGVudGl0eS52MS5Db21wbGV0ZVNpZ25JblJlcXVlc3QaMC5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuQ29tcGxldGVTaWduSW5SZXNwb25zZSIEiLUYARJtCgpHZXRTZXNzaW9uEisubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLkdldFNlc3Npb25SZXF1ZXN0GiwubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLkdldFNlc3Npb25SZXNwb25zZSIEiLUYAhJkCgdTaWduT3V0EigubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlNpZ25PdXRSZXF1ZXN0GikubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlNpZ25PdXRSZXNwb25zZSIEiLUYAhKCAQoRU3RhcnRWZXJpZnlBY3Rpb24SMi5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuU3RhcnRWZXJpZnlBY3Rpb25SZXF1ZXN0GjMubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlN0YXJ0VmVyaWZ5QWN0aW9uUmVzcG9uc2UiBIi1GAIScwoMVmVyaWZ5QWN0aW9uEi0ubmlnaHRfc2hhcmVzLmlkZW50aXR5LnYxLlZlcmlmeUFjdGlvblJlcXVlc3QaLi5uaWdodF9zaGFyZXMuaWRlbnRpdHkudjEuVmVyaWZ5QWN0aW9uUmVzcG9uc2UiBIi1GAJiBnByb3RvMw", [file_google_protobuf_timestamp, file_night_shares_auth_v1_access, file_night_shares_identity_v1_user]);
 
 /**
  * @generated from message night_shares.identity.v1.StartSignInRequest
@@ -52,6 +52,26 @@ export type StartSignInResponse = Message<"night_shares.identity.v1.StartSignInR
    * @generated from field: google.protobuf.Timestamp expires_at = 3;
    */
   expiresAt?: Timestamp | undefined;
+
+  /**
+   * @generated from field: string app_id = 4;
+   */
+  appId: string;
+
+  /**
+   * @generated from field: string action = 5;
+   */
+  action: string;
+
+  /**
+   * @generated from field: string signal = 6;
+   */
+  signal: string;
+
+  /**
+   * @generated from field: night_shares.identity.v1.WorldIdMode mode = 7;
+   */
+  mode: WorldIdMode;
 };
 
 /**
@@ -71,9 +91,21 @@ export type CompleteSignInRequest = Message<"night_shares.identity.v1.CompleteSi
   requestId: string;
 
   /**
-   * @generated from field: string proof = 2;
+   * @generated from oneof night_shares.identity.v1.CompleteSignInRequest.proof
    */
-  proof: string;
+  proof: {
+    /**
+     * @generated from field: string mock_proof = 3;
+     */
+    value: string;
+    case: "mockProof";
+  } | {
+    /**
+     * @generated from field: night_shares.identity.v1.WorldIdProof world_id = 4;
+     */
+    value: WorldIdProof;
+    case: "worldId";
+  } | { case: undefined; value?: undefined };
 };
 
 /**
@@ -171,9 +203,26 @@ export type VerifyActionRequest = Message<"night_shares.identity.v1.VerifyAction
   action: string;
 
   /**
-   * @generated from field: string proof = 2;
+   * @generated from field: string request_id = 5;
    */
-  proof: string;
+  requestId: string;
+
+  /**
+   * @generated from oneof night_shares.identity.v1.VerifyActionRequest.proof
+   */
+  proof: {
+    /**
+     * @generated from field: string mock_proof = 3;
+     */
+    value: string;
+    case: "mockProof";
+  } | {
+    /**
+     * @generated from field: night_shares.identity.v1.WorldIdProof world_id = 4;
+     */
+    value: WorldIdProof;
+    case: "worldId";
+  } | { case: undefined; value?: undefined };
 };
 
 /**
@@ -204,6 +253,125 @@ export type VerifyActionResponse = Message<"night_shares.identity.v1.VerifyActio
  */
 export const VerifyActionResponseSchema: GenMessage<VerifyActionResponse> = /*@__PURE__*/
   messageDesc(file_night_shares_identity_v1_identity, 9);
+
+/**
+ * @generated from message night_shares.identity.v1.WorldIdProof
+ */
+export type WorldIdProof = Message<"night_shares.identity.v1.WorldIdProof"> & {
+  /**
+   * @generated from field: string merkle_root = 1;
+   */
+  merkleRoot: string;
+
+  /**
+   * @generated from field: string nullifier_hash = 2;
+   */
+  nullifierHash: string;
+
+  /**
+   * @generated from field: string proof = 3;
+   */
+  proof: string;
+
+  /**
+   * @generated from field: string verification_level = 4;
+   */
+  verificationLevel: string;
+};
+
+/**
+ * Describes the message night_shares.identity.v1.WorldIdProof.
+ * Use `create(WorldIdProofSchema)` to create a new message.
+ */
+export const WorldIdProofSchema: GenMessage<WorldIdProof> = /*@__PURE__*/
+  messageDesc(file_night_shares_identity_v1_identity, 10);
+
+/**
+ * @generated from message night_shares.identity.v1.StartVerifyActionRequest
+ */
+export type StartVerifyActionRequest = Message<"night_shares.identity.v1.StartVerifyActionRequest"> & {
+  /**
+   * @generated from field: string action = 1;
+   */
+  action: string;
+};
+
+/**
+ * Describes the message night_shares.identity.v1.StartVerifyActionRequest.
+ * Use `create(StartVerifyActionRequestSchema)` to create a new message.
+ */
+export const StartVerifyActionRequestSchema: GenMessage<StartVerifyActionRequest> = /*@__PURE__*/
+  messageDesc(file_night_shares_identity_v1_identity, 11);
+
+/**
+ * @generated from message night_shares.identity.v1.StartVerifyActionResponse
+ */
+export type StartVerifyActionResponse = Message<"night_shares.identity.v1.StartVerifyActionResponse"> & {
+  /**
+   * @generated from field: string request_id = 1;
+   */
+  requestId: string;
+
+  /**
+   * @generated from field: string app_id = 2;
+   */
+  appId: string;
+
+  /**
+   * @generated from field: string action = 3;
+   */
+  action: string;
+
+  /**
+   * @generated from field: string signal = 4;
+   */
+  signal: string;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp expires_at = 5;
+   */
+  expiresAt?: Timestamp | undefined;
+
+  /**
+   * @generated from field: night_shares.identity.v1.WorldIdMode mode = 6;
+   */
+  mode: WorldIdMode;
+};
+
+/**
+ * Describes the message night_shares.identity.v1.StartVerifyActionResponse.
+ * Use `create(StartVerifyActionResponseSchema)` to create a new message.
+ */
+export const StartVerifyActionResponseSchema: GenMessage<StartVerifyActionResponse> = /*@__PURE__*/
+  messageDesc(file_night_shares_identity_v1_identity, 12);
+
+/**
+ * One fixed cloud action keeps the nullifier stable across purposes.
+ *
+ * @generated from enum night_shares.identity.v1.WorldIdMode
+ */
+export enum WorldIdMode {
+  /**
+   * @generated from enum value: WORLD_ID_MODE_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: WORLD_ID_MODE_MOCK = 1;
+   */
+  MOCK = 1,
+
+  /**
+   * @generated from enum value: WORLD_ID_MODE_WORLD_ID = 2;
+   */
+  WORLD_ID = 2,
+}
+
+/**
+ * Describes the enum night_shares.identity.v1.WorldIdMode.
+ */
+export const WorldIdModeSchema: GenEnum<WorldIdMode> = /*@__PURE__*/
+  enumDesc(file_night_shares_identity_v1_identity, 0);
 
 /**
  * @generated from service night_shares.identity.v1.IdentityService
@@ -240,6 +408,14 @@ export const IdentityService: GenService<{
     methodKind: "unary";
     input: typeof SignOutRequestSchema;
     output: typeof SignOutResponseSchema;
+  },
+  /**
+   * @generated from rpc night_shares.identity.v1.IdentityService.StartVerifyAction
+   */
+  startVerifyAction: {
+    methodKind: "unary";
+    input: typeof StartVerifyActionRequestSchema;
+    output: typeof StartVerifyActionResponseSchema;
   },
   /**
    * @generated from rpc night_shares.identity.v1.IdentityService.VerifyAction

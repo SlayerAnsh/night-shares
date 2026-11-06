@@ -5,10 +5,12 @@ import { createSqliteUserRepo } from "./repo/user-repo.sqlite";
 import { createSignOut } from "./use-cases/session/sign-out";
 import { createCompleteSignIn } from "./use-cases/sign-in/complete-sign-in";
 import { createStartSignIn } from "./use-cases/sign-in/start-sign-in";
+import { createStartVerifyAction } from "./use-cases/start-verify-action";
 import { createVerifyAction } from "./use-cases/verify-action";
 export function createIdentityModule(ports: Ports) {
   const repo = createSqliteUserRepo(ports);
   const handler = createIdentityHandler({
+    startVerifyAction: createStartVerifyAction(ports),
     startSignIn: createStartSignIn(ports),
     completeSignIn: createCompleteSignIn({ ...ports, repo }),
     signOut: createSignOut(ports),

@@ -1,4 +1,5 @@
 import type { Ports } from "../../../../container/ports";
+import type { IdentityProof } from "../../../../ports/identity-verifier/identity-verifier";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import type { UserRepo } from "../../repo/user-repo";
@@ -33,7 +34,7 @@ export function createCompleteSignIn(
       pending.delete(humanId);
     }
   }
-  return async (input: { requestId: string; proof: string }) => {
+  return async (input: { requestId: string; proof: IdentityProof }) => {
     if (!input.requestId.trim())
       throw new DomainError(
         "INVALID_ARGUMENT",

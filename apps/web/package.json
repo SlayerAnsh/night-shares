@@ -18,7 +18,8 @@
     "@connectrpc/connect-web": "2.3.0",
     "@connectrpc/connect": "2.3.0",
     "@night-shares/proto": "workspace:*",
-    "@night-shares/design-system": "workspace:*"
+    "@night-shares/design-system": "workspace:*",
+    "@worldcoin/idkit": "2.4.2"
   },
   "devDependencies": {
     "@types/react": "19.3.0",

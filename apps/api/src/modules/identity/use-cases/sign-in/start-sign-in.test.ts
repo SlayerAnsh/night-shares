@@ -13,5 +13,9 @@ test("starts a request for the selected level with clock-based expiry", async ()
     requestId: "wid_0001",
     qrPayload: "mock-world-id:wid_0001:orb",
     expiresAt: 301000,
+    appId: "",
+    action: "night-shares-human",
+    signal: "sign_in:nonce_0001",
+    mode: 1,
   });
 });

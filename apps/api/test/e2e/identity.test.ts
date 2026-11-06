@@ -20,17 +20,20 @@ test("World ID sign-in, wallet, fresh action proof and sign-out complete the gue
   expect(request.expiresAt).toBeDefined();
   const session = await h.clients.identity.completeSignIn({
     requestId: request.requestId,
-    proof: "mock:guest:device",
+    proof: { case: "mockProof", value: "mock:guest:device" },
   });
   const clients = h.clientsFor(session.sessionToken);
   expect((await clients.identity.getSession({})).user).toEqual(session.user);
   expect((await clients.wallet.getBalance({})).balance?.micros).toBe(
     12480000000n,
   );
-  // This requires the verifier adapter to expose a stable per-app human ID across action scopes.
-  const verification = await clients.identity.verifyAction({
+  const fresh = await clients.identity.startVerifyAction({
     action: "check_in",
-    proof: "mock:guest:device",
+  });
+  const verification = await clients.identity.verifyAction({
+    requestId: fresh.requestId,
+    action: "check_in",
+    proof: { case: "mockProof", value: "mock:guest:device" },
   });
   expect(verification.verificationToken).not.toBe("");
   expect(verification.expiresAt && timestampMs(verification.expiresAt)).toBe(
@@ -74,7 +77,7 @@ test("bad proofs are Unauthenticated and unknown action names are InvalidArgumen
   await expect(
     h.clients.identity.completeSignIn({
       requestId: request.requestId,
-      proof: "bad",
+      proof: { case: "mockProof", value: "bad" },
     }),
   ).rejects.toMatchObject({ code: Code.Unauthenticated });
   await expect(h.clients.identity.startSignIn({})).rejects.toMatchObject({
@@ -84,13 +87,16 @@ test("bad proofs are Unauthenticated and unknown action names are InvalidArgumen
   await expect(
     session.clients.identity.verifyAction({
       action: "unknown",
-      proof: "mock:e2e:device",
+      proof: { case: "mockProof", value: "mock:e2e:device" },
     }),
   ).rejects.toMatchObject({ code: Code.InvalidArgument });
   await expect(
     session.clients.identity.verifyAction({
       action: "check_in",
-      proof: "mock:someone-else:device",
+      requestId: (
+        await session.clients.identity.startVerifyAction({ action: "check_in" })
+      ).requestId,
+      proof: { case: "mockProof", value: "mock:someone-else:device" },
     }),
   ).rejects.toMatchObject({ code: Code.PermissionDenied });
 });

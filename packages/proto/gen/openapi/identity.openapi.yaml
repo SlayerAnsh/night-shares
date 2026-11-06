@@ -141,6 +141,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/night_shares.identity.v1.StartSignInResponse'
+  /night_shares.identity.v1.IdentityService/StartVerifyAction:
+    post:
+      tags:
+        - night_shares.identity.v1.IdentityService
+      summary: StartVerifyAction
+      operationId: night_shares.identity.v1.IdentityService.StartVerifyAction
+      parameters:
+        - name: Connect-Protocol-Version
+          in: header
+          required: true
+          schema:
+            $ref: '#/components/schemas/connect-protocol-version'
+        - name: Connect-Timeout-Ms
+          in: header
+          schema:
+            $ref: '#/components/schemas/connect-timeout-header'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/night_shares.identity.v1.StartVerifyActionRequest'
+        required: true
+      responses:
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/connect.error'
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/night_shares.identity.v1.StartVerifyActionResponse'
   /night_shares.identity.v1.IdentityService/VerifyAction:
     post:
       tags:
@@ -345,13 +380,28 @@ components:
          ) to obtain a formatter capable of generating timestamps in this format.
     night_shares.identity.v1.CompleteSignInRequest:
       type: object
-      properties:
-        requestId:
-          type: string
-          title: request_id
-        proof:
-          type: string
-          title: proof
+      allOf:
+        - properties:
+            requestId:
+              type: string
+              title: request_id
+        - oneOf:
+            - type: object
+              properties:
+                mockProof:
+                  type: string
+                  title: mock_proof
+              title: mock_proof
+              required:
+                - mockProof
+            - type: object
+              properties:
+                worldId:
+                  title: world_id
+                  $ref: '#/components/schemas/night_shares.identity.v1.WorldIdProof'
+              title: world_id
+              required:
+                - worldId
       title: CompleteSignInRequest
       additionalProperties: false
     night_shares.identity.v1.CompleteSignInResponse:
@@ -405,7 +455,50 @@ components:
         expiresAt:
           title: expires_at
           $ref: '#/components/schemas/google.protobuf.Timestamp'
+        appId:
+          type: string
+          title: app_id
+        action:
+          type: string
+          title: action
+        signal:
+          type: string
+          title: signal
+        mode:
+          title: mode
+          $ref: '#/components/schemas/night_shares.identity.v1.WorldIdMode'
       title: StartSignInResponse
+      additionalProperties: false
+    night_shares.identity.v1.StartVerifyActionRequest:
+      type: object
+      properties:
+        action:
+          type: string
+          title: action
+      title: StartVerifyActionRequest
+      additionalProperties: false
+    night_shares.identity.v1.StartVerifyActionResponse:
+      type: object
+      properties:
+        requestId:
+          type: string
+          title: request_id
+        appId:
+          type: string
+          title: app_id
+        action:
+          type: string
+          title: action
+        signal:
+          type: string
+          title: signal
+        expiresAt:
+          title: expires_at
+          $ref: '#/components/schemas/google.protobuf.Timestamp'
+        mode:
+          title: mode
+          $ref: '#/components/schemas/night_shares.identity.v1.WorldIdMode'
+      title: StartVerifyActionResponse
       additionalProperties: false
     night_shares.identity.v1.User:
       type: object
@@ -433,13 +526,31 @@ components:
         - VERIFICATION_LEVEL_ORB
     night_shares.identity.v1.VerifyActionRequest:
       type: object
-      properties:
-        action:
-          type: string
-          title: action
-        proof:
-          type: string
-          title: proof
+      allOf:
+        - properties:
+            action:
+              type: string
+              title: action
+            requestId:
+              type: string
+              title: request_id
+        - oneOf:
+            - type: object
+              properties:
+                mockProof:
+                  type: string
+                  title: mock_proof
+              title: mock_proof
+              required:
+                - mockProof
+            - type: object
+              properties:
+                worldId:
+                  title: world_id
+                  $ref: '#/components/schemas/night_shares.identity.v1.WorldIdProof'
+              title: world_id
+              required:
+                - worldId
       title: VerifyActionRequest
       additionalProperties: false
     night_shares.identity.v1.VerifyActionResponse:
@@ -452,6 +563,31 @@ components:
           title: expires_at
           $ref: '#/components/schemas/google.protobuf.Timestamp'
       title: VerifyActionResponse
+      additionalProperties: false
+    night_shares.identity.v1.WorldIdMode:
+      type: string
+      title: WorldIdMode
+      enum:
+        - WORLD_ID_MODE_UNSPECIFIED
+        - WORLD_ID_MODE_MOCK
+        - WORLD_ID_MODE_WORLD_ID
+      description: One fixed cloud action keeps the nullifier stable across purposes.
+    night_shares.identity.v1.WorldIdProof:
+      type: object
+      properties:
+        merkleRoot:
+          type: string
+          title: merkle_root
+        nullifierHash:
+          type: string
+          title: nullifier_hash
+        proof:
+          type: string
+          title: proof
+        verificationLevel:
+          type: string
+          title: verification_level
+      title: WorldIdProof
       additionalProperties: false
 security: []
 tags:

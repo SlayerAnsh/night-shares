@@ -1,10 +1,15 @@
 "use client";
+import {
+  type CompleteSignInRequest,
+  WorldIdMode,
+} from "@night-shares/proto/identity/v1/identity_pb";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { AccessLevel } from "../session/access";
 import { completeSignIn, signOut } from "../session/actions";
 import { useSession } from "../session/SessionProvider";
 import type { WorldIdClient } from "./world-id-client";
+import { verifyWithIdkit } from "./world-id-client.idkit";
 import { useMockWorldIdClient } from "./world-id-client.mock";
 
 export function useLogin(need: AccessLevel) {
@@ -37,7 +42,13 @@ export function useLogin(need: AccessLevel) {
     setStage("verifying");
     setError("");
     try {
-      await completeSignIn(request.requestId, `mock:${seed}:${need}`);
+      const submit = (proof: CompleteSignInRequest["proof"]) =>
+        completeSignIn(request.requestId, proof);
+      if (request.mode === WorldIdMode.WORLD_ID) {
+        await verifyWithIdkit(request, need, submit);
+      } else if (request.mode === WorldIdMode.MOCK) {
+        await submit({ case: "mockProof", value: `mock:${seed}:${need}` });
+      } else throw new Error("Unsupported World ID mode.");
       await session.refresh();
       setStage("success");
     } catch (error) {
