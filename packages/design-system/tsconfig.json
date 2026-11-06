@@ -1,5 +1,10 @@
 {
   "extends": "../tsconfig/base.json",
-  "compilerOptions": { "strict": true, "noUncheckedIndexedAccess": true, "types": ["bun"], "noEmit": true },
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "types": ["bun"],
+    "noEmit": true
+  },
   "include": ["src/**/*.ts"]
 }

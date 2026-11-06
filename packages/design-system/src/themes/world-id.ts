@@ -2,7 +2,8 @@
 // screens. Keys keep the mock --w-* names.
 
 export const worldIdFont = {
-  "w-font": "'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif",
+  "w-font":
+    "'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif",
 } as const;
 
 export const worldIdLight = {
