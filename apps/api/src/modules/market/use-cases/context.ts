@@ -5,6 +5,7 @@ import {
   toTenths,
 } from "@night-shares/market-model";
 import type { Ports } from "../../../container/ports";
+import { transaction } from "../../../db/transaction";
 import type { User } from "../../../ports/sessions/session-store";
 import { parseDate } from "../../../shared/dates";
 import { DomainError } from "../../../shared/errors/domain-error";
@@ -45,21 +46,29 @@ export function realise(position: Position, size: number, proceeds: bigint) {
   position.wins += pnl > 0n ? 1 : 0;
   position.returns += cost ? Number((pnl * 10000n) / cost) : 0;
 }
-export function syncPosition({ repo }: Deps, user: User, record: NightRecord) {
-  const position = repo.position(user.humanId, record.key);
-  const ask = record.state.traderAsks.find((a) => a.who === user.walletAddress);
-  const remaining = ask ? toTenths(ask.size) : 0;
-  const filled = position.escrow - remaining;
-  if (filled > 0)
-    realise(
-      position,
-      filled,
-      toMicros(
-        askFillProceeds(Number(position.askPrice) / 1e6, filled / 10).net,
-      ),
+export function syncPosition(
+  { repo, ports }: Deps,
+  user: User,
+  record: NightRecord,
+) {
+  return transaction(ports.db, () => {
+    const position = repo.position(user.humanId, record.key);
+    const ask = record.state.traderAsks.find(
+      (a) => a.who === user.walletAddress,
     );
-  position.escrow = remaining;
-  return position;
+    const remaining = ask ? toTenths(ask.size) : 0;
+    const filled = position.escrow - remaining;
+    if (filled > 0)
+      realise(
+        position,
+        filled,
+        toMicros(
+          askFillProceeds(Number(position.askPrice) / 1e6, filled / 10).net,
+        ),
+      );
+    position.escrow = remaining;
+    return position;
+  });
 }
 export function assertOpen(ports: Ports, record: NightRecord) {
   if (record.stopped || hoursLeft(ports, record) <= 0)

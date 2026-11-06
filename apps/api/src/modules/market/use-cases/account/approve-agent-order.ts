@@ -34,5 +34,6 @@ export async function approveAgentOrder(
   );
   order.status = AgentOrderStatus.EXECUTED;
   order.spent = execution.quote?.total;
+  deps.repo.account(user.humanId).orders.set(id, order);
   return { order: structuredClone(order), execution };
 }

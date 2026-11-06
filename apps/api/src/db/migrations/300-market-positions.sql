@@ -1,0 +1,13 @@
+CREATE TABLE market_positions (
+  human_id TEXT NOT NULL,
+  night_key TEXT NOT NULL,
+  free INTEGER NOT NULL DEFAULT 0,
+  average INTEGER NOT NULL DEFAULT 0,
+  realised INTEGER NOT NULL DEFAULT 0,
+  escrow INTEGER NOT NULL DEFAULT 0,
+  ask_price INTEGER NOT NULL DEFAULT 0,
+  closed INTEGER NOT NULL DEFAULT 0,
+  wins INTEGER NOT NULL DEFAULT 0,
+  returns INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (human_id, night_key)
+);

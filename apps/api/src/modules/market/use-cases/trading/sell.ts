@@ -4,6 +4,7 @@ import {
   ExecutionSchema,
   type RouteQuote,
 } from "@night-shares/proto/market/v1/book_pb";
+import { transaction } from "../../../../db/transaction";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { feePayments } from "../../../../shared/fee-payments";
@@ -19,35 +20,44 @@ export async function sell(
   min: bigint,
 ) {
   const { ports } = deps;
-  let quote: RouteQuote | undefined;
-  const record = ports.inventory.update(key, (current) => {
-    assertOpen(ports, current);
-    const position = syncPosition(deps, user, current);
-    if (position.free < size)
-      throw new DomainError(
-        "FAILED_PRECONDITION",
-        "Not enough unlisted room nights.",
-      );
-    quote = quoteSell(deps, key, size, user, current);
-    if (
-      quote.filled?.tenths !== size ||
-      size > Math.round(current.state.held * 10)
-    )
-      throw new DomainError(
-        "FAILED_PRECONDITION",
-        "Not enough sell-back liquidity.",
-      );
-    if ((quote.total?.micros ?? 0n) < min)
-      throw new DomainError("FAILED_PRECONDITION", "Price moved.");
-    return applyPoolSell(current, size);
-  });
-  if (!quote)
-    throw new DomainError("FAILED_PRECONDITION", "Trade could not execute.");
-  const position = deps.repo.position(user.humanId, key);
-  const previous = { ...position };
-  position.free -= size;
-  realise(position, size, quote.total?.micros ?? 0n);
-  const reserved = { ...position };
+  const { record, quote, position, previous, reserved } = transaction(
+    ports.db,
+    () => {
+      let quote: RouteQuote | undefined;
+      const record = ports.inventory.update(key, (current) => {
+        assertOpen(ports, current);
+        const position = syncPosition(deps, user, current);
+        if (position.free < size)
+          throw new DomainError(
+            "FAILED_PRECONDITION",
+            "Not enough unlisted room nights.",
+          );
+        quote = quoteSell(deps, key, size, user, current);
+        if (
+          quote.filled?.tenths !== size ||
+          size > Math.round(current.state.held * 10)
+        )
+          throw new DomainError(
+            "FAILED_PRECONDITION",
+            "Not enough sell-back liquidity.",
+          );
+        if ((quote.total?.micros ?? 0n) < min)
+          throw new DomainError("FAILED_PRECONDITION", "Price moved.");
+        return applyPoolSell(current, size);
+      });
+      if (!quote)
+        throw new DomainError(
+          "FAILED_PRECONDITION",
+          "Trade could not execute.",
+        );
+      const position = deps.repo.position(user.humanId, key);
+      const previous = { ...position };
+      position.free -= size;
+      realise(position, size, quote.total?.micros ?? 0n);
+      const reserved = { ...position };
+      return { record, quote, position, previous, reserved };
+    },
+  );
   try {
     await ports.walletProvider.settle(
       [
@@ -67,12 +77,14 @@ export async function sell(
       ].filter((leg) => leg.amount > 0n),
     );
   } catch (error) {
-    ports.inventory.update(key, (current) => applyPoolBuy(current, size));
-    position.free += size;
-    position.realised += previous.realised - reserved.realised;
-    position.closed += previous.closed - reserved.closed;
-    position.wins += previous.wins - reserved.wins;
-    position.returns += previous.returns - reserved.returns;
+    transaction(ports.db, () => {
+      ports.inventory.update(key, (current) => applyPoolBuy(current, size));
+      position.free += size;
+      position.realised += previous.realised - reserved.realised;
+      position.closed += previous.closed - reserved.closed;
+      position.wins += previous.wins - reserved.wins;
+      position.returns += previous.returns - reserved.returns;
+    });
     throw error;
   }
   ports.activity.append({
