@@ -4,6 +4,7 @@ export const PLATFORM_FEE = 0.003;
 export const PRESETS = { calm: 0.3, normal: 0.6, peak: 1.0 };
 export const FLOOR_RATIO = 0.85;
 export const RECALL_MARKUP = 0.25;
+export const RECALL_MIN_MARKUP = 0.05;
 export const GUEST_TRANCHE = 0.2;
 export const CAP_PEAK = 0.3;
 export const LATE_HOURS = 72;

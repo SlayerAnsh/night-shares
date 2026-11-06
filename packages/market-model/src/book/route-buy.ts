@@ -24,6 +24,17 @@ export function routeBuy(
     left = 0;
   }
   const avg = amount - left > 0 ? spend / (amount - left) : 0;
+  let sellerFees = 0,
+    sellerNet = 0;
+  // Trader and recall sellers pay the base fee on their filled notional.
+  for (const fill of fills) {
+    if (fill.src === "trader" || fill.src === "recall") {
+      fill.sellerFee = fill.take * fill.price * FEE;
+      fill.sellerNet = fill.take * fill.price * (1 - FEE);
+      sellerFees += fill.sellerFee;
+      sellerNet += fill.sellerNet;
+    }
+  }
   return {
     filled: amount - left,
     avg,
@@ -31,5 +42,7 @@ export function routeBuy(
     total: spend * (1 + FEE),
     fee: spend * FEE,
     fills,
+    sellerFees,
+    sellerNet,
   };
 }

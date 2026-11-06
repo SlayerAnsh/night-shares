@@ -8,7 +8,7 @@ const dates = Array.from({ length: 60 }, (_, i) =>
 );
 
 test("original model fingerprint and all exported constants match", () => {
-  expect(modelSha.slice(0, 12)).toBe("4bdc16badf85");
+  expect(modelSha.slice(0, 12)).toBe("3099c47b5452");
   expect(shared.props).toHaveLength(6);
   expect(shared.today.getFullYear()).toBe(2026);
   expect(shared.today.getMonth()).toBe(11);
@@ -46,6 +46,7 @@ for (const property of shared.props) {
         compare(actualBook, referenceBook);
         for (const amount of [0, 0.1, 1, state.S + 1])
           for (const guest of [false, true]) {
+            // Compare seller totals and per-fill fields, including absent pool fields.
             compare(
               port.routeBuy(actualBook, amount, { guest }),
               original.routeBuy(referenceBook, amount, { guest }),
@@ -133,5 +134,34 @@ test("room types split each property's rooms exactly", () => {
       0,
     );
     expect(total).toBe(property.rooms);
+  }
+});
+
+test("seller proceeds match the source for default, fractional and zero sizes", () => {
+  for (const price of [0, 1, 391.27]) {
+    compare(port.askFillProceeds(price), original.askFillProceeds(price));
+    for (const size of [0, 0.1, 0.75, 2]) {
+      compare(
+        port.askFillProceeds(price, size),
+        original.askFillProceeds(price, size),
+      );
+    }
+  }
+});
+
+test("recall markup floor and RangeError behavior match the source", () => {
+  for (const model of [port, original]) {
+    // VM errors have a different prototype, so compare the name and message.
+    let caught: unknown;
+    try {
+      model.recallStrike(100, 0, 0.04);
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toMatchObject({
+      name: "RangeError",
+      message: "recall markup m must be at least 5%",
+    });
+    expect(model.recallStrike(100, 0, 0.05)).toBe(105);
   }
 });

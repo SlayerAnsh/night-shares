@@ -35,9 +35,10 @@ export interface BookInput {
   levels?: number;
   hoursLeft?: number;
 }
-export type Fill =
+export type Fill = (
   | (Ask & { take: number })
-  | { price: number; take: number; src: "recall" };
+  | { price: number; take: number; src: "recall" }
+) & { sellerFee?: number; sellerNet?: number };
 export interface BuyResult {
   filled: number;
   avg: number;
@@ -45,4 +46,6 @@ export interface BuyResult {
   total: number;
   fee: number;
   fills: Fill[];
+  sellerFees: number;
+  sellerNet: number;
 }

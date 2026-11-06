@@ -28,3 +28,13 @@ test("floors, caps, tranches and fair bounds retain original rounding", () => {
   expect(clampFair(1, 100)).toBe(70);
   expect(clampFair(999, 100)).toBe(250);
 });
+
+test("recall markup rejects values below five percent and accepts the floor", () => {
+  for (const markup of [-1, 0, 0.04]) {
+    expect(() => recallStrike(100, 0, markup)).toThrow(
+      new RangeError("recall markup m must be at least 5%"),
+    );
+  }
+  expect(recallStrike(100, 0, 0.05)).toBe(105);
+  expect(recallStrike(100, 0)).toBe(125);
+});

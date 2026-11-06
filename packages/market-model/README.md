@@ -1,6 +1,6 @@
 # @night-shares/market-model
 
-Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `4bdc16badf85`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
+Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `3099c47b5452`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
 
 ## Public API
 
@@ -15,6 +15,7 @@ floorFromRate(usualRate: number): number
 capOf(S: number, peak?: boolean): number
 trancheOf(S: number): number
 clampFair(pstar: number, usualRate: number): number
+askFillProceeds(price: number, size?: number): { gross: number; fee: number; net: number }
 lateFee(hoursLeft: number): number
 unsoldRefund(ask: number | null | undefined, pstar: number): number
 offlineSaleRefund(pstar: number): number
@@ -35,7 +36,7 @@ toTenths(roomNights: number): number
 fromTenths(tenths: number): number
 ```
 
-Constants: `FEE`, `HOST_FEE`, `PLATFORM_FEE`, `PRESETS`, `FLOOR_RATIO`, `RECALL_MARKUP`, `GUEST_TRANCHE`, `CAP_PEAK`, `LATE_HOURS`, `LATE_MAX`, `BOND`, `PSTAR_BAND`, `PSTAR_MAX_MOVE_PER_HOUR`, `REFUND_AT_FAIR`, `SLICE`.
+Constants: `FEE`, `HOST_FEE`, `PLATFORM_FEE`, `PRESETS`, `FLOOR_RATIO`, `RECALL_MARKUP`, `RECALL_MIN_MARKUP`, `GUEST_TRANCHE`, `CAP_PEAK`, `LATE_HOURS`, `LATE_MAX`, `BOND`, `PSTAR_BAND`, `PSTAR_MAX_MOVE_PER_HOUR`, `REFUND_AT_FAIR`, `SLICE`.
 
 Types: `RateProperty`, `NightProperty`, `NightStateInput`, `NightState`, `PayoutInput`, `TraderAsk`, `PoolAsk`, `TraderLevel`, `Ask`, `Bid`, `BookInput`, `Book`, `Fill`, `BuyResult`.
 
@@ -54,6 +55,14 @@ Parity tests load the unmodified sibling mock files through `node:vm`, with a mi
 ## Rules fixed in both mock and port
 
 Guests never pay above the recall cap: routing stops at the first ask priced above it and fills the rest at the cap. Traders are not capped. Night heat is clamped to zero and one, so distant dates never show negative inventory. Rooms split exactly across room types (nine rooms over two types become five and four).
+
+## Seller fees
+
+`askFillProceeds` returns gross proceeds, the base fee and net proceeds for a fill (size defaults to one). Trader and recall fills carry `sellerFee` and `sellerNet`; pool fills omit these fields. `routeBuy` returns `sellerFees` and `sellerNet` totals, both zero when no sellers fill. Buyer charges are unchanged.
+
+## Recall markup floor
+
+`RECALL_MIN_MARKUP` is 0.05. `recallStrike` throws `RangeError("recall markup m must be at least 5%")` below this floor and accepts exactly 0.05. The default markup remains 0.25.
 
 ## Preserved source behavior
 
