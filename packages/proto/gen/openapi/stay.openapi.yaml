@@ -836,6 +836,9 @@ components:
         usualRate:
           title: usual_rate
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        isSoldOut:
+          type: boolean
+          title: is_sold_out
       title: NightPrice
       additionalProperties: false
     night_shares.stay.v1.PriceSource:

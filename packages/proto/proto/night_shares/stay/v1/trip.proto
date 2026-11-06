@@ -45,6 +45,7 @@ message NightPrice {
   night_shares.common.v1.Usdc price = 2;
   PriceSource source = 3;
   night_shares.common.v1.Usdc usual_rate = 4;
+  bool is_sold_out = 5;
 }
 
 message StayQuote {
