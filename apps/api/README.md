@@ -129,13 +129,15 @@ Boot validates operational settings through `src/config/server-config.ts`. The f
 | --- | --- | --- |
 | `LOG_LEVEL` | `info` | JSON output threshold: debug, info, warn, error or silent. |
 | `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated exact HTTP origins. An empty value disables cross-origin access. |
-| `TRUST_PROXY` | `false` | Accept the first valid IP in X-Forwarded-For only when true. |
+| `TRUST_PROXY` | `false` | Read X-Forwarded-For only when true and the socket peer matches TRUSTED_PROXIES. |
+| `TRUSTED_PROXY_HOPS` | `1` | Positive integer; select this entry counting from the right of X-Forwarded-For. Invalid or short headers fall back to the socket address. Match the actual ingress hop count. |
+| `TRUSTED_PROXIES` | empty | Comma-separated IPv4/IPv6 addresses or CIDRs. Empty trusts nobody, including loopback/private ranges. Explicitly allow only ingress peers; IPv4-mapped IPv6 peers match IPv4 ranges. |
 | `RATE_LIMIT_ENABLED` | `true` | Enable in-memory token buckets. |
-| `RATE_LIMIT_PER_IP` | `120` | General IP capacity per window. |
+| `RATE_LIMIT_PER_IP` | `120` | General IP capacity per window; IPv6 addresses share a /64 bucket and IPv4-mapped IPv6 uses its IPv4 bucket. |
 | `RATE_LIMIT_PER_USER` | `120` | Authenticated user capacity per window, shared across sessions and IPs. |
 | `RATE_LIMIT_IDENTITY` | `10` | Additional shared IP and user budget for StartSignIn, CompleteSignIn and VerifyAction. |
 | `RATE_LIMIT_WINDOW_MS` | `60000` | Time to refill an empty bucket continuously. |
-| `RATE_LIMIT_MAX_BUCKETS` | `10000` | Maximum keys per bucket table. At capacity, expired entries are reclaimed; otherwise new keys are rejected. |
+| `RATE_LIMIT_MAX_BUCKETS` | `10000` | Maximum keys per bucket table. At capacity, stale entries are reclaimed, then the least recently used key is evicted to admit new clients. Eviction resets the evicted key’s quota. |
 | `MAX_REQUEST_BODY_BYTES` | `65536` | HTTP body limit, including chunked bodies. Oversized bodies return HTTP 413. |
 | `CONNECT_READ_MAX_BYTES` | `65536` | Connect decoded message limit, capped by the HTTP body limit. |
 | `REQUEST_TIMEOUT_MS` | `30000` | HTTP request deadline and maximum Connect deadline. Also bounds header and socket waits. |

@@ -74,6 +74,8 @@ export function createServer(
             req.socket.remoteAddress,
             req.headers["x-forwarded-for"],
             config.trustProxy,
+            config.trustedProxyHops,
+            config.trustedProxies,
           ),
           path,
         )

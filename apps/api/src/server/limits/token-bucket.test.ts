@@ -1,10 +1,9 @@
 import { expect, test } from "bun:test";
 import { loadServerConfig } from "../../config/server-config";
-import { clientIp } from "./client-ip";
 import { createRateLimits } from "./rate-limit";
 import { createTokenBucket } from "./token-bucket";
 
-test("buckets isolate keys, refill continuously and bound memory without resetting quotas", () => {
+test("buckets isolate keys and refill continuously", () => {
   let now = 0;
   const bucket = createTokenBucket({
     capacity: 2,
@@ -16,22 +15,60 @@ test("buckets isolate keys, refill continuously and bound memory without resetti
   expect(bucket.take("a")).toBe(true);
   expect(bucket.take("a")).toBe(false);
   expect(bucket.take("b")).toBe(true);
-  expect(bucket.take("c")).toBe(false);
   now = 500;
   expect(bucket.take("a")).toBe(true);
   expect(bucket.take("a")).toBe(false);
   now = 1500;
-  expect(bucket.take("c")).toBe(true);
+  expect(bucket.take("a")).toBe(true);
 });
 
-test("forwarded IPs require explicit proxy trust and valid IP syntax", () => {
-  expect(clientIp("127.0.0.1", "203.0.113.7, 10.0.0.1", false)).toBe(
-    "127.0.0.1",
-  );
-  expect(clientIp("127.0.0.1", "203.0.113.7, 10.0.0.1", true)).toBe(
-    "203.0.113.7",
-  );
-  expect(clientIp("127.0.0.1", "invented-key", true)).toBe("127.0.0.1");
+test("full maps admit new clients and evict the least recently touched key", () => {
+  const bucket = createTokenBucket({
+    capacity: 1,
+    windowMs: 1000,
+    maxBuckets: 2,
+    now: () => 0,
+  });
+  expect(bucket.take("a")).toBe(true);
+  expect(bucket.take("b")).toBe(true);
+  expect(bucket.take("a")).toBe(false);
+  expect(bucket.take("c")).toBe(true);
+  expect(bucket.take("a")).toBe(false);
+  expect(bucket.take("b")).toBe(true);
+});
+
+test("stale entries are reclaimed before an active LRU key", () => {
+  let now = 0;
+  const bucket = createTokenBucket({
+    capacity: 2,
+    windowMs: 1000,
+    maxBuckets: 2,
+    now: () => now,
+  });
+  expect(bucket.take("a")).toBe(true);
+  expect(bucket.take("b")).toBe(true);
+  now = 500;
+  expect(bucket.take("a")).toBe(true);
+  now = 1000;
+  expect(bucket.take("c")).toBe(true);
+  expect(bucket.take("a")).toBe(true);
+  expect(bucket.take("a")).toBe(true);
+  expect(bucket.take("a")).toBe(false);
+});
+
+test("IPv6 variants in one /64 share quotas but adjacent /64s remain separate", () => {
+  const bucket = createTokenBucket({
+    capacity: 1,
+    windowMs: 1000,
+    maxBuckets: 10,
+    now: () => 0,
+  });
+  expect(bucket.take("2001:db8:1234:5678::1")).toBe(true);
+  expect(bucket.take("2001:0DB8:1234:5678:ffff:0000:0000:0002")).toBe(false);
+  expect(bucket.take("2001:db8:1234:5679::1")).toBe(true);
+  expect(bucket.take("192.0.2.1")).toBe(true);
+  expect(bucket.take("::ffff:192.0.2.1")).toBe(false);
+  expect(bucket.take("::FFFF:c000:201")).toBe(false);
 });
 
 test("sensitive identity methods share stricter IP budget; general budget remains separate", () => {

@@ -1,3 +1,5 @@
+import { parseProxyRange } from "../server/limits/ip-address";
+
 export type ServerConfig = ReturnType<typeof loadServerConfig>;
 
 export function loadServerConfig(env: Record<string, string | undefined> = {}) {
@@ -43,7 +45,16 @@ export function loadServerConfig(env: Record<string, string | undefined> = {}) {
       );
     }
   }
+  const trustedProxies = (env.TRUSTED_PROXIES ?? "").trim()
+    ? (env.TRUSTED_PROXIES ?? "").split(",").map((value) => value.trim())
+    : [];
+  if (trustedProxies.some((range) => !parseProxyRange(range)))
+    throw new Error(
+      "TRUSTED_PROXIES must contain comma-separated IP addresses or CIDRs.",
+    );
   return {
+    trustedProxyHops: integer("TRUSTED_PROXY_HOPS", 1),
+    trustedProxies,
     logLevel: logLevel as "debug" | "info" | "warn" | "error" | "silent",
     corsOrigins,
     trustProxy: boolean("TRUST_PROXY", false),
