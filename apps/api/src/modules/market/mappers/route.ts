@@ -45,7 +45,7 @@ export function buyQuote(
     fee: { micros: toMicros(result.fee) },
     total: { micros: toMicros(result.gross) + toMicros(result.fee) },
     capUsed: { tenths: used },
-    cap: { tenths: toTenths(capOf(record.state.S, record.state.peak)) },
+    cap: { tenths: toTenths(capOf(record.state.S)) },
     lateFee: { micros: 0n },
     unsoldRefund: {
       micros: mulTenths(

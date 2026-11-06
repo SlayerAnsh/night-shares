@@ -57,6 +57,7 @@ message NightCard {
 }
 
 message NightStats {
+  bool host_sold_back = 8;
   int32 annualized_return_bps = 1;
   int32 volatility_bps = 2;
   int32 sell_through_bps = 3;

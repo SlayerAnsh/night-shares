@@ -16,7 +16,7 @@ export function nightAnalytics(
   bookedBps: number,
 ) {
   const ps = state.pstar;
-  const current = bk.asks.find((a) => !a.guestOnly)?.price ?? ps;
+  const current = bk.asks[0]?.price ?? ps;
   const dl = Math.max(1, hoursLeft / 24);
   const trend = Math.max(
     -0.2,
@@ -52,7 +52,7 @@ export function nightAnalytics(
       changes.reduce((a, b) => a + (b - mean) ** 2, 0) / changes.length,
     ) * Math.sqrt(30);
   const buy = bk.asks
-    .filter((a) => !a.guestOnly && Math.abs(a.price / ps - 1) <= 0.05)
+    .filter((a) => Math.abs(a.price / ps - 1) <= 0.05)
     .reduce((a, b) => a + b.size, 0);
   const sellLiq = bk.bids
     .filter((b) => Math.abs(b.price / ps - 1) <= 0.05)

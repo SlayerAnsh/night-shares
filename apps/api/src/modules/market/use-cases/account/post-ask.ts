@@ -6,6 +6,7 @@ import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { toProto } from "../../../../shared/night-key";
 import { assertOpen, type Deps, syncPosition } from "../context";
+import { humanWallets } from "../human-wallets";
 export function postAsk(
   deps: Deps,
   user: User,
@@ -21,8 +22,9 @@ export function postAsk(
       const position = syncPosition(deps, user, current);
       if (size > position.free + position.escrow)
         throw new DomainError("FAILED_PRECONDITION", "Not enough room nights.");
+      const wallets = humanWallets(deps.ports, user, current.propertyId);
       const traderAsks = current.state.traderAsks.filter(
-        (a) => a.who !== user.walletAddress,
+        (a) => !wallets.has(a.who ?? ""),
       );
       traderAsks.push({
         who: user.walletAddress,

@@ -1,16 +1,34 @@
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
 import { lateFee, toMicros, toTenths } from "@night-shares/market-model";
 import { source } from "../../mappers/route";
-import { bookOf, type Deps, hoursLeft, releaseAt } from "../context";
-export function getBook({ ports }: Deps, key: string) {
+import {
+  bookOf,
+  type Deps,
+  hoursLeft,
+  releaseAt,
+  syncPosition,
+} from "../context";
+import { isHost } from "../trading/host-fees";
+export function getBook(deps: Deps, key: string) {
+  const { ports, repo } = deps;
   const record = ports.inventory.get(key),
     bk = bookOf(ports, record);
   return {
+    holders: repo
+      .holders(key)
+      .map((user) => {
+        const position = syncPosition(deps, user, record);
+        return {
+          walletAddress: user.walletAddress,
+          size: { tenths: position.free + position.escrow },
+          isHost: isHost(ports, record.propertyId, user),
+        };
+      })
+      .filter((h) => h.size.tenths > 0),
     asks: bk.asks.map((a) => ({
       price: { micros: toMicros(a.price) },
       size: { tenths: toTenths(a.size) },
       source: source(a.src),
-      guestOnly: a.guestOnly ?? false,
       askId: a.src === "trader" ? `${key}|${a.who}` : "",
     })),
     bids: bk.bids.map((b) => ({

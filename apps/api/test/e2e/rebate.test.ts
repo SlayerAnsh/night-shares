@@ -33,7 +33,7 @@ test("late sell-back excess funds the rebate pool", async () => {
     expect(fee).toBeGreaterThan(base);
     expect(await wallet.balance("rebate_pool")).toBe(before + fee - base);
     expect(await wallet.balance("treasury")).toBe(
-      treasury + base - (gross + 500n) / 1000n,
+      treasury + base - (gross + 500n) / 1000n - (gross + 50n) / 100n,
     );
   } finally {
     await h.close();
@@ -75,10 +75,10 @@ for (const [ask, funds, rebate] of [
         size: { tenths: 10 },
         price: { micros: BigInt(ask) * 1000000n },
       });
-      // Reserve the remaining pool inventory for guests so the trader ask fills.
+      // Book the remaining pool inventory so only the trader ask can fill.
       ports.inventory.update(key, (r) => ({
         ...r,
-        state: { ...r.state, tranche: r.state.S - r.state.q },
+        state: { ...r.state, q: r.state.S, booked: r.state.S - r.state.held },
       }));
       const poolBalance = await wallet.balance("rebate_pool");
       await wallet.transfer(

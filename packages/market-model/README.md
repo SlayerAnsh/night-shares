@@ -1,6 +1,6 @@
 # @night-shares/market-model
 
-Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `fb6cebfd712e`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
+Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `3d84c7b5d2cb`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
 
 ## Public API
 
@@ -12,8 +12,7 @@ cost(F: number, k: number, S: number, a: number, b: number): number
 lastRoomPrice(F: number, k: number): number
 recallStrike(F: number, k: number, m?: number): number
 floorFromRate(usualRate: number): number
-capOf(S: number, peak?: boolean): number
-trancheOf(S: number): number
+capOf(S: number): number
 clampFair(pstar: number, usualRate: number): number
 askFillProceeds(price: number, size?: number): { gross: number; fee: number; net: number }
 lateFee(hoursLeft: number): number
@@ -22,7 +21,7 @@ cutoffRefund(input: CutoffRefundInput): {
 }
 offlineSaleRefund(pstar: number): number
 book(input: BookInput): Book
-routeBuy(book: Book, amount: number, options?: { guest?: boolean }): BuyResult
+routeBuy(book: Book, amount: number, options?: { guest?: boolean; recallable?: number }): BuyResult
 nightPrice(property: RateProperty, date: string): number
 nightState(input: NightStateInput): NightState
 hostPayout(state: PayoutInput): {
@@ -37,13 +36,13 @@ toTenths(roomNights: number): number
 fromTenths(tenths: number): number
 ```
 
-Constants: `MAKER_REBATE`, `REBATE_BAND`, `FEE`, `HOST_FEE`, `PLATFORM_FEE`, `PRESETS`, `FLOOR_RATIO`, `RECALL_MARKUP`, `RECALL_MIN_MARKUP`, `GUEST_TRANCHE`, `CAP_PEAK`, `LATE_HOURS`, `LATE_MAX`, `COVER_FUND`, `PSTAR_BAND`, `PSTAR_MAX_MOVE_PER_HOUR`, `SLICE`.
+Constants: `MAKER_REBATE`, `REBATE_BAND`, `FEE`, `HOST_FEE`, `PLATFORM_FEE`, `PRESETS`, `FLOOR_RATIO`, `RECALL_MARKUP`, `RECALL_MIN_MARKUP`, `CAP_HUMAN`, `LATE_HOURS`, `LATE_MAX`, `COVER_FUND`, `PSTAR_BAND`, `PSTAR_MAX_MOVE_PER_HOUR`, `SLICE`.
 
 Types: `RateProperty`, `NightProperty`, `NightStateInput`, `NightState`, `PayoutInput`, `CutoffRefundInput`, `TraderAsk`, `PoolAsk`, `TraderLevel`, `Ask`, `Bid`, `BookInput`, `Book`, `Fill`, `BuyResult`.
 
 `RateProperty` contains only `{ id, base, phase }`. `NightProperty` adds `rooms` and `roomTypes: { rateMultiplier: number }[]`. `NightStateInput` is `{ property, roomIndex, date, today }`. Both dates are valid `YYYY-MM-DD` calendar dates. Calendar arithmetic uses UTC fields to avoid depending on the process timezone. An out of range room index falls back to the first room type, but the supplied index still seeds randomness, matching the mock. Empty room types throw `TypeError`, as in the original.
 
-`BookInput` requires `{ F, k, S, q }` and optionally accepts `{ tranche, traderAsks, levels, hoursLeft }`. Trader asks contain `{ price, size, who? }`. `PayoutInput` and `CutoffRefundInput` require `{ F, k, S, q, held }`. `PayoutInput` also accepts an API extension, `cutoffPaid`, for settled cutoff refunds and rebate-pool haircuts. `hostPayout` deducts that amount from gross and available proceeds; absent values preserve source parity. Public interfaces are defined in the source modules and exported from the package entry point.
+`BookInput` requires `{ F, k, S, q }` and optionally accepts `{ traderAsks, levels, hoursLeft }`. Trader asks contain `{ price, size, who? }`. `PayoutInput` and `CutoffRefundInput` require `{ F, k, S, q, held }`. `PayoutInput` also accepts an API extension, `cutoffPaid`, for settled cutoff refunds and rebate-pool haircuts. `hostPayout` deducts that amount from gross and available proceeds; absent values preserve source parity. Public interfaces are defined in the source modules and exported from the package entry point.
 
 Convert only at system boundaries. `toMicros` rounds the decimal representation of a finite USD value to six decimals, with ties away from zero; nonfinite values throw `RangeError`. `toTenths` rounds room nights to the nearest integer tenth, with ties away from zero. `fromTenths` divides an integer quantity by ten. Core math performs neither conversion.
 
@@ -51,11 +50,11 @@ Convert only at system boundaries. `toMicros` rounds the decimal representation 
 
 From this directory, run `bun test` and `pnpm typecheck`. From the workspace root, run `pnpm check`.
 
-Parity tests load the unmodified sibling mock files through `node:vm`, with a minimal `window` shim and a fixed zero argument `Date` constructor. Today is `2026-12-01`. Catalog fixtures come only from the VM. The grid covers all six properties, both room types and 60 dates from December 1 through January 29: 720 states, usual rates, books and payouts, 5,760 routes across four quantities and both buyer modes, 5,040 late fees, 720 cutoff refunds. Another 24 cutoff cases cover empty, negligible, fractional and fully held inventory across three curve slopes. Numeric tolerance is absolute `1e-9`; object keys, arrays and nonnumeric values must also match. Additional tests cover every constant, curve helpers, deterministic random streams and 12 distant date fallback states. Focused unit tests sit beside implementation files.
+Parity tests load the unmodified sibling mock files through `node:vm`, with a minimal `window` shim and a fixed zero argument `Date` constructor. Today is `2026-12-01`. Catalog fixtures come only from the VM. The grid covers all six properties, both room types and 60 dates from December 1 through January 29: 720 states, usual rates, books and payouts, 23,040 routes across four quantities, both buyer modes and four recall limits, 5,040 late fees, 720 cutoff refunds. Another 24 cutoff cases cover empty, negligible, fractional and fully held inventory across three curve slopes. Numeric tolerance is absolute `1e-9`; object keys, arrays and nonnumeric values must also match. Additional tests cover every constant, curve helpers, deterministic random streams and 12 distant date fallback states. Focused unit tests sit beside implementation files.
 
 ## Rules fixed in both mock and port
 
-Guests never pay above the recall cap: routing stops at the first ask priced above it and fills the rest at the cap. Traders are not capped. Night heat is clamped to zero and one, so distant dates never show negative inventory. Rooms split exactly across room types (nine rooms over two types become five and four).
+Guests never pay above the recall cap: routing stops at the first ask priced above it and recalls the remaining quantity at the cap, limited to `recallable` minus trader ask fills already taken. Pass total trader holdings as `recallable`; the compatibility default is `Infinity`. Exhausted inventory returns a partial fill. Only guests can recall. Every pool slice is available to traders, who may pay above the recall strike. There is no guest tranche. Night heat is clamped to zero and one, so distant dates never show negative inventory. Rooms split exactly across room types (nine rooms over two types become five and four).
 
 ## Seller fees
 
@@ -67,7 +66,7 @@ Guests never pay above the recall cap: routing stops at the first ask priced abo
 
 For `F: 6000`, `k: 1.2`, `S: 15`, `q: 6` and `held: 4`, results rounded to cents are `avgBid: 8298.07`, `perNight: 5808.65`, `total: 23234.59` and `haircut: 9957.68`. Calculations remain unrounded internally.
 
-The source exposes 35 exports. The legacy parked-ask refund and its constant have been removed. For `offlineSaleRefund`, callers pass the pool bid as `pstar`.
+The source exposes 33 exports. The legacy parked-ask refund and its constant have been removed. For `offlineSaleRefund`, callers pass the pool bid as `pstar`.
 
 ## Offline double sale cover
 
@@ -81,7 +80,7 @@ For `pstar: 16000`, `reserveSlice: 11000` and `pending: 3000`, the fund advances
 
 ## Preserved source behavior
 
-Past dates still report 14 hours remaining. Caps and guest tranches have a minimum of one, even for zero supply. The book assumes asks are sorted.
+Past dates still report 14 hours remaining. The human cap is 30% of supply on every night, with a minimum of one even for zero supply. The book assumes asks are sorted.
 
 ## Resynchronizing
 

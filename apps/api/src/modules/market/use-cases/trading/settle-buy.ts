@@ -6,8 +6,8 @@ import {
   toTenths,
 } from "@night-shares/market-model";
 import type { User } from "../../../../ports/sessions/session-store";
-import { feePayments } from "../../../../shared/fee-payments";
 import type { Deps } from "../context";
+import { tradeFeePayments } from "./host-fees";
 import { rebatePayments } from "./rebate-payments";
 export async function settleBuy(
   { ports }: Deps,
@@ -36,11 +36,20 @@ export async function settleBuy(
         gross - fee,
         "ask fill",
       );
-      for (const payment of feePayments(gross, fee))
+      for (const payment of tradeFeePayments(
+        ports,
+        key.split(":")[0] ?? "",
+        fill.who ?? marketMaker,
+        gross,
+        fee,
+      ))
         transfer(user.walletAddress, payment.to, payment.amount, "seller fee");
     } else transfer(user.walletAddress, "pool", gross, "market buy");
   }
-  for (const payment of feePayments(
+  for (const payment of tradeFeePayments(
+    ports,
+    key.split(":")[0] ?? "",
+    user,
     toMicros(result.gross),
     toMicros(result.fee),
   ))

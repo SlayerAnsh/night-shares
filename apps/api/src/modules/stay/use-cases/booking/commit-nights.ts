@@ -3,6 +3,7 @@ import type { Ports } from "../../../../container/ports";
 import { revertFills } from "../../../market/use-cases/trading/revert-fills";
 import { routeNight } from "../../pricing/quote-night";
 import { fillNight } from "./fill-night";
+import { reserveRecall } from "./reserve-recall";
 
 export function commitNights(
   ports: Ports,
@@ -15,19 +16,29 @@ export function commitNights(
   for (const night of nights)
     fillNight(ports.inventory.get(night.key), night.route, rooms);
   const before = nights.map((night) => ports.inventory.get(night.key));
+  const recalls = new Map<string, ReturnType<typeof reserveRecall>>();
   for (const night of nights) {
     ports.inventory.update(night.key, (record) => {
       night.route = routeNight(record, rooms);
-      return fillNight(record, night.route, rooms);
+      const recall = reserveRecall(
+        ports,
+        record,
+        night.route,
+        fillNight(record, night.route, rooms),
+      );
+      recalls.set(night.key, recall);
+      return recall.next;
     });
   }
   return {
+    recallPayments: (key: string) => recalls.get(key)?.payments ?? [],
     revert() {
       for (const [index, night] of nights.entries()) {
         const original = before[index];
         if (!original) continue;
-        ports.inventory.update(night.key, (record) =>
-          revertFills(
+        ports.inventory.update(night.key, (record) => {
+          record = recalls.get(night.key)?.revert(record) ?? record;
+          return revertFills(
             {
               ...record,
               state: {
@@ -38,8 +49,8 @@ export function commitNights(
             },
             night.route,
             original,
-          ),
-        );
+          );
+        });
       }
     },
     publish() {

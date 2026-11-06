@@ -82,7 +82,12 @@ export function createCreateBooking(ports: Ports, repo: StayRepo) {
       let buyerRemaining = paid;
       const legs: Parameters<typeof ports.walletProvider.settle>[0] = [];
       for (const night of current) {
-        for (const payment of settlement(night.route)) {
+        for (const payment of settlement(night.route, {
+          ports,
+          propertyId: value.propertyId,
+          buyer: user.walletAddress,
+          recallPayments: reservation.recallPayments(night.key),
+        })) {
           const buyerAmount = minMicros(payment.amount, buyerRemaining);
           buyerRemaining -= buyerAmount;
           if (buyerAmount > 0n)

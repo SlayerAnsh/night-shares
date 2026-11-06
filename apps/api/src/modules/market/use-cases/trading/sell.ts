@@ -7,10 +7,10 @@ import {
 import { transaction } from "../../../../db/transaction";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
-import { feePayments } from "../../../../shared/fee-payments";
 import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyPoolSell } from "../../../inventory/mutations/apply-pool-sell";
 import { assertOpen, type Deps, realise, syncPosition } from "../context";
+import { isHost, tradeFeePayments } from "./host-fees";
 import { quoteSell } from "./quote-sell";
 import { withSettlement } from "./with-settlement";
 export async function sell(
@@ -79,7 +79,10 @@ async function executeSell(
           amount: quote.total?.micros ?? 0n,
           memo: "sell back",
         },
-        ...feePayments(
+        ...tradeFeePayments(
+          ports,
+          record.propertyId,
+          user,
           quote.gross?.micros ?? 0n,
           quote.fee?.micros ?? 0n,
           true,
@@ -105,7 +108,7 @@ async function executeSell(
     nightKey: key,
     propertyId: record.propertyId,
     kind: "trader_sold_back",
-    actor: "pool",
+    actor: isHost(ports, record.propertyId, user) ? "host" : "pool",
     userId: user.id,
     tenths: size,
     priceMicros: quote.average?.micros,

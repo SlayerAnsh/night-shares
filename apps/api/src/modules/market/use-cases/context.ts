@@ -13,6 +13,7 @@ import { format, type NightIdentity } from "../../../shared/night-key";
 import type { NightRecord } from "../../inventory/inventory-repo";
 import { cutoffAt } from "../cutoff";
 import type { MarketRepo, Position } from "../repo/market-repo";
+import { humanWallets } from "./human-wallets";
 export type Deps = { ports: Ports; repo: MarketRepo };
 export function nightKey(night?: NightIdentity) {
   if (!night) throw new DomainError("INVALID_ARGUMENT", "Choose a night.");
@@ -30,12 +31,18 @@ export const releaseAt = (record: NightRecord) =>
   record.cutoffAt ?? Date.parse(`${record.date}T14:00:00Z`);
 export const hoursLeft = (ports: Ports, record: NightRecord) =>
   Math.max(0, (cutoffAt(ports, record) - ports.clock.now()) / 3_600_000);
-export function bookOf(ports: Ports, record: NightRecord, wallet?: string) {
+export function bookOf(
+  ports: Ports,
+  record: NightRecord,
+  wallet?: string | ReadonlySet<string>,
+) {
   return book({
     ...record.state,
     levels: Math.max(80, toTenths(record.state.S)),
     hoursLeft: hoursLeft(ports, record),
-    traderAsks: record.state.traderAsks.filter((a) => a.who !== wallet),
+    traderAsks: record.state.traderAsks.filter((a) =>
+      typeof wallet === "string" ? a.who !== wallet : !wallet?.has(a.who ?? ""),
+    ),
   });
 }
 export function realise(position: Position, size: number, proceeds: bigint) {
@@ -54,10 +61,10 @@ export function syncPosition(
   return transaction(ports.db, () => {
     repo.remember(user);
     const position = repo.position(user.humanId, record.key);
-    const ask = record.state.traderAsks.find(
-      (a) => a.who === user.walletAddress,
-    );
-    const remaining = ask ? toTenths(ask.size) : 0;
+    const wallets = humanWallets(ports, user, record.propertyId);
+    const remaining = record.state.traderAsks
+      .filter((a) => wallets.has(a.who ?? ""))
+      .reduce((sum, a) => sum + toTenths(a.size), 0);
     const filled = position.escrow - remaining;
     if (filled > 0)
       realise(

@@ -1,5 +1,5 @@
 import { PRESETS } from "../constants";
-import { capOf, clampFair, floorFromRate, price, trancheOf } from "../curve";
+import { capOf, clampFair, floorFromRate, price } from "../curve";
 import { diffDays, parseDate } from "../dates";
 import { hash } from "../random/hash";
 import { rng } from "../random/rng";
@@ -42,7 +42,6 @@ export function nightState({
   const preset = peak ? "peak" : dow === 5 || dow === 6 ? "normal" : "calm";
   const k = PRESETS[preset],
     F = floorFromRate(usualRate);
-  const tranche = trancheOf(S);
   const daysOut = Math.max(0, diffDays(today, date));
   // Heat is clamped to [0, 1] so inventory never goes negative.
   const heat = Math.max(
@@ -71,13 +70,12 @@ export function nightState({
     k,
     preset,
     peak,
-    tranche,
     q,
     booked,
     held,
     pstar,
     traderAsks,
     hoursLeft,
-    cap: capOf(S, peak),
+    cap: capOf(S),
   };
 }

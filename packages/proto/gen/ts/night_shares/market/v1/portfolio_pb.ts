@@ -14,12 +14,17 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file night_shares/market/v1/portfolio.proto.
  */
 export const file_night_shares_market_v1_portfolio: GenFile = /*@__PURE__*/
-  fileDesc("CiZuaWdodF9zaGFyZXMvbWFya2V0L3YxL3BvcnRmb2xpby5wcm90bxIWbmlnaHRfc2hhcmVzLm1hcmtldC52MSK4AgoHSG9sZGluZxIvCgVuaWdodBgBIAEoCzIgLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuTmlnaHRLZXkSMAoEc2l6ZRgCIAEoCzIiLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuUm9vbU5pZ2h0cxIyCgxhdmVyYWdlX2Nvc3QYAyABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSKwoFdmFsdWUYBCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSNAoOdW5yZWFsaXNlZF9wbmwYBSABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSMwoNdW5zb2xkX3JlZnVuZBgGIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyLHAgoKQWdlbnRPcmRlchIKCgJpZBgBIAEoCRIvCgVuaWdodBgCIAEoCzIgLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuTmlnaHRLZXkSMAoEc2l6ZRgDIAEoCzIiLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuUm9vbU5pZ2h0cxIsCgZidWRnZXQYBCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSKwoFc3BlbnQYBSABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFgoOd2FsbGV0X2FkZHJlc3MYBiABKAkSOAoGc3RhdHVzGAcgASgOMigubmlnaHRfc2hhcmVzLm1hcmtldC52MS5BZ2VudE9yZGVyU3RhdHVzEh0KFXJlcXVpcmVzX3ZlcmlmaWNhdGlvbhgIIAEoCCKVAQoRVHJhZGVyVHJhY2tSZWNvcmQSGAoQY2xvc2VkX3Bvc2l0aW9ucxgBIAEoBRIWCg5wcm9maXRhYmxlX2JwcxgCIAEoBRIaChJhdmVyYWdlX3JldHVybl9icHMYAyABKAUSMgoMcmVhbGlzZWRfcG5sGAQgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjKpgBChBBZ2VudE9yZGVyU3RhdHVzEiIKHkFHRU5UX09SREVSX1NUQVRVU19VTlNQRUNJRklFRBAAEh4KGkFHRU5UX09SREVSX1NUQVRVU19QRU5ESU5HEAESHwobQUdFTlRfT1JERVJfU1RBVFVTX0FQUFJPVkVEEAISHwobQUdFTlRfT1JERVJfU1RBVFVTX0VYRUNVVEVEEANiBnByb3RvMw", [file_night_shares_common_v1_money, file_night_shares_common_v1_night]);
+  fileDesc("CiZuaWdodF9zaGFyZXMvbWFya2V0L3YxL3BvcnRmb2xpby5wcm90bxIWbmlnaHRfc2hhcmVzLm1hcmtldC52MSLJAgoHSG9sZGluZxIPCgdpc19ob3N0GAcgASgIEi8KBW5pZ2h0GAEgASgLMiAubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5OaWdodEtleRIwCgRzaXplGAIgASgLMiIubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Sb29tTmlnaHRzEjIKDGF2ZXJhZ2VfY29zdBgDIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIrCgV2YWx1ZRgEIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxI0Cg51bnJlYWxpc2VkX3BubBgFIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIzCg11bnNvbGRfcmVmdW5kGAYgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjIscCCgpBZ2VudE9yZGVyEgoKAmlkGAEgASgJEi8KBW5pZ2h0GAIgASgLMiAubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5OaWdodEtleRIwCgRzaXplGAMgASgLMiIubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Sb29tTmlnaHRzEiwKBmJ1ZGdldBgEIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIrCgVzcGVudBgFIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIWCg53YWxsZXRfYWRkcmVzcxgGIAEoCRI4CgZzdGF0dXMYByABKA4yKC5uaWdodF9zaGFyZXMubWFya2V0LnYxLkFnZW50T3JkZXJTdGF0dXMSHQoVcmVxdWlyZXNfdmVyaWZpY2F0aW9uGAggASgIIpUBChFUcmFkZXJUcmFja1JlY29yZBIYChBjbG9zZWRfcG9zaXRpb25zGAEgASgFEhYKDnByb2ZpdGFibGVfYnBzGAIgASgFEhoKEmF2ZXJhZ2VfcmV0dXJuX2JwcxgDIAEoBRIyCgxyZWFsaXNlZF9wbmwYBCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMiaQoMUHVibGljSG9sZGVyEhYKDndhbGxldF9hZGRyZXNzGAEgASgJEjAKBHNpemUYAiABKAsyIi5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlJvb21OaWdodHMSDwoHaXNfaG9zdBgDIAEoCCqYAQoQQWdlbnRPcmRlclN0YXR1cxIiCh5BR0VOVF9PUkRFUl9TVEFUVVNfVU5TUEVDSUZJRUQQABIeChpBR0VOVF9PUkRFUl9TVEFUVVNfUEVORElORxABEh8KG0FHRU5UX09SREVSX1NUQVRVU19BUFBST1ZFRBACEh8KG0FHRU5UX09SREVSX1NUQVRVU19FWEVDVVRFRBADYgZwcm90bzM", [file_night_shares_common_v1_money, file_night_shares_common_v1_night]);
 
 /**
  * @generated from message night_shares.market.v1.Holding
  */
 export type Holding = Message<"night_shares.market.v1.Holding"> & {
+  /**
+   * @generated from field: bool is_host = 7;
+   */
+  isHost: boolean;
+
   /**
    * @generated from field: night_shares.common.v1.NightKey night = 1;
    */
@@ -141,6 +146,35 @@ export type TraderTrackRecord = Message<"night_shares.market.v1.TraderTrackRecor
  */
 export const TraderTrackRecordSchema: GenMessage<TraderTrackRecord> = /*@__PURE__*/
   messageDesc(file_night_shares_market_v1_portfolio, 2);
+
+/**
+ * Public ownership aggregates all wallets controlled by one human.
+ *
+ * @generated from message night_shares.market.v1.PublicHolder
+ */
+export type PublicHolder = Message<"night_shares.market.v1.PublicHolder"> & {
+  /**
+   * @generated from field: string wallet_address = 1;
+   */
+  walletAddress: string;
+
+  /**
+   * @generated from field: night_shares.common.v1.RoomNights size = 2;
+   */
+  size?: RoomNights | undefined;
+
+  /**
+   * @generated from field: bool is_host = 3;
+   */
+  isHost: boolean;
+};
+
+/**
+ * Describes the message night_shares.market.v1.PublicHolder.
+ * Use `create(PublicHolderSchema)` to create a new message.
+ */
+export const PublicHolderSchema: GenMessage<PublicHolder> = /*@__PURE__*/
+  messageDesc(file_night_shares_market_v1_portfolio, 3);
 
 /**
  * @generated from enum night_shares.market.v1.AgentOrderStatus

@@ -3,7 +3,10 @@ import type { Book, BuyResult, Fill } from "./types";
 export function routeBuy(
   bk: Book,
   amount: number,
-  { guest = false }: { guest?: boolean } = {},
+  {
+    guest = false,
+    recallable = Infinity,
+  }: { guest?: boolean; recallable?: number } = {},
 ): BuyResult {
   let left = amount,
     spend = 0;
@@ -12,16 +15,22 @@ export function routeBuy(
     if (left <= 1e-9) break;
     // Guests never pay above the recall cap. Asks are sorted, so stop here.
     if (guest && l.price > bk.recall) break;
-    if (l.guestOnly && !guest) continue;
     const take = Math.min(left, l.size);
     spend += take * l.price;
     left -= take;
     fills.push({ ...l, take });
   }
   if (left > 1e-9 && guest) {
-    spend += left * bk.recall;
-    fills.push({ price: bk.recall, take: left, src: "recall" });
-    left = 0;
+    const usedTrader = fills.reduce(
+      (total, fill) => total + (fill.src === "trader" ? fill.take : 0),
+      0,
+    );
+    const take = Math.min(left, Math.max(0, recallable - usedTrader));
+    if (take > 1e-9) {
+      spend += take * bk.recall;
+      fills.push({ price: bk.recall, take, src: "recall" });
+      left -= take;
+    }
   }
   const avg = amount - left > 0 ? spend / (amount - left) : 0;
   let sellerFees = 0,

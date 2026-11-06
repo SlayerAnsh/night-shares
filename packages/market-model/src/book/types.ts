@@ -7,11 +7,9 @@ export interface PoolAsk {
   price: number;
   size: number;
   src: "pool";
-  guestOnly: boolean;
 }
 export interface TraderLevel extends TraderAsk {
   src: "trader";
-  guestOnly?: boolean;
 }
 export type Ask = PoolAsk | TraderLevel;
 export interface Bid {
@@ -30,7 +28,6 @@ export interface BookInput {
   k: number;
   S: number;
   q: number;
-  tranche?: number;
   traderAsks?: readonly TraderAsk[];
   levels?: number;
   hoursLeft?: number;

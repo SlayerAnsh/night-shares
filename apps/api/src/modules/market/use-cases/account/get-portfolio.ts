@@ -5,6 +5,8 @@ import type { User } from "../../../../ports/sessions/session-store";
 import { mulTenths } from "../../../../shared/money";
 import { toProto } from "../../../../shared/night-key";
 import { type Deps, syncPosition } from "../context";
+import { humanWallets } from "../human-wallets";
+import { isHost } from "../trading/host-fees";
 export function getPortfolio(deps: Deps, user: User) {
   const response = create(GetPortfolioResponseSchema);
   let realised = 0n,
@@ -15,9 +17,8 @@ export function getPortfolio(deps: Deps, user: User) {
   for (const key of deps.repo.account(user.humanId).positions.keys()) {
     const record = deps.ports.inventory.get(key);
     const position = syncPosition(deps, user, record);
-    const ask = record.state.traderAsks.find(
-      (a) => a.who === user.walletAddress,
-    );
+    const wallets = humanWallets(deps.ports, user, record.propertyId);
+    const ask = record.state.traderAsks.find((a) => wallets.has(a.who ?? ""));
     const size = position.free + (ask ? toTenths(ask.size) : 0);
     const value = mulTenths(toMicros(record.state.pstar), size);
     const pnl = value - mulTenths(position.average, size);
@@ -30,6 +31,7 @@ export function getPortfolio(deps: Deps, user: User) {
     if (size)
       response.holdings.push({
         $typeName: "night_shares.market.v1.Holding",
+        isHost: isHost(deps.ports, record.propertyId, user),
         night,
         size: { $typeName: "night_shares.common.v1.RoomNights", tenths: size },
         averageCost: {
@@ -52,7 +54,7 @@ export function getPortfolio(deps: Deps, user: User) {
     if (ask)
       response.listings.push({
         $typeName: "night_shares.market.v1.Ask",
-        id: `${key}|${user.walletAddress}`,
+        id: `${key}|${ask.who}`,
         night,
         size: {
           $typeName: "night_shares.common.v1.RoomNights",

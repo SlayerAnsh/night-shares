@@ -6,8 +6,15 @@ import type { NightRecord } from "../../inventory/inventory-repo";
 
 export function routeNight(record: NightRecord, rooms: number) {
   if (record.stopped || record.state.booked + rooms > record.state.S)
-    throw new DomainError("FAILED_PRECONDITION", "Not enough rooms available.");
-  return routeBuy(book(record.state), rooms, { guest: true });
+    throw new DomainError("FAILED_PRECONDITION", "This night is sold out.");
+  const route = routeBuy(
+    book({ ...record.state, levels: Math.ceil(record.state.S * 10) }),
+    rooms,
+    { guest: true, recallable: record.state.held },
+  );
+  if (Math.round(route.filled * 10) !== rooms * 10)
+    throw new DomainError("FAILED_PRECONDITION", "This night is sold out.");
+  return route;
 }
 export function quoteNight(
   ports: Ports,

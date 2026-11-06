@@ -11,7 +11,7 @@ test("buy preview is read only and excludes guest-only liquidity", async () => {
   expect(d.ports.inventory.get(d.key)).toEqual(before);
   d.ports.inventory.update(d.key, (r) => ({
     ...r,
-    state: { ...r.state, q: r.state.S - r.state.tranche, traderAsks: [] },
+    state: { ...r.state, q: r.state.S, traderAsks: [] },
   }));
   expect(quoteBuy(d, d.key, 2).filled?.tenths).toBe(0);
 });

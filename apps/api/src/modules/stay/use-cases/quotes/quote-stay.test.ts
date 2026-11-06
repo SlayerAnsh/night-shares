@@ -19,6 +19,6 @@ test("quote rejects missing selection, invalid dates and unavailable inventory",
   ).toThrow();
   f.ports.inventory.update(f.key, (r) => ({ ...r, stopped: true }));
   expect(() => f.cases.quoteStay(f.selection)).toThrow(
-    "Not enough rooms available.",
+    "This night is sold out.",
   );
 });

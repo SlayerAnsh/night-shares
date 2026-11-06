@@ -11,6 +11,8 @@ export function fillNight(
 ) {
   if (record.released)
     throw new DomainError("FAILED_PRECONDITION", "This night has closed.");
+  if (toTenths(route.filled) !== rooms * 10)
+    throw new DomainError("FAILED_PRECONDITION", "This night is sold out.");
   let next = record;
   for (const fill of route.fills) {
     if (fill.src === "pool") next = applyPoolBuy(next, toTenths(fill.take));
@@ -22,6 +24,6 @@ export function fillNight(
     }
   }
   if (toTenths(next.state.held) < rooms * 10)
-    throw new DomainError("FAILED_PRECONDITION", "Not enough rooms available.");
+    throw new DomainError("FAILED_PRECONDITION", "This night is sold out.");
   return applyGuestBooking(next, rooms * 10);
 }

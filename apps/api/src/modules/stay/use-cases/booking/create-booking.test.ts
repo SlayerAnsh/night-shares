@@ -52,7 +52,7 @@ test("insufficient balance and unavailable later nights never mutate earlier nig
     stopped: true,
   }));
   await expect(f.cases.createBooking(f.request, f.user)).rejects.toThrow(
-    "Not enough rooms",
+    "This night is sold out.",
   );
   expect(f.ports.inventory.get(f.key)).toEqual(initial);
 });

@@ -8,8 +8,8 @@ const dates = Array.from({ length: 60 }, (_, i) =>
 );
 
 test("original model fingerprint and all exported constants match", () => {
-  expect(modelSha.slice(0, 12)).toBe("fb6cebfd712e");
-  expect(Object.keys(original)).toHaveLength(35);
+  expect(modelSha.slice(0, 12)).toBe("3d84c7b5d2cb");
+  expect(Object.keys(original)).toHaveLength(33);
   expect("unsoldRefund" in port).toBe(false);
   expect("REFUND_AT_FAIR" in port).toBe(false);
   expect(shared.props).toHaveLength(6);
@@ -48,13 +48,14 @@ for (const property of shared.props) {
           referenceBook = original.book(reference);
         compare(actualBook, referenceBook);
         for (const amount of [0, 0.1, 1, state.S + 1])
-          for (const guest of [false, true]) {
-            // Compare seller totals and per-fill fields, including absent pool fields.
-            compare(
-              port.routeBuy(actualBook, amount, { guest }),
-              original.routeBuy(referenceBook, amount, { guest }),
-            );
-          }
+          for (const guest of [false, true])
+            for (const recallable of [0, 0.2, state.held, Infinity]) {
+              // Compare seller totals and per-fill fields, including absent pool fields.
+              compare(
+                port.routeBuy(actualBook, amount, { guest, recallable }),
+                original.routeBuy(referenceBook, amount, { guest, recallable }),
+              );
+            }
         compare(port.hostPayout(state), original.hostPayout(reference));
         compare(port.cutoffRefund(state), original.cutoffRefund(reference));
         for (const hours of [-1, 0, 14, 36, 71.9, 72, state.hoursLeft]) {
@@ -83,9 +84,7 @@ test("curve, fee and random helpers preserve exact source formulas", () => {
       compare(port.clampFair(F, 100), original.clampFair(F, 100));
     }
   for (const S of [0, 1, 3, 8]) {
-    compare(port.trancheOf(S), original.trancheOf(S));
-    for (const peak of [false, true])
-      compare(port.capOf(S, peak), original.capOf(S, peak));
+    compare(port.capOf(S), original.capOf(S));
   }
 });
 
@@ -192,4 +191,31 @@ test("maker rebate matches at band boundaries and balance caps", () => {
         const input = { askPrice, poolPrice: 100, size, poolBalance };
         compare(port.makerRebate(input), original.makerRebate(input));
       }
+});
+
+test("guest recall and sold-out routes match the frozen near-capacity example", () => {
+  const input = {
+    F: 6000,
+    k: 1.2,
+    S: 15,
+    q: 14.5,
+    traderAsks: [{ price: 30000, size: 0.5, who: "seller" }],
+  };
+  const actual = port.book(input);
+  const reference = original.book(input);
+  compare(actual, reference);
+  for (const guest of [false, true])
+    for (const recallable of [0, 0.2, 4, Infinity])
+      compare(
+        port.routeBuy(actual, 1, { guest, recallable }),
+        original.routeBuy(reference, 1, { guest, recallable }),
+      );
+  const guest = port.routeBuy(actual, 1, { guest: true, recallable: 4 });
+  expect(guest.fills.filter((fill) => fill.src === "pool")).toHaveLength(5);
+  expect(guest.fills.at(-1)?.src).toBe("recall");
+  expect(Math.round(guest.total)).toBe(22503);
+  expect(
+    port.routeBuy(actual, 1, { guest: true, recallable: 0.2 }).filled,
+  ).toBeCloseTo(0.7, 12);
+  expect(port.routeBuy(actual, 1).fills.at(-1)?.src).toBe("trader");
 });

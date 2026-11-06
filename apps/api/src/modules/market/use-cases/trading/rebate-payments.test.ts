@@ -50,7 +50,7 @@ test("pool fills advance the comparison price before the following ask", async (
         recall: 200,
         bids: [],
         asks: [
-          { src: "pool", price: 105, size: 1, guestOnly: false },
+          { src: "pool", price: 105, size: 1 },
           { src: "trader", price: 110, size: 1, who: "maker" },
         ],
       },

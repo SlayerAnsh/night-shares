@@ -9,7 +9,7 @@ for (const src of ["pool", "trader"] as const) {
         asks: [
           src === "trader"
             ? { price: 100, size: 1, src, who: "seller" }
-            : { price: 100, size: 1, src, guestOnly: false },
+            : { price: 100, size: 1, src },
         ],
         bids: [],
         recall: 150,
@@ -38,7 +38,7 @@ test("fractional booking fills reconcile fee rounding without changing total", (
     {
       asks: [
         { price: 13.123457, size: 0.3, src: "trader", who: "seller" },
-        { price: 15.123456, size: 0.7, src: "pool", guestOnly: false },
+        { price: 15.123456, size: 0.7, src: "pool" },
       ],
       bids: [],
       recall: 20,

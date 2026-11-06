@@ -26,7 +26,7 @@ for (const trader of [false, true]) {
       cover,
     );
     expect((await wallet.balance(SYSTEM_ADDRESSES.treasury)) - treasury).toBe(
-      fee * (trader ? 2n : 1n) - cover,
+      (fee - (gross + 50n) / 100n) * (trader ? 2n : 1n) - cover,
     );
     expect(buyer - (await wallet.balance(d.user.walletAddress))).toBe(
       result.quote?.total?.micros ?? 0n,
@@ -50,7 +50,7 @@ test("sell back funds cover from gross notional while preserving net payout", as
   const cover = (gross + 500n) / 1000n;
   expect((await wallet.balance(SYSTEM_ADDRESSES.coverFund)) - fund).toBe(cover);
   expect((await wallet.balance(SYSTEM_ADDRESSES.treasury)) - treasury).toBe(
-    base - cover,
+    base - cover - (gross + 50n) / 100n,
   );
   expect((await wallet.balance(d.user.walletAddress)) - seller).toBe(
     result.quote?.total?.micros ?? 0n,

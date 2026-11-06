@@ -27,9 +27,9 @@ for (const [ask, funds, expected] of [
           F: 100,
           k: 0,
           S: 10,
-          q: 9,
+          q: 10,
+          booked: 8,
           held: 2,
-          tranche: 2,
           traderAsks: [{ who: maker, price: ask, size: 1 }],
         },
       }));

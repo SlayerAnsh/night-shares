@@ -3,12 +3,12 @@ import { routeBuy } from "./route-buy";
 import type { Book } from "./types";
 
 const book: Book = {
-  asks: [{ price: 200, size: 1, src: "pool", guestOnly: true }],
+  asks: [{ price: 200, size: 1, src: "pool" }],
   bids: [],
   recall: 125,
 };
-test("traders skip guest inventory while guests recall remaining quantity", () => {
-  expect(routeBuy(book, 2).filled).toBe(0);
+test("traders fill available pool inventory while guests recall remaining quantity", () => {
+  expect(routeBuy(book, 2).filled).toBe(1);
   const result = routeBuy(book, 2, { guest: true });
   expect(result.filled).toBe(2);
   expect(result.gross).toBe(250);
@@ -32,7 +32,7 @@ test("guests never pay above the recall cap", () => {
 test("traders may buy above the recall cap and zero orders cost nothing", () => {
   const open: Book = {
     ...book,
-    asks: [{ price: 200, size: 1, src: "pool", guestOnly: false }],
+    asks: [{ price: 200, size: 1, src: "pool" }],
   };
   expect(routeBuy(open, 1).avg).toBe(200);
   expect(routeBuy(book, 0).total).toBe(0);
@@ -41,7 +41,7 @@ test("traders may buy above the recall cap and zero orders cost nothing", () => 
 test("mixed guest fills charge sellers only for trader and recall inventory", () => {
   const mixed: Book = {
     asks: [
-      { price: 80, size: 0.5, src: "pool", guestOnly: false },
+      { price: 80, size: 0.5, src: "pool" },
       { price: 100, size: 0.5, src: "trader", who: "seller" },
     ],
     bids: [],
@@ -76,7 +76,7 @@ test("mixed guest fills charge sellers only for trader and recall inventory", ()
 test("pool fills and empty routes have zero seller totals", () => {
   const pool: Book = {
     ...book,
-    asks: [{ price: 100, size: 1, src: "pool", guestOnly: false }],
+    asks: [{ price: 100, size: 1, src: "pool" }],
   };
   for (const result of [
     routeBuy(pool, 1),
@@ -90,4 +90,17 @@ test("pool fills and empty routes have zero seller totals", () => {
       expect(fill).not.toHaveProperty("sellerNet");
     }
   }
+});
+
+test("recall uses only holdings remaining after trader ask fills", () => {
+  const mixed: Book = {
+    asks: [{ price: 100, size: 0.5, src: "trader", who: "seller" }],
+    bids: [],
+    recall: 125,
+  };
+  const result = routeBuy(mixed, 2, { guest: true, recallable: 0.7 });
+  expect(result.filled).toBeCloseTo(0.7, 12);
+  expect(result.fills[1]?.take).toBeCloseTo(0.2, 12);
+  expect(routeBuy(mixed, 2, { recallable: 5 }).filled).toBe(0.5);
+  expect(routeBuy(mixed, 2, { guest: true, recallable: 0 }).filled).toBe(0.5);
 });

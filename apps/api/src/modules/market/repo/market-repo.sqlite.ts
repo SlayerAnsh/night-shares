@@ -10,6 +10,10 @@ export function createSqliteMarketRepo(db: Database): MarketRepo {
   const queues = new Map<string, Promise<unknown>>();
   return {
     remember(user) {
+      db.query("INSERT OR IGNORE INTO market_human_wallets VALUES (?, ?)").run(
+        user.walletAddress,
+        user.humanId,
+      );
       db.query(
         "INSERT INTO market_holders VALUES (?, ?, ?) ON CONFLICT(human_id) DO UPDATE SET id = excluded.id, wallet_address = excluded.wallet_address",
       ).run(user.humanId, user.id, user.walletAddress);

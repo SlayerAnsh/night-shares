@@ -58,7 +58,7 @@ export function quoteSell(
       micros: mulTenths(toMicros(cutoffRefund(record.state).perNight), size),
     },
     capUsed: { tenths: position ? position.free + position.escrow : 0 },
-    cap: { tenths: toTenths(capOf(record.state.S, record.state.peak)) },
+    cap: { tenths: toTenths(capOf(record.state.S)) },
     releaseAt: timestampFromMs(cutoffAt(deps.ports, record)),
   });
 }

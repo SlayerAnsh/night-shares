@@ -27,7 +27,12 @@ export function getNight({ ports }: Deps, key: string) {
   }
   return {
     night: data.card,
-    stats: data.stats,
+    stats: {
+      ...data.stats,
+      hostSoldBack: ports.activity
+        .list({ nightKey: key, kinds: ["trader_sold_back"] })
+        .some((event) => event.actor === "host"),
+    },
     priceHistory: data.hist.market.map((price, index) => ({
       at: timestampFromMs(
         parseDate(ports.clock.today()) + (index - 30) * 86_400_000,

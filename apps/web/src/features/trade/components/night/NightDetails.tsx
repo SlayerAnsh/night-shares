@@ -10,6 +10,9 @@ export function NightDetails({ detail }: { detail: GetNightResponse }) {
       {s && (
         <section>
           <h2>Night stats</h2>
+          {s.hostSoldBack && (
+            <p>The host has sold holdings back on this night.</p>
+          )}
           <dl>
             <dt>Annualized return</dt>
             <dd>{percent(s.annualizedReturnBps)}</dd>

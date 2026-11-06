@@ -996,9 +996,6 @@ components:
         source:
           title: source
           $ref: '#/components/schemas/night_shares.market.v1.BookSource'
-        guestOnly:
-          type: boolean
-          title: guest_only
         net:
           title: net
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
@@ -1163,6 +1160,11 @@ components:
     night_shares.market.v1.GetBookResponse:
       type: object
       properties:
+        holders:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.market.v1.PublicHolder'
+          title: holders
         asks:
           type: array
           items:
@@ -1259,6 +1261,9 @@ components:
     night_shares.market.v1.Holding:
       type: object
       properties:
+        isHost:
+          type: boolean
+          title: is_host
         night:
           title: night
           $ref: '#/components/schemas/night_shares.common.v1.NightKey'
@@ -1351,6 +1356,9 @@ components:
     night_shares.market.v1.NightStats:
       type: object
       properties:
+        hostSoldBack:
+          type: boolean
+          title: host_sold_back
         annualizedReturnBps:
           type: integer
           title: annualized_return_bps
@@ -1416,6 +1424,21 @@ components:
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
       title: PricePoint
       additionalProperties: false
+    night_shares.market.v1.PublicHolder:
+      type: object
+      properties:
+        walletAddress:
+          type: string
+          title: wallet_address
+        size:
+          title: size
+          $ref: '#/components/schemas/night_shares.common.v1.RoomNights'
+        isHost:
+          type: boolean
+          title: is_host
+      title: PublicHolder
+      additionalProperties: false
+      description: Public ownership aggregates all wallets controlled by one human.
     night_shares.market.v1.QuoteBuyRequest:
       type: object
       properties:

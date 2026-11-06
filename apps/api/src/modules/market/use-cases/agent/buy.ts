@@ -19,6 +19,7 @@ import { cutoffAt } from "../../cutoff";
 import { buyQuote } from "../../mappers/route";
 import { agentWallets } from "../../repo/agent-wallets.sqlite";
 import { assertOpen, bookOf, type Deps, syncPosition } from "../context";
+import { humanWallets } from "../human-wallets";
 import { revertFills } from "../trading/revert-fills";
 import { settleBuy } from "../trading/settle-buy";
 import { withSettlement } from "../trading/with-settlement";
@@ -60,9 +61,12 @@ async function executeBuy(
       assertOpen(ports, current);
       const position = syncPosition(deps, user, current);
       used = position.free + position.escrow;
-      if (used + size > toTenths(capOf(current.state.S, current.state.peak)))
+      if (used + size > toTenths(capOf(current.state.S)))
         throw new DomainError("FAILED_PRECONDITION", "Per-human cap exceeded.");
-      result = routeBuy(bookOf(ports, current, user.walletAddress), size / 10);
+      result = routeBuy(
+        bookOf(ports, current, humanWallets(ports, user, current.propertyId)),
+        size / 10,
+      );
       const quote = buyQuote(
         current,
         size,

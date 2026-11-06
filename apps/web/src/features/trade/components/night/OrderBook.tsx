@@ -29,15 +29,12 @@ export function OrderBook({
               <th>Price</th>
               <th>Room nights</th>
               <th>Source</th>
-              <th>Access</th>
               <th>Net after late fee</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr
-                key={`${row.askId}-${row.source}-${row.price?.micros}-${row.guestOnly}`}
-              >
+              <tr key={`${row.askId}-${row.source}-${row.price?.micros}`}>
                 <td>
                   {money(row.price)}
                   {row.price?.micros === book.fairPrice?.micros
@@ -46,13 +43,26 @@ export function OrderBook({
                 </td>
                 <td>{formatRoomNights(row.size?.tenths ?? 0)}</td>
                 <td>{sourceName(row.source)}</td>
-                <td>{row.guestOnly ? "Guest only" : "Everyone"}</td>
                 <td>{label === "Bids" ? money(row.net) : "—"}</td>
               </tr>
             ))}
           </tbody>
         </table>
       ))}
+      <h2>Holders</h2>
+      <ul>
+        {book.holders.map((holder) => (
+          <li key={holder.walletAddress}>
+            {holder.walletAddress}
+            {holder.isHost ? " (Host)" : ""}:{" "}
+            {formatRoomNights(holder.size?.tenths ?? 0)}
+          </li>
+        ))}
+      </ul>
+      <p>
+        Each human may hold up to 30% of this night. Guests can recall holdings
+        at the recall cap.
+      </p>
       <h2>Last prints</h2>
       <table>
         <thead>

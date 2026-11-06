@@ -1,7 +1,6 @@
 import {
-  CAP_PEAK,
+  CAP_HUMAN,
   FLOOR_RATIO,
-  GUEST_TRANCHE,
   PSTAR_BAND,
   RECALL_MARKUP,
   RECALL_MIN_MARKUP,
@@ -21,10 +20,7 @@ export const recallStrike = (F: number, k: number, m = RECALL_MARKUP) => {
 };
 export const floorFromRate = (usualRate: number) =>
   Math.round(usualRate * FLOOR_RATIO);
-export const capOf = (S: number, peak = true) =>
-  Math.max(1, (peak ? CAP_PEAK : 1) * S);
-export const trancheOf = (S: number) =>
-  Math.max(1, Math.round(GUEST_TRANCHE * S));
+export const capOf = (S: number) => Math.max(1, CAP_HUMAN * S);
 
 export const clampFair = (pstar: number, usualRate: number): number =>
   Math.min(

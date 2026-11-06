@@ -13,6 +13,7 @@ enum AgentOrderStatus {
 }
 
 message Holding {
+  bool is_host = 7;
   night_shares.common.v1.NightKey night = 1;
   night_shares.common.v1.RoomNights size = 2;
   night_shares.common.v1.Usdc average_cost = 3;
@@ -37,4 +38,11 @@ message TraderTrackRecord {
   int32 profitable_bps = 2;
   int32 average_return_bps = 3;
   night_shares.common.v1.Usdc realised_pnl = 4;
+}
+
+// Public ownership aggregates all wallets controlled by one human.
+message PublicHolder {
+  string wallet_address = 1;
+  night_shares.common.v1.RoomNights size = 2;
+  bool is_host = 3;
 }

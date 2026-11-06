@@ -1,13 +1,12 @@
 import { expect, test } from "bun:test";
 import { book } from "./build-book";
 
-test("book sorts trader asks and marks pool slices reserved for guests", () => {
+test("book sorts trader asks and exposes every pool slice to everyone", () => {
   const result = book({
     F: 100,
     k: 0,
     S: 2,
     q: 1,
-    tranche: 1,
     traderAsks: [{ price: 50, size: 0.5, who: "seller" }],
     levels: 2,
     hoursLeft: 0,
@@ -18,7 +17,7 @@ test("book sorts trader asks and marks pool slices reserved for guests", () => {
     src: "trader",
     who: "seller",
   });
-  expect(result.asks.slice(1).every((ask) => ask.guestOnly)).toBe(true);
+  for (const ask of result.asks) expect(ask).not.toHaveProperty("guestOnly");
   expect(result.bids).toHaveLength(2);
   expect(result.bids[0]?.net).toBeCloseTo(70, 10);
   expect(result.recall).toBe(125);

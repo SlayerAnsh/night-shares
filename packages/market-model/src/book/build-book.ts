@@ -7,20 +7,17 @@ export function book({
   k,
   S,
   q,
-  tranche = 0,
   traderAsks = [],
   levels = 8,
   hoursLeft = 999,
 }: BookInput): Book {
   const asks: Ask[] = [],
     bids: Bid[] = [];
-  const traderLimit = S - tranche; // traders cannot buy into the guest tranche
   for (let i = 0, a = q; i < levels && a + SLICE <= S + 1e-9; i++, a += SLICE)
     asks.push({
       price: cost(F, k, S, a, a + SLICE) / SLICE,
       size: SLICE,
       src: "pool",
-      guestOnly: a + SLICE > traderLimit + 1e-9,
     });
   for (const t of traderAsks) {
     asks.push({ price: t.price, size: t.size, src: "trader", who: t.who });

@@ -99,6 +99,7 @@ message GetBookRequest {
 }
 
 message GetBookResponse {
+  repeated PublicHolder holders = 7;
   repeated BookLevel asks = 1;
   repeated BookLevel bids = 2;
   night_shares.common.v1.Usdc recall_cap = 3;

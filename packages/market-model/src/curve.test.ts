@@ -7,7 +7,6 @@ import {
   lastRoomPrice,
   price,
   recallStrike,
-  trancheOf,
 } from "./curve";
 
 test("flat curves charge floor per night and exponential curves integrate", () => {
@@ -20,11 +19,11 @@ test("flat curves charge floor per night and exponential curves integrate", () =
   expect(lastRoomPrice(100, 0.6)).toBe(price(100, 0.6, 4, 4));
   expect(recallStrike(100, 0)).toBe(125);
 });
-test("floors, caps, tranches and fair bounds retain original rounding", () => {
+test("floors, human caps and fair bounds retain original rounding", () => {
   expect(floorFromRate(101)).toBe(86);
   expect(capOf(3)).toBe(1);
-  expect(capOf(5, false)).toBe(5);
-  expect(trancheOf(0)).toBe(1);
+  expect(capOf(5)).toBe(1.5);
+  expect(capOf(0)).toBe(1);
   expect(clampFair(1, 100)).toBe(70);
   expect(clampFair(999, 100)).toBe(250);
 });
