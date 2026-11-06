@@ -33,7 +33,7 @@ export function QuotePreview({
         </dd>
         <dt>Late fee</dt>
         <dd>{money(q.lateFee)}</dd>
-        <dt>Refund if unsold</dt>
+        <dt>If unsold at cutoff: 70% of the average bid</dt>
         <dd>{money(q.unsoldRefund)}</dd>
       </dl>
       {(q.filled?.tenths ?? 0) < (q.requested?.tenths ?? 0) && (

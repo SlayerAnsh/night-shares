@@ -2,6 +2,7 @@ import { create } from "@bufbuild/protobuf";
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
 import {
   capOf,
+  cutoffRefund,
   FEE,
   lateFee,
   toMicros,
@@ -15,13 +16,8 @@ import type { User } from "../../../../ports/sessions/session-store";
 import { mulTenths } from "../../../../shared/money";
 import { toProto } from "../../../../shared/night-key";
 import type { NightRecord } from "../../../inventory/inventory-repo";
-import {
-  bookOf,
-  type Deps,
-  hoursLeft,
-  releaseAt,
-  syncPosition,
-} from "../context";
+import { cutoffAt } from "../../cutoff";
+import { bookOf, type Deps, hoursLeft, syncPosition } from "../context";
 export function quoteSell(
   deps: Deps,
   key: string,
@@ -58,9 +54,11 @@ export function quoteSell(
     lateFee: {
       micros: lateFee(hoursLeft(deps.ports, record)) > FEE ? gross - net : 0n,
     },
-    unsoldRefund: { micros: 0n },
+    unsoldRefund: {
+      micros: mulTenths(toMicros(cutoffRefund(record.state).perNight), size),
+    },
     capUsed: { tenths: position ? position.free + position.escrow : 0 },
     cap: { tenths: toTenths(capOf(record.state.S, record.state.peak)) },
-    releaseAt: timestampFromMs(releaseAt(record)),
+    releaseAt: timestampFromMs(cutoffAt(deps.ports, record)),
   });
 }

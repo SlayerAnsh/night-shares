@@ -1,6 +1,7 @@
 import type { Book } from "../book/types";
-import { FEE, REFUND_AT_FAIR } from "../constants";
+import { FEE } from "../constants";
 import { price } from "../curve";
+import { cutoffRefund } from "../cutoff-refund";
 import type { NightState } from "../night/night-state";
 import { hash } from "../random/hash";
 import { rng } from "../random/rng";
@@ -38,7 +39,8 @@ export function nightAnalytics(
   const exit =
     sell *
       (0.5 * ps * (1 + trend) + 0.5 * price(state.F, state.k, state.S, qExp)) +
-    (1 - sell) * (0.5 * ps * 0.9 * (1 - FEE) + 0.5 * REFUND_AT_FAIR * ps);
+    (1 - sell) *
+      (0.5 * ps * 0.9 * (1 - FEE) + 0.5 * cutoffRefund(state).perNight);
   const ret = (exit * (1 - FEE)) / (current * (1 + FEE)) - 1;
   const apy = Math.max(1e-4, 1 + ret) ** (365 / dl) - 1;
   const changes = hist.market
@@ -78,7 +80,7 @@ export function nightAnalytics(
     volatilityBps: bps(vol),
     sellThroughBps: bps(sell),
     expectedExit: exit,
-    worstRefund: REFUND_AT_FAIR * ps,
+    worstRefund: cutoffRefund(state).perNight,
     buyLiquidityTenths: toTenths(buy),
     sellLiquidityTenths: toTenths(sellLiq),
   };

@@ -12,7 +12,19 @@ import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyPoolSell } from "../../../inventory/mutations/apply-pool-sell";
 import { assertOpen, type Deps, realise, syncPosition } from "../context";
 import { quoteSell } from "./quote-sell";
+import { withSettlement } from "./with-settlement";
 export async function sell(
+  deps: Deps,
+  user: User,
+  key: string,
+  size: number,
+  min: bigint,
+) {
+  return withSettlement(deps, key, () =>
+    executeSell(deps, user, key, size, min),
+  );
+}
+async function executeSell(
   deps: Deps,
   user: User,
   key: string,

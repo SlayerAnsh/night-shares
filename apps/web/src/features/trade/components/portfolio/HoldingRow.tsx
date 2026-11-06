@@ -33,7 +33,10 @@ export function HoldingRow({
       <td>{card ? percent(card.estimatedReturnBps) : "Unavailable"}</td>
       <td>{card ? riskName(card.risk) : "Unavailable"}</td>
       <td>{formatRoomNights(listed)}</td>
-      <td>{money(h.unsoldRefund)}</td>
+      <td>
+        {money(h.unsoldRefund)}
+        <small>If unsold at cutoff: 70% of the average bid</small>
+      </td>
     </tr>
   );
 }

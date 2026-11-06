@@ -1,4 +1,6 @@
 export type ActivityKind =
+  | "night_released"
+  | "cutoff_refund"
   | "guest_booked"
   | "trader_bought"
   | "trader_sold_back"
@@ -7,7 +9,13 @@ export type ActivityKind =
   | "ask_cancelled"
   | "nights_opened"
   | "nights_edited"
-  | "selling_stopped";
+  | "selling_stopped"
+  | "maker_rebate"
+  | "double_sale_reported"
+  | "double_sale_refund"
+  | "channel_push_failed"
+  | "agent_wallet_funded"
+  | "agent_order_filled";
 
 export type ActivityEvent = {
   id: string;

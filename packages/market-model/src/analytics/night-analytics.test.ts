@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { book, nightState } from "../index";
+import { book, cutoffRefund, nightState } from "../index";
 import { hostTrackRecord } from "./host-track-record";
 import { nightAnalytics } from "./night-analytics";
 import { priceHistory } from "./price-history";
@@ -31,8 +31,8 @@ test("night analytics retain returns, risk, liquidity and sell-through", () => {
     hostTrackRecord(property).bookedBps,
   );
   expect(result).toMatchObject({
-    estimatedReturnBps: 6,
-    annualizedReturnBps: 99,
+    estimatedReturnBps: 98,
+    annualizedReturnBps: 1627,
     risk: "low",
     changeBps: 187,
     volatilityBps: 847,
@@ -40,8 +40,8 @@ test("night analytics retain returns, risk, liquidity and sell-through", () => {
     buyLiquidityTenths: 8,
     sellLiquidityTenths: 8,
   });
-  expect(result.expectedExit).toBeCloseTo(830.9431537439161, 9);
-  expect(result.worstRefund).toBe(state.pstar * 0.5);
+  expect(result.expectedExit).toBeCloseTo(838.542633462095, 9);
+  expect(result.worstRefund).toBe(cutoffRefund(state).perNight);
   expect(result.riskScore).toBeCloseTo(0.4039232405055009, 12);
   const empty = nightAnalytics(
     state,

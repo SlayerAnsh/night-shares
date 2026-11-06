@@ -9,6 +9,22 @@ import { sqliteWatchlist } from "./watchlist.sqlite";
 export function createSqliteMarketRepo(db: Database): MarketRepo {
   const queues = new Map<string, Promise<unknown>>();
   return {
+    remember(user) {
+      db.query(
+        "INSERT INTO market_holders VALUES (?, ?, ?) ON CONFLICT(human_id) DO UPDATE SET id = excluded.id, wallet_address = excluded.wallet_address",
+      ).run(user.humanId, user.id, user.walletAddress);
+    },
+    holders(key) {
+      return db
+        .query<
+          { humanId: string; id: string; walletAddress: string },
+          [string]
+        >(
+          `SELECT h.human_id AS humanId, h.id, h.wallet_address AS walletAddress FROM market_holders h JOIN market_positions p ON p.human_id = h.human_id WHERE p.night_key = ? AND (p.free > 0 OR p.escrow > 0)`,
+        )
+        .all(key)
+        .map((user) => ({ ...user, level: "orb" as const }));
+    },
     position: (id, key) => sqlitePosition(db, id, key),
     account(id) {
       return {

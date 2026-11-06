@@ -7,11 +7,11 @@ import {
 import type { Ports } from "../../../container/ports";
 import { transaction } from "../../../db/transaction";
 import type { User } from "../../../ports/sessions/session-store";
-import { parseDate } from "../../../shared/dates";
 import { DomainError } from "../../../shared/errors/domain-error";
 import { mulTenths } from "../../../shared/money";
 import { format, type NightIdentity } from "../../../shared/night-key";
 import type { NightRecord } from "../../inventory/inventory-repo";
+import { cutoffAt } from "../cutoff";
 import type { MarketRepo, Position } from "../repo/market-repo";
 export type Deps = { ports: Ports; repo: MarketRepo };
 export function nightKey(night?: NightIdentity) {
@@ -27,9 +27,9 @@ export function quantity(size?: { tenths: number }) {
   return size.tenths;
 }
 export const releaseAt = (record: NightRecord) =>
-  parseDate(record.date) + 14 * 3_600_000;
+  record.cutoffAt ?? Date.parse(`${record.date}T14:00:00Z`);
 export const hoursLeft = (ports: Ports, record: NightRecord) =>
-  Math.max(0, (releaseAt(record) - ports.clock.now()) / 3_600_000);
+  Math.max(0, (cutoffAt(ports, record) - ports.clock.now()) / 3_600_000);
 export function bookOf(ports: Ports, record: NightRecord, wallet?: string) {
   return book({
     ...record.state,
@@ -52,6 +52,7 @@ export function syncPosition(
   record: NightRecord,
 ) {
   return transaction(ports.db, () => {
+    repo.remember(user);
     const position = repo.position(user.humanId, record.key);
     const ask = record.state.traderAsks.find(
       (a) => a.who === user.walletAddress,
@@ -71,6 +72,8 @@ export function syncPosition(
   });
 }
 export function assertOpen(ports: Ports, record: NightRecord) {
+  if (record.released)
+    throw new DomainError("FAILED_PRECONDITION", "This night has closed.");
   if (record.stopped || hoursLeft(ports, record) <= 0)
     throw new DomainError(
       "FAILED_PRECONDITION",

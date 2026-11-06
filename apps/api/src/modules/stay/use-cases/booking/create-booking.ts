@@ -42,6 +42,13 @@ export function createCreateBooking(ports: Ports, repo: StayRepo) {
 
         const { value, dates } = selection(ports, lock.quote.selection);
         const keys = dates.map((date) => format({ ...value, date }));
+        for (const key of keys) {
+          if (ports.inventory.get(key).released)
+            throw new DomainError(
+              "FAILED_PRECONDITION",
+              "This night has closed.",
+            );
+        }
         const current = keys.map((key) => ({
           key,
           route: routeNight(ports.inventory.get(key), value.rooms),

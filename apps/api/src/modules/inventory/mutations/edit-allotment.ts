@@ -11,6 +11,8 @@ export function editAllotment(
   record: NightRecord,
   edit: AllotmentEdit,
 ): NightRecord {
+  if (record.released)
+    throw new DomainError("FAILED_PRECONDITION", "This night has closed.");
   const S = quantity(edit.tenths);
   const { booked, held } = record.state;
   if (S < booked + held - 1e-9)

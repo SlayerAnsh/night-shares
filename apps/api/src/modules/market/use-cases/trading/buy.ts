@@ -17,10 +17,23 @@ import { feePayments } from "../../../../shared/fee-payments";
 import { mulTenths } from "../../../../shared/money";
 import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyTraderAskFill } from "../../../inventory/mutations/apply-trader-ask-fill";
+import { cutoffAt } from "../../cutoff";
 import { buyQuote } from "../../mappers/route";
 import { assertOpen, bookOf, type Deps, syncPosition } from "../context";
 import { revertFills } from "./revert-fills";
+import { withSettlement } from "./with-settlement";
 export async function buy(
+  deps: Deps,
+  user: User,
+  key: string,
+  size: number,
+  max: bigint,
+) {
+  return withSettlement(deps, key, () =>
+    executeBuy(deps, user, key, size, max),
+  );
+}
+async function executeBuy(
   deps: Deps,
   user: User,
   key: string,
@@ -50,7 +63,13 @@ export async function buy(
       if (used + size > toTenths(capOf(current.state.S, current.state.peak)))
         throw new DomainError("FAILED_PRECONDITION", "Per-human cap exceeded.");
       result = routeBuy(bookOf(ports, current, user.walletAddress), size / 10);
-      const quote = buyQuote(current, size, result, used);
+      const quote = buyQuote(
+        current,
+        size,
+        result,
+        used,
+        cutoffAt(ports, current),
+      );
       if (toTenths(result.filled) !== size)
         throw new DomainError(
           "FAILED_PRECONDITION",
@@ -72,7 +91,7 @@ export async function buy(
     });
     if (!result)
       throw new DomainError("FAILED_PRECONDITION", "Trade could not execute.");
-    const quote = buyQuote(record, size, result, used);
+    const quote = buyQuote(record, size, result, used, cutoffAt(ports, record));
     const position = deps.repo.position(user.humanId, key);
     const previousAverage = position.average;
     const total = quote.total?.micros ?? 0n;

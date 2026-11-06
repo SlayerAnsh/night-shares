@@ -13,7 +13,8 @@ import {
 import type { Ports } from "../../../../container/ports";
 import { toProto } from "../../../../shared/night-key";
 import type { NightRecord } from "../../../inventory/inventory-repo";
-import { bookOf, hoursLeft, releaseAt } from "../../use-cases/context";
+import { cutoffAt } from "../../cutoff";
+import { bookOf, hoursLeft } from "../../use-cases/context";
 import { history } from "./history";
 export function card(ports: Ports, record: NightRecord) {
   const property = ports.catalog.get(record.propertyId);
@@ -44,7 +45,7 @@ export function card(ports: Ports, record: NightRecord) {
       risk: { low: Risk.LOW, medium: Risk.MEDIUM, high: Risk.HIGH }[
         analytics.risk
       ],
-      releaseAt: timestampFromMs(releaseAt(record)),
+      releaseAt: timestampFromMs(cutoffAt(ports, record)),
       changeBps: analytics.changeBps,
     }),
     stats: create(NightStatsSchema, {

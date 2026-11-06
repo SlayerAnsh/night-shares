@@ -3,9 +3,9 @@ import { timestampFromMs } from "@bufbuild/protobuf/wkt";
 import {
   type BuyResult,
   capOf,
+  cutoffRefund,
   toMicros,
   toTenths,
-  unsoldRefund,
 } from "@night-shares/market-model";
 import {
   BookSource,
@@ -28,6 +28,7 @@ export function buyQuote(
   size: number,
   result: BuyResult,
   used: number,
+  cutoff = releaseAt(record),
 ) {
   return create(RouteQuoteSchema, {
     night: toProto(record.key),
@@ -48,10 +49,10 @@ export function buyQuote(
     lateFee: { micros: 0n },
     unsoldRefund: {
       micros: mulTenths(
-        toMicros(unsoldRefund(record.state.pstar, record.state.pstar)),
+        toMicros(cutoffRefund(record.state).perNight),
         toTenths(result.filled),
       ),
     },
-    releaseAt: timestampFromMs(releaseAt(record)),
+    releaseAt: timestampFromMs(cutoff),
   });
 }

@@ -10,3 +10,11 @@ test("guest fills preserve booked plus held equals pool position", () => {
   expect(next.state.booked).toBe(record.state.booked + 1);
   expect(next.state.booked + next.state.held).toBeCloseTo(next.state.q);
 });
+
+test("released nights reject booking before mutating inventory", () => {
+  const f = fixture();
+  const record = f.ports.inventory.get(f.key);
+  expect(() =>
+    fillNight({ ...record, released: true }, routeNight(record, 1), 1),
+  ).toThrow("This night has closed.");
+});

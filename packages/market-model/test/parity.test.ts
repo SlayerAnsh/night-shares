@@ -8,7 +8,10 @@ const dates = Array.from({ length: 60 }, (_, i) =>
 );
 
 test("original model fingerprint and all exported constants match", () => {
-  expect(modelSha.slice(0, 12)).toBe("7d071c4616d8");
+  expect(modelSha.slice(0, 12)).toBe("e3e2575c2d1f");
+  expect(Object.keys(original)).toHaveLength(32);
+  expect("unsoldRefund" in port).toBe(false);
+  expect("REFUND_AT_FAIR" in port).toBe(false);
   expect(shared.props).toHaveLength(6);
   expect(shared.today.getFullYear()).toBe(2026);
   expect(shared.today.getMonth()).toBe(11);
@@ -56,20 +59,6 @@ for (const property of shared.props) {
         compare(port.cutoffRefund(state), original.cutoffRefund(reference));
         for (const hours of [-1, 0, 14, 36, 71.9, 72, state.hoursLeft]) {
           compare(port.lateFee(hours), original.lateFee(hours));
-        }
-        for (const ask of [
-          undefined,
-          null,
-          0,
-          state.pstar,
-          state.pstar * 1.5,
-          state.pstar * 2,
-          state.pstar * 3,
-        ]) {
-          compare(
-            port.unsoldRefund(ask, state.pstar),
-            original.unsoldRefund(ask, reference.pstar),
-          );
         }
       }
   });

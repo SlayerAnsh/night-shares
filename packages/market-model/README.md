@@ -1,6 +1,6 @@
 # @night-shares/market-model
 
-Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `7d071c4616d8`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
+Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `e3e2575c2d1f`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
 
 ## Public API
 
@@ -17,7 +17,6 @@ trancheOf(S: number): number
 clampFair(pstar: number, usualRate: number): number
 askFillProceeds(price: number, size?: number): { gross: number; fee: number; net: number }
 lateFee(hoursLeft: number): number
-unsoldRefund(ask: number | null | undefined, pstar: number): number
 cutoffRefund(input: CutoffRefundInput): {
   avgBid: number; perNight: number; total: number; haircut: number;
 }
@@ -38,13 +37,13 @@ toTenths(roomNights: number): number
 fromTenths(tenths: number): number
 ```
 
-Constants: `FEE`, `HOST_FEE`, `PLATFORM_FEE`, `PRESETS`, `FLOOR_RATIO`, `RECALL_MARKUP`, `RECALL_MIN_MARKUP`, `GUEST_TRANCHE`, `CAP_PEAK`, `LATE_HOURS`, `LATE_MAX`, `COVER_FUND`, `PSTAR_BAND`, `PSTAR_MAX_MOVE_PER_HOUR`, `REFUND_AT_FAIR`, `SLICE`.
+Constants: `FEE`, `HOST_FEE`, `PLATFORM_FEE`, `PRESETS`, `FLOOR_RATIO`, `RECALL_MARKUP`, `RECALL_MIN_MARKUP`, `GUEST_TRANCHE`, `CAP_PEAK`, `LATE_HOURS`, `LATE_MAX`, `COVER_FUND`, `PSTAR_BAND`, `PSTAR_MAX_MOVE_PER_HOUR`, `SLICE`.
 
 Types: `RateProperty`, `NightProperty`, `NightStateInput`, `NightState`, `PayoutInput`, `CutoffRefundInput`, `TraderAsk`, `PoolAsk`, `TraderLevel`, `Ask`, `Bid`, `BookInput`, `Book`, `Fill`, `BuyResult`.
 
 `RateProperty` contains only `{ id, base, phase }`. `NightProperty` adds `rooms` and `roomTypes: { rateMultiplier: number }[]`. `NightStateInput` is `{ property, roomIndex, date, today }`. Both dates are valid `YYYY-MM-DD` calendar dates. Calendar arithmetic uses UTC fields to avoid depending on the process timezone. An out of range room index falls back to the first room type, but the supplied index still seeds randomness, matching the mock. Empty room types throw `TypeError`, as in the original.
 
-`BookInput` requires `{ F, k, S, q }` and optionally accepts `{ tranche, traderAsks, levels, hoursLeft }`. Trader asks contain `{ price, size, who? }`. `PayoutInput` and `CutoffRefundInput` require `{ F, k, S, q, held }`. Public interfaces are defined in the source modules and exported from the package entry point.
+`BookInput` requires `{ F, k, S, q }` and optionally accepts `{ tranche, traderAsks, levels, hoursLeft }`. Trader asks contain `{ price, size, who? }`. `PayoutInput` and `CutoffRefundInput` require `{ F, k, S, q, held }`. `PayoutInput` also accepts an API extension, `cutoffPaid`, for settled cutoff refunds. `hostPayout` deducts that amount from gross and available proceeds; absent values preserve source parity. Public interfaces are defined in the source modules and exported from the package entry point.
 
 Convert only at system boundaries. `toMicros` rounds the decimal representation of a finite USD value to six decimals, with ties away from zero; nonfinite values throw `RangeError`. `toTenths` rounds room nights to the nearest integer tenth, with ties away from zero. `fromTenths` divides an integer quantity by ten. Core math performs neither conversion.
 
@@ -52,7 +51,7 @@ Convert only at system boundaries. `toMicros` rounds the decimal representation 
 
 From this directory, run `bun test` and `pnpm typecheck`. From the workspace root, run `pnpm check`.
 
-Parity tests load the unmodified sibling mock files through `node:vm`, with a minimal `window` shim and a fixed zero argument `Date` constructor. Today is `2026-12-01`. Catalog fixtures come only from the VM. The grid covers all six properties, both room types and 60 dates from December 1 through January 29: 720 states, usual rates, books and payouts, 5,760 routes across four quantities and both buyer modes, 5,040 late fees, 5,040 legacy refunds and 720 cutoff refunds. Another 24 cutoff cases cover empty, negligible, fractional and fully held inventory across three curve slopes. Numeric tolerance is absolute `1e-9`; object keys, arrays and nonnumeric values must also match. Additional tests cover every constant, curve helpers, deterministic random streams and 12 distant date fallback states. Focused unit tests sit beside implementation files.
+Parity tests load the unmodified sibling mock files through `node:vm`, with a minimal `window` shim and a fixed zero argument `Date` constructor. Today is `2026-12-01`. Catalog fixtures come only from the VM. The grid covers all six properties, both room types and 60 dates from December 1 through January 29: 720 states, usual rates, books and payouts, 5,760 routes across four quantities and both buyer modes, 5,040 late fees, 720 cutoff refunds. Another 24 cutoff cases cover empty, negligible, fractional and fully held inventory across three curve slopes. Numeric tolerance is absolute `1e-9`; object keys, arrays and nonnumeric values must also match. Additional tests cover every constant, curve helpers, deterministic random streams and 12 distant date fallback states. Focused unit tests sit beside implementation files.
 
 ## Rules fixed in both mock and port
 
@@ -68,7 +67,7 @@ Guests never pay above the recall cap: routing stops at the first ask priced abo
 
 For `F: 6000`, `k: 1.2`, `S: 15`, `q: 6` and `held: 4`, results rounded to cents are `avgBid: 8298.07`, `perNight: 5808.65`, `total: 23234.59` and `haircut: 9957.68`. Calculations remain unrounded internally.
 
-`unsoldRefund` and `REFUND_AT_FAIR` are deprecated in favor of `cutoffRefund`; their behavior is unchanged. For `offlineSaleRefund`, callers pass the pool bid as `pstar`.
+The source exposes 32 exports. The legacy parked-ask refund and its constant have been removed. For `offlineSaleRefund`, callers pass the pool bid as `pstar`.
 
 ## Offline double sale cover
 

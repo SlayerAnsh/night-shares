@@ -9,6 +9,8 @@ export function fillNight(
   route: BuyResult,
   rooms: number,
 ) {
+  if (record.released)
+    throw new DomainError("FAILED_PRECONDITION", "This night has closed.");
   let next = record;
   for (const fill of route.fills) {
     if (fill.src === "pool") next = applyPoolBuy(next, toTenths(fill.take));

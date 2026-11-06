@@ -12,6 +12,4 @@ export const LATE_MAX = 0.3;
 export const COVER_FUND = 0.001;
 export const PSTAR_BAND = [0.7, 2.5] as const;
 export const PSTAR_MAX_MOVE_PER_HOUR = 0.05;
-/** @deprecated Cutoff now uses cutoffRefund. */
-export const REFUND_AT_FAIR = 0.5;
 export const SLICE = 0.1;

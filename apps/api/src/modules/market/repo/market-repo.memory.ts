@@ -1,5 +1,7 @@
+import type { User } from "../../../ports/sessions/session-store";
 import type { Account, MarketRepo } from "./market-repo";
 export function createMemoryMarketRepo(): MarketRepo {
+  const users = new Map<string, User>();
   const accounts = new Map<string, Account>();
   const queues = new Map<string, Promise<unknown>>();
   const account = (id: string): Account => {
@@ -11,6 +13,15 @@ export function createMemoryMarketRepo(): MarketRepo {
     return value;
   };
   return {
+    remember(user) {
+      users.set(user.humanId, user);
+    },
+    holders(key) {
+      return [...users.values()].filter((user) => {
+        const p = account(user.humanId).positions.get(key);
+        return p && p.free + p.escrow > 0;
+      });
+    },
     account,
     position(id, key) {
       const positions = account(id).positions;

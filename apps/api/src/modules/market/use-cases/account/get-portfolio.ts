@@ -1,5 +1,5 @@
 import { create } from "@bufbuild/protobuf";
-import { toMicros, toTenths, unsoldRefund } from "@night-shares/market-model";
+import { cutoffRefund, toMicros, toTenths } from "@night-shares/market-model";
 import { GetPortfolioResponseSchema } from "@night-shares/proto/market/v1/market_pb";
 import type { User } from "../../../../ports/sessions/session-store";
 import { mulTenths } from "../../../../shared/money";
@@ -43,12 +43,10 @@ export function getPortfolio(deps: Deps, user: User) {
         },
         unsoldRefund: {
           $typeName: "night_shares.common.v1.Usdc",
-          micros: ask
-            ? mulTenths(
-                toMicros(unsoldRefund(ask.price, record.state.pstar)),
-                toTenths(ask.size),
-              )
-            : 0n,
+          micros: mulTenths(
+            toMicros(cutoffRefund(record.state).perNight),
+            size,
+          ),
         },
       });
     if (ask)

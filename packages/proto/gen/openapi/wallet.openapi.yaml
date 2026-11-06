@@ -313,6 +313,9 @@ components:
         - TRANSACTION_KIND_WITHDRAWAL
         - TRANSACTION_KIND_FEE
         - TRANSACTION_KIND_DEPOSIT
+        - TRANSACTION_KIND_REBATE
+        - TRANSACTION_KIND_DOUBLE_SALE_REFUND
+        - TRANSACTION_KIND_AGENT_FUNDING
 security: []
 tags:
   - name: night_shares.wallet.v1.WalletService
