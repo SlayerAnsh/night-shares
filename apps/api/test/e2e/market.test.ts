@@ -26,6 +26,9 @@ test("discover, detail, book, quote, buy, list, cancel and late sell-back", asyn
   expect(detail.monthCalendar).toHaveLength(31);
   expect((await market.getBook({ night })).lateFeeBps).toBeGreaterThan(130);
   const quote = (await market.quoteBuy({ night, size: { tenths: 5 } })).quote;
+  expect(quote?.gross?.micros).toBe(373123796n);
+  expect(quote?.fee?.micros).toBe(4850609n);
+  expect(quote?.total?.micros).toBe(377974405n);
   const execution = await market.buy({
     night,
     size: { tenths: 5 },

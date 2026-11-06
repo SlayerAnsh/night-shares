@@ -9,14 +9,15 @@ import {
   recallStrike,
 } from "./curve";
 
-test("flat curves charge floor per night and exponential curves integrate", () => {
+test("flat curves charge floor per night and ladder costs add across rooms", () => {
   expect(price(100, 0, 4, 2)).toBe(100);
   expect(cost(100, 0, 4, 1, 3)).toBe(200);
   expect(cost(100, 0.6, 4, 0, 2) + cost(100, 0.6, 4, 2, 4)).toBeCloseTo(
     cost(100, 0.6, 4, 0, 4),
     10,
   );
-  expect(lastRoomPrice(100, 0.6)).toBe(price(100, 0.6, 4, 4));
+  expect(lastRoomPrice(100, 0.6)).toBe(182.2118800390509);
+  expect(price(100, 0.6, 4, 4)).toBe(182.21188003905084);
   expect(recallStrike(100, 0)).toBe(125);
 });
 test("floors, human caps and fair bounds retain original rounding", () => {

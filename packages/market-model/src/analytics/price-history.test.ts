@@ -18,8 +18,8 @@ test("history preserves deterministic seeds, 31 points and current endpoints", (
   const history = priceHistory("velana", 0, "2026-12-24", state);
   expect(history.fair).toHaveLength(31);
   expect(history.market).toHaveLength(31);
-  expect(history.fair[0]).toBeCloseTo(765.4594979609201, 9);
-  expect(history.market[0]).toBeCloseTo(807.8559931820773, 9);
+  expect(history.fair[0]).toBeCloseTo(765.3587045263467, 9);
+  expect(history.market[0]).toBeCloseTo(807.7496171028591, 9);
   expect(history.fair[30]).toBe(state.pstar);
   expect(history.market[30]).toBe(price(state.F, state.k, state.S, state.q));
   expect(priceHistory("velana", 0, "2026-12-24", state)).toEqual(history);

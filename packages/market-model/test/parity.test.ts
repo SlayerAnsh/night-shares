@@ -8,8 +8,8 @@ const dates = Array.from({ length: 60 }, (_, i) =>
 );
 
 test("original model fingerprint and all exported constants match", () => {
-  expect(modelSha.slice(0, 12)).toBe("3d84c7b5d2cb");
-  expect(Object.keys(original)).toHaveLength(33);
+  expect(modelSha.slice(0, 12)).toBe("b7476f4bd364");
+  expect(Object.keys(original)).toHaveLength(35);
   expect("unsoldRefund" in port).toBe(false);
   expect("REFUND_AT_FAIR" in port).toBe(false);
   expect(shared.props).toHaveLength(6);
@@ -80,7 +80,6 @@ test("curve, fee and random helpers preserve exact source formulas", () => {
       compare(port.recallStrike(F, k), original.recallStrike(F, k));
       compare(port.recallStrike(F, k, 0.5), original.recallStrike(F, k, 0.5));
       compare(port.floorFromRate(F), original.floorFromRate(F));
-      compare(port.offlineSaleRefund(F), original.offlineSaleRefund(F));
       compare(port.clampFair(F, 100), original.clampFair(F, 100));
     }
   for (const S of [0, 1, 3, 8]) {
@@ -155,17 +154,14 @@ test("recall markup floor and RangeError behavior match the source", () => {
   }
 });
 
-test("offline sale cover waterfall matches across balances and fair prices", () => {
-  for (const pstar of [0, 0.01, 100, 16000])
-    for (const reserveSlice of [-1, 0, 30, 11000, 32000])
-      for (const pending of [-1, 0, 50, 3000, 50000]) {
-        const input = { pstar, reserveSlice, pending };
-        compare(port.offlineSaleCover(input), original.offlineSaleCover(input));
-      }
-  compare(
-    port.offlineSaleCover({ pstar: 100 }),
-    original.offlineSaleCover({ pstar: 100 }),
-  );
+test("walk payouts match across booking prices and pending balances", () => {
+  for (const paid of [0, 0.01, 100, 10000])
+    for (const pending of [undefined, -1, 0, 50, 12000, 50000]) {
+      const input = { paid, pending };
+      compare(port.walkPayout(input), original.walkPayout(input));
+    }
+  expect("offlineSaleRefund" in port).toBe(false);
+  expect("offlineSaleCover" in port).toBe(false);
 });
 
 test("host payout matches with empty, fully held and fully booked inventory", () => {
@@ -213,7 +209,7 @@ test("guest recall and sold-out routes match the frozen near-capacity example", 
   const guest = port.routeBuy(actual, 1, { guest: true, recallable: 4 });
   expect(guest.fills.filter((fill) => fill.src === "pool")).toHaveLength(5);
   expect(guest.fills.at(-1)?.src).toBe("recall");
-  expect(Math.round(guest.total)).toBe(22503);
+  expect(Math.round(guest.total)).toBe(22500);
   expect(
     port.routeBuy(actual, 1, { guest: true, recallable: 0.2 }).filled,
   ).toBeCloseTo(0.7, 12);

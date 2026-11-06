@@ -1,6 +1,6 @@
 # @night-shares/market-model
 
-Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `3d84c7b5d2cb`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
+Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `b7476f4bd364`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
 
 ## Public API
 
@@ -19,7 +19,9 @@ lateFee(hoursLeft: number): number
 cutoffRefund(input: CutoffRefundInput): {
   avgBid: number; perNight: number; total: number; haircut: number;
 }
-offlineSaleRefund(pstar: number): number
+walkPayout(input: { paid: number; pending?: number }): {
+  toGuest: number; fromPending: number; fromFund: number; hostDebt: number;
+}
 book(input: BookInput): Book
 routeBuy(book: Book, amount: number, options?: { guest?: boolean; recallable?: number }): BuyResult
 nightPrice(property: RateProperty, date: string): number
@@ -36,7 +38,7 @@ toTenths(roomNights: number): number
 fromTenths(tenths: number): number
 ```
 
-Constants: `MAKER_REBATE`, `REBATE_BAND`, `FEE`, `HOST_FEE`, `PLATFORM_FEE`, `PRESETS`, `FLOOR_RATIO`, `RECALL_MARKUP`, `RECALL_MIN_MARKUP`, `CAP_HUMAN`, `LATE_HOURS`, `LATE_MAX`, `COVER_FUND`, `PSTAR_BAND`, `PSTAR_MAX_MOVE_PER_HOUR`, `SLICE`.
+Constants: `MAKER_REBATE`, `REBATE_BAND`, `FEE`, `HOST_FEE`, `PLATFORM_FEE`, `PRESETS`, `FLOOR_RATIO`, `RECALL_MARKUP`, `RECALL_MIN_MARKUP`, `CAP_HUMAN`, `LATE_HOURS`, `LATE_MAX`, `COVER_FUND`, `WALK_MULTIPLE`, `WALK_REPORT_HOURS`, `WALK_SUSPEND_AFTER`, `PSTAR_BAND`, `PSTAR_MAX_MOVE_PER_HOUR`, `SLICE`.
 
 Types: `RateProperty`, `NightProperty`, `NightStateInput`, `NightState`, `PayoutInput`, `CutoffRefundInput`, `TraderAsk`, `PoolAsk`, `TraderLevel`, `Ask`, `Bid`, `BookInput`, `Book`, `Fill`, `BuyResult`.
 
@@ -64,15 +66,21 @@ Guests never pay above the recall cap: routing stops at the first ask priced abo
 
 `cutoffRefund({ F, k, S, q, held })` redeems unsold holdings against their pool reserve `L = cost(F, k, S, q - held, q)`. It returns `avgBid = L / held`, `perNight = avgBid * (1 - LATE_MAX)`, `total = L * (1 - LATE_MAX)` and `haircut = L * LATE_MAX`. The 30% haircut transfers to the rebate pool, never the host. All fields are zero unless `held > 1e-9`, preserving the source guard.
 
-For `F: 6000`, `k: 1.2`, `S: 15`, `q: 6` and `held: 4`, results rounded to cents are `avgBid: 8298.07`, `perNight: 5808.65`, `total: 23234.59` and `haircut: 9957.68`. Calculations remain unrounded internally.
+For `F: 6000`, `k: 1.2`, `S: 15`, `q: 6` and `held: 4`, results rounded to cents are `avgBid: 8295.85`, `perNight: 5807.10`, `total: 23228.39` and `haircut: 9955.02`. Calculations remain unrounded internally.
 
-The source exposes 33 exports. The legacy parked-ask refund and its constant have been removed. For `offlineSaleRefund`, callers pass the pool bid as `pstar`.
+The source exposes 35 exports. The legacy parked-ask refund, `offlineSaleRefund` and `offlineSaleCover` are removed.
 
-## Offline double sale cover
+## Ladder pricing
 
-`offlineSaleCover({ pstar, reserveSlice = 0, pending = 0 })` pays the holder the fair price from the token reserve slice, then pending host payouts, then the cover fund. Remaining pending payouts pay a penalty of one fair price. `hostDebt` combines the fund advance and unpaid penalty; `hostTotal` is twice the fair price. The result includes `toHolder`, `fromReserve`, `fromPending`, `fromFund`, `penalty`, `penaltyFromPending`, `hostDebt` and `hostTotal`.
+`price` and `cost` follow one constant-liquidity v4 position per room. Internal `ideal(F, k, S, q)` is `F * exp(k * q / S)`. Each room spans that ideal price at its endpoints, with a partial last room when supply is fractional. `sqrtAt` computes the price within a position; `cost` sums liquidity times the change in square-root price across overlapping rooms. Reversed intervals negate cost; zero steepness charges `F * (b - a)`. `lastRoomPrice` and `recallStrike` retain their ideal endpoint formulas.
 
-For `pstar: 16000`, `reserveSlice: 11000` and `pending: 3000`, the fund advances 2000 and host debt is 18000. `COVER_FUND` is 0.001 of trade notional, carved out of `PLATFORM_FEE`; total `FEE` remains 0.013. Host payouts hold only trader reserves. Parity tests cover 100 waterfall combinations, default balances and 12 payout edge cases.
+For `F = 6000`, `k = 1.2`, `S = 15`, rounded costs are `cost(6, 7) = 10092` and `cost(0, 15) = 173962`. At `q = 6`, `held = 4`, host payout is `availableNow: 13009.85`, `heldForTraders: 33183.42`. Internal calculations preserve the mock's exact floating point operation order. Chain settlement remains mock.
+
+## Walked guest payouts
+
+`walkPayout({ paid, pending = 0 })` pays `WALK_MULTIPLE = 2` times the booking price to the guest, using nonnegative pending host payouts first, then the cover fund. The fund advance becomes host debt. For `paid: 10000`, `pending: 12000`, the result is `toGuest: 20000`, `fromPending: 12000`, `fromFund: 8000`, `hostDebt: 8000`.
+
+Eligibility is enforced by the API: reception tag presence, no World ID desk check-in, and a report within `WALK_REPORT_HOURS = 24` hours of check-in. Each valid walk is public; `WALK_SUSPEND_AFTER = 2` incidents suspend new openings. False reporters are banned by human ID. Debt is netted from automatic host sweeps. `COVER_FUND` remains 0.001 of trade notional, carved out of `PLATFORM_FEE`, and backs walk payouts only. The pure helper does not enforce eligibility.
 
 ## Recall markup floor
 

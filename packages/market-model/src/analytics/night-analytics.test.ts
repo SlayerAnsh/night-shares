@@ -32,7 +32,7 @@ test("night analytics retain returns, risk, liquidity and sell-through", () => {
   );
   expect(result).toMatchObject({
     estimatedReturnBps: 98,
-    annualizedReturnBps: 1627,
+    annualizedReturnBps: 1631,
     risk: "low",
     changeBps: 187,
     volatilityBps: 847,
@@ -40,9 +40,9 @@ test("night analytics retain returns, risk, liquidity and sell-through", () => {
     buyLiquidityTenths: 8,
     sellLiquidityTenths: 8,
   });
-  expect(result.expectedExit).toBeCloseTo(838.542633462095, 9);
+  expect(result.expectedExit).toBeCloseTo(838.4629514194714, 9);
   expect(result.worstRefund).toBe(cutoffRefund(state).perNight);
-  expect(result.riskScore).toBeCloseTo(0.4039232405055009, 12);
+  expect(result.riskScore).toBeCloseTo(0.4039527460163068, 12);
   const empty = nightAnalytics(
     state,
     { asks: [], bids: [], recall: 0 },
