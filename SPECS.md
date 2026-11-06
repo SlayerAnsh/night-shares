@@ -1,0 +1,203 @@
+# Night Shares platform spec
+
+Night Shares turns hotel room nights into tradable units. Hosts offer nights, traders buy and sell them before the stay, guests book them through a normal checkout. Everyone signs in with World ID. Payments settle in USDC on Arc.
+
+This document describes the backend and shared packages. The behaviour mirrors the approved static mock in `../mock/v2` (see its `README.md` and `assets/model.js`). When the mock changes its market model, `packages/market-model` is re-synced and this spec is updated.
+
+Coding rules live in `STANDARDS.md`.
+
+## Goals
+
+- End to end flows work on mocks from day one: sign in, search, quote, book, check in, trade, open nights, payout.
+- Every external system sits behind a port with a mock adapter, so each can be replaced by a real one without touching business logic.
+- Protobuf is the single contract. Types, Connect clients, React Query hooks and OpenAPI docs are generated from it.
+
+## Non-goals (for now)
+
+- Frontend UI. The Next.js app is planned below but built only after the mock is approved.
+- Real chain, real World ID, real channel manager. They come later, one adapter at a time.
+- A database. Repositories are in memory and seeded on boot.
+
+## Layout
+
+```
+app/
+  package.json            workspace scripts (pnpm)
+  pnpm-workspace.yaml
+  biome.json
+  STANDARDS.md  SPECS.md  DEVELOPER.md  CHANGELOG.md
+  apps/
+    api/                  Bun + Connect server
+    web/                  Next.js (later)
+  packages/
+    tsconfig/             shared tsconfig presets
+    proto/                .proto sources, buf config, generated code and OpenAPI
+    market-model/         pure pricing and book math (port of mock/v2/assets/model.js)
+    design-system/        tokens and, later, React components shared by all web apps
+```
+
+## packages/proto
+
+```
+proto/night_shares/
+  auth/v1/access.proto         method option: PUBLIC | DEVICE | ORB
+  common/v1/money.proto        Usdc { int64 micros }
+  common/v1/night.proto        NightKey, RoomNights { int32 tenths }
+  identity/v1/identity.proto
+  catalog/v1/catalog.proto
+  stay/v1/stay.proto
+  market/v1/market.proto
+  host/v1/host.proto
+  wallet/v1/wallet.proto
+```
+
+Generation (`buf generate`):
+
+| Plugin | Output | Used by |
+| --- | --- | --- |
+| `protoc-gen-es` (v2) | messages and service descriptors | api, web |
+| `protoc-gen-connect-query` | React Query hooks helpers | web |
+| `protoc-gen-connect-openapi` | one OpenAPI 3.1 file per service | api `/docs`, humans |
+
+Generated code goes to `packages/proto/gen` and is not edited by hand. The package exports it as `@night-shares/proto`.
+
+## Services
+
+Auth column: the `access` option on each RPC.
+
+### identity.v1.IdentityService
+
+| RPC | Access | Purpose |
+| --- | --- | --- |
+| StartSignIn | PUBLIC | Begin a World ID request. In: level (DEVICE or ORB). Out: request id, QR payload, expiry |
+| CompleteSignIn | PUBLIC | Submit the World ID proof. Out: session token, user (human id, level, wallet address) |
+| GetSession | DEVICE | Current user |
+| SignOut | DEVICE | End session |
+| VerifyAction | DEVICE | Fresh World ID check for a sensitive action (check in, agent order over budget). Out: verification token |
+
+`humanId` is the per app nullifier from World ID. Night Shares never receives a name or photo. Sign in creates or links a USDC wallet through `WalletProvider`.
+
+### catalog.v1.CatalogService
+
+| RPC | Access | Purpose |
+| --- | --- | --- |
+| ListDestinations | PUBLIC | Autocomplete. In: text. Out: city, country, stay count, from price |
+| SearchStays | PUBLIC | In: destination, type, sort, check in, check out, adults, kids, rooms. Out: stay cards with total, average, deal flag |
+| GetProperty | PUBLIC | Property, room types, amenities, photos |
+
+### stay.v1.StayService
+
+| RPC | Access | Purpose |
+| --- | --- | --- |
+| GetPriceCalendar | PUBLIC | Per night guest price for a room type over a date range |
+| QuoteStay | PUBLIC | Total, fee, per night rows, price source (hotel, trader, recall cap), usual rate |
+| LockQuote | DEVICE | Hold a quote for 10 minutes. Out: lock id, expiry |
+| CreateBooking | DEVICE | In: lock id, guest name and email (sent only to the hotel), pay method (USDC or CARD). Buys 1.0 room night per room per night through `routeBuy(guest)`, burns it, pushes the reservation to the hotel. Out: trip |
+| ListTrips | DEVICE | Upcoming and past trips |
+| CheckIn | DEVICE | In: trip id, verification token from VerifyAction. Marks the stay confirmed |
+| GetReceipt | DEVICE | Receipt for a trip |
+| ToggleSave / ListSaves | DEVICE | Saved stays |
+
+### market.v1.MarketService
+
+| RPC | Access | Purpose |
+| --- | --- | --- |
+| Discover | PUBLIC | Night cards for the next 75 nights. Filters: city, sort (return, risk), value only, soon, watchlist |
+| GetNight | PUBLIC | Night detail: fair price, stats, risk, price history, host track record, month calendar |
+| GetBook | PUBLIC | Unified book: asks (pool slices and trader asks, guest only flagged), sell back bids with late fee, recall cap, fair price |
+| ListTape | PUBLIC | Last 40 prints |
+| QuoteBuy / QuoteSell | PUBLIC | Route preview: fills, average, fee, cap used, late fee, unsold refund |
+| Buy | ORB | Execute a buy. Enforces per human cap and guest tranche |
+| Sell | ORB | Sell back to the pool with late fee |
+| PostAsk / CancelAsk | ORB | Park an ask. Warns past 2 times fair price or above recall cap |
+| GetPortfolio | ORB | Holdings, listings, realised and unrealised P&L, track record |
+| ToggleWatch / ListWatch | ORB | Watchlist |
+| CreateAgentOrder / ApproveAgentOrder | ORB | Agent wallet orders. Orders over 1,000 USDC need a VerifyAction token |
+
+### host.v1.HostService
+
+| RPC | Access | Purpose |
+| --- | --- | --- |
+| ConnectChannelManager | ORB | In: property, PMS (Mews, Cloudbeds, SiteMinder). Imports room types and usual rates |
+| GetPortfolio | ORB | All hotels: KPIs, alerts, 8 week occupancy |
+| GetHotel | ORB | One hotel: KPIs, month glance, price series, calendar |
+| PreviewOpenNights | ORB | Floor, last room price, guest price cap, minimum payout, security hold |
+| OpenNights | ORB | In: dates, room types, allotment percent, demand preset, release policy. Allotment never drops below booked plus held |
+| StopSelling | ORB | Take back unsold rooms for the chosen nights |
+| GetNight | ORB | Per room type state, activity, release timeline, payout split |
+| GetPayout | ORB | Available now, held for traders, security hold, fees |
+| Withdraw | ORB | Send available USDC to the host wallet |
+
+### wallet.v1.WalletService
+
+| RPC | Access | Purpose |
+| --- | --- | --- |
+| GetBalance | DEVICE | USDC balance |
+| ListTransactions | DEVICE | Ledger entries for the user |
+
+## apps/api
+
+```
+apps/api/src/
+  main.ts                 boot: load config, build container, start server
+  config/                 env parsing (ADAPTERS=mock by default, PORT)
+  server/
+    create-server.ts      node:http + connectNodeAdapter, CORS, /docs, /healthz
+    routes.ts             registers every service handler
+    interceptors/         auth (reads the access option), errors
+    docs/                 serves OpenAPI files and a Swagger UI page
+  container/              composition root: picks adapters, builds services
+  shared/                 DomainError, money helpers, ids, dates
+  ports/                  cross domain ports (one folder per port)
+    clock/  ids/  identity-verifier/  wallet-provider/  onramp/  channel-manager/
+      <port>.ts           interface
+      <port>.mock.ts      mock adapter
+  modules/<domain>/       identity, catalog, stay, market, host, wallet
+    <domain>.handler.ts   proto <-> use case
+    mappers/
+    use-cases/            one file per use case, each with a test
+    repo/                 repository interface and in memory implementation
+  seed/                   the six mock properties and their room types
+apps/api/test/e2e/        full flows through the generated Connect client
+```
+
+### Ports and their mocks
+
+| Port | Mock behaviour | Real adapter later |
+| --- | --- | --- |
+| `Clock` | settable time | system clock |
+| `IdGenerator` | counter based, prefixed | random ids |
+| `IdentityVerifier` | any proof with `mock:` prefix verifies; returns a stable nullifier per seed | World ID cloud verify |
+| `WalletProvider` | creates a fake address, keeps balances in memory, seeds 12,480 USDC | Arc USDC |
+| `Onramp` | card charge always succeeds, converts 1:1 | card onramp |
+| `ChannelManager` | returns room types and usual rates from seed, accepts reservation push and returns a hotel reference | Mews, Cloudbeds, SiteMinder |
+
+### Market state
+
+Night state (allotment, pool position `q`, booked, held, trader asks) lives in the market repository. On boot it is seeded from `nightState` in `market-model`, so numbers match the mock. After boot, buys, sells and bookings change it.
+
+Not in the first cut (listed so it is not forgotten): release at cutoff with unsold refunds, bond return after checkout, background order flow simulation, offline double sale slashing.
+
+## apps/web (later)
+
+One Next.js app, three product areas as route groups with their own URL prefix:
+
+```
+apps/web/app/
+  layout.tsx              root: World ID session provider, Connect transport, React Query
+  (stay)/stay/...         Stay app
+  (host)/host/...         Host app
+  (trade)/trade/...       Trade app
+  login/                  World ID sign in, honours ?next=&why=&need=
+```
+
+Data access uses the generated Connect Query hooks only.
+
+## Build order
+
+1. Workspace skeleton, tooling, `packages/tsconfig`.
+2. `packages/proto` with all services and working generation.
+3. In parallel: `packages/market-model` (port and tests), `packages/design-system` (tokens from `mock/v2/assets/styles.css`), `apps/api` server skeleton with ports, mocks, interceptors and docs.
+4. In parallel, one per domain: identity and wallet, catalog and stay, market, host.
+5. End to end tests for every flow.
+6. Replace mocks with real adapters, one port at a time.
