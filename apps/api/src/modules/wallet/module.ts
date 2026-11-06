@@ -1,13 +1,14 @@
-import { Code, ConnectError, type ServiceImpl } from "@connectrpc/connect";
 import { WalletService } from "@night-shares/proto/wallet/v1/wallet_pb";
 import type { Ports } from "../../container/ports";
-export function createWalletModule(_ports: Ports) {
-  const notBuiltYet = (): never => {
-    throw new ConnectError("not built yet", Code.Unimplemented);
+import { createGetBalance } from "./use-cases/get-balance";
+import { createListTransactions } from "./use-cases/list-transactions";
+import { createWalletHandler } from "./wallet.handler";
+export function createWalletModule(ports: Ports) {
+  return {
+    service: WalletService,
+    handler: createWalletHandler({
+      getBalance: createGetBalance(ports),
+      listTransactions: createListTransactions(ports),
+    }),
   };
-  const handler: ServiceImpl<typeof WalletService> = {
-    getBalance: notBuiltYet,
-    listTransactions: notBuiltYet,
-  };
-  return { service: WalletService, handler };
 }
