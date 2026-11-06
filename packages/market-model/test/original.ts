@@ -26,7 +26,11 @@ type OriginalModel = Omit<typeof Port, "nightState"> & {
     date: Date,
   ) => Port.NightState;
 };
-const context = createContext({ window: {} });
+// shared.js is browser code; give it the few globals it reads at load time.
+const context = createContext({
+  window: {},
+  navigator: { platform: "", userAgent: "" },
+});
 // Fix the zero-argument clock while retaining the original local calendar semantics.
 runInContext(
   `Date = class extends Date {
