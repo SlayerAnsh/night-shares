@@ -1,4 +1,5 @@
 import { Code, ConnectError } from "@connectrpc/connect";
+import { ErrorInfoSchema } from "@night-shares/proto/common/v1/error_pb";
 import { errorCopy } from "../fallback/error-copy";
 
 // A transaction hash on Arc: 0x and 64 hex digits.
@@ -15,8 +16,7 @@ export function shortHash(hash: string, head = 6, tail = 4): string {
     : `${hash.slice(0, head)}…${hash.slice(-tail)}`;
 }
 
-// Names the API uses (or may add) for the transaction behind a result:
-// Trip.chain_transaction_hash today; a trade Execution has none yet.
+// Transaction field names supported across API versions.
 const HASH_FIELDS = ["chainTransactionHash", "transactionHash", "txHash"];
 
 /** The transaction hash carried by an API result, if it has one. */
@@ -34,7 +34,9 @@ export function explorerTxUrl(
   hash: string,
 ): string | undefined {
   if (!explorerUrl || !/^https?:\/\//.test(explorerUrl)) return undefined;
-  return `${explorerUrl.replace(/\/+$/, "")}/tx/${hash}`;
+  const base = explorerUrl.replace(/\/+$/, "");
+  if (base.endsWith(`/tx/${hash}`)) return base;
+  return `${base.endsWith("/tx") ? base : `${base}/tx`}/${hash}`;
 }
 
 export type TxFailureKind =
@@ -81,7 +83,7 @@ const RULES: [RegExp, TxFailureKind, string, string][] = [
     /price moved|slippage/i,
     "slippage",
     "The price moved",
-    "The price changed by more than your 0.5% limit before the order went through, so nothing was traded. Check the new quote and try again.",
+    "The price changed by more than your slippage limit before the order went through, so nothing was traded. Check the new quote and try again.",
   ],
   [
     /reverted/i,
@@ -131,8 +133,26 @@ const UNKNOWN_OUTCOME = new Set([
 /** Plain words for a failed write, and whether the outcome is still unknown. */
 export function txFailure(error: unknown): TxFailure {
   const raw = rawOf(error);
+  const reasons: Record<string, TxFailureKind> = {
+    SLIPPAGE: "slippage",
+    PENDING_RECONCILIATION: "confirming",
+    CANCEL_PENDING: "confirming",
+    REVERTED: "reverted",
+    TRADING_PAUSED: "paused",
+    CAP_EXCEEDED: "cap",
+    LIQUIDITY: "liquidity",
+    INSUFFICIENT_USDC: "balance",
+    ONE_ROOM_ONE_NIGHT: "one-night",
+  };
+  const reason =
+    error instanceof ConnectError
+      ? error
+          .findDetails(ErrorInfoSchema)
+          .map((detail) => reasons[detail.reason])
+          .find(Boolean)
+      : undefined;
   for (const [pattern, kind, title, message] of RULES)
-    if (pattern.test(raw))
+    if (reason ? reason === kind : pattern.test(raw))
       return { kind, title, message, unknownOutcome: kind === "confirming" };
   if (/another .*(operation|cancellation).* pending/i.test(raw))
     return {

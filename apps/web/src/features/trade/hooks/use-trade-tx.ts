@@ -56,7 +56,9 @@ export function useTradeTx() {
     setState({ phase: "pending", request: sent });
     try {
       if (sent.mode === "ask") {
-        const res = await callUnaryMethod(transport, rpc.postAsk, sent.input);
+        const res = await callUnaryMethod(transport, rpc.postAsk, sent.input, {
+          headers,
+        });
         keeper.settle(false);
         setState({ phase: "confirmed", request: sent, ask: res.ask });
       } else {

@@ -730,6 +730,9 @@ components:
     night_shares.stay.v1.GetPriceCalendarResponse:
       type: object
       properties:
+        onChain:
+          type: boolean
+          title: on_chain
         nights:
           type: array
           items:
@@ -1071,6 +1074,9 @@ components:
         hotelSyncPending:
           type: boolean
           title: hotel_sync_pending
+        explorerUrl:
+          type: string
+          title: explorer_url
       title: Trip
       additionalProperties: false
     night_shares.stay.v1.WalkRefund:

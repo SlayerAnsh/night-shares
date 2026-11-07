@@ -78,6 +78,9 @@ export function createMarketHandler(
     listTape: (r, ctx) =>
       listTape(deps, nightKey(r.night), optionalUser(ctx)?.id),
     quoteBuy: async (r, ctx) => ({
+      slippageBps: isChain(deps.ports)
+        ? (chainMarket(deps.ports).slippageBps ?? 50)
+        : 50,
       quote: isChain(deps.ports)
         ? await quoteChainTrade(
             deps,
@@ -94,6 +97,9 @@ export function createMarketHandler(
           ),
     }),
     quoteSell: async (r, ctx) => ({
+      slippageBps: isChain(deps.ports)
+        ? (chainMarket(deps.ports).slippageBps ?? 50)
+        : 50,
       quote: isChain(deps.ports)
         ? await quoteChainTrade(
             deps,
@@ -152,7 +158,16 @@ export function createMarketHandler(
           nightKey(r.night),
           quantity(r.size),
           money(r.price),
-          { expiry: r.expiry, nonce: r.nonce, signature: r.signature },
+          {
+            expiry: r.expiry,
+            nonce: r.nonce,
+            signature: r.signature,
+            operationId: requestId(
+              deps,
+              user.humanId,
+              ctx.requestHeader.get("idempotency-key"),
+            ),
+          },
         ),
       );
     },

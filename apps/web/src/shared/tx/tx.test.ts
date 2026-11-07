@@ -32,6 +32,12 @@ describe("transaction hashes", () => {
     expect(explorerTxUrl("https://scan.arc/", HASH)).toBe(
       `https://scan.arc/tx/${HASH}`,
     );
+    expect(explorerTxUrl(`https://scan.arc/tx/${HASH}`, HASH)).toBe(
+      `https://scan.arc/tx/${HASH}`,
+    );
+    expect(explorerTxUrl("https://scan.arc/tx/", HASH)).toBe(
+      `https://scan.arc/tx/${HASH}`,
+    );
     expect(explorerTxUrl("javascript:alert(1)", HASH)).toBeUndefined();
   });
 });
@@ -40,7 +46,7 @@ describe("failed writes", () => {
   test("a moved price reads as slippage and is settled", () => {
     const f = fail("Price moved.");
     expect(f.kind).toBe("slippage");
-    expect(f.message).toContain("0.5%");
+    expect(f.message).toContain("slippage limit");
     expect(f.unknownOutcome).toBe(false);
   });
 
@@ -87,4 +93,43 @@ describe("failed writes", () => {
         /failed_precondition|internal\]/,
       );
   });
+});
+
+test("typed reasons override contradictory messages", async () => {
+  const { ErrorInfoSchema } = await import(
+    "@night-shares/proto/common/v1/error_pb"
+  );
+  const kinds = {
+    SLIPPAGE: "slippage",
+    PENDING_RECONCILIATION: "confirming",
+    CANCEL_PENDING: "confirming",
+    REVERTED: "reverted",
+    TRADING_PAUSED: "paused",
+    CAP_EXCEEDED: "cap",
+    LIQUIDITY: "liquidity",
+    INSUFFICIENT_USDC: "balance",
+    ONE_ROOM_ONE_NIGHT: "one-night",
+  } as const;
+  for (const [reason, kind] of Object.entries(kinds)) {
+    const error = new ConnectError(
+      "Price moved.",
+      Code.FailedPrecondition,
+      undefined,
+      [
+        {
+          desc: ErrorInfoSchema,
+          value: { reason, domain: "night-shares" },
+        },
+      ],
+    );
+    expect(txFailure(error).kind).toBe(kind);
+    expect(txFailure(error).unknownOutcome).toBe(kind === "confirming");
+  }
+  expect(
+    txFailure(
+      new ConnectError("Price moved.", Code.FailedPrecondition, undefined, [
+        { desc: ErrorInfoSchema, value: { reason: "FUTURE_REASON" } },
+      ]),
+    ).kind,
+  ).toBe("slippage");
 });

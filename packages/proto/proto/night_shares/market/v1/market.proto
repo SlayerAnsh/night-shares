@@ -148,6 +148,7 @@ message QuoteBuyRequest {
 
 message QuoteBuyResponse {
   RouteQuote quote = 1;
+  optional int32 slippage_bps = 2;
 }
 
 message QuoteSellRequest {
@@ -157,6 +158,7 @@ message QuoteSellRequest {
 
 message QuoteSellResponse {
   RouteQuote quote = 1;
+  optional int32 slippage_bps = 2;
 }
 
 message BuyRequest {
@@ -215,7 +217,11 @@ message CancelAskRequest {
   string ask_id = 1;
 }
 
-message CancelAskResponse {}
+message CancelAskResponse {
+  string transaction_hash = 1;
+  repeated string resigned_ask_ids = 2;
+  string explorer_url = 3;
+}
 
 message GetPortfolioRequest {}
 

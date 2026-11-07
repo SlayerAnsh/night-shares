@@ -302,6 +302,9 @@ components:
     night_shares.catalog.v1.GetPropertyResponse:
       type: object
       properties:
+        onChain:
+          type: boolean
+          title: on_chain
         walkIncidents:
           type: array
           items:

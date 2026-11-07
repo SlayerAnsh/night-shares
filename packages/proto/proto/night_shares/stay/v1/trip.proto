@@ -42,6 +42,7 @@ message Trip {
   string chain_booking_id = 16;
   string chain_transaction_hash = 17;
   bool hotel_sync_pending = 18;
+  string explorer_url = 19;
 }
 
 message NightPrice {

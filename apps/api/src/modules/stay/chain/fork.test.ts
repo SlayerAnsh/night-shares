@@ -109,7 +109,7 @@ forkTest(
         rpcUrl: rpc,
       });
       // This test owns a fresh range, independent of all other integration tasks.
-      const firstIndex = 60001 + Math.floor(Math.random() * 10000);
+      const firstIndex = 80001 + Math.floor(Math.random() * 10000);
       const sentinel = anvilAccount(firstIndex);
       ports.db
         .query("INSERT INTO anvil_wallets VALUES (?, ?, ?, ?)")

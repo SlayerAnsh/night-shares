@@ -3,7 +3,7 @@ import { useQuery } from "@connectrpc/connect-query";
 import type { NightKey } from "@night-shares/proto/common/v1/night_pb";
 import * as rpc from "@night-shares/proto/market/v1/market-MarketService_connectquery";
 import { parseMicros, parseTenths } from "../model/market";
-import { priceLimit } from "../model/slippage";
+import { priceLimit, quoteSlippageBps } from "../model/slippage";
 import { useTradeTx } from "./use-trade-tx";
 import { useUrlState } from "./use-url-state";
 export function useTicket(
@@ -30,10 +30,10 @@ export function useTicket(
   const preview = mode === "sell" ? sellQuote : buyQuote;
   const quote = mode === "ask" ? undefined : preview.data?.quote;
   const tx = useTradeTx();
-  // The limit sent with the order: the quote plus the 0.5% slippage.
+  // The limit sent with the order: the quote with the configured slippage.
   const limit =
     quote?.total && mode !== "ask"
-      ? priceLimit(quote.total.micros, mode)
+      ? priceLimit(quote.total.micros, mode, quoteSlippageBps(preview.data))
       : undefined;
   async function submit() {
     if (tx.unresolved) return tx.checkAgain();

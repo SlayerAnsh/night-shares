@@ -15,6 +15,7 @@ import { createReportWalk } from "./trips/report-walk";
 import { createTapReception } from "./trips/tap-reception";
 export function createStayCases(ports: Ports, repo: StayRepo) {
   return {
+    onChain: ports.chainExecutor?.mode === "fork",
     getPriceCalendar: createGetPriceCalendar(ports),
     quoteStay: createQuoteStay(ports, repo),
     lockQuote: createLockQuote(ports, repo),

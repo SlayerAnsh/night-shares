@@ -1,0 +1,9 @@
+syntax = "proto3";
+package night_shares.common.v1;
+
+// Structured failure information, following the google.rpc.ErrorInfo shape.
+message ErrorInfo {
+  string reason = 1;
+  string domain = 2;
+  map<string, string> metadata = 3;
+}

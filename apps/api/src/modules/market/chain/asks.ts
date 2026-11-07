@@ -6,6 +6,7 @@ import {
 } from "@bufbuild/protobuf/wkt";
 import { AskSchema } from "@night-shares/proto/market/v1/book_pb";
 import { type Address, type Hex, hashTypedData, verifyTypedData } from "viem";
+import { transactionExplorerUrl } from "../../../config/arc-networks";
 import {
   type Ask,
   deserialize,
@@ -183,9 +184,45 @@ export async function postChainAsk(
   key: string,
   size: number,
   price: bigint,
-  options: { expiry?: Timestamp; nonce?: bigint; signature?: string } = {},
+  options: {
+    expiry?: Timestamp;
+    nonce?: bigint;
+    signature?: string;
+    operationId?: string;
+  } = {},
 ) {
   const { reader, custody } = chainMarket(deps.ports);
+  const db = deps.ports.db;
+  db.exec(
+    "CREATE TABLE IF NOT EXISTS market_chain_ask_requests (id TEXT PRIMARY KEY, request TEXT NOT NULL, result TEXT NOT NULL)",
+  );
+  const request = serialize({
+    key,
+    size,
+    price,
+    expiry: options.expiry,
+    nonce: options.nonce,
+    signature: options.signature,
+  });
+  if (options.operationId) {
+    const previous = db
+      .query<{ request: string; result: string }, [string]>(
+        "SELECT request, result FROM market_chain_ask_requests WHERE id = ?",
+      )
+      .get(options.operationId);
+    if (previous) {
+      if (previous.request !== request)
+        throw new DomainError(
+          "INVALID_ARGUMENT",
+          "Idempotency key was already used for a different ask.",
+        );
+      return deserialize<{
+        ask: ReturnType<typeof create<typeof AskSchema>>;
+        isAboveTwiceFair: boolean;
+        isAboveRecallCap: boolean;
+      }>(previous.result);
+    }
+  }
   const previous = askRows(deps, key).find(
     (r) => r.maker.toLowerCase() === user.walletAddress.toLowerCase(),
   );
@@ -237,9 +274,22 @@ export async function postChainAsk(
       "FAILED_PRECONDITION",
       "Ask cancellation is pending reconciliation.",
     );
-  deps.ports.db
-    .query("INSERT INTO market_chain_asks VALUES (?, ?, ?, ?, ?, ?, ?, 'open')")
-    .run(
+  const config = (
+    await reader.read<NightConfig>({
+      contract: "NightFactory",
+      functionName: "config",
+      args: [p.chainOrder.night],
+    })
+  ).value;
+  const response = {
+    ask: p.order,
+    isAboveTwiceFair: false,
+    isAboveRecallCap: price > config.X,
+  };
+  db.transaction(() => {
+    db.query(
+      "INSERT INTO market_chain_asks VALUES (?, ?, ?, ?, ?, ?, ?, 'open')",
+    ).run(
       reader.fingerprint,
       key,
       p.wallet.address,
@@ -248,18 +298,14 @@ export async function postChainAsk(
       p.digest,
       serialize({ order: p.chainOrder, signature, qty: p.chainOrder.size }),
     );
-  const config = (
-    await reader.read<NightConfig>({
-      contract: "NightFactory",
-      functionName: "config",
-      args: [p.chainOrder.night],
-    })
-  ).value;
-  return {
-    ask: p.order,
-    isAboveTwiceFair: false,
-    isAboveRecallCap: price > config.X,
-  };
+    if (options.operationId)
+      db.query("INSERT INTO market_chain_ask_requests VALUES (?, ?, ?)").run(
+        options.operationId,
+        request,
+        serialize(response),
+      );
+  })();
+  return response;
 }
 // A persisted keep-list makes cancelAll plus re-signing resumable after mining.
 export async function cancelChainAsks(
@@ -267,7 +313,13 @@ export async function cancelChainAsks(
   user: User,
   target?: string,
   selected?: { walletId: string; address: Address },
-): Promise<{ nonce: bigint; cancelledCount: number }> {
+): Promise<{
+  nonce: bigint;
+  cancelledCount: number;
+  transactionHash: string;
+  resignedAskIds: string[];
+  explorerUrl: string;
+}> {
   const { reader, executor, custody } = chainMarket(deps.ports);
   const parent = await userWallet(deps.ports, user);
   let wallet = selected ?? parent;
@@ -304,7 +356,13 @@ export async function cancelChainAsks(
       cancelledCount += result.cancelledCount;
       if (maker.walletId === parent.walletId) nonce = result.nonce;
     }
-    return { nonce, cancelledCount };
+    return {
+      nonce,
+      cancelledCount,
+      transactionHash: "",
+      resignedAskIds: [],
+      explorerUrl: "",
+    };
   }
   if (
     target &&
@@ -353,7 +411,7 @@ export async function cancelChainAsks(
         serialize(user),
       );
   }
-  confirmed(
+  const receipt = confirmed(
     await executor.execute({
       operationId: pending.id,
       walletId: wallet.walletId,
@@ -424,5 +482,13 @@ export async function cancelChainAsks(
       .run(pending.id);
     return count - replacements.length;
   })();
-  return { nonce, cancelledCount };
+  return {
+    nonce,
+    cancelledCount,
+    transactionHash: receipt.transactionHash,
+    resignedAskIds: replacements.map(
+      ({ row }) => `${row.night_key}|${row.maker}`,
+    ),
+    explorerUrl: transactionExplorerUrl(receipt.transactionHash),
+  };
 }

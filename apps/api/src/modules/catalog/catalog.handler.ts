@@ -5,6 +5,7 @@ import type { createGetProperty } from "./use-cases/get-property";
 import type { createListDestinations } from "./use-cases/list-destinations";
 import type { createSearchStays } from "./use-cases/search-stays";
 export function createCatalogHandler(cases: {
+  onChain?: boolean;
   walkIncidents: (
     propertyId: string,
   ) => ReturnType<typeof import("../walk/repo/incidents").walkIncidents>;
@@ -15,6 +16,7 @@ export function createCatalogHandler(cases: {
   return {
     getProperty: (req) => ({
       property: propertyToProto(cases.getProperty(req.propertyId)),
+      onChain: cases.onChain ?? false,
       walkIncidents: cases.walkIncidents(req.propertyId),
     }),
     listDestinations: (req) => ({

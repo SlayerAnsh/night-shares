@@ -41,7 +41,6 @@ import { toProto } from "../../../shared/night-key";
 import { agentWallets } from "../repo/agent-wallets.sqlite";
 import { fixture } from "../testing/fixture";
 import { approveAgentOrder } from "../use-cases/account/approve-agent-order";
-import { cancelAsk } from "../use-cases/account/cancel-ask";
 import { createAgentOrder } from "../use-cases/account/create-agent-order";
 import { postAskWithCustody } from "../use-cases/account/post-ask";
 import { buyAgent } from "../use-cases/agent/buy";
@@ -115,9 +114,9 @@ forkTest(
       // Isolated child fork plus a separate derivation range avoids parallel test identities.
       db.query("INSERT INTO anvil_wallets VALUES (?, ?, ?, ?)").run(
         "system:reserved",
-        60100,
-        "anvil:60100",
-        anvilAccount(60100).address,
+        70001,
+        "anvil:70001",
+        anvilAccount(70001).address,
       );
       const attester = anvilAccount(9);
       const custody: WalletCustody = {
@@ -278,10 +277,32 @@ forkTest(
         db.query("SELECT * FROM market_chain_preparations").all(),
       ).toHaveLength(0);
       const before = (await reader.cash(maker.wallet.address)).value.usdc;
-      const execution = await buy(deps, maker.user, key, 2, 1000000n);
+      const execution = await buy(
+        deps,
+        maker.user,
+        key,
+        2,
+        1000000n,
+        "receipt-replay",
+      );
+      expect(
+        (await buy(deps, maker.user, key, 2, 1000000n, "receipt-replay"))
+          .transactionHash,
+      ).toBe(execution.transactionHash);
       expect((await reader.cash(maker.wallet.address)).value.usdc).toBe(
         before - (execution.quote?.total?.micros ?? 0n),
       );
+      expect(execution.transactionHash).toMatch(/^0x[0-9a-fA-F]{64}$/);
+      const tradeReceipt = await client.getTransactionReceipt({
+        hash: execution.transactionHash as Hex,
+      });
+      expect(tradeReceipt.transactionHash).toBe(
+        execution.transactionHash as Hex,
+      );
+      expect(tradeReceipt.to?.toLowerCase()).toBe(
+        deployment.TradeRouter.toLowerCase(),
+      );
+      expect(execution.explorerUrl).toBe("");
       const paid = execution.quote?.total?.micros ?? 0n;
       for (const row of db
         .query<{ command: string }, []>("SELECT command FROM chain_operations")
@@ -302,7 +323,28 @@ forkTest(
         if (command.kind === "approveUsdc" || command.kind === "approvePermit2")
           expect(command.amount).toBe(1000000n);
       }
-      await postAskWithCustody(deps, maker.user, key, 1, 1n, { signature: "" });
+      const posted = await postAskWithCustody(deps, maker.user, key, 1, 1n, {
+        signature: "",
+        operationId: "post-retry",
+      });
+      const journalBeforeRetry = db
+        .query("SELECT * FROM chain_operations")
+        .all();
+      expect(
+        await postAskWithCustody(deps, maker.user, key, 1, 1n, {
+          signature: "",
+          operationId: "post-retry",
+        }),
+      ).toEqual(posted);
+      expect(db.query("SELECT * FROM chain_operations").all()).toEqual(
+        journalBeforeRetry,
+      );
+      await expect(
+        postAskWithCustody(deps, maker.user, key, 1, 2n, {
+          signature: "",
+          operationId: "post-retry",
+        }),
+      ).rejects.toThrow("Idempotency key");
       const digest = askRows(deps, key)[0]?.digest;
       if (!digest) throw new Error("Missing ask digest.");
       await buy(deps, taker.user, key, 1, 1000000n);
@@ -446,7 +488,15 @@ forkTest(
       await postAskWithCustody(deps, maker.user, secondKey, 1, 100n);
       const kept = (await liveAsks(deps, secondKey))[0];
       if (!kept) throw new Error("Missing keep ask.");
-      await cancelAsk(deps, maker.user, `${key}|${maker.wallet.address}`);
+      const cancellation = await cancelChainAsks(
+        deps,
+        maker.user,
+        `${key}|${maker.wallet.address}`,
+      );
+      expect(cancellation.transactionHash).toMatch(/^0x[0-9a-fA-F]{64}$/);
+      expect(cancellation.resignedAskIds).toEqual([
+        `${secondKey}|${maker.wallet.address}`,
+      ]);
       expect(
         (
           await reader.read<bigint>({
@@ -690,7 +740,7 @@ forkTest(
       // External token transfer must appear without an API settlement mutation.
       const token = await reader.tokenOf(nightHash(key));
       const external = createWalletClient({
-        account: anvilAccount(60101),
+        account: anvilAccount(70002),
         transport: http(rpcUrl),
       });
       const hash = await external.writeContract({

@@ -9,6 +9,7 @@ export const ARC_NETWORKS = {
     chainId: 5042,
     rpcUrl: "http://127.0.0.1:8545",
     explorerUrl: "",
+    txExplorerBase: "",
     usdc: undefined,
   },
   mainnet: {
@@ -16,6 +17,7 @@ export const ARC_NETWORKS = {
     chainId: 5042,
     rpcUrl: "https://rpc.mainnet.arc.io",
     explorerUrl: "https://explorer.arc.io",
+    txExplorerBase: "https://explorer.arc.io/tx/",
     poolManager: "0x8366a39CC670B4001A1121B8F6A443A643e40951",
     positionManager: "0x6049c9a0e26405C0985f9E3685C87d0aE917f82B",
     universalRouter: "0x4fcA4a51Ab4F23A7447b3284fBd7D73289A89Fb1",
@@ -27,6 +29,7 @@ export const ARC_NETWORKS = {
     chainId: 5042002,
     rpcUrl: "https://rpc.testnet.arc.io",
     explorerUrl: "https://explorer.testnet.arc.io",
+    txExplorerBase: "https://explorer.testnet.arc.io/tx/",
     poolManager: null,
     positionManager: null,
     universalRouter: null,
@@ -34,3 +37,12 @@ export const ARC_NETWORKS = {
     stateView: null,
   },
 } as const;
+
+export function transactionExplorerUrl(
+  hash: string,
+  network = process.env.ARC_NETWORK ?? "fork",
+) {
+  const base =
+    ARC_NETWORKS[network as keyof typeof ARC_NETWORKS]?.txExplorerBase;
+  return base && hash ? `${base}${hash}` : "";
+}

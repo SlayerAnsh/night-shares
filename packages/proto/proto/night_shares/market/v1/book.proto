@@ -62,4 +62,6 @@ message Execution {
   string id = 1;
   RouteQuote quote = 2;
   google.protobuf.Timestamp executed_at = 3;
+  string transaction_hash = 4;
+  string explorer_url = 5;
 }

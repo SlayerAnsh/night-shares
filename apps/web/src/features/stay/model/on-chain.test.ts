@@ -34,3 +34,11 @@ describe("on-chain stays", () => {
     expect(overOneNight(1, 2)).toBe(true);
   });
 });
+
+test("calendar and property detail advertise chain mode before quoting", () => {
+  expect(staysOnChain([{ data: { onChain: true, nights: [] } }])).toBe(true);
+  expect(
+    staysOnChain([{ data: { onChain: true, property: { id: "hotel" } } }]),
+  ).toBe(true);
+  expect(staysOnChain([{ data: { onChain: false, nights: [] } }])).toBe(false);
+});

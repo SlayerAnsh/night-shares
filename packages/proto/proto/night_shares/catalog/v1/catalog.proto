@@ -45,6 +45,7 @@ message GetPropertyRequest {
 }
 
 message GetPropertyResponse {
+  bool on_chain = 3;
   repeated WalkIncident walk_incidents = 2;
   night_shares.catalog.v1.Property property = 1;
 }

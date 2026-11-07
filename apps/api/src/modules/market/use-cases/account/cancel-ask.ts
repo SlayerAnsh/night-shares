@@ -7,8 +7,7 @@ import { isChain } from "../../chain/runtime";
 import { type Deps, syncPosition } from "../context";
 import { humanWallets } from "../human-wallets";
 export function cancelAsk(deps: Deps, user: User, askId: string) {
-  if (isChain(deps.ports))
-    return cancelChainAsks(deps, user, askId).then(() => ({}));
+  if (isChain(deps.ports)) return cancelChainAsks(deps, user, askId);
   return transaction(deps.ports.db, () => {
     const [key, owner, extra] = askId.split("|");
     if (!key || !owner || extra !== undefined)

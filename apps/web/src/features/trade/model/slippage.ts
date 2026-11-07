@@ -20,3 +20,7 @@ export function priceLimit(
     ? (total * BigInt(10000 + bps) + 9999n) / 10000n
     : (total * BigInt(10000 - bps)) / 10000n;
 }
+
+/** Older servers omit the configured tolerance; explicit zero remains valid. */
+export const quoteSlippageBps = (quote?: { slippageBps?: number }) =>
+  quote?.slippageBps ?? DEFAULT_SLIPPAGE_BPS;

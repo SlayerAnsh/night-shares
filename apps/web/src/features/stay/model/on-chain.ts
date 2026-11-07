@@ -14,9 +14,19 @@ export function isOneNightRejection(error: unknown): boolean {
  */
 export function staysOnChain(entries: Entry[]): boolean {
   return entries.some(({ data, error }) => {
-    const quote = (data as { quote?: { onChain?: unknown } } | undefined)
-      ?.quote;
-    return quote?.onChain === true || isOneNightRejection(error);
+    const result = data as
+      | {
+          onChain?: boolean;
+          property?: { onChain?: boolean };
+          quote?: { onChain?: boolean };
+        }
+      | undefined;
+    return (
+      result?.onChain === true ||
+      result?.property?.onChain === true ||
+      result?.quote?.onChain === true ||
+      isOneNightRejection(error)
+    );
   });
 }
 

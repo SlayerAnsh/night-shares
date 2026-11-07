@@ -55,6 +55,7 @@ message GetPriceCalendarRequest {
 }
 
 message GetPriceCalendarResponse {
+  bool on_chain = 2;
   repeated NightPrice nights = 1;
 }
 

@@ -27,3 +27,13 @@ describe("price limit", () => {
     expect(slippageLabel(125)).toBe("1.25%");
   });
 });
+
+test("quote tolerance preserves zero and defaults only when absent", async () => {
+  const { quoteSlippageBps } = await import("./slippage");
+  expect(quoteSlippageBps()).toBe(50);
+  expect(quoteSlippageBps({})).toBe(50);
+  expect(quoteSlippageBps({ slippageBps: 0 })).toBe(0);
+  expect(
+    priceLimit(10000n, "buy", quoteSlippageBps({ slippageBps: 125 })),
+  ).toBe(10125n);
+});

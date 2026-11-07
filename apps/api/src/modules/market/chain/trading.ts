@@ -5,6 +5,7 @@ import {
   RouteQuoteSchema,
 } from "@night-shares/proto/market/v1/book_pb";
 import { type Address, decodeEventLog } from "viem";
+import { transactionExplorerUrl } from "../../../config/arc-networks";
 import { ensureRouterAllowance } from "../../../ports/chain-executor/approvals";
 import {
   type ChainCommand,
@@ -267,9 +268,12 @@ export async function executeChainTrade(
       gross: bigint;
       fee: bigint;
       at: number;
+      transactionHash?: string;
     }>(intent.result);
     return create(ExecutionSchema, {
       id: intent.id,
+      transactionHash: result.transactionHash ?? "",
+      explorerUrl: transactionExplorerUrl(result.transactionHash ?? ""),
       quote: routeQuote(key, size, result.total, result.gross, result.fee),
       executedAt: timestampFromMs(result.at),
     });
@@ -438,10 +442,21 @@ export async function executeChainTrade(
       .query(
         "UPDATE market_chain_intents SET state = 'finalized', result = ? WHERE id = ?",
       )
-      .run(serialize({ total, gross, fee, at }), saved.id);
+      .run(
+        serialize({
+          total,
+          gross,
+          fee,
+          at,
+          transactionHash: receipt.transactionHash,
+        }),
+        saved.id,
+      );
   })();
   return create(ExecutionSchema, {
     id: saved.id,
+    transactionHash: receipt.transactionHash,
+    explorerUrl: transactionExplorerUrl(receipt.transactionHash),
     quote: routeQuote(key, size, total, gross, fee),
     executedAt: timestampFromMs(at),
   });

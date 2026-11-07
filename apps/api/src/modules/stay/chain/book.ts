@@ -5,6 +5,7 @@ import {
   TripSchema,
 } from "@night-shares/proto/stay/v1/trip_pb";
 import { type Hex, keccak256, stringToHex } from "viem";
+import { transactionExplorerUrl } from "../../../config/arc-networks";
 import type { Ports } from "../../../container/ports";
 import { transaction } from "../../../db/transaction";
 import { ensureRouterAllowance } from "../../../ports/chain-executor/approvals";
@@ -267,6 +268,7 @@ async function executeBooking(
       total: { micros: event.paid },
       chainBookingId: event.bookingId,
       chainTransactionHash: receipt.transactionHash,
+      explorerUrl: transactionExplorerUrl(receipt.transactionHash),
       hotelSyncPending: true,
     });
     transaction(ports.db, () => {

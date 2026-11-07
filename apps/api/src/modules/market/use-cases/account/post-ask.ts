@@ -50,7 +50,12 @@ export function postAsk(
   key: string,
   size: number,
   price: bigint,
-  options: { expiry?: Timestamp; nonce?: bigint; signature?: string } = {},
+  options: {
+    expiry?: Timestamp;
+    nonce?: bigint;
+    signature?: string;
+    operationId?: string;
+  } = {},
 ) {
   if (isChain(deps.ports))
     throw new DomainError(

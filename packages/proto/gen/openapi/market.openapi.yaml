@@ -1415,6 +1415,18 @@ components:
       additionalProperties: false
     night_shares.market.v1.CancelAskResponse:
       type: object
+      properties:
+        transactionHash:
+          type: string
+          title: transaction_hash
+        resignedAskIds:
+          type: array
+          items:
+            type: string
+          title: resigned_ask_ids
+        explorerUrl:
+          type: string
+          title: explorer_url
       title: CancelAskResponse
       additionalProperties: false
     night_shares.market.v1.ClaimCutoffRequest:
@@ -1536,6 +1548,12 @@ components:
         executedAt:
           title: executed_at
           $ref: '#/components/schemas/google.protobuf.Timestamp'
+        transactionHash:
+          type: string
+          title: transaction_hash
+        explorerUrl:
+          type: string
+          title: explorer_url
       title: Execution
       additionalProperties: false
     night_shares.market.v1.Fill:
@@ -2011,6 +2029,12 @@ components:
         quote:
           title: quote
           $ref: '#/components/schemas/night_shares.market.v1.RouteQuote'
+        slippageBps:
+          type:
+            - integer
+            - "null"
+          title: slippage_bps
+          format: int32
       title: QuoteBuyResponse
       additionalProperties: false
     night_shares.market.v1.QuoteSellRequest:
@@ -2030,6 +2054,12 @@ components:
         quote:
           title: quote
           $ref: '#/components/schemas/night_shares.market.v1.RouteQuote'
+        slippageBps:
+          type:
+            - integer
+            - "null"
+          title: slippage_bps
+          format: int32
       title: QuoteSellResponse
       additionalProperties: false
     night_shares.market.v1.Risk:

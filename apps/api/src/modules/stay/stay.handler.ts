@@ -8,7 +8,10 @@ export function createStayHandler(
   cases: ReturnType<typeof createStayCases>,
 ): ServiceImpl<typeof StayService> {
   return {
-    getPriceCalendar: (req) => ({ nights: cases.getPriceCalendar(req) }),
+    getPriceCalendar: (req) => ({
+      nights: cases.getPriceCalendar(req),
+      onChain: cases.onChain,
+    }),
     quoteStay: (req) => ({ quote: cases.quoteStay(req.selection) }),
     lockQuote: (req, ctx) =>
       lockToProto(cases.lockQuote(req.quoteId, requireUser(ctx).id)),
