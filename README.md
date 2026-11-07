@@ -9,6 +9,7 @@ Live app: <https://nightshares.dokploy.anshudhar.dev>
 - [How it works](#how-it-works)
 - [Uniswap v4 integration](#uniswap-v4-integration)
 - [Deployments](#deployments)
+  - [Mainnet scripted trade](#mainnet-scripted-trade)
 - [Built with Arc Studio](#built-with-arc-studio)
 - [Architecture](#architecture)
 - [Contracts](#contracts)
@@ -115,6 +116,22 @@ Source verification on the explorer is run with `sh packages/contracts/script/ve
 | Platform (fee recipient) | [`0x890a49C20aba01E020AD7d334dAEeD1C4b78f854`](https://explorer.arc.io/address/0x890a49C20aba01E020AD7d334dAEeD1C4b78f854) |
 | Attester | [`0xaeCdDC573e77e23DA449Ab4184Ac81a1c960fec4`](https://explorer.arc.io/address/0xaeCdDC573e77e23DA449Ab4184Ac81a1c960fec4) |
 | Deployer | [`0xEfD0195458C9CDd99178D92404f09a04f8863b90`](https://explorer.arc.io/address/0xEfD0195458C9CDd99178D92404f09a04f8863b90) |
+
+### Mainnet scripted trade
+
+Every user path was exercised on Arc mainnet with real USDC against the deployment above, through the official Uniswap v4 PoolManager. All transactions succeeded (status 1). The demo night is recorded in [`5042.json`](packages/contracts/deployments/5042.json) (commit `db89e67`), and the flow is scripted in [`TestnetTrade.s.sol`](packages/contracts/script/TestnetTrade.s.sol) (network neutral via `DEPLOYMENT` and `NIGHT_DATE`).
+
+Demo night: property `ns-mainnet-smoke`, room `double`, check in 2026-11-12, floor price `F` 0.5 USDC, `k` 1.2, `S` 10 rooms. Night id `0xab45538278b2def12bdb03c38b627fa0769fa529f8d567cca2115f5c8e69fdd3`, NightToken [`0x0314c5Ccd94df0b089FbC3946b5826D4B196077f`](https://explorer.arc.io/address/0x0314c5Ccd94df0b089FbC3946b5826D4B196077f). Setup (identity link, property bind, Orb attestation, open night, liquidity ladder, approvals) took 10 transactions.
+
+| Step | Contract | Transaction | Amounts (USDC) |
+| --- | --- | --- | --- |
+| Buy 0.1 room night from the pool | TradeRouter | [`0xe52b99e1…0152721`](https://explorer.arc.io/tx/0xe52b99e1b8cd19bc66f9e174d8e073b58a0824f3e6193b0fcf971db7e0152721) | notional 0.050293, fee 0.000654 |
+| Sell 0.1 room night back | TradeRouter | [`0xb39f874f…0201dae`](https://explorer.arc.io/tx/0xb39f874f13e1b9b4657c1c6244af08438cf0766bb101d49a28cdd05c80201dae) | notional 0.050292, fee 0.000654 |
+| Book 1 room for 1 night | BookingRouter | [`0x070c5908…096381a`](https://explorer.arc.io/tx/0x070c59087560015bf14f7fdbe758c071b66fbc6960562b1e8e2736fd8096381a) | paid 0.537815 (notional 0.530913, fee 0.006902) |
+| Agent buy 0.1 via x402 (USDC EIP-3009 authorization) | X402Settler | [`0xfdc7afbc…0d57c0eb`](https://explorer.arc.io/tx/0xfdc7afbca673dc391812b9972eb80f4487426143e40902c61591a50a0d57c0eb) | notional 0.056705, fee 0.000737 |
+| Agent sell 0.1 via x402 (NightToken EIP-3009 authorization) | X402Settler | [`0x860ba934…cf1682a0f`](https://explorer.arc.io/tx/0x860ba934cefa81a64bcd6c8241cdf8b8c8cda50e52100004a623939cf1682a0f) | notional 0.056703, fee 0.000737 |
+
+Every trade paid exactly 1.3%. The same wallet acted as host and trader, so this is a host self trade: the host's 1% went to `RebatePool`, with 0.2% to the platform and 0.1% to `CoverFund`. The x402 trades priced higher than the first buy because the booking had consumed a room from the pool. The night settles at cutoff (2026-11-12 14:00 UTC), which frees its open night slot.
 
 ### Arc testnet (chain 5042002), current
 
