@@ -5,6 +5,8 @@ All notable changes to this monorepo. Newest first.
 
 ## Unreleased
 
+- Root README with deployments, Arc Studio and Uniswap v4 integration links.
+
 - Add an idempotent Arc testnet catalog seed with Privy custody, journaled trader funding, an ops budget guard, and rehearsal instructions.
 
 - Enable Arc mainnet execution and recovery behind an explicit execution switch, with read-only mainnet defaults and startup limit validation.
