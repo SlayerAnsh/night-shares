@@ -4,6 +4,7 @@ import {
   DomainError,
   type DomainErrorCode,
 } from "../../shared/errors/domain-error";
+import { redactRpc } from "../../shared/redact-url";
 
 import type { Logger } from "../logging/logger";
 
@@ -20,9 +21,11 @@ export function createErrorsInterceptor(logger?: Logger): Interceptor {
     try {
       return await next(request);
     } catch (error) {
+      // Classify the original error; redaction returns a copy that loses
+      // its class, so it is applied only to text that leaves this function.
       if (error instanceof DomainError)
         throw new ConnectError(
-          error.message,
+          redactRpc(error.message),
           codes[error.code],
           undefined,
           error.reason
@@ -34,8 +37,8 @@ export function createErrorsInterceptor(logger?: Logger): Interceptor {
               ]
             : [],
         );
-      if (error instanceof ConnectError) throw error;
-      logger?.unexpected(error);
+      if (error instanceof ConnectError) throw redactRpc(error);
+      logger?.unexpected(redactRpc(error));
       throw new ConnectError("An unexpected error occurred.", Code.Internal);
     }
   };

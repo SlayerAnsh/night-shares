@@ -133,3 +133,28 @@ test("LOG_LEVEL filters JSON lines", () => {
   createLogger("silent", (line) => lines.push(line)).log("error", "hidden");
   expect(lines).toHaveLength(1);
 });
+
+test("RPC clients and logs redact expected and unexpected endpoint errors", async () => {
+  const { registerRpcUrls } = await import("../../shared/redact-url");
+  const secret = "rpc-client-secret-123456789";
+  const url = `https://rpc.invalid/v2/${secret}?dkey=${secret}`;
+  registerRpcUrls([url]);
+  for (const error of [
+    new Error(url),
+    new DomainError("NOT_FOUND", `${url} ${secret}`),
+    new ConnectError(`${url} ${secret}`, Code.Unavailable),
+  ]) {
+    const f = fixture();
+    f.fail(error);
+    let failure: unknown;
+    try {
+      await f.client.listDestinations({});
+    } catch (caught) {
+      failure = caught;
+    }
+    expect(failure).toBeInstanceOf(ConnectError);
+    expect(
+      `${String(failure)} ${JSON.stringify(failure)} ${f.lines.join("\n")}`,
+    ).not.toContain(secret);
+  }
+});

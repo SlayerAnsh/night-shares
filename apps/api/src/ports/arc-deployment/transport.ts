@@ -4,6 +4,7 @@ import {
   http,
   type Transport,
 } from "viem";
+import { redactRpc, registerRpcUrls } from "../../shared/redact-url";
 
 export function retryableRpcError(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
@@ -26,6 +27,7 @@ export function arcTransport(
     retries?: number;
   } = {},
 ): Transport {
+  registerRpcUrls(urls);
   if (!urls.length) throw new Error("At least one Arc RPC URL is required.");
   return (config) => {
     const transports = urls.map((url) =>
@@ -47,7 +49,7 @@ export function arcTransport(
             return await transport.request(args);
           } catch (error) {
             if (attempt >= (options.retries ?? 6) || !retryableRpcError(error))
-              throw error;
+              throw redactRpc(error, urls);
             selected = (selected + 1) % transports.length;
             await (
               options.wait ??

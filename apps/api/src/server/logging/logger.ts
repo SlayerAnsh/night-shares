@@ -1,4 +1,5 @@
 import type { ServerConfig } from "../../config/server-config";
+import { redactRpc } from "../../shared/redact-url";
 
 type Level = Exclude<ServerConfig["logLevel"], "silent">;
 const priority = { debug: 10, info: 20, warn: 30, error: 40, silent: 100 };
@@ -15,9 +16,12 @@ export function createLogger(
       fields: Record<string, unknown> = {},
     ) {
       if (priority[levelToWrite] < priority[level]) return;
-      write(JSON.stringify({ ...fields, level: levelToWrite, event }));
+      write(
+        JSON.stringify(redactRpc({ ...fields, level: levelToWrite, event })),
+      );
     },
     unexpected(error: unknown) {
+      error = redactRpc(error);
       // Error messages and causes may contain user input. Keep stack locations only.
       const stack =
         error instanceof Error
