@@ -5,6 +5,7 @@ import type { NightConfig } from "../../../ports/chain-executor/chain-executor";
 import type { Deps } from "../use-cases/context";
 import { liveAsks } from "./asks";
 import { openedNight } from "./nights";
+import { chainPool } from "./pool";
 import { chainMarket, nightHash } from "./runtime";
 export async function chainBook(deps: Deps, key: string) {
   await openedNight(deps.ports, key);
@@ -35,17 +36,20 @@ export async function chainBook(deps: Deps, key: string) {
     wallet = await read<Address>("NightToken", "next", [wallet]);
   }
   const asks = await liveAsks(deps, key);
+  const pool = await chainPool(deps.ports, key);
   return {
     tradingPaused: await read<boolean>("NightHook", "paused"),
     holders,
-    asks: asks.map((a) => ({
-      price: { micros: a.order.price },
-      size: { tenths: Number(a.qty / 100000000000000000n) },
-      source: BookSource.TRADER,
-      askId: `${key}|${a.order.maker}`,
-    })),
-    // Finite pool prices are available through actual-sender router simulation only.
-    bids: [],
+    asks: [
+      ...pool.asks,
+      ...asks.map((a) => ({
+        price: { micros: a.order.price },
+        size: { tenths: Number(a.qty / 100000000000000000n) },
+        source: BookSource.TRADER,
+        askId: `${key}|${a.order.maker}`,
+      })),
+    ].sort((a, b) => Number(a.price.micros - b.price.micros)),
+    bids: pool.bids,
     releaseAt: timestampFromMs(Number(config.cutoff) * 1000),
   };
 }

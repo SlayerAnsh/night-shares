@@ -1,5 +1,11 @@
 import type { NightCard } from "@night-shares/proto/market/v1/analytics_pb";
-import { fairDelta, median, signedPercent, tone } from "../../model/display";
+import {
+  fairDelta,
+  forecastReturn,
+  median,
+  signedPercent,
+  tone,
+} from "../../model/display";
 import text from "../ui/text.module.css";
 import styles from "./discover.module.css";
 
@@ -8,7 +14,12 @@ export function DiscoverSummary({ nights }: { nights: NightCard[] }) {
     (card) =>
       (fairDelta(card.price?.micros, card.fairPrice?.micros) ?? 0) <= -0.02,
   ).length;
-  const mid = median(nights.map((card) => card.estimatedReturnBps));
+  const mid = median(
+    nights.flatMap((card) => {
+      const value = forecastReturn(card);
+      return value === undefined ? [] : [value];
+    }),
+  );
   return (
     <div className={styles.meta}>
       <p>

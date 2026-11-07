@@ -47,7 +47,8 @@ export function OtherMarkets({
               {usd(card.price?.micros)} <i>price</i>
             </span>
             <span className={`${text.num} ${text[tone(card.changeBps, 4)]}`}>
-              {signedPercent(card.changeBps)} <i>24h</i>
+              {signedPercent(card.fairPrice ? card.changeBps : undefined)}{" "}
+              <i>24h</i>
             </span>
             <span className={`${text.num} ${text[fairTone(delta)]}`}>
               {fairText(delta)} <i>ask vs fair</i>

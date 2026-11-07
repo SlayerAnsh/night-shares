@@ -5,6 +5,7 @@ import {
   fairDelta,
   fairText,
   fairTone,
+  forecastReturn,
   hoursUntil,
   releaseLong,
   shortDate,
@@ -73,7 +74,7 @@ export function NightHeader({
           },
           {
             label: "24h",
-            value: signedPercent(card.changeBps),
+            value: signedPercent(card.fairPrice ? card.changeBps : undefined),
             tone: tone(card.changeBps, 4),
           },
           {
@@ -84,7 +85,7 @@ export function NightHeader({
           },
           {
             label: "Est. return",
-            value: signedPercent(card.estimatedReturnBps),
+            value: signedPercent(forecastReturn(card)),
             tone: tone(card.estimatedReturnBps),
             detail: "at best ask",
           },

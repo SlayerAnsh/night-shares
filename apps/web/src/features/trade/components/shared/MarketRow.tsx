@@ -4,6 +4,7 @@ import {
   fairDelta,
   fairText,
   fairTone,
+  forecastReturn,
   hoursUntil,
   releaseShort,
   signedPercent,
@@ -25,7 +26,7 @@ export function MarketRow({ card, now }: { card: NightCard; now: number }) {
       <Link
         className={styles.link}
         href={nightHref(card.night)}
-        aria-label={`${card.propertyName}, ${card.roomTypeName}, ${date}. Price ${usd(card.price?.micros)}, est. return ${signedPercent(card.estimatedReturnBps)}`}
+        aria-label={`${card.propertyName}, ${card.roomTypeName}, ${date}. Price ${usd(card.price?.micros)}, est. return ${signedPercent(forecastReturn(card))}`}
       >
         <span className={styles.mkt}>
           <b>{card.propertyName}</b>
@@ -42,7 +43,7 @@ export function MarketRow({ card, now }: { card: NightCard; now: number }) {
           className={`${styles.chg} ${text.num} ${text[tone(card.changeBps, 4)]}`}
         >
           <i className={styles.lab}>24h </i>
-          {signedPercent(card.changeBps)}
+          {signedPercent(card.fairPrice ? card.changeBps : undefined)}
         </span>
         <span className={`${styles.fair} ${text.num} ${text[fairTone(delta)]}`}>
           <i className={styles.lab}>Ask vs fair </i>
@@ -52,7 +53,7 @@ export function MarketRow({ card, now }: { card: NightCard; now: number }) {
           className={`${styles.ret} ${text.num} ${text[tone(card.estimatedReturnBps)]}`}
         >
           <i className={styles.lab}>Est. return </i>
-          {signedPercent(card.estimatedReturnBps)}
+          {signedPercent(forecastReturn(card))}
         </span>
         <span className={styles.risk}>
           <Risk risk={card.risk} />

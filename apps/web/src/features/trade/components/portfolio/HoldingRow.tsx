@@ -1,4 +1,7 @@
-"use client";
+import { forecastReturn } from "../../model/display";
+
+("use client");
+
 import type { Ask } from "@night-shares/proto/market/v1/book_pb";
 import type { Holding } from "@night-shares/proto/market/v1/portfolio_pb";
 import Link from "next/link";
@@ -65,7 +68,7 @@ export function HoldingRow({
       <span
         className={`${text.num} ${card ? text[tone(card.estimatedReturnBps)] : ""}`}
       >
-        {card ? signedPercent(card.estimatedReturnBps) : "n/a"}
+        {card ? signedPercent(forecastReturn(card)) : "n/a"}
       </span>
       <span>{card ? <Risk risk={card.risk} /> : "n/a"}</span>
       <span className={listed ? text.num : text.muted}>

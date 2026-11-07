@@ -40,15 +40,21 @@ for (const approved of [false, true]) {
       async read<T>(request: Parameters<ChainReader["read"]>[0]) {
         return {
           block,
-          value: (request.functionName === "isOrb"
-            ? true
-            : request.contract === "PERMIT2"
-              ? [approved ? 500000n : 0n, 10000, 0]
-              : request.contract === "USDC"
-                ? approved
-                  ? 750000n
-                  : 0n
-                : amount) as T,
+          value: (request.functionName === "config"
+            ? { F: 10000n, k: 10n ** 18n, S: 10n ** 19n, cutoff: 1000000n }
+            : request.functionName === "held"
+              ? 0n
+              : request.functionName === "humanBalance"
+                ? 5n * 10n ** 17n
+                : request.functionName === "isOrb"
+                  ? true
+                  : request.contract === "PERMIT2"
+                    ? [approved ? 500000n : 0n, 10000, 0]
+                    : request.contract === "USDC"
+                      ? approved
+                        ? 750000n
+                        : 0n
+                      : amount) as T,
         };
       },
       tokenOf: async () => wallet.address,
@@ -68,7 +74,10 @@ for (const approved of [false, true]) {
       custody,
       client: {
         getBlock: async () => block,
-        readContract: async () => 123456789n,
+        readContract: async (request: { functionName: string }) =>
+          request.functionName === "extsload"
+            ? `0x${"00".repeat(32)}`
+            : 123456789n,
         simulateContract: async (request: {
           account: string;
           stateOverride: unknown[];
@@ -79,6 +88,9 @@ for (const approved of [false, true]) {
         },
       } as unknown as ForkClient,
       deployment: {
+        NightHook: wallet.address,
+        NightVault: wallet.address,
+        POOL_MANAGER: wallet.address,
         USDC: wallet.address,
         PERMIT2: wallet.address,
         TradeRouter: wallet.address,
@@ -90,7 +102,10 @@ for (const approved of [false, true]) {
       for (let i = 0; i < 4; i++) {
         for (const kind of ["buy", "sell"] as const) {
           const quote = quoteChainTrade(deps, key, 2, user, kind, wallet);
-          expect((await quote).total?.micros).toBe(100n);
+          const result = await quote;
+          expect(result.total?.micros).toBe(100n);
+          expect(result.capUsed?.tenths).toBe(5);
+          expect(result.cap?.tenths).toBe(30);
         }
       }
       expect(transactions).toBe(0);

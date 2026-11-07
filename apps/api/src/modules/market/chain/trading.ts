@@ -20,6 +20,7 @@ import { toProto } from "../../../shared/night-key";
 import { agentWallets } from "../repo/agent-wallets.sqlite";
 import { type Deps, quantity } from "../use-cases/context";
 import { liveAsks } from "./asks";
+import { chainPool } from "./pool";
 import { simulateQuote } from "./quote-simulation";
 import {
   assertOrb,
@@ -207,7 +208,49 @@ export async function quoteChainTrade(
   const quote = await simulateQuote(deps.ports, command, wallet.address);
   if (typeof quote.value !== "bigint")
     throw new Error("Router quote did not return micro USDC.");
-  return routeQuote(key, size, quote.value);
+  const result = routeQuote(key, size, quote.value);
+  const pool = await chainPool(deps.ports, key);
+  const { reader } = chainMarket(deps.ports);
+  const human = (
+    await reader.read<bigint>(
+      {
+        contract: "HumanRegistry",
+        functionName: "humanIdOf",
+        args: [wallet.address],
+      },
+      pool.block.number,
+    )
+  ).value;
+  const used = (
+    await reader.read<bigint>(
+      {
+        contract: "NightToken",
+        night: nightHash(key),
+        functionName: "humanBalance",
+        args: [human],
+      },
+      pool.block.number,
+    )
+  ).value;
+  const cap = (pool.config.S * 3n) / 10n;
+  result.cap = {
+    $typeName: "night_shares.common.v1.RoomNights",
+    tenths: Number(
+      (cap > 1000000000000000000n ? cap : 1000000000000000000n) /
+        100000000000000000n,
+    ),
+  };
+  result.capUsed = {
+    $typeName: "night_shares.common.v1.RoomNights",
+    tenths: Number(used / 100000000000000000n),
+  };
+  result.releaseAt = timestampFromMs(Number(pool.config.cutoff) * 1000);
+  if (pool.refund !== undefined)
+    result.unsoldRefund = {
+      $typeName: "night_shares.common.v1.Usdc",
+      micros: (pool.refund * BigInt(size)) / 10n,
+    };
+  return result;
 }
 export async function executeChainTrade(
   deps: Deps,

@@ -45,6 +45,8 @@ export function WhyPanel({ detail }: { detail?: GetNightResponse }) {
   const s = detail.stats;
   const t = detail.hostTrackRecord;
   const ret = detail.night?.estimatedReturnBps ?? 0;
+  const forecast =
+    !!s?.expectedExit && (detail.night?.price?.micros ?? 0n) >= 10000n;
   return (
     <>
       <p className={styles.line}>
@@ -57,39 +59,62 @@ export function WhyPanel({ detail }: { detail?: GetNightResponse }) {
       <div className={styles.why}>
         <Column
           title="Return"
-          figure={<span className={text[tone(ret)]}>{signedPercent(ret)}</span>}
+          figure={
+            <span className={text[tone(ret)]}>
+              {signedPercent(forecast ? ret : undefined)}
+            </span>
+          }
           line="Expected if you hold to release, after fees."
           rows={[
             ["Value at release", usd(s?.expectedExit?.micros)],
-            ["Sell through, similar nights", percent(s?.sellThroughBps ?? 0)],
-            ["Annualized", percent(s?.annualizedReturnBps ?? 0), text.muted],
+            [
+              "Sell through, similar nights",
+              percent(forecast ? s?.sellThroughBps : undefined),
+            ],
+            [
+              "Annualized",
+              percent(forecast ? s?.annualizedReturnBps : undefined),
+              text.muted,
+            ],
           ]}
         />
         <Column
           title="Risk"
           figure={<Risk risk={detail.night?.risk ?? 0} size="large" />}
-          line={`Prices moved ${percent(s?.volatilityBps ?? 0)} recently.`}
+          line={`Prices moved ${percent(detail.priceHistory.length ? s?.volatilityBps : undefined)} recently.`}
           rows={[
             ["Refund if unsold", `${usd(s?.worstRefund?.micros)} / rn`],
-            ["Price swings", percent(s?.volatilityBps ?? 0)],
-            ["Host sold back", s?.hostSoldBack ? "Yes" : "No"],
+            [
+              "Price swings",
+              percent(
+                detail.priceHistory.length ? s?.volatilityBps : undefined,
+              ),
+            ],
+            [
+              "Host sold back",
+              detail.night?.fairPrice
+                ? s?.hostSoldBack
+                  ? "Yes"
+                  : "No"
+                : "n/a",
+            ],
           ]}
         />
         <Column
           title="Track record"
-          figure={percent(t?.profitableBps ?? 0).replace(".00", "")}
+          figure={percent(t?.profitableBps).replace(".00", "")}
           line="of traders made money on past nights at this hotel."
           rows={[
             [
               "Avg return per night",
-              signedPercent(t?.averageReturnBps ?? 0),
+              signedPercent(t?.averageReturnBps),
               text[tone(t?.averageReturnBps ?? 0)],
             ],
-            ["Booked by guests", percent(t?.bookedBps ?? 0)],
-            ["Unsold at release", percent(t?.unsoldBps ?? 0)],
+            ["Booked by guests", percent(t?.bookedBps)],
+            ["Unsold at release", percent(t?.unsoldBps)],
             [
               "Guests turned away",
-              String(t?.incidents ?? 0),
+              t ? String(t.incidents) : "n/a",
               t?.incidents ? text.warn : undefined,
             ],
           ]}
@@ -97,15 +122,15 @@ export function WhyPanel({ detail }: { detail?: GetNightResponse }) {
         <Column
           title="Liquidity"
           figure={`${formatRoomNights(s?.buyLiquidity?.tenths ?? 0)} rn`}
-          line="Room nights you can buy near the fair price now."
+          line="Room nights available to buy now."
           rows={[
             [
               "Sell liquidity",
               `${formatRoomNights(s?.sellLiquidity?.tenths ?? 0)} rn`,
             ],
-            ["Nights traded", String(t?.nightsTraded ?? 0)],
-            ["Bookings honoured", percent(t?.honouredBps ?? 0)],
-            ["Refunded at release", percent(t?.refundBps ?? 0)],
+            ["Nights traded", t ? String(t.nightsTraded) : "n/a"],
+            ["Bookings honoured", percent(t?.honouredBps)],
+            ["Refunded at release", percent(t?.refundBps)],
           ]}
         />
       </div>

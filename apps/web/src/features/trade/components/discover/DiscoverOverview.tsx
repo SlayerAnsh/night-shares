@@ -1,4 +1,7 @@
-"use client";
+import { forecastReturn } from "../../model/display";
+
+("use client");
+
 import { Kpis, Segmented } from "@night-shares/design-system";
 import type { NightCard } from "@night-shares/proto/market/v1/analytics_pb";
 import { useState } from "react";
@@ -41,7 +44,12 @@ export function DiscoverOverview({
     (card) =>
       (hoursUntil(card.releaseAt?.seconds, now) ?? Infinity) <= SOON_HOURS,
   ).length;
-  const mid = median(nights.map((card) => card.estimatedReturnBps)) ?? 0;
+  const mid = median(
+    nights.flatMap((card) => {
+      const value = forecastReturn(card);
+      return value === undefined ? [] : [value];
+    }),
+  );
   const byChange = [...nights].sort((a, b) =>
     movers === "up" ? b.changeBps - a.changeBps : a.changeBps - b.changeBps,
   );
@@ -62,8 +70,8 @@ export function DiscoverOverview({
           },
           {
             label: "Median est. return",
-            value: signedPercent(Math.round(mid), 1),
-            tone: tone(mid),
+            value: signedPercent(mid === null ? undefined : Math.round(mid), 1),
+            tone: tone(mid ?? 0),
           },
           { label: "Release in 14 days", value: soon, detail: "markets" },
         ]}
@@ -86,7 +94,7 @@ export function DiscoverOverview({
           <MoverRows
             nights={byChange.slice(0, 5)}
             figure={(card) => ({
-              text: signedPercent(card.changeBps),
+              text: signedPercent(card.fairPrice ? card.changeBps : undefined),
               tone: tone(card.changeBps, 4),
             })}
           />

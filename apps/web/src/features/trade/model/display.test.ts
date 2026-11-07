@@ -3,6 +3,7 @@ import {
   fairDelta,
   fairText,
   fairTone,
+  forecastReturn,
   median,
   releaseLong,
   releaseShort,
@@ -57,4 +58,33 @@ describe("trade display formatting", () => {
     expect(median([1, 2, 3, 4])).toBe(2.5);
     expect(median([])).toBeNull();
   });
+});
+
+test("sub-dollar prices retain four decimals and missing forecasts stay unavailable", () => {
+  expect(usd(10290n)).toBe("$0.0103");
+  expect(usd(10290n, 2)).toBe("$0.0103");
+  expect(usd(100n)).toBe("$0.0001");
+  expect(usd(-10290n)).toBe("-$0.0103");
+  expect(signedPercent(undefined)).toBe("n/a");
+  expect(signedPercent(2147483647)).toBe("n/a");
+});
+
+test("a zero proto default does not invent a chain forecast", () => {
+  expect(
+    forecastReturn({ price: { micros: 10290n }, estimatedReturnBps: 0 }),
+  ).toBeUndefined();
+  expect(
+    forecastReturn({
+      price: { micros: 9999n },
+      fairPrice: { micros: 1000000n },
+      estimatedReturnBps: 9000000,
+    }),
+  ).toBeUndefined();
+  expect(
+    forecastReturn({
+      price: { micros: 1000000n },
+      fairPrice: { micros: 1000000n },
+      estimatedReturnBps: 0,
+    }),
+  ).toBe(0);
 });

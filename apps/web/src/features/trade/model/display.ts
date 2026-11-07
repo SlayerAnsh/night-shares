@@ -13,7 +13,7 @@ export function usd(micros: bigint | undefined, decimals: 0 | 2 = 0) {
   const n = dollars(micros);
   const text = Math.abs(n).toLocaleString("en-US", {
     minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
+    maximumFractionDigits: Math.abs(n) > 0 && Math.abs(n) < 1 ? 4 : decimals,
   });
   return `${n < 0 && text !== "0" ? "-" : ""}$${text}`;
 }
@@ -31,7 +31,9 @@ export function signedUsd(micros: bigint | undefined) {
   return `${micros > 0n ? "+" : MINUS}${usd(micros < 0n ? -micros : micros)}`;
 }
 
-export function signedPercent(bps: number, decimals = 1) {
+export function signedPercent(bps: number | undefined, decimals = 1) {
+  if (bps === undefined || !Number.isFinite(bps) || Math.abs(bps) > 1000000)
+    return "n/a";
   const text = (Math.abs(bps) / 100).toFixed(decimals);
   if (Number(text) === 0) return `${text}%`;
   return `${bps > 0 ? "+" : MINUS}${text}%`;
@@ -115,4 +117,15 @@ export function median(values: number[]) {
   return sorted.length % 2
     ? (sorted[mid] ?? 0)
     : ((sorted[mid - 1] ?? 0) + (sorted[mid] ?? 0)) / 2;
+}
+
+// Proto scalar defaults are zero; absent fairPrice identifies an unavailable forecast.
+export function forecastReturn(card: {
+  fairPrice?: { micros: bigint };
+  price?: { micros: bigint };
+  estimatedReturnBps: number;
+}) {
+  return card.fairPrice && (card.price?.micros ?? 0n) >= 10000n
+    ? card.estimatedReturnBps
+    : undefined;
 }

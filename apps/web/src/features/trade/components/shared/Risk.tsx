@@ -9,7 +9,7 @@ export function Risk({ risk, size }: { risk: number; size?: "large" }) {
       className={`${styles.risk} ${styles[name.toLowerCase()] ?? ""} ${size ? styles.large : ""}`}
     >
       <i aria-hidden="true" />
-      {name}
+      {risk === 0 ? "n/a" : name}
     </span>
   );
 }

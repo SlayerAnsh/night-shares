@@ -1,5 +1,6 @@
 import type { NightKey } from "@night-shares/proto/common/v1/night_pb";
-import { formatNight, formatUsdc } from "../../../shared/format";
+import { formatNight } from "../../../shared/format";
+import { usd } from "./display";
 export function parseNightKey(key: string) {
   const [propertyId, roomTypeId, date, extra] = key.split(":");
   if (!propertyId || !roomTypeId || !date || extra !== undefined) return null;
@@ -32,8 +33,11 @@ export function daysOut(date: string, now: number) {
   return Math.ceil((Date.parse(`${date}T00:00:00Z`) - now) / 86400000);
 }
 export const money = (value?: { micros: bigint }) =>
-  value ? formatUsdc(value.micros) : "Unavailable";
-export const percent = (bps: number) => `${(bps / 100).toFixed(2)}%`;
+  value ? usd(value.micros, 2) : "Unavailable";
+export const percent = (bps: number | undefined) =>
+  bps === undefined || !Number.isFinite(bps) || Math.abs(bps) > 1000000
+    ? "n/a"
+    : `${(bps / 100).toFixed(2)}%`;
 export const riskName = (risk: number) =>
   ["Unknown", "Low", "Medium", "High"][risk] ?? "Unknown";
 export const sourceName = (source: number) =>

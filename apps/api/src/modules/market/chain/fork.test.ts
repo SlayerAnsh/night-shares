@@ -51,8 +51,11 @@ import { buy } from "../use-cases/trading/buy";
 import { sell } from "../use-cases/trading/sell";
 import { chainAgentTransfer, chainAgentWallet } from "./agent";
 import { askRows, cancelChainAsks, liveAsks } from "./asks";
+import { chainBook } from "./book";
 import { claimChainCutoff, releaseChainCutoff } from "./cutoff";
+import { chainPool } from "./pool";
 import { chainPortfolio } from "./positions";
+import { chainNight } from "./queries";
 import { recoverChainMarket } from "./recovery";
 import { configureChainMarket, nightHash } from "./runtime";
 import { quoteChainTrade } from "./trading";
@@ -114,9 +117,9 @@ forkTest(
       // Isolated child fork plus a separate derivation range avoids parallel test identities.
       db.query("INSERT INTO anvil_wallets VALUES (?, ?, ?, ?)").run(
         "system:reserved",
-        70001,
-        "anvil:70001",
-        anvilAccount(70001).address,
+        99001,
+        "anvil:99001",
+        anvilAccount(99001).address,
       );
       const attester = anvilAccount(9);
       const custody: WalletCustody = {
@@ -323,10 +326,55 @@ forkTest(
         if (command.kind === "approveUsdc" || command.kind === "approvePermit2")
           expect(command.amount).toBe(1000000n);
       }
+      const pool = await chainPool(deps.ports, key);
+      expect(pool.spot).toBeGreaterThan(0n);
+      expect(pool.asks.length).toBeGreaterThan(0);
+      expect(pool.bids.length).toBeGreaterThan(0);
+      expect(pool.bids[0]?.net?.micros).toBeLessThan(
+        pool.bids[0]?.price.micros ?? 0n,
+      );
+      expect(pool.refund).toBeGreaterThan(0n);
+      const book = await chainBook(deps, key);
+      expect(book.asks[0]?.source).toBe(1);
+      const detail = await chainNight(deps, key);
+      expect(detail.night.price?.micros).toBe(pool.spot);
+      expect(detail.night.fairPrice).toBeUndefined();
+      expect(detail.stats.expectedExit).toBeUndefined();
+      expect(detail.night.estimatedReturnBps).toBe(0);
+      expect(detail.stats.buyLiquidity?.tenths).toBe(pool.asks.length);
+      expect(detail.stats.sellLiquidity?.tenths).toBe(pool.bids.length);
+      expect(detail.stats.worstRefund?.micros).toBe(pool.refund);
+      const preview = await quoteChainTrade(deps, key, 1, maker.user, "buy");
+      expect(preview.capUsed?.tenths).toBe(2);
+      expect(preview.cap?.tenths).toBe(
+        Math.max(10, Math.floor((Number(pool.config.S) / 1e18) * 3)),
+      );
+      expect(preview.unsoldRefund?.micros).toBe((pool.refund ?? 0n) / 10n);
+      const sellPreview = await quoteChainTrade(
+        deps,
+        key,
+        1,
+        maker.user,
+        "sell",
+      );
+      expect(
+        Math.abs(
+          Number(
+            (sellPreview.total?.micros ?? 0n) * 10n -
+              (pool.bids[0]?.net?.micros ?? 0n),
+          ),
+        ),
+      ).toBeLessThanOrEqual(20);
       const posted = await postAskWithCustody(deps, maker.user, key, 1, 1n, {
         signature: "",
         operationId: "post-retry",
       });
+      const signedBook = await chainBook(deps, key);
+      expect(signedBook.asks[0]?.price.micros).toBe(1n);
+      expect(signedBook.asks[0]?.source).toBe(2);
+      expect(await chainPool(deps.ports, key)).toBe(
+        await chainPool(deps.ports, key),
+      );
       const journalBeforeRetry = db
         .query("SELECT * FROM chain_operations")
         .all();
@@ -740,7 +788,7 @@ forkTest(
       // External token transfer must appear without an API settlement mutation.
       const token = await reader.tokenOf(nightHash(key));
       const external = createWalletClient({
-        account: anvilAccount(70002),
+        account: anvilAccount(99002),
         transport: http(rpcUrl),
       });
       const hash = await external.writeContract({
