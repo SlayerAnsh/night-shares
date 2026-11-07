@@ -6,6 +6,10 @@ import {NightHook} from "../../src/NightHook.sol";
 import {Deploy} from "../../script/Deploy.s.sol";
 
 contract DeployManifestHarness is Deploy {
+    function _deploymentPath() internal pure override returns (string memory) {
+        return "out/x402-offline-test.json";
+    }
+
     function write(address factory, Deployment memory d) external {
         _writeDeployment(factory, d, address(this), address(0x123), address(0x124), address(0x125), 1e6, 50e6, 100e18, 20);
     }
@@ -36,10 +40,9 @@ contract X402FlowTest is SettlerFixture {
         assertEq(cash.balanceOf(maker), 0); assertEq(settlement.remainingReserve(night), 0); _conserved();
     }
     function test_deploymentManifestContainsX402AndDomains() public {
-        vm.setEnv("DEPLOYMENT_NAME", "x402-offline-test");
         vm.setEnv("USDC_EIP712_NAME", "USDC"); vm.setEnv("USDC_EIP712_VERSION", "2");
         DeployManifestHarness harness = new DeployManifestHarness(); harness.write(address(factory), d);
-        string memory path = "deployments/x402-offline-test.json";
+        string memory path = "out/x402-offline-test.json";
         string memory json = vm.readFile(path);
         assertEq(vm.parseJsonAddress(json, ".X402Settler"), d.settler);
         assertEq(vm.parseJsonAddress(json, ".NightTokenDeployer"), factory.tokenDeployer());

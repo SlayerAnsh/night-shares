@@ -43,6 +43,10 @@ contract Deploy is Script, INightTypes {
             "Arc mainnet roles must differ from deployer");
     }
 
+    function _deploymentPath() internal view virtual returns (string memory) {
+        return string.concat("deployments/", vm.envOr("DEPLOYMENT_NAME", vm.toString(block.chainid)), ".json");
+    }
+
     function _writeDeployment(address factory, Deployment memory d, address sender, address helper,
         address attester, address owner, uint256 maxF, uint256 maxPool, uint256 maxS, uint256 maxOpen) internal {
         string memory key = "deployment";
@@ -71,7 +75,7 @@ contract Deploy is Script, INightTypes {
         vm.serializeUint(key, "MAX_POOL", maxPool);
         vm.serializeUint(key, "MAX_S", maxS / 1e18);
         string memory json = vm.serializeUint(key, "MAX_OPEN_NIGHTS", maxOpen);
-        string memory path = string.concat("deployments/", vm.envOr("DEPLOYMENT_NAME", vm.toString(block.chainid)), ".json");
+        string memory path = _deploymentPath();
         vm.writeJson(json, path);
         vm.writeJson(json, path, ".constructorConfig");
         string memory domain = "domain";

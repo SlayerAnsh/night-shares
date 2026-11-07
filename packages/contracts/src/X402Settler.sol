@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 import {IX402Settler} from "./interfaces/IX402Settler.sol";
+import {INightToken} from "./interfaces/INightToken.sol";
 import {IERC3009} from "./interfaces/IERC3009.sol";
 import {INightFactory} from "./interfaces/INightFactory.sol";
 import {ITradeRouter} from "./interfaces/ITradeRouter.sol";
@@ -70,6 +71,7 @@ contract X402Settler is IX402Settler {
         _payment(token, auth);
         if (auth.nonce != sellNonce(night, minReceived, deadline, salt)) revert TermsMismatch();
         uint256 cashBefore = usdc.balanceOf(address(this));
+        INightToken(token).setSettlerHints(hints);
         uint256 before_ = _pull(token, auth, signature);
         token.safeApprove(address(tradeRouter), auth.value);
         received = tradeRouter.sellFor(auth.from, night, auth.value, minReceived, hints, deadline);

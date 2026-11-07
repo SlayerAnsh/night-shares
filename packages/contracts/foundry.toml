@@ -8,4 +8,4 @@ evm_version = "cancun"
 via_ir = true
 optimizer = true
 optimizer_runs = 200
-fs_permissions = [{ access = "read", path = "./test/fixtures" }, { access = "read", path = "./out" }, { access = "read-write", path = "./deployments" }]
+fs_permissions = [{ access = "read", path = "./test/fixtures" }, { access = "read", path = "./out" }, { access = "read-write", path = "./out/x402-offline-test.json" }, { access = "read-write", path = "./deployments" }]

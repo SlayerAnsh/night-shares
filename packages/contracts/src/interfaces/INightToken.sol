@@ -61,6 +61,8 @@ interface INightToken is INightTypes, IERC3009 {
     function burnVaultDust() external returns (uint256 amount);
     /// @notice Anyone supplies transaction-scoped hints; validate both links before use, otherwise walk at most 64 nodes or revert.
     function setHints(Hint[] calldata hints) external;
+    /// @notice Only the immutable settler supplies hints before an authorized token pull.
+    function setSettlerHints(Hint[] calldata hints) external;
     /// @notice BookingRouter or Settlement only. Burns tenths from its own custody and increments burned count.
     function burn(uint256 amount) external;
     /// @notice BookingRouter only. Pops largest holders, transfers qty to router, pays each X less 1.3% from prefunded USDC, emits Recalled.

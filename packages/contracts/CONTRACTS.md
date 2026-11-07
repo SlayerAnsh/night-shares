@@ -34,6 +34,7 @@ The e2e environment uses chain ID 5042002, a freshly deployed real PoolManager, 
 | Factory.addLadderChunk | Bound host only. Vault unlocks PoolManager once for the chunk; hook validates every unique vault-owned position. |
 | Token transfers | Owners or approved spenders. Verify recipients, enforce cached human caps, maintain descending holder links and enforce released inventory. Fixed excluded endpoints are vault, manager, routers, Settlement, X402Settler and zero. |
 | Token.routerTransfer | Fixed TradeRouter or BookingRouter only. Routers perform signature and fill checks first. |
+| Token.setSettlerHints | Only the immutable X402Settler may install transaction scoped hints before an authorized token pull. It uses the same adjacency validation and bounded fallback as setHints. |
 | Token.setHints | Anyone may provide transaction-scoped validated list hints. Hints require live `inList` membership and reciprocal adjacency. Transfer counterparties cannot be hint neighbors. Invalid hints fall back to traversal of at most 64 nodes. |
 | TradeRouter.buyFor/sellFor | Immutable X402Settler only. Orb identity, cap, hook context, host fee split and Trade.taker use the agent wallet. USDC and sold tokens come from the settler. |
 | X402Settler.buy/sell | Anyone relays an authorization whose nonce binds the trade terms. Payment and trade are atomic. Exact allowances are cleared after routing. |
@@ -315,6 +316,7 @@ function released() external view returns (uint256);
 function routerTransfer(address from, address to, uint256 amount) external;
 function seedPosition(uint256 i) external view returns (int24 lower, int24 upper, uint128 liquidity, uint256 deposit);
 function setHints(INightTypes.Hint[] hints) external;
+function setSettlerHints(INightTypes.Hint[] hints) external;
 function snapshotAtCutoff() external returns (uint256 amount, address first);
 function snapshotBalance(address account) external view returns (uint256);
 function symbol() external pure returns (string);
@@ -594,7 +596,7 @@ Using `forge test --offline --match-contract ReviewFlowTest --match-test test_F5
 
 NightToken implements IERC3009 with both bytes and v/r/s signature overloads. Its EIP-712 domain is NightShares Room Night, version 1, the current chain ID and the token address. Authorization nonces belong to each authorizer. The validity window is strict at both boundaries. SignatureCheckerLib supports EOAs and ERC-1271 accounts. Every successful authorization emits AuthorizationUsed and runs the normal guarded token update, including quantity, cap, cutoff and holder-list checks.
 
-While either pause is active, transfers between ordinary holders remain available only when the sender has a nonzero live registry human ID equal to the recipient's live registry human ID and the sender's cached human ID also matches that recipient ID. A wallet relinked to another human cannot transfer under its old cached ID while paused. There is no settler pause exemption. Excluded endpoints cannot use this exemption. Cutoff still freezes ordinary transfers.
+While either pause is active, transfers between ordinary holders remain available only when the sender has a nonzero live registry human ID equal to the recipient's live registry human ID and the sender's cached human ID also matches that recipient ID. The recipient's cached human ID must also be zero or equal to its live registry human ID. A wallet relinked to another human cannot send or receive under its old cached ID while paused. Unpaused receives continue to use the cached identity of an existing position, as documented above. Exiting clears that cache, and the next receive uses the current registry identity. There is no settler pause exemption. Excluded endpoints cannot use this exemption. Cutoff still freezes ordinary transfers.
 
 ## X402 settlement
 
@@ -604,6 +606,8 @@ TradeRouter exposes `settler()`, `buyFor(recipient, night, qty, maxPaid, asks, h
 
 X402Settler exposes `buy`, `sell`, `buyNonce`, `sellNonce` and `processed`. IX402Settler defines the complete Authorization tuple and events X402Bought and X402Sold. Buy nonces bind night, quantity, deadline and salt. Sell nonces bind night, minimum proceeds, deadline and salt. Authorization signatures separately bind payer, recipient, value and validity window. The settler checks its token and USDC balances against each call's starting balances. Donations neither subsidize trades nor block them. USDC and NightToken allowances equal the current authorization value and are reset to zero. There is no owner, pause or withdrawal entry point.
 
+X402Settler installs sell hints through the additive `NightToken.setSettlerHints(Hint[])` entry point before pulling tokens with authorization. Only the immutable settler can call this entry point. The existing public `setHints` selector retains its validated hint semantics. A partial sell can therefore reinsert the agent behind more than 64 larger holders. Missing or invalid hints still use the bounded fallback and can revert with `HintSearchExhausted`. The router installs buy hints before delivering tokens to the agent.
+
 NightToken rejects authorized transfers to X402Settler unless the settler submits them. Holders never use the same-human pause exemption to reach excluded endpoints.
 
 ### Accepted limitation for direct payments
@@ -611,3 +615,14 @@ NightToken rejects authorized transfers to X402Settler unless the settler submit
 X402Settler keeps `transferWithAuthorization` as its payment method and has no recovery function for consumed authorizations. EIP-3009 `authorizationState` reports whether a nonce was consumed, but not which value it moved. A new signature using that nonce cannot prove the amount previously transferred, so the settler cannot safely calculate a refund from it.
 
 Successful buys and sells leave no funds from their payments stranded in the settler. A buy returns unused payment funds atomically. A payment sent straight to the settler outside `buy` or `sell`, including a USDC authorization submitted directly to USDC, is not recoverable through the settler. This is an accepted limitation. Such funds remain in the settler, and subsequent buys and sells preserve that balance through their per call balance checks.
+
+
+### M1 and M2 regression evidence
+
+`test_M1_partialSellWithManyLargerHolders` creates 65 strictly larger holders and attempts a partial authorized sell. Before the fix, the call with correct hints reverted with `HintSearchExhausted()`. The test also requires the call without hints to revert and verifies authorization rollback before retrying. `test_M1_buyWithManyLargerHolders` covers delivery behind 65 larger holders and already passed before the fix. `test_M1_settlerHintsRejectUntrustedCaller` checks access to the added entry point.
+
+`test_M2_pausedTransferToStaleRecipientBlocked` relinks a funded recipient to the sender's live identity. Before the fix, the transfer unexpectedly succeeded. The regression covers both global and local pause, unchanged balances after rejection, preserved cached accounting when unpaused, and a fresh position after exit.
+
+The deployment manifest test writes its temporary JSON into `out/x402-offline-test.json` and removes it after validation. The production script retains its existing deployment path.
+
+Validation with `forge build --offline && forge test --offline` passed. The suite reported 257 passing tests, zero failures, and one skipped test. This preserves the original 253 passing tests and adds four regression tests. Both required M1 and M2 regressions were confirmed failing before the fixes.

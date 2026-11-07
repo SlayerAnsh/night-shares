@@ -1,11 +1,74 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
+import {INightToken} from "../../src/interfaces/INightToken.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {SettlerFixture} from "./SettlerFixture.sol";
 import {IX402Settler} from "../../src/interfaces/IX402Settler.sol";
 import {NightHook} from "../../src/NightHook.sol";
 
 contract X402SettlerTest is SettlerFixture {
+    function _manyLargerHolders() internal returns (Hint[] memory hints) {
+        _open(30, "many-holders", "2030-01-01");
+        _buy(maker, 2e17);
+        // Descending addresses make each new equal-sized holder the head.
+        for (uint256 i; i < 65; ++i) {
+            address holder = address(uint160(0x2000 - i));
+            accounts.push(holder);
+            _link(holder, 100 + i, true);
+            _fund(holder);
+            _buy(holder, 3e17);
+        }
+        hints = new Hint[](1);
+        hints[0] = Hint(maker, address(0x2000), address(0));
+    }
+
+    function test_M1_partialSellWithManyLargerHolders() public {
+        Hint[] memory hints = _manyLargerHolders();
+        IX402Settler.Authorization memory a = _sellAuth(1e17, 1, 0);
+        bytes memory sig = _signature(address(token), a);
+        vm.expectRevert(INightToken.HintSearchExhausted.selector);
+        settler.sell(a, sig, night, 1, new Hint[](0), c.cutoff - 1, 0);
+        assertEq(token.balanceOf(maker), 2e17);
+        assertFalse(token.authorizationState(maker, a.nonce));
+        assertFalse(settler.processed(address(token), maker, a.nonce));
+        uint256 before_ = cash.balanceOf(maker);
+        uint256 received = settler.sell(a, sig, night, 1, hints, c.cutoff - 1, 0);
+        assertGt(received, 1);
+        assertEq(cash.balanceOf(maker) - before_, received);
+        assertEq(token.balanceOf(maker), 1e17);
+        assertEq(token.prev(maker), address(0x2000));
+        assertEq(token.next(address(0x2000)), maker);
+        assertEq(token.holderCount(), 66);
+        assertEq(token.balanceOf(d.settler), 0);
+        assertEq(token.allowance(d.settler, d.tradeRouter), 0);
+        _conserved();
+    }
+
+    function test_M1_settlerHintsRejectUntrustedCaller() public {
+        Hint[] memory hints = new Hint[](1);
+        hints[0] = Hint(maker, address(0), address(0));
+        vm.expectRevert(Unauthorized.selector);
+        token.setSettlerHints(hints);
+        vm.prank(d.settler);
+        token.setSettlerHints(hints);
+    }
+
+    function test_M1_buyWithManyLargerHolders() public {
+        Hint[] memory hints = _manyLargerHolders();
+        // Exit first so the next buy must insert the agent behind 65 holders.
+        _settleSell(_sellAuth(2e17, 1, 0), 1, 0);
+        IX402Settler.Authorization memory a = _buyAuth(1e17, 100000e6, 0);
+        bytes memory sig = _signature(USDC, a);
+        vm.expectRevert(INightToken.HintSearchExhausted.selector);
+        settler.buy(a, sig, night, 1e17, new Ask[](0), new Hint[](0), c.cutoff - 1, 0);
+        assertFalse(cash.authorizationState(maker, a.nonce));
+        settler.buy(a, sig, night, 1e17, new Ask[](0), hints, c.cutoff - 1, 0);
+        assertEq(token.balanceOf(maker), 1e17);
+        assertEq(token.prev(maker), address(0x2000));
+        assertEq(token.next(address(0x2000)), maker);
+        _conserved();
+    }
+
     function test_buyPullsPaysAndRefundsUnused() public {
         uint256 quote = _quote(5e17); IX402Settler.Authorization memory a = _buyAuth(5e17, quote + 10, 0);
         uint256 before_ = cash.balanceOf(maker);

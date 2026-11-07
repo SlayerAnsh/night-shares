@@ -227,6 +227,7 @@ contract NightToken is INightToken {
         if ((!excluded[from] || !excluded[to]) && (paused || INightHook(d.hook).paused())) {
             bool sameHuman = !excluded[from] && !excluded[to] && cachedHuman[from] != 0
                 && cachedHuman[from] == IHumanRegistry(d.registry).humanIdOf(to)
+                && (cachedHuman[to] == 0 || cachedHuman[to] == IHumanRegistry(d.registry).humanIdOf(to))
                 && IHumanRegistry(d.registry).humanIdOf(from) != 0
                 && IHumanRegistry(d.registry).humanIdOf(from) == IHumanRegistry(d.registry).humanIdOf(to);
             if (!sameHuman) revert Paused();
@@ -289,7 +290,16 @@ contract NightToken is INightToken {
         holderCount--;
     }
 
+    function setSettlerHints(Hint[] calldata hints) external {
+        if (msg.sender != d.settler) revert Unauthorized();
+        _setHints(hints);
+    }
+
     function setHints(Hint[] calldata hints) external {
+        _setHints(hints);
+    }
+
+    function _setHints(Hint[] calldata hints) private {
         for (uint256 i; i < hints.length; i++) {
             bytes32 slot = keccak256(abi.encode("NightToken.hint", hints[i].account));
             address p = hints[i].prev;

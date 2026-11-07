@@ -83,6 +83,46 @@ contract NightToken3009Test is X402Fixture {
         }
     }
 
+    function test_M2_pausedTransferToStaleRecipientBlocked() public {
+        _buy(BUYER, 2e17);
+        uint64 deadline = uint64(block.timestamp + 1 days);
+        registry.relinkWallet(2, BUYER, deadline, _sig(ATTESTER_KEY,
+            OrderLib.digest(registry.DOMAIN_SEPARATOR(), OrderLib.hashWallet(2, BUYER, deadline, true))));
+        assertEq(registry.humanIdOf(BUYER), 2);
+        assertEq(token.cachedHuman(BUYER), 3);
+        for (uint256 i; i < 2; ++i) {
+            vm.prank(PLATFORM);
+            NightHook(d.hook).setPaused(i == 0);
+            vm.prank(PLATFORM);
+            token.setPaused(i == 1);
+            vm.expectRevert(Paused.selector);
+            vm.prank(maker);
+            token.transfer(BUYER, 1e17);
+            assertEq(token.balanceOf(maker), 1e18);
+            assertEq(token.balanceOf(BUYER), 2e17);
+            assertEq(token.humanBalance(2), 1e18);
+            assertEq(token.humanBalance(3), 2e17);
+        }
+        vm.prank(PLATFORM);
+        token.setPaused(false);
+        // Unpaused receives retain the existing position's identity until exit.
+        vm.prank(maker);
+        token.transfer(BUYER, 1e17);
+        assertEq(token.cachedHuman(BUYER), 3);
+        assertEq(token.humanBalance(3), 3e17);
+        assertEq(token.humanBalance(2), 9e17);
+        vm.prank(BUYER);
+        token.transfer(maker, 3e17);
+        assertEq(token.cachedHuman(BUYER), 0);
+        vm.prank(PLATFORM);
+        token.setPaused(true);
+        vm.prank(maker);
+        token.transfer(BUYER, 1e17);
+        assertEq(token.cachedHuman(BUYER), 2);
+        assertEq(token.humanBalance(2), 12e17);
+        assertEq(token.humanBalance(3), 0);
+    }
+
     function test_pausedOtherHumanTransferBlocked() public {
         vm.prank(PLATFORM); NightHook(d.hook).setPaused(true);
         bytes memory sig = _auth(BUYER, 1e17, 0, type(uint256).max, 0);
