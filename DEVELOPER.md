@@ -185,6 +185,8 @@ The Arc fork chain (`docker-compose.chain.yml`) is a local development tool and 
 
 ### Dokploy
 
+`docker-compose.testnet.yml` and `docker-compose.mainnet.yml` are copies of `docker-compose.yml` without `expose` entries, one per Dokploy deployment. They are identical apart from the header comment; the network is chosen by that deployment's environment (`ARC_NETWORK` and related keys), not by the file. Keep all three in sync when the stack changes.
+
 1. Create a Compose service pointing at this repository, compose path `app/docker-compose.yml` (or `docker-compose.yml` when the repository root is `app`).
 2. Paste the contents of `.env.example`, with real values, into the Environment tab. Dokploy writes it to `.env` beside the compose file, which the API loads.
 3. Add a domain routed to service `web`, container port 3000, with HTTPS. Only `web` needs a domain, because it proxies all API calls server-side. HTTPS matters because the production web build sets the session cookie `Secure`.
