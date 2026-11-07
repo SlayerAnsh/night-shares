@@ -1,12 +1,12 @@
 import { expect, test } from "bun:test";
 import { chainConfig } from "./config";
 
-test("mainnet limits and threshold follow real mainnet adapters with explicit overrides", () => {
+test("mainnet limits and threshold follow mainnet network with explicit overrides", () => {
   expect(chainConfig({}).chainLimits).toBe("off");
   expect(
     chainConfig({ ADAPTERS: "mock", ARC_NETWORK: "mainnet" })
       .agentApprovalThreshold,
-  ).toBe(1_000_000_000n);
+  ).toBe(10_000_000n);
   expect(
     chainConfig({ ADAPTERS: "arc", ARC_NETWORK: "mainnet" })
       .agentApprovalThreshold,

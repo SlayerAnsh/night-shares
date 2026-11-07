@@ -74,6 +74,12 @@ export function createServer(
           })
           .end(
             JSON.stringify({
+              ...(path === "/readyz"
+                ? {
+                    executionEnabled:
+                      container.ports.chainExecutor?.executionEnabled ?? false,
+                  }
+                : {}),
               status: healthy ? "ok" : "unavailable",
               ...(reason ? { reason: redactRpc(reason) } : {}),
             }),

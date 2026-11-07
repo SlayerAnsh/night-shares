@@ -44,3 +44,29 @@ test("readyz returns 503 and reason for ops gas shortage; healthz stays live", a
     await harness.close();
   }
 });
+
+test("read-only readyz remains healthy and reports execution disabled", async () => {
+  const { buildContainer } = await import("../container/build-container");
+  const { createHarness } = await import("../../test/e2e/harness");
+  const container = buildContainer({
+    port: 0,
+    adapters: "mock",
+    dbPath: ":memory:",
+  });
+  if (!container.ports.chainExecutor) throw new Error("Missing executor");
+  container.ports.chainExecutor = {
+    ...container.ports.chainExecutor,
+    executionEnabled: false,
+  };
+  const harness = await createHarness(container);
+  try {
+    const response = await fetch(`${harness.baseUrl}/readyz`);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      status: "ok",
+      executionEnabled: false,
+    });
+  } finally {
+    await harness.close();
+  }
+});

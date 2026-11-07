@@ -11,7 +11,10 @@ test("enabled IP limit rejects excess RPCs but leaves probes available", async (
     for (const path of ["/healthz", "/readyz"]) {
       const response = await fetch(`${h.baseUrl}${path}`);
       expect(response.status).toBe(200);
-      expect(await response.json()).toEqual({ status: "ok" });
+      expect(await response.json()).toEqual({
+        status: "ok",
+        ...(path === "/readyz" ? { executionEnabled: false } : {}),
+      });
     }
     await h.clients.catalog.listDestinations({});
     for (const path of ["/healthz", "/readyz", "/healthz"]) {
@@ -22,7 +25,10 @@ test("enabled IP limit rejects excess RPCs but leaves probes available", async (
       ).rejects.toMatchObject({ code: Code.ResourceExhausted });
       const response = await fetch(`${h.baseUrl}${path}`);
       expect(response.status).toBe(200);
-      expect(await response.json()).toEqual({ status: "ok" });
+      expect(await response.json()).toEqual({
+        status: "ok",
+        ...(path === "/readyz" ? { executionEnabled: false } : {}),
+      });
     }
   } finally {
     await h.close();

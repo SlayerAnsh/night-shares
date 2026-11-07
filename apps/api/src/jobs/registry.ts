@@ -1,3 +1,4 @@
+import { assertChainExecution } from "../config/chain-execution";
 import type { Ports } from "../container/ports";
 import { createSqliteMarketRepo } from "../modules/market/repo/market-repo.sqlite";
 import { releaseAtCutoff } from "../modules/market/use-cases/release-at-cutoff";
@@ -9,7 +10,17 @@ import { sweepHosts } from "./sweep/sweep-hosts";
 export function createJobRegistry(ports: Ports) {
   if (ports.chainExecutor?.mode === "chain")
     return [
-      { name: "chain-recovery-and-keepers", run: () => runChainJobs(ports) },
+      {
+        name: "chain-recovery-and-keepers",
+        run: async () => {
+          if (ports.chainExecutor?.executionEnabled === false) {
+            await ports.chainReader?.assertCurrent();
+            await ports.chainReader?.poll();
+            assertChainExecution(false);
+          }
+          await runChainJobs(ports);
+        },
+      },
     ];
   const deps = { ports, repo: createSqliteMarketRepo(ports.db) };
   return [

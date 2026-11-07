@@ -44,9 +44,13 @@ test("custody credentials fail closed and Arc order defaults follow network", ()
   expect(() => loadConfig({ ARC_NETWORK: "testnet" })).toThrow(
     "ATTESTER_KEYSTORE",
   );
-  expect(() => loadConfig({ ARC_NETWORK: "mainnet" })).toThrow(
-    "ARC_DEPLOYMENT_FILE missing",
-  );
+  expect(() =>
+    loadConfig({
+      ARC_NETWORK: "mainnet",
+      ARC_DEPLOYMENT_FILE:
+        "/private/tmp/r18m-intentionally-missing-deployment.json",
+    }),
+  ).toThrow("ARC_DEPLOYMENT_FILE missing");
   for (const key of ["WALLET_CUSTODY", "ARC_NETWORK", "ARC_RPC_URL"])
     expect(() => loadConfig({ [key]: "bad" })).toThrow(key);
   expect(() => loadConfig({ WALLET_CUSTODY: "privy" })).toThrow("PRIVY_APP_ID");

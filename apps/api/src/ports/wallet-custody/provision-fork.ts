@@ -1,5 +1,6 @@
 import type { Database } from "bun:sqlite";
 import { toHex } from "viem";
+import { assertChainExecution } from "../../config/chain-execution";
 import { assertLocalForkRpc } from "../arc-deployment/local-fork";
 import type { ForkClient } from "../arc-deployment/validate";
 import type { ChainExecutor } from "../chain-executor/chain-executor";
@@ -17,6 +18,7 @@ export function forkProvisioner(deps: {
 }) {
   assertLocalForkRpc(deps.rpcUrl);
   return async (wallet: CustodyWallet) => {
+    assertChainExecution(deps.executor.executionEnabled !== false);
     await deps.reader.assertCurrent();
     if ((await deps.client.getChainId()) !== 5042)
       throw new Error("Fork provisioning chainId must equal 5042.");

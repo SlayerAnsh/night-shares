@@ -38,9 +38,9 @@ test("mainnet executor refuses execute/recover before RPC or journal writes", as
         walletId: "unused",
         command: { kind: "verifyHuman", humanId: 1n, orb: true },
       }),
-    ).rejects.toThrow("Mainnet transactions are disabled");
+    ).rejects.toThrow("Chain execution is disabled (CHAIN_EXECUTION=off).");
     await expect(executor.recover("send")).rejects.toThrow(
-      "Mainnet transactions are disabled",
+      "Chain execution is disabled (CHAIN_EXECUTION=off).",
     );
     expect(executor.pending()).toEqual([]);
     expect(db.query("SELECT * FROM chain_operations").all()).toEqual([]);

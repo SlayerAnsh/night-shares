@@ -2,7 +2,12 @@ import type { Database } from "bun:sqlite";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, URL } from "node:url";
 import { privateKeyToAccount } from "viem/accounts";
+import {
+  assertChainExecution,
+  executionEnabled,
+} from "../config/chain-execution";
 import type { Config } from "../config/load-config";
+import { assertMainnetLimits } from "../config/mainnet-limits";
 import { assertLocalForkRpc } from "../ports/arc-deployment/local-fork";
 import {
   chainClient,
@@ -34,6 +39,8 @@ export function createChainFoundation(config: Config, db: Database) {
     throw new Error(
       "Chain execution requires deployment and RPC configuration.",
     );
+  assertMainnetLimits(network, d);
+  const enabled = executionEnabled(config);
   validateExecutionAbi(d);
   const getKey = config.attesterKey ?? config.forkAttesterKey;
   if (!getKey && network !== "fork")
@@ -107,7 +114,12 @@ export function createChainFoundation(config: Config, db: Database) {
       if (!resolved) throw new Error("Execution wallet unavailable.");
       return resolved;
     },
+    async signTypedData(id, data) {
+      assertChainExecution(enabled);
+      return adapter.signTypedData(id, data);
+    },
     async signTransaction(id, tx) {
+      assertChainExecution(enabled);
       if (id === "chain:ops" && ops) return ops.signTransaction(tx);
       const signed = await ((id === "chain:attester" ||
         id === "fork:attester") &&
@@ -125,6 +137,7 @@ export function createChainFoundation(config: Config, db: Database) {
     client,
     reader,
     custody,
+    executionEnabled: enabled,
     gasHeadroomBps: config.forkGasHeadroomBps,
     network,
     provisionWallet:
@@ -157,10 +170,18 @@ export function createChainFoundation(config: Config, db: Database) {
     });
   return {
     client,
-    chainReadiness: gasFloat?.readiness,
+    chainReadiness: enabled ? gasFloat?.readiness : undefined,
     chainExecutor: executor,
     chainReader: reader,
-    chainAttester: signing?.attester,
+    chainAttester: signing
+      ? {
+          address: signing.attester.address,
+          async sign(attestation: Parameters<typeof signing.attester.sign>[0]) {
+            assertChainExecution(enabled);
+            return signing.attester.sign(attestation);
+          },
+        }
+      : undefined,
     provisionWallet: provision,
     custody,
     walletProvider: createForkWalletProvider(custody, reader),

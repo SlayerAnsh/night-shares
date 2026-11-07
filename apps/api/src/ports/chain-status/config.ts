@@ -1,7 +1,8 @@
 export function chainConfig(env: Record<string, string | undefined>) {
   const chainLimits =
     env.CHAIN_LIMITS ??
-    (env.ARC_NETWORK !== "testnet" && env.ADAPTERS === "arc"
+    (env.ARC_NETWORK === "mainnet" ||
+    (env.ARC_NETWORK !== "testnet" && env.ADAPTERS === "arc")
       ? "mainnet"
       : "off");
   if (chainLimits !== "mainnet" && chainLimits !== "off")
@@ -11,7 +12,9 @@ export function chainConfig(env: Record<string, string | undefined>) {
     throw new Error("CHAIN_PAUSED must be true or false.");
   const threshold =
     env.AGENT_APPROVAL_THRESHOLD_USDC ??
-    (chainLimits === "mainnet" ? "10" : "1000");
+    (env.ARC_NETWORK === "mainnet" || chainLimits === "mainnet"
+      ? "10"
+      : "1000");
   if (!/^\d+(\.\d{1,6})?$/.test(threshold))
     throw new Error(
       "AGENT_APPROVAL_THRESHOLD_USDC must be a nonnegative USDC amount with at most six decimals.",

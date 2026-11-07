@@ -8,6 +8,7 @@ import {
   recoverTransactionAddress,
   type TransactionReceipt,
 } from "viem";
+import { assertChainExecution } from "../../config/chain-execution";
 import type { ArcDeployment } from "../arc-deployment/arc-deployment";
 import { digest, type ForkClient } from "../arc-deployment/validate";
 import type { ChainReader } from "../chain-reader/chain-reader";
@@ -48,6 +49,7 @@ export function createChainExecutor(deps: {
   reader: ChainReader;
   custody: WalletCustody;
   gasHeadroomBps?: number;
+  executionEnabled?: boolean;
   network?: "fork" | "testnet" | "mainnet";
   provisionWallet?: (wallet: {
     walletId: string;
@@ -64,6 +66,7 @@ export function createChainExecutor(deps: {
     ])
       if (existsSync(path)) chmodSync(path, 0o600);
   }
+  const enabled = deps.executionEnabled ?? deps.network !== "mainnet";
   const headroom = deps.gasHeadroomBps ?? 12000;
   if (!Number.isInteger(headroom) || headroom < 10000 || headroom > 50000)
     throw new Error("Gas headroom must be 10000..50000 bps.");
@@ -81,6 +84,7 @@ export function createChainExecutor(deps: {
     receipt: r.receipt ? deserialize<TransactionReceipt>(r.receipt) : undefined,
   });
   async function deliver(r: Row): Promise<ExecutionResult> {
+    assertChainExecution(enabled);
     if (r.fingerprint !== reader.fingerprint)
       throw new Error("Stale deployment operation rejected.");
     await reader.assertCurrent();
@@ -151,6 +155,7 @@ export function createChainExecutor(deps: {
   }
   const executor: ChainExecutor = {
     mode: "chain",
+    executionEnabled: enabled,
     pending: () =>
       db
         .query<{ id: string }, [string]>(
@@ -159,8 +164,7 @@ export function createChainExecutor(deps: {
         .all(reader.fingerprint)
         .map((r) => r.id),
     async recover(id) {
-      if (deps.network === "mainnet")
-        throw new Error("Mainnet transactions are disabled.");
+      assertChainExecution(enabled);
       const r = row(id);
       if (!r) throw new Error("Unknown chain operation.");
       if (r.fingerprint !== reader.fingerprint)
@@ -174,8 +178,7 @@ export function createChainExecutor(deps: {
       return deliver(r);
     },
     async execute(request: ExecutionRequest) {
-      if (deps.network === "mainnet")
-        throw new Error("Mainnet transactions are disabled.");
+      assertChainExecution(enabled);
       if (
         deps.network &&
         deps.network !== "fork" &&

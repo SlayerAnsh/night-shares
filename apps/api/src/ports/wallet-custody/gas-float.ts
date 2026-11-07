@@ -1,5 +1,6 @@
 import type { Database } from "bun:sqlite";
 import type { Address } from "viem";
+import { assertChainExecution } from "../../config/chain-execution";
 import type { ChainExecutor } from "../chain-executor/chain-executor";
 import type { CustodyWallet } from "./wallet-custody";
 
@@ -34,6 +35,7 @@ export function createGasFloat(deps: {
     return undefined;
   }
   async function provision(wallet: CustodyWallet) {
+    assertChainExecution(deps.executor.executionEnabled !== false);
     if (wallet.address.toLowerCase() === deps.opsAddress.toLowerCase()) return;
     const reason = await readiness();
     if (reason) throw new Error(reason);

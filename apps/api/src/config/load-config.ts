@@ -17,9 +17,11 @@ import { registerRpcUrls, rpcJsonReplacer } from "../shared/redact-url";
 import { ARC_NETWORKS } from "./arc-networks";
 import { loadChainKeys } from "./chain-keys";
 import { normalizeEnv } from "./env";
+import { assertMainnetLimits } from "./mainnet-limits";
 import { loadServerConfig, type ServerConfig } from "./server-config";
 export type Config = Partial<ServerConfig> &
   AgentPassConfig & {
+    chainExecution?: boolean;
     chain?: { network: "fork" | "testnet" | "mainnet" };
     arcRpcUrls?: string[];
     toJSON?: () => unknown;
@@ -89,6 +91,10 @@ export function loadConfig(
     throw new Error("ARC_NETWORK must be mainnet, testnet or fork.");
   if (walletCustody === "anvil" && arcNetwork !== "fork")
     throw new Error("WALLET_CUSTODY=anvil requires ARC_NETWORK=fork.");
+  const execution =
+    env.CHAIN_EXECUTION ?? (arcNetwork === "mainnet" ? "off" : "on");
+  if (execution !== "off" && execution !== "on")
+    throw new Error("CHAIN_EXECUTION must be off or on.");
   const chain: Config["chain"] = env.ARC_NETWORK
     ? { network: arcNetwork }
     : undefined;
@@ -96,6 +102,7 @@ export function loadConfig(
     chain || env.ARC_DEPLOYMENT_FILE
       ? loadDeployment(arcNetwork, env.ARC_DEPLOYMENT_FILE)
       : undefined;
+  if (arcDeployment) assertMainnetLimits(arcNetwork, arcDeployment);
   const chainStatus = env.CHAIN_STATUS ?? (chain ? "onchain" : "mock");
   if (chainStatus !== "mock" && chainStatus !== "onchain")
     throw new Error("CHAIN_STATUS must be onchain or mock.");
@@ -309,6 +316,7 @@ export function loadConfig(
     privyAppSecret,
     privyAuthorizationKey: env.PRIVY_AUTHORIZATION_KEY?.trim() || undefined,
     chain,
+    chainExecution: execution === "on",
     attesterKey,
     opsKey,
     gasPolicy,
