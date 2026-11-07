@@ -17,8 +17,8 @@ interface IERC20Min {
 /// The deployer acts as host and trader. Keys come from env (DEPLOYER_PK, ATTESTER_PK).
 contract TestnetTrade is Script, INightTypes {
     function run() external {
-        require(block.chainid == 5042002, "testnet only");
-        string memory json = vm.readFile("deployments/5042002.json");
+        string memory json = vm.readFile(vm.envOr("DEPLOYMENT", string("deployments/5042002.json")));
+        require(block.chainid == vm.parseJsonUint(json, ".chainId"), "chain does not match deployment");
         NightFactory factory = NightFactory(vm.parseJsonAddress(json, ".NightFactory"));
         HumanRegistry registry = HumanRegistry(vm.parseJsonAddress(json, ".HumanRegistry"));
         ITradeRouter trade = ITradeRouter(vm.parseJsonAddress(json, ".TradeRouter"));
@@ -44,7 +44,8 @@ contract TestnetTrade is Script, INightTypes {
             factory.bindProperty(property, me, deadline, _sig(attesterKey, OrderLib.digest(
                 factory.DOMAIN_SEPARATOR(), OrderLib.hashProperty(property, me, deadline))));
         }
-        bytes32 night = factory.registerNightIdentity(propertyId, "double", "2030-01-01");
+        bytes32 night =
+            factory.registerNightIdentity(propertyId, "double", vm.envOr("NIGHT_DATE", string("2030-01-01")));
         vm.stopBroadcast();
 
         if (!registry.isOrb(me)) {
