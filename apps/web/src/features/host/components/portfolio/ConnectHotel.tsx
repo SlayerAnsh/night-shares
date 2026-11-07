@@ -1,10 +1,5 @@
 "use client";
-import {
-  buttonClass,
-  cx,
-  Segmented,
-  Spinner,
-} from "@night-shares/design-system";
+import { buttonClass, cx, Spinner } from "@night-shares/design-system";
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
 import { Pms } from "@night-shares/proto/host/v1/opening_pb";
 import Link from "next/link";
@@ -16,11 +11,10 @@ import { ErrorNote } from "../ui/QueryState";
 import ui from "../ui/ui.module.css";
 import styles from "./ConnectHotel.module.css";
 
-const PMS = [
-  { value: Pms.MEWS, label: "Mews" },
-  { value: Pms.CLOUDBEDS, label: "Cloudbeds" },
-  { value: Pms.SITE_MINDER, label: "SiteMinder" },
-] as const;
+// Hotel data is imported from the hotel's system, so there is no channel
+// manager choice in the UI. The connect request still carries a pms field;
+// send a fixed default so the API call is unchanged.
+const DEFAULT_PMS = Pms.MEWS;
 
 export function ConnectHotel({
   options,
@@ -33,7 +27,7 @@ export function ConnectHotel({
 }) {
   const { search, set } = useHostSearch();
   const propertyId = search.get("connect") ?? options[0]?.id ?? "";
-  const pms = Number(search.get("pms") ?? Pms.MEWS) as Pms;
+  const pms = DEFAULT_PMS;
   const { connect } = useHostMutations();
   const [payoutAddress, setPayoutAddress] = useState("");
   const access = useRequireAccess();
@@ -51,8 +45,8 @@ export function ConnectHotel({
           Connect your channel manager
         </h2>
         <p className={styles.lead}>
-          Night Shares reads your room types, room counts and usual rates from
-          your property system, so there is nothing to type in. You choose which
+          Night Shares reads your room types, room counts and usual rates
+          from your hotel system, so there is nothing to type in. You choose which
           nights and how many rooms to offer. Everything else runs on its own.
         </p>
         <ol className={styles.steps}>
@@ -95,7 +89,7 @@ export function ConnectHotel({
           className={styles.box}
           onSubmit={(event) => {
             event.preventDefault();
-            set({ connect: propertyId, pms: String(pms) });
+            set({ connect: propertyId });
             if (access.require("host", "orb"))
               connect.mutate({ propertyId, pms, payoutAddress });
           }}
@@ -116,16 +110,9 @@ export function ConnectHotel({
               ))}
             </select>
           </label>
-          <div className={styles.field}>
-            <span>Your channel manager</span>
-            <Segmented
-              label="Channel manager"
-              options={PMS}
-              value={pms}
-              block
-              onChange={(value) => set({ pms: String(value) })}
-            />
-          </div>
+          <p className={ui.note}>
+            Room types, room counts and usual rates come from your hotel system.
+          </p>
           <label className={styles.field}>
             <span>Permanent payout address (required on chain networks)</span>
             <input
