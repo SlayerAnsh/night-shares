@@ -21,6 +21,7 @@ import { createAnvilWalletCustody } from "../ports/wallet-custody/wallet-custody
 import { createPrivyWalletCustody } from "../ports/wallet-custody/wallet-custody.privy";
 import { persistWalletCustody } from "../ports/wallet-custody/wallet-custody.sqlite";
 import { createForkWalletProvider } from "../ports/wallet-provider/wallet-provider.fork";
+import { preflightFingerprint, preflightReason } from "./chain-preflight";
 export function createChainFoundation(config: Config, db: Database) {
   const network = config.chain?.network ?? config.arcNetwork;
   if (!network) throw new Error("Chain network is required.");
@@ -47,7 +48,10 @@ export function createChainFoundation(config: Config, db: Database) {
   const client = chainClient(rpcUrls, d.chainId);
   const checked = spawnSync(
     process.execPath,
-    [fileURLToPath(new URL("./chain-preflight.ts", import.meta.url))],
+    [
+      "--no-env-file",
+      fileURLToPath(new URL("./chain-preflight.ts", import.meta.url)),
+    ],
     {
       input: JSON.stringify({ deployment: d, rpcUrls }, (_, v) =>
         typeof v === "bigint" ? v.toString() : v,
@@ -57,9 +61,10 @@ export function createChainFoundation(config: Config, db: Database) {
       env: { PATH: process.env.PATH },
     },
   );
-  if (checked.status !== 0 || !/^[a-f0-9]{64}$/.test(checked.stdout))
-    throw new Error("Chain deployment preflight failed; API startup refused.");
-  const reader = createChainReader(db, d, client, checked.stdout);
+  const fingerprint = preflightFingerprint(checked, rpcUrls);
+  if (checked.stderr?.trim())
+    console.warn(preflightReason(checked.stderr, rpcUrls));
+  const reader = createChainReader(db, d, client, fingerprint);
   let provision: ((wallet: CustodyWallet) => Promise<void>) | undefined;
   const adapter =
     config.walletCustody === "anvil"

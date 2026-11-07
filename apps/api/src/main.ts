@@ -6,7 +6,7 @@ import { createServer } from "./server/create-server";
 import { createLogger } from "./server/logging/logger";
 import { createShutdown, type ShutdownHook } from "./server/shutdown";
 
-import { redactRpc, registerRpcUrls } from "./shared/redact-url";
+import { registerRpcUrls } from "./shared/redact-url";
 
 registerRpcUrls(
   (process.env.ARC_RPC_URLS ?? process.env.ARC_RPC_URL ?? "")
@@ -31,9 +31,9 @@ try {
   shutdownHooks.push(() => jobs.stop());
   const server = createServer(container, config);
   server.once("error", (error) => {
-    logger.unexpected(redactRpc(error));
+    logger.unexpected(error);
     process.exitCode = 1;
-    void jobs.stop().catch((error) => logger.unexpected(redactRpc(error)));
+    void jobs.stop().catch((error) => logger.unexpected(error));
   });
   server.listen(config.port, () => {
     const address = server.address();
@@ -55,6 +55,6 @@ try {
     });
   }
 } catch (error) {
-  createLogger().unexpected(redactRpc(error));
+  createLogger().unexpected(error);
   process.exitCode = 1;
 }

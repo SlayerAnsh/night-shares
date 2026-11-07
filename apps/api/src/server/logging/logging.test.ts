@@ -85,7 +85,11 @@ test("RPC logs contain method, code, duration and user ID without headers or pay
 
 test("unexpected errors produce one sanitized stack and a generic client error", async () => {
   const f = fixture();
-  f.fail(new Error("private-token private@example.test"));
+  f.fail(
+    new Error(
+      "RPC failed: https://rpc.invalid/private-token?email=private@example.test",
+    ),
+  );
   await expect(f.client.listDestinations({})).rejects.toMatchObject({
     code: Code.Internal,
     rawMessage: "An unexpected error occurred.",
@@ -93,7 +97,12 @@ test("unexpected errors produce one sanitized stack and a generic client error",
   expect(
     f.lines.filter((line) => JSON.parse(line).event === "unexpected_error"),
   ).toHaveLength(1);
-  expect(JSON.parse(f.lines[0] ?? "{}").stack).toContain("at ");
+  const logged = JSON.parse(f.lines[0] ?? "{}");
+  expect(logged.message).toStartWith(
+    "RPC failed: https://rpc.invalid/<redacted>",
+  );
+  expect(logged.stack.split("\n")[0]).toBe(`Error: ${logged.message}`);
+  expect(logged.stack).toContain("at ");
   expect(f.lines.join("")).not.toContain("private-token");
   expect(f.lines.join("")).not.toContain("private@example.test");
 });

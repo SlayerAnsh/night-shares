@@ -166,3 +166,61 @@ test("required x402 functions, events, errors and dependencies are pinned", () =
     }
   }
 });
+
+test("missing NightToken defers once or validates the factory demo token", async () => {
+  const original = deployment();
+  const d = { ...original, NightToken: zeroAddress };
+  const warnings: string[] = [];
+  const client = clientFor(original);
+  const warn = (message: string) => {
+    warnings.push(message);
+  };
+  await validateDeployment(d, client, warn);
+  await validateDeployment(d, client, warn);
+  expect(warnings).toHaveLength(1);
+  expect(warnings[0]).toContain("deferred");
+  d.demoNight = `0x${"ab".repeat(32)}`;
+  await expect(validateDeployment(d, client, warn)).resolves.toMatch(
+    /^[a-f0-9]{64}$/,
+  );
+  await expect(
+    validateDeployment(
+      d,
+      clientFor(original, "NightToken.DOMAIN_SEPARATOR"),
+      warn,
+    ),
+  ).rejects.toThrow("domain NightToken");
+  expect(warnings).toHaveLength(1);
+});
+
+test("preflight includes failing check and redacts endpoint secrets", async () => {
+  const { runPreflight } = await import("../../container/chain-preflight");
+  const d = deployment();
+  const client = clientFor(d);
+  const read = client.readContract;
+  const secret = "preflight-secret-123456789";
+  const url = `https://rpc.invalid/v2/${secret}`;
+  client.readContract = (async (args: Parameters<typeof read>[0]) => {
+    if (
+      args.address === d.NightToken &&
+      args.functionName === "DOMAIN_SEPARATOR"
+    )
+      throw new Error(
+        `The contract function "DOMAIN_SEPARATOR" returned no data.\n${url} ${secret}`,
+      );
+    return read(args);
+  }) as typeof read;
+  let reason = "";
+  try {
+    await runPreflight(
+      { deployment: d, rpcUrls: [url], chainId: d.chainId },
+      client,
+    );
+  } catch (error) {
+    reason = (error as Error).message;
+  }
+  expect(reason).toContain(`domain NightToken ${d.NightToken}`);
+  expect(reason).toContain("returned no data");
+  expect(reason).not.toContain(secret);
+  expect(reason).not.toContain("\n");
+});

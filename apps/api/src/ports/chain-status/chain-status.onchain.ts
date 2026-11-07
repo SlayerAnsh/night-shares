@@ -1,4 +1,10 @@
-import { createPublicClient, zeroAddress } from "viem";
+import {
+  type Address,
+  createPublicClient,
+  keccak256,
+  stringToHex,
+  zeroAddress,
+} from "viem";
 import type { ArcDeployment } from "../arc-deployment/arc-deployment";
 import { arcTransport } from "../arc-deployment/transport";
 
@@ -31,22 +37,45 @@ export function createOnchainChainStatus(
         `Arc deployment abis.${name} must contain unambiguous paused() view returns (bool).`,
       );
   }
-  let paused = true;
-  let expires = 0;
-  let pending: Promise<boolean> | undefined;
-  const refresh = (): Promise<boolean> => {
-    if (pending) return pending;
-    if (Date.now() < expires) return Promise.resolve(paused);
-    pending = (async () => {
+  type Snapshot = {
+    paused: boolean;
+    expires: number;
+    pending?: Promise<boolean>;
+  };
+  const snapshots = new Map<string, Snapshot>();
+  const snapshot = (key = "") => {
+    let value = snapshots.get(key);
+    if (!value) {
+      value = { paused: true, expires: 0 };
+      snapshots.set(key, value);
+    }
+    return value;
+  };
+  const refresh = (nightKey?: string): Promise<boolean> => {
+    const state = snapshot(nightKey);
+    if (state.pending) return state.pending;
+    if (Date.now() < state.expires) return Promise.resolve(state.paused);
+    state.pending = (async () => {
       try {
         if ((await client.getChainId()) !== deployment.chainId)
           throw new Error("Arc RPC chainId does not match deployment.");
+        let token = deployment.NightToken;
+        if (nightKey) {
+          token = (await client.readContract({
+            address: deployment.NightFactory,
+            abi: deployment.abis.NightFactory ?? [],
+            functionName: "tokenOf",
+            args: [keccak256(stringToHex(nightKey))],
+          })) as Address;
+          if (token === zeroAddress)
+            throw new Error("Night token unavailable.");
+        }
         const results = await Promise.all(
           (["NightHook", "NightToken"] as const)
-            .filter((name) => deployment[name] !== zeroAddress)
+            .filter((name) => name !== "NightToken" || token !== zeroAddress)
             .map((name) =>
               client.readContract({
-                address: deployment[name],
+                address: name === "NightToken" ? token : deployment.NightHook,
                 abi: deployment.abis[name] ?? [],
                 functionName: "paused",
               }),
@@ -54,31 +83,29 @@ export function createOnchainChainStatus(
         );
         if (results.some((result) => typeof result !== "boolean"))
           throw new Error("Invalid chain pause response.");
-        paused = results.some(Boolean);
-        expires = Date.now() + ttlMs;
-        return paused;
+        state.paused = results.some(Boolean);
+        state.expires = Date.now() + ttlMs;
+        return state.paused;
       } catch (error) {
-        paused = true;
-        expires = Date.now() + ttlMs;
+        state.paused = true;
+        state.expires = Date.now() + ttlMs;
         throw error;
       } finally {
-        pending = undefined;
+        state.pending = undefined;
       }
     })();
-    return pending;
+    return state.pending;
   };
-  // Refresh lazily to avoid background timers surviving container shutdown.
   return {
     refresh,
-    async readPaused() {
-      return refresh();
-    },
-    isPaused(_nightKey?: string) {
-      if (Date.now() >= expires) {
-        void refresh().catch(() => {});
+    readPaused: refresh,
+    isPaused(nightKey?: string) {
+      const state = snapshot(nightKey);
+      if (Date.now() >= state.expires) {
+        void refresh(nightKey).catch(() => {});
         return true;
       }
-      return paused;
+      return state.paused;
     },
   };
 }

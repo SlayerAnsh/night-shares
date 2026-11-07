@@ -21,16 +21,9 @@ export function createLogger(
       );
     },
     unexpected(error: unknown) {
-      error = redactRpc(error);
-      // Error messages and causes may contain user input. Keep stack locations only.
-      const stack =
-        error instanceof Error
-          ? error.stack
-              ?.split("\n")
-              .filter((line) => /^\s+at /.test(line))
-              .join("\n")
-          : undefined;
-      this.log("error", "unexpected_error", { stack });
+      const message = error instanceof Error ? error.message : String(error);
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.log("error", "unexpected_error", { message, stack });
     },
   };
 }
