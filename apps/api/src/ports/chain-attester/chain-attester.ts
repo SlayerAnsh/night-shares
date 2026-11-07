@@ -23,10 +23,11 @@ export function createChainAttester(
 ): { attester: ChainAttester; custody: WalletCustody } {
   const account = privateKeyToAccount(getKey());
   if (account.address.toLowerCase() !== d.ATTESTER.toLowerCase())
-    throw new Error("FORK_ATTESTER_KEY does not match deployment ATTESTER.");
-  const wallet = { walletId: "fork:attester", address: account.address };
+    throw new Error("ATTESTER_KEY does not match deployment ATTESTER.");
+  const wallet = { walletId: "chain:attester", address: account.address };
   const requireWallet = (id: string) => {
-    if (id !== wallet.walletId) throw new Error("Unknown attester wallet.");
+    if (id !== wallet.walletId && id !== "fork:attester")
+      throw new Error("Unknown attester wallet.");
   };
   return {
     attester: {
@@ -85,7 +86,7 @@ export function createChainAttester(
           domain: {
             name: "NightShares",
             version: "1",
-            chainId: 5042,
+            chainId: d.chainId,
             verifyingContract:
               a.kind === "walk"
                 ? d.Settlement

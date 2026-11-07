@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { URL } from "node:url";
 import { createMemoryCatalogRepo } from "../modules/catalog-data/catalog-repo.memory";
 import { createSqliteInventoryRepo } from "../modules/inventory/inventory-repo.sqlite";
 import { createSqliteActivityLog } from "../ports/activity/activity-log.sqlite";

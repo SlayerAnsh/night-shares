@@ -6,7 +6,7 @@ import { openChainNights } from "./open";
 
 /** Task 5 can retry the original immutable opening and its PMS outbox after restart. */
 export async function recoverHostOpenings(ports: Ports) {
-  if (ports.chainExecutor?.mode !== "fork") return;
+  if (ports.chainExecutor?.mode !== "chain") return;
   const { reader } = chainPorts(ports);
   const deps = { ports, repo: createSqliteHostRepo(ports) };
   const rows = ports.db

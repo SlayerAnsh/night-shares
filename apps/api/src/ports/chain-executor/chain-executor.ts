@@ -148,7 +148,7 @@ export type ExecutionResult = {
   receipt?: TransactionReceipt;
 };
 export interface ChainExecutor {
-  readonly mode: "mock" | "fork";
+  readonly mode: "mock" | "chain";
   execute(request: ExecutionRequest): Promise<ExecutionResult>;
   recover(operationId: string): Promise<ExecutionResult>;
   pending(): string[];

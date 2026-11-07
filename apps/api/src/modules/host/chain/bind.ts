@@ -92,7 +92,7 @@ export async function bindProperty(
       };
       return {
         operationId: "",
-        walletId: "fork:attester",
+        walletId: "chain:attester",
         command: { ...a, signature: await attester.sign(a) },
       };
     });

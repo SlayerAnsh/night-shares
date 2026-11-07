@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, URL } from "node:url";
 import {
   type Abi,
   type Address,
@@ -148,14 +148,12 @@ export function loadDeployment(
   network: "mainnet" | "testnet" | "fork",
   file?: string,
 ): ArcDeployment | undefined {
-  if (network === "testnet" && !file) return undefined;
   const path = resolve(
     repoRoot,
     file ??
-      `packages/contracts/deployments/${network === "fork" ? "5042-fork" : "5042"}.json`,
+      `packages/contracts/deployments/${network === "fork" ? "5042-fork" : network === "testnet" ? "5042002" : "5042"}.json`,
   );
   if (!existsSync(path)) {
-    if (network !== "fork" && !file) return undefined;
     throw new Error(
       `ARC_DEPLOYMENT_FILE missing: ${path}. Deploy contracts before starting the API.`,
     );

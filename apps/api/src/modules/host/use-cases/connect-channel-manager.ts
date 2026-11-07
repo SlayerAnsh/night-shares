@@ -16,7 +16,7 @@ export function createConnectChannelManager({ ports, repo }: HostDeps) {
     if (!name)
       throw new DomainError("INVALID_ARGUMENT", "Choose a supported PMS.");
     if (
-      ports.chainExecutor?.mode === "fork" &&
+      ports.chainExecutor?.mode === "chain" &&
       (!payout || !isAddress(payout) || payout === zeroAddress)
     )
       throw new DomainError(
@@ -26,7 +26,7 @@ export function createConnectChannelManager({ ports, repo }: HostDeps) {
     if (
       repo.owner(propertyId) &&
       !(
-        ports.chainExecutor?.mode === "fork" &&
+        ports.chainExecutor?.mode === "chain" &&
         repo.owner(propertyId) === userId
       )
     )
@@ -34,7 +34,7 @@ export function createConnectChannelManager({ ports, repo }: HostDeps) {
         "PERMISSION_DENIED",
         "This property is managed by another host.",
       );
-    if (ports.chainExecutor?.mode === "fork")
+    if (ports.chainExecutor?.mode === "chain")
       await hostWallet({ ports, repo }, userId);
     const imported = await ports.channelManager.connect({
       propertyId,
@@ -43,7 +43,7 @@ export function createConnectChannelManager({ ports, repo }: HostDeps) {
     let provisional = false;
     transaction(ports.db, () => {
       const owner = repo.owner(propertyId);
-      if (owner && !(ports.chainExecutor?.mode === "fork" && owner === userId))
+      if (owner && !(ports.chainExecutor?.mode === "chain" && owner === userId))
         throw new DomainError(
           "PERMISSION_DENIED",
           "This property is managed by another host.",
@@ -52,12 +52,12 @@ export function createConnectChannelManager({ ports, repo }: HostDeps) {
         repo.claim(userId, propertyId);
         provisional = true;
       }
-      if (ports.chainExecutor?.mode !== "fork")
+      if (ports.chainExecutor?.mode !== "chain")
         repo
           .connections(userId)
           .set(propertyId, { pms: name, roomTypes: imported.roomTypes });
     });
-    if (ports.chainExecutor?.mode === "fork") {
+    if (ports.chainExecutor?.mode === "chain") {
       try {
         await bindProperty({ ports, repo }, userId, propertyId, payout ?? "");
         repo

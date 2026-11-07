@@ -7,7 +7,7 @@ import { expireAsks } from "./expire-asks";
 import { pushCutoff } from "./push-cutoff";
 import { sweepHosts } from "./sweep/sweep-hosts";
 export function createJobRegistry(ports: Ports) {
-  if (ports.chainExecutor?.mode === "fork")
+  if (ports.chainExecutor?.mode === "chain")
     return [
       { name: "chain-recovery-and-keepers", run: () => runChainJobs(ports) },
     ];

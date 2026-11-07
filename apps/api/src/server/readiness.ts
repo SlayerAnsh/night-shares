@@ -1,5 +1,6 @@
 import type { Database } from "bun:sqlite";
 import { readdirSync } from "node:fs";
+import { URL } from "node:url";
 
 export function createReadiness(db: Database) {
   const expected = readdirSync(

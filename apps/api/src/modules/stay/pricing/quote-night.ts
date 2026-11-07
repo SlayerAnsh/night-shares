@@ -26,7 +26,7 @@ export function quoteNight(
   rooms = 1,
 ) {
   const record =
-    ports.chainExecutor?.mode === "fork"
+    ports.chainExecutor?.mode === "chain"
       ? ports.inventory
           .list({ propertyId, roomTypeId })
           .find(

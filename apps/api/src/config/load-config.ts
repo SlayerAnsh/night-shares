@@ -12,9 +12,14 @@ import { assertLocalForkRpc } from "../ports/arc-deployment/local-fork";
 import { chainConfig } from "../ports/chain-status/config";
 import { parseDate } from "../shared/dates";
 import { ARC_NETWORKS } from "./arc-networks";
+import { loadChainKeys } from "./chain-keys";
 import { loadServerConfig, type ServerConfig } from "./server-config";
 export type Config = Partial<ServerConfig> &
   AgentPassConfig & {
+    chain?: { network: "fork" | "testnet" | "mainnet" };
+    arcRpcUrls?: string[];
+    attesterKey?: () => `0x${string}`;
+    opsKey?: () => `0x${string}`;
     chainLimits?: string;
     chainPaused?: boolean;
     agentApprovalThreshold?: bigint;
@@ -77,9 +82,14 @@ export function loadConfig(
     throw new Error("ARC_NETWORK must be mainnet, testnet or fork.");
   if (walletCustody === "anvil" && arcNetwork !== "fork")
     throw new Error("WALLET_CUSTODY=anvil requires ARC_NETWORK=fork.");
-  const arcDeployment = loadDeployment(arcNetwork, env.ARC_DEPLOYMENT_FILE);
-  const chainStatus =
-    env.CHAIN_STATUS ?? (arcNetwork === "fork" ? "onchain" : "mock");
+  const chain: Config["chain"] = env.ARC_NETWORK
+    ? { network: arcNetwork }
+    : undefined;
+  const arcDeployment =
+    chain || env.ARC_DEPLOYMENT_FILE
+      ? loadDeployment(arcNetwork, env.ARC_DEPLOYMENT_FILE)
+      : undefined;
+  const chainStatus = env.CHAIN_STATUS ?? (chain ? "onchain" : "mock");
   if (chainStatus !== "mock" && chainStatus !== "onchain")
     throw new Error("CHAIN_STATUS must be onchain or mock.");
   if (chainStatus === "onchain" && !arcDeployment)
@@ -89,32 +99,44 @@ export function loadConfig(
     throw new Error("FORK_FAUCET must be true or false.");
   if (faucet === "true" && arcNetwork !== "fork")
     throw new Error("FORK_FAUCET requires ARC_NETWORK=fork.");
-  const key = arcNetwork === "fork" ? env.FORK_ATTESTER_KEY?.trim() : undefined;
-  if (key && !/^0x[0-9a-fA-F]{64}$/.test(key))
-    throw new Error("FORK_ATTESTER_KEY must be a 32-byte private key.");
-  // Keep secret material inside a closure so config serialization cannot expose it.
-  const forkAttesterKey = key
-    ? Object.assign(() => key as `0x${string}`, { toJSON: () => "[REDACTED]" })
-    : undefined;
-  const arcRpcUrl = env.ARC_RPC_URL ?? ARC_NETWORKS[arcNetwork].rpcUrl;
-  try {
-    const url = new URL(arcRpcUrl);
-    if (
-      !["http:", "https:"].includes(url.protocol) ||
-      url.username ||
-      url.password
-    )
-      throw new Error();
-  } catch {
-    throw new Error("ARC_RPC_URL must be an HTTP(S) URL without credentials.");
+  const { attesterKey, opsKey } = loadChainKeys(
+    env,
+    chain?.network,
+    arcDeployment,
+  );
+  const forkAttesterKey = arcNetwork === "fork" ? attesterKey : undefined;
+  const arcRpcUrls = (
+    env.ARC_RPC_URLS ??
+    env.ARC_RPC_URL ??
+    (arcNetwork === "testnet"
+      ? "https://rpc.testnet.arc.network,https://rpc.testnet.arc.io"
+      : ARC_NETWORKS[arcNetwork].rpcUrl)
+  )
+    .split(",")
+    .map((url) => url.trim());
+  const arcRpcUrl = arcRpcUrls[0] as string;
+  for (const rpcUrl of arcRpcUrls) {
+    try {
+      const url = new URL(rpcUrl);
+      if (
+        !["http:", "https:"].includes(url.protocol) ||
+        url.username ||
+        url.password
+      )
+        throw new Error();
+    } catch {
+      throw new Error(
+        "ARC_RPC_URL must be an HTTP(S) URL without credentials.",
+      );
+    }
+    if (arcNetwork === "fork") assertLocalForkRpc(rpcUrl);
   }
-  if (arcNetwork === "fork") {
-    assertLocalForkRpc(arcRpcUrl);
-    if (walletCustody !== "anvil")
-      throw new Error("Fork execution requires WALLET_CUSTODY=anvil.");
-    if (chainStatus !== "onchain")
-      throw new Error("Fork execution requires CHAIN_STATUS=onchain.");
-  }
+  if (chain && walletCustody !== "anvil" && walletCustody !== "privy")
+    throw new Error(
+      "Chain execution requires WALLET_CUSTODY=anvil (fork only) or privy.",
+    );
+  if (chain && chainStatus !== "onchain")
+    throw new Error("Chain execution requires CHAIN_STATUS=onchain.");
   const forkGasHeadroomBps = Number(env.FORK_GAS_HEADROOM_BPS ?? "12000");
   if (
     !Number.isInteger(forkGasHeadroomBps) ||
@@ -248,6 +270,10 @@ export function loadConfig(
     privyAppId,
     privyAppSecret,
     privyAuthorizationKey: env.PRIVY_AUTHORIZATION_KEY?.trim() || undefined,
+    chain,
+    attesterKey,
+    opsKey,
+    arcRpcUrls,
     arcNetwork,
     arcDeployment,
     chainStatus,

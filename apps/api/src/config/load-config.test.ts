@@ -41,17 +41,12 @@ test("custody credentials fail closed and Arc order defaults follow network", ()
     arcRpcUrl: "https://rpc.mainnet.arc.io",
     orderChainId: 5042,
   });
-  expect(loadConfig({ ARC_NETWORK: "testnet" })).toMatchObject({
-    orderChainId: 5042002,
-    arcRpcUrl: "https://rpc.testnet.arc.io",
-  });
-  expect(
-    loadConfig({
-      ARC_NETWORK: "testnet",
-      ORDER_CHAIN_ID: "5042",
-      ARC_RPC_URL: "https://rpc.example.com",
-    }),
-  ).toMatchObject({ orderChainId: 5042, arcRpcUrl: "https://rpc.example.com" });
+  expect(() => loadConfig({ ARC_NETWORK: "testnet" })).toThrow(
+    "ATTESTER_KEYSTORE",
+  );
+  expect(() => loadConfig({ ARC_NETWORK: "mainnet" })).toThrow(
+    "ARC_DEPLOYMENT_FILE missing",
+  );
   for (const key of ["WALLET_CUSTODY", "ARC_NETWORK", "ARC_RPC_URL"])
     expect(() => loadConfig({ [key]: "bad" })).toThrow(key);
   expect(() => loadConfig({ WALLET_CUSTODY: "privy" })).toThrow("PRIVY_APP_ID");

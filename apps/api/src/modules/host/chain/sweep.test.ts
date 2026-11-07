@@ -95,7 +95,7 @@ test("sweep waits for receipt, nets actual debt and never settles mock money", a
   } as unknown as TransactionReceipt;
   let mined = false;
   ports.chainExecutor = {
-    mode: "fork",
+    mode: "chain",
     pending: () => [],
     async recover() {
       throw new Error("unused");

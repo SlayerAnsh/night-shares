@@ -205,7 +205,7 @@ export async function quoteChainTrade(
     kind,
     deps.ports.ids.next("quote"),
   );
-  const quote = await simulateQuote(deps.ports, command, wallet.address);
+  const quote = await simulateQuote(deps.ports, command, wallet.address, key);
   if (typeof quote.value !== "bigint")
     throw new Error("Router quote did not return micro USDC.");
   const result = routeQuote(key, size, quote.value);
@@ -335,7 +335,10 @@ export async function executeChainTrade(
       limit,
       true,
     );
-    const simulated = await reader.simulate(command, wallet.address);
+    const simulated =
+      chainMarket(ports).network && chainMarket(ports).network !== "fork"
+        ? await simulateQuote(ports, command, wallet.address, key)
+        : await reader.simulate(command, wallet.address);
     if (typeof simulated.value !== "bigint")
       throw new Error("Router quote did not return micro USDC.");
     const bounds = slippageBounds(simulated.value, slippageBps);

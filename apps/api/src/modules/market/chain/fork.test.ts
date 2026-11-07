@@ -125,14 +125,14 @@ forkTest(
       const custody: WalletCustody = {
         ...base,
         async resolveWallet(id) {
-          if (id === "fork:attester")
+          if (id === "chain:attester")
             return { walletId: id, address: attester.address };
           const w = await base.resolveWallet?.(id);
           if (!w) throw new Error("Missing wallet.");
           return w;
         },
         async signTransaction(id, tx) {
-          if (id === "fork:attester") return attester.signTransaction(tx);
+          if (id === "chain:attester") return attester.signTransaction(tx);
           const s = await base.signTransaction?.(id, tx);
           if (!s) throw new Error("Missing signer.");
           return s;
@@ -243,7 +243,7 @@ forkTest(
           (
             await executor.execute({
               operationId: `orb:${id}`,
-              walletId: "fork:attester",
+              walletId: "chain:attester",
               command: { kind: "verifyHuman", humanId, orb: true },
             })
           ).state,

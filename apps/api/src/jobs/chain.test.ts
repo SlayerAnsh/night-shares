@@ -53,7 +53,7 @@ function fixture() {
   ports.chainReader = reader;
   ports.chainAttester = { address: zeroAddress, sign: async () => zeroHash };
   ports.chainExecutor = {
-    mode: "fork",
+    mode: "chain",
     pending: () => [],
     recover: async () => {
       throw new Error("Unexpected recovery");

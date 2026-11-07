@@ -11,7 +11,7 @@ import { createGetPortfolio } from "./reporting/get-portfolio";
 export function createHostUseCases(deps: HostDeps) {
   configureChainInventory(
     deps.ports.db,
-    deps.ports.chainExecutor?.mode === "fork"
+    deps.ports.chainExecutor?.mode === "chain"
       ? deps.ports.chainReader?.fingerprint
       : undefined,
   );
@@ -22,7 +22,7 @@ export function createHostUseCases(deps: HostDeps) {
     previewOpenNights: createPreviewOpenNights(deps),
     getPayout: createGetPayout(deps),
     chainPayout: (userId: string, propertyId: string) =>
-      deps.ports.chainExecutor?.mode === "fork"
+      deps.ports.chainExecutor?.mode === "chain"
         ? chainHostLiabilities(deps, userId, propertyId)
         : undefined,
     getHotel: createGetHotel(deps),

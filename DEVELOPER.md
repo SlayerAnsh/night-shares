@@ -103,7 +103,7 @@ The PostAsk RPC prepares typed data and awaits custodial signing before opening 
 
 Create a Privy app and obtain its app ID and a full-access app secret from the dashboard. Server wallet API access must be available for that app. No Privy login UI or JWT authentication setup is required: World ID remains the only login. If using an authorization key, provision a P-256 key in the dashboard and set `PRIVY_AUTHORIZATION_KEY`; the adapter assigns its public key to newly created wallets. Changing this key does not transfer ownership of existing wallets. Any wallet policies must permit `eth_signTypedData_v4` for the NightShares domain and selected chain. These are custodial server wallets: the server controls signatures, not the user's World ID credential. See [Privy wallet creation](https://docs.privy.io/api-reference/wallets/create) and [authorization signatures](https://docs.privy.io/controls/authorization-keys/using-owners/sign/direct-implementation).
 
-Migration `390-wallet-custody.sql` persists owner, provider, wallet ID and address. Stable external IDs prevent duplicate wallets beyond Privy's 24-hour idempotency window. Existing mock users retain addresses; they cannot produce Privy signatures for those addresses. New users receive custody addresses, while system wallets are provisioned lazily on ledger use. `GetBalance.system_wallets` always returns every system name in sorted order, with empty address and explorer URL until provisioned. Reads never create wallets. Provisioning can fill those fields later without changing list membership or order; ledger aliases remain unchanged. Ledger balances and settlement remain mock, including the initial 12,480 USDC seed. `onchain_usdc_balance` is separate ERC-20 micro USDC (6 decimals); it is absent on RPC failure, represented as null in the use case. Native gas USDC uses 18 decimals. `explorer_url` follows the selected network. No transfers or contract writes are sent. Arc RPC reads retry error `-32014` with bounded exponential backoff; future log readers must limit ranges to 9,999 blocks.
+Migration `390-wallet-custody.sql` persists owner, provider, wallet ID and address. Stable external IDs prevent duplicate wallets beyond Privy's 24-hour idempotency window. Existing mock users retain addresses; they cannot produce Privy signatures for those addresses. New users receive custody addresses, while system wallets are provisioned lazily on ledger use. `GetBalance.system_wallets` always returns every system name in sorted order, with empty address and explorer URL until provisioned. Reads never create wallets. Provisioning can fill those fields later without changing list membership or order; ledger aliases remain unchanged. When ARC_NETWORK is unset, ledger balances and settlement remain mock, including the initial 12,480 USDC seed. `onchain_usdc_balance` is separate ERC-20 micro USDC (6 decimals); it is absent on RPC failure, represented as null in the use case. Native gas USDC uses 18 decimals. `explorer_url` follows the selected network. Privy sends remain unavailable. Chain RPC reads retry transient errors with bounded exponential backoff; log readers limit ranges to 9,999 blocks.
 
 ## Scheduled jobs
 
@@ -195,6 +195,52 @@ The Arc fork chain (`docker-compose.chain.yml`) is a local development tool and 
 
 Container execution and network e2e checks require a host with Docker and permission to bind ports. The operations unit suite runs without listening sockets: `cd apps/api && bun test src/server`.
 
+## Chain networks
+
+Setting `ARC_NETWORK=fork`, `testnet`, or `mainnet` activates `config.chain.network` and the chain foundation for identity, inventory, trading, stays, host operations, and jobs. Leaving `ARC_NETWORK` unset retains mock development. Chain mode never falls back to the SQLite cash ledger or mock executor. `CHAIN_STATUS` must be `onchain` (the default in chain mode).
+
+| Network | Chain ID | Default deployment | Default RPC URLs |
+| --- | --- | --- | --- |
+| `fork` | 5042 | `packages/contracts/deployments/5042-fork.json` | `http://127.0.0.1:8545` |
+| `testnet` | 5042002 | `packages/contracts/deployments/5042002.json` | `https://rpc.testnet.arc.network,https://rpc.testnet.arc.io` |
+| `mainnet` | 5042 | `packages/contracts/deployments/5042.json` | `https://rpc.mainnet.arc.io` |
+
+`ARC_DEPLOYMENT_FILE` overrides the artifact path. A missing deployment fails startup; mainnet currently has no deployment artifact. `ARC_RPC_URLS` is a comma-separated endpoint list and takes precedence over the single-endpoint `ARC_RPC_URL`. All fork endpoints must be local. The transport rotates endpoints and applies bounded exponential backoff for HTTP 429, 5xx, and JSON-RPC -32014/-32005. Polling starts at the deployment block (71115581 on testnet); each poll is capped at 9,999 blocks and log requests currently cover one block each.
+
+Fork environment:
+
+```sh
+export ARC_NETWORK=fork
+export WALLET_CUSTODY=anvil
+export ARC_RPC_URL=http://127.0.0.1:8545
+export FORK_FAUCET=true
+# Supply ATTESTER_KEY at runtime, or use the keystore pair below.
+# FORK_ATTESTER_KEY remains a fork-only alias.
+```
+
+Testnet environment (paths and service names are not secrets):
+
+```sh
+export ARC_NETWORK=testnet
+export WALLET_CUSTODY=privy
+export ATTESTER_KEYSTORE="$HOME/.foundry/keystores/ns-testnet-attester"
+export ATTESTER_KEYCHAIN_SERVICE=ns-testnet-attester
+# Optional: load the ops gas wallet for the next transaction-sending round.
+export OPS_KEYSTORE="$HOME/.foundry/keystores/ns-testnet-ops"
+export OPS_KEYCHAIN_SERVICE=ns-testnet-ops
+# Supply PRIVY_APP_ID and PRIVY_APP_SECRET through runtime secret management.
+```
+
+For mainnet, use `ARC_NETWORK=mainnet`, `WALLET_CUSTODY=privy`, and dedicated mainnet attester keystore/service values. Supply the reviewed `5042.json` before boot validation. No mainnet transactions are enabled or exercised in this round.
+
+The API itself invokes `security find-generic-password -s <service> -w` with `execFileSync`, without a shell. It decrypts Foundry/geth JSON keystores in memory using ethers. Password buffers are cleared after use; immutable JavaScript strings and signer internals cannot be reliably wiped. Passwords and private keys are never written to disk, environment variables, or logs. Config key accessors serialize as `[REDACTED]`; decryption errors omit vendor details. Both members of each keystore/service pair are required. Raw `ATTESTER_KEY` is supported only on fork; do not put raw keys in env files. The attester address must match deployment `ATTESTER` at startup. `OWNER`/`OPERATOR` keys are not required. This password source requires macOS Keychain; containers need a separately implemented secret-provider integration.
+
+Privy custody boots with the real chain reader, attester, and executor. Transaction execution and recovery fail with `Privy transaction sending not implemented` before signing or broadcasting. Provisioning gas with `anvil_setBalance`, the faucet, Anvil custody, `dev:fork`, and `seed:fork` remain fork-only. Privy transaction sending is deferred to the next round.
+
+Off-fork execution uses live RPC `estimateGas` without the preceding `simulateContract` transfer path. Off-fork market quotes project the deployed pool's ladder positions instead of overriding Arc USDC storage: its blocklist precompile is not supported by local simulation. These pool-only estimates include sell-back fees but exclude peer asks; router limits remain authoritative. Fork quotes retain simulation. Testnet's pre-x402 deployment disables x402, and its absent demo NightToken is skipped during boot code and pause checks.
+
+Tests use throwaway encrypted keystores and a stub password reader; never use real Keychain services in tests or smoke checks. Fork acceptance runs only on disposable child forks. Fresh `seed:fork` openings use `F=0.5` USDC (500,000 micro USDC), below `MAX_F=1,000,000`; existing immutable openings retain their original price.
+
 ## Arc fork
 
 Start the local chain from the repository root, then start the API:
@@ -206,15 +252,15 @@ cd apps/api
 ARC_NETWORK=fork WALLET_CUSTODY=anvil bun run dev
 ```
 
-The deployment file is generated per run and gitignored. Restart the API after redeployment. All fork addresses and contract ABIs come from this file. Mainnet loads `packages/contracts/deployments/5042.json` when present; without it the existing network constants remain available. Unset `ARC_NETWORK` retains mock development behavior.
+The deployment file is generated per run and gitignored. Restart the API after redeployment. All fork addresses and contract ABIs come from this file. Explicit mainnet selection requires `packages/contracts/deployments/5042.json` and fails fast if absent. Unset `ARC_NETWORK` retains mock development behavior.
 
 | Variable | Fork behavior |
 | --- | --- |
 | `ARC_NETWORK` | `fork` selects chain 5042. |
 | `ARC_RPC_URL` | Defaults to `http://127.0.0.1:8545`; use `http://chain:8545` inside Compose. |
 | `ARC_DEPLOYMENT_FILE` | Defaults to `packages/contracts/deployments/5042-fork.json`, resolved from the repository root, regardless of working directory. Missing or invalid files fail startup. |
-| `CHAIN_STATUS` | `onchain` by default on fork, otherwise `mock`. Reads `NightHook.paused()` and deployment `NightToken.paused()`. |
-| `WALLET_CUSTODY` | `anvil` is fork-only; default remains `mock`. |
+| `CHAIN_STATUS` | `onchain` by default on any explicitly selected chain network, otherwise `mock`. Reads `NightHook.paused()` and deployment `NightToken.paused()`. |
+| `WALLET_CUSTODY` | `anvil` is fork-only and defaults on fork; choose `privy` for public chains. |
 | `FORK_FAUCET` | Defaults to `false`. When `true`, first allocation requests 100 mock USDC using `mint(address,uint256)` from funded Anvil account 0 and waits for its receipt. |
 | `FORK_ATTESTER_KEY` | Optional Anvil account 9 key, read only on fork, retained behind a config accessor and redacted in JSON dumps. Supply outside committed files. |
 | `FORK_IT` | `1` enables the live read-only integration test. |
@@ -233,7 +279,7 @@ FORK_IT=1 bun test src/ports/arc-deployment/fork.integration.test.ts
 
 ### Fork execution foundation (Task 1)
 
-`ARC_NETWORK=fork` selects the viem execution foundation independently of mock PMS/reception adapters. It requires Anvil custody and a local HTTP(S) RPC (`127.0.0.1`, `localhost`, `::1`, or Compose `chain`). Startup runs a bounded RPC preflight before the synchronous container returns: chain ID 5042, deployed code, reviewed function, event and custom-error ABI schemas including credits, immutable wiring, attesters, factory dependencies and EIP-712 domains must match the deployment artifact. The artifact is read once; no per-run address is embedded in the adapter. Optional metadata is retained by the loader. The fingerprint includes deployment addresses, deployment block/hash and ABI bundle.
+`ARC_NETWORK=fork` selects the viem execution foundation independently of mock PMS/reception adapters. It accepts Anvil or Privy custody and requires a local HTTP(S) RPC (`127.0.0.1`, `localhost`, `::1`, or Compose `chain`). Startup runs a bounded RPC preflight before the synchronous container returns: chain ID 5042, deployed code, reviewed function, event and custom-error ABI schemas including credits, immutable wiring, attesters, factory dependencies and EIP-712 domains must match the deployment artifact. The artifact is read once; no per-run address is embedded in the adapter. Optional metadata is retained by the loader. The fingerprint includes deployment addresses, deployment block/hash and ABI bundle.
 
 The fork wallet provider reads ERC-20 cash on chain and rejects legacy `settle`, `transfer` and synthetic history calls. Tasks 2–5 must integrate the intent ports before those product flows work in fork mode. Unset `ARC_NETWORK` retains the existing mock ledger. No product decisions from plan section 6 are implemented.
 
@@ -242,7 +288,7 @@ Consumers use these contracts:
 - `ports/chain-executor/chain-executor.ts`: `ChainCommand`, `ExecutionRequest`, `ExecutionResult`, `ChainExecutor.execute`, `recover`, and `pending`. Commands cover buy, sell, book, open, chunks, cancellation, sweep, cutoff, claims, credits, identity, binding, walk reports, transfers and approvals. Supply a stable operation ID and custody wallet ID. Amounts are bigint micro USDC, token quantities are bigint 18-decimal units, and deadlines are bigint seconds; `tokenTenths` and `soliditySeconds` convert API units explicitly.
 - `ports/chain-executor/approvals.ts`: `ensureRouterAllowance` reads both allowance layers and journals bounded approval children. Pass the intended expiry and amount; wait for all children to finalize before the router command. Renewals need a new parent intent ID. Approval success does not imply trade success.
 - `ports/chain-reader/chain-reader.ts`: `ChainReader.read`, `cash`, `tokenOf`, `simulate`, `ingest`, `watch`, `poll`, `head`, and `assertCurrent`. `snapshots.ts` adds typed position, night and allowance snapshots, including three separate credit balances. Reads carry block number/hash/timestamp. Resolve every token through the factory. Router simulation uses the real sender, asks, hints and bounds; it does not call the self-only pool quoter.
-- `ports/chain-attester/chain-attester.ts`: `ChainAttester.sign(Attestation)` handles typed link/relink, bind and individual walk payloads. The optional attester signer uses only `FORK_ATTESTER_KEY`; `fork:attester` is the execution wallet for `verifyHuman`. No secret is persisted or logged. Custody account index 9 is never allocated as a user wallet.
+- `ports/chain-attester/chain-attester.ts`: `ChainAttester.sign(Attestation)` handles typed link/relink, bind and individual walk payloads. The attester signer uses the configured keystore or fork-only raw key; `chain:attester` is the execution wallet for `verifyHuman`. No secret is persisted or logged. Custody account index 9 is never allocated as a user wallet.
 - Container ports expose `chainExecutor`, `chainReader`, optional `chainAttester`, and `provisionWallet`. Existing hand-built mock fixtures may omit these fields. Mock command consumers must explicitly supply their existing ledger handler to `createMockChainExecutor`; existing use cases keep their current mock boundary.
 
 The migration `530-chain-execution.sql` owns deployment instances, immutable commands, sender nonces, signed transactions, receipts, indexed logs, watch requests and snapshots. Keep the SQLite database and its WAL/SHM files private to the API service account: signed transactions are replayable until consumed. Execution must run outside SQLite transactions. Nonce allocation uses a short immediate SQLite transaction and a unique deployment/sender/nonce constraint across processes sharing that database. Sender nonce differs from maker order nonce. Signed bytes and their deterministic hash are committed before sending. Ambiguous delivery stays pending; recovery rebroadcasts identical bytes, and refuses a consumed nonce without its known receipt. It never retries the business action at a fresh nonce. Replacement transactions are not generated automatically.

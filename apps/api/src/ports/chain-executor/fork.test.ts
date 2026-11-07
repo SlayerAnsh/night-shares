@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createForkFoundation } from "../../container/fork-foundation";
+import { createChainFoundation } from "../../container/chain-foundation";
 import { openDatabase } from "../../db/open-database";
 import { loadDeployment } from "../arc-deployment/arc-deployment";
 import { assertLocalForkRpc } from "../arc-deployment/local-fork";
@@ -75,7 +75,7 @@ forkTest(
       if (!ready || child.exitCode !== null)
         throw new Error("Disposable Anvil failed to start.");
       const fingerprint = await validateDeployment(d, client);
-      const foundation = createForkFoundation(
+      const foundation = createChainFoundation(
         {
           port: 0,
           adapters: "mock",
@@ -86,7 +86,7 @@ forkTest(
         },
         db,
       );
-      expect(foundation.chainExecutor.mode).toBe("fork");
+      expect(foundation.chainExecutor.mode).toBe("chain");
       await expect(foundation.walletProvider.settle([])).rejects.toThrow(
         "ChainExecutor",
       );

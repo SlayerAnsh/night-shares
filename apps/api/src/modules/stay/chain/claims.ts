@@ -10,7 +10,7 @@ import { chainContext } from "./context";
 
 /** Consume the shared, deduplicated reducer; never infer payments from host balances. */
 export async function refreshChainWalkClaims(ports: Ports, userId: string) {
-  if (ports.chainExecutor?.mode !== "fork") return;
+  if (ports.chainExecutor?.mode !== "chain") return;
   const { reader } = chainContext(ports);
   await reader.poll(1000);
   const payments = new Map<string, bigint>();

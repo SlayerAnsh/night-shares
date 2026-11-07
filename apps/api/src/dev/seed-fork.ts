@@ -35,7 +35,11 @@ export function seedConfig(env = process.env) {
 }
 
 export async function seedFork({ ports }: Container) {
-  if (ports.chainExecutor?.mode !== "fork" || !ports.chainReader)
+  if (
+    ports.chainExecutor?.mode !== "chain" ||
+    !ports.chainReader ||
+    !ports.provisionWallet
+  )
     throw new Error("seed:fork requires fork execution.");
   const reader = ports.chainReader;
   const login = async (seed: string, index: number) => {
@@ -114,6 +118,11 @@ export async function seedFork({ ports }: Container) {
         "SELECT status FROM host_chain_openings WHERE fingerprint = ? AND night_key = ?",
       )
       .get(reader.fingerprint, key);
+    if (token === zeroAddress && !opening)
+      ports.inventory.update(key, (record) => ({
+        ...record,
+        state: { ...record.state, F: 0.5 },
+      }));
     if (token === zeroAddress || (opening && opening.status !== "complete"))
       await cases.openNights(
         host.user.id,

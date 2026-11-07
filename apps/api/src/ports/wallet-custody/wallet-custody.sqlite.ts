@@ -18,6 +18,8 @@ export function persistWalletCustody(
       )
       .get(key, mode) ?? undefined;
   return {
+    resolveWallet: adapter.resolveWallet,
+    signTransaction: adapter.signTransaction,
     async getWallet(owner) {
       return get(ownerKey(owner));
     },

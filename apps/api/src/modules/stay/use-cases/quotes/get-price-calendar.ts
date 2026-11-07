@@ -9,7 +9,7 @@ export function createGetPriceCalendar(ports: Ports) {
     if (count < 1 || count > 365)
       throw new DomainError("INVALID_ARGUMENT", "Choose 1 to 365 nights.");
     const dates =
-      ports.chainExecutor?.mode === "fork"
+      ports.chainExecutor?.mode === "chain"
         ? ports.inventory
             .list({
               propertyId: input.propertyId,

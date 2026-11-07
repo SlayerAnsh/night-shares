@@ -65,7 +65,7 @@ forkTest(
       const custody = {
         ...base,
         resolveWallet: async (id: string) => {
-          const result = await (id === "fork:attester"
+          const result = await (id === "chain:attester"
             ? signing.custody
             : base
           ).resolveWallet?.(id);
@@ -76,7 +76,7 @@ forkTest(
           id: string,
           tx: Parameters<NonNullable<typeof base.signTransaction>>[1],
         ) => {
-          const result = await (id === "fork:attester"
+          const result = await (id === "chain:attester"
             ? signing.custody
             : base
           ).signTransaction?.(id, tx);

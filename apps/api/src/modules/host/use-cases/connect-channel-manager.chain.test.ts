@@ -54,7 +54,7 @@ for (const outcome of ["failed bind", "foreign owner", "success"]) {
     ports.chainAttester = { address: wallet.address, sign: async () => "0x" };
     let transactions = 0;
     ports.chainExecutor = {
-      mode: "fork",
+      mode: "chain",
       pending: () => [],
       recover: async () => {
         throw new Error("unused");

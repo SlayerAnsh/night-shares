@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { URL } from "node:url";
 
 const names = ["identity", "catalog", "stay", "market", "host", "wallet"];
 const urls = names.map((name) => ({ name, url: `/docs/openapi/${name}.yaml` }));

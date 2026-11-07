@@ -5,6 +5,8 @@ All notable changes to this monorepo. Newest first.
 
 ## Unreleased
 
+- Generalize the API chain stack across Arc fork, testnet and mainnet with Keychain-backed keystores, resilient RPCs, Privy send guards, and realistic fork seed prices.
+
 - Add `docker-compose.testnet.yml` and `docker-compose.mainnet.yml`, copies of the deployable stack without `expose`, for separate Dokploy deployments.
 
 - Make `docker-compose.yml` the deployable stack for Dokploy: `api` loads runtime config from `.env` (template `.env.example`), and services use `expose` instead of host ports.

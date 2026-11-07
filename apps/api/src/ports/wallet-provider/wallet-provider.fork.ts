@@ -8,7 +8,7 @@ export function createForkWalletProvider(
 ): WalletProvider {
   const unsupported = async (): Promise<never> => {
     throw new Error(
-      "Fork financial operations require ChainExecutor intent and operation ID.",
+      "Chain financial operations require ChainExecutor intent and operation ID.",
     );
   };
   return {

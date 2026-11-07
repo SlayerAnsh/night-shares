@@ -14,6 +14,7 @@ import {
   permit2Abi,
   usdcAbi,
 } from "../../../ports/chain-executor/codecs";
+import { chainPool } from "./pool";
 import { chainMarket } from "./runtime";
 
 // Discover and verify mapping slots against the deployed getter. No writes are
@@ -23,8 +24,30 @@ export async function simulateQuote(
   ports: Ports,
   command: Extract<ChainCommand, { kind: "buy" | "sell" }>,
   sender: Address,
+  key?: string,
 ) {
-  const { reader, client, deployment: d } = chainMarket(ports);
+  const { reader, client, deployment: d, network } = chainMarket(ports);
+  // Arc USDC uses a blocklist precompile and does not support the storage
+  // overrides used by fork simulation. Project live v4 ladder positions instead.
+  // This is an estimate: on-chain router limits remain authoritative at execution.
+  if (network && network !== "fork") {
+    if (!key)
+      throw new Error("A night key is required for a chain quote projection.");
+    const pool = await chainPool(ports, key);
+    const levels = command.kind === "buy" ? pool.asks : pool.bids;
+    const tenths = command.qty / 100000000000000000n;
+    if (command.qty % 100000000000000000n || tenths > BigInt(levels.length))
+      throw new Error("Insufficient pool liquidity for quote projection.");
+    let value = 0n;
+    for (const level of levels.slice(0, Number(tenths))) {
+      const price =
+        command.kind === "buy"
+          ? level.price.micros
+          : (level.net?.micros ?? level.price.micros);
+      value += command.kind === "buy" ? (price + 9n) / 10n : price / 10n;
+    }
+    return { block: pool.block, value };
+  }
   await reader.assertCurrent();
   const block = await reader.head();
   if (

@@ -7,6 +7,7 @@ import { createMemoryCatalogRepo } from "../modules/catalog-data/catalog-repo.me
 import { createHostModule } from "../modules/host/module";
 import { createIdentityModule } from "../modules/identity/module";
 import { createSqliteInventoryRepo } from "../modules/inventory/inventory-repo.sqlite";
+import { configureChainMarket } from "../modules/market/chain/runtime";
 import { createMarketModule } from "../modules/market/module";
 import { signedInventory } from "../modules/market/orders/inventory";
 import { configureOrders } from "../modules/market/orders/settings";
@@ -44,7 +45,7 @@ import { createPrivyWalletCustody } from "../ports/wallet-custody/wallet-custody
 import { persistWalletCustody } from "../ports/wallet-custody/wallet-custody.sqlite";
 import { createSqliteWalletProvider } from "../ports/wallet-provider/wallet-provider.sqlite";
 import { parseDate } from "../shared/dates";
-import { createForkFoundation } from "./fork-foundation";
+import { createChainFoundation } from "./chain-foundation";
 import type { Ports } from "./ports";
 export function buildContainer(config: Config) {
   if (config.devTagIssuer && config.adapters !== "mock")
@@ -58,8 +59,8 @@ export function buildContainer(config: Config) {
     throw new Error("Only mock adapters are available.");
   if (config.walletCustody === "anvil" && config.arcNetwork !== "fork")
     throw new Error("Anvil custody requires ARC_NETWORK=fork.");
-  if (config.arcNetwork === "fork" && !config.arcDeployment)
-    throw new Error("Fork requires ARC_DEPLOYMENT_FILE.");
+  if (config.chain && !config.arcDeployment)
+    throw new Error("Chain mode requires ARC_DEPLOYMENT_FILE.");
   if (config.arcDeployment)
     assertOrderDomain(
       {
@@ -105,10 +106,11 @@ export function buildContainer(config: Config) {
     db,
   );
   const catalog = createMemoryCatalogRepo();
-  const fork =
-    config.arcNetwork === "fork" ? createForkFoundation(config, db) : undefined;
+  const foundation = config.chain
+    ? createChainFoundation(config, db)
+    : undefined;
   const custody =
-    fork?.custody ??
+    foundation?.custody ??
     (config.walletCustody === "anvil"
       ? createAnvilWalletCustody({
           db,
@@ -123,7 +125,7 @@ export function buildContainer(config: Config) {
           custodyAdapter,
         ));
   const walletProvider =
-    fork?.walletProvider ??
+    foundation?.walletProvider ??
     createSqliteWalletProvider({
       db,
       ids,
@@ -132,7 +134,7 @@ export function buildContainer(config: Config) {
     });
   const network = config.arcNetwork ?? "mainnet";
   walletProvider.explorerUrl = ARC_NETWORKS[network].explorerUrl;
-  if (!fork)
+  if (!foundation)
     walletProvider.onchainUsdcBalance = createOnchainUsdcBalance(
       network,
       config.arcRpcUrl,
@@ -140,10 +142,10 @@ export function buildContainer(config: Config) {
     );
   const ports: Ports & { bookingReport: ReturnType<typeof bookingReportFor> } =
     {
-      chainExecutor: fork?.chainExecutor ?? createMockChainExecutor(),
-      chainReader: fork?.chainReader,
-      chainAttester: fork?.chainAttester,
-      provisionWallet: fork?.provisionWallet,
+      chainExecutor: foundation?.chainExecutor ?? createMockChainExecutor(),
+      chainReader: foundation?.chainReader,
+      chainAttester: foundation?.chainAttester,
+      provisionWallet: foundation?.provisionWallet,
       receptionTag,
       issueReceptionTag:
         config.devTagIssuer === true ? receptionTag.issueTagPayload : undefined,
@@ -180,6 +182,13 @@ export function buildContainer(config: Config) {
             }),
       channelManager: createMockChannelManager({ catalog, clock, ids }),
     };
+  if (foundation)
+    configureChainMarket(ports, {
+      client: foundation.client,
+      custody,
+      deployment: requireDeployment(),
+      network: config.chain?.network ?? config.arcNetwork,
+    });
   if (config.walletCustody === "privy" || config.walletCustody === "anvil")
     configureCustodialSigner(
       ports,
@@ -191,11 +200,14 @@ export function buildContainer(config: Config) {
     );
   configureChainStatus(
     ports,
-    fork || config.chainStatus === "onchain"
+    foundation || config.chainStatus === "onchain"
       ? createOnchainChainStatus(
           requireDeployment(),
           config.arcRpcUrl ??
             ARC_NETWORKS[config.arcNetwork ?? "mainnet"].rpcUrl,
+          5000,
+          undefined,
+          config.arcRpcUrls,
         )
       : createMockChainStatus(config.chainPaused),
     config.chainLimits === "mainnet",

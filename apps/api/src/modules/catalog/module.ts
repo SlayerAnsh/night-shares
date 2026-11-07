@@ -9,9 +9,9 @@ import { createSearchStays } from "./use-cases/search-stays";
 export function createCatalogModule(ports: Ports) {
   const handler = createCatalogHandler({
     refreshNights: async () => {
-      if (ports.chainExecutor?.mode === "fork") await openedNights(ports);
+      if (ports.chainExecutor?.mode === "chain") await openedNights(ports);
     },
-    onChain: ports.chainExecutor?.mode === "fork",
+    onChain: ports.chainExecutor?.mode === "chain",
     walkIncidents: (propertyId) => walkIncidents(ports.db, propertyId),
     getProperty: createGetProperty(ports),
     listDestinations: createListDestinations(ports),

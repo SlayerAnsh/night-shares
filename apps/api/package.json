@@ -8,7 +8,7 @@
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "e2e": "bun test test/e2e",
-    "dev:fork": "ARC_NETWORK=fork CHAIN_STATUS=onchain WALLET_CUSTODY=anvil bun src/jobs/dev-fork.ts",
+    "dev:fork": "bun src/jobs/dev-fork.ts",
     "seed:fork": "bun src/dev/seed-fork.ts"
   },
   "dependencies": {
@@ -19,6 +19,7 @@
     "@night-shares/proto": "workspace:*",
     "@noble/curves": "1.9.1",
     "@worldcoin/idkit-core": "4.6.0",
+    "ethers": "6.16.0",
     "jose": "6.2.3",
     "viem": "^2.57.16"
   },

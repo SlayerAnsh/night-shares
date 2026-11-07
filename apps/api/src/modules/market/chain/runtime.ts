@@ -15,6 +15,7 @@ import type { WalletCustody } from "../../../ports/wallet-custody/wallet-custody
 import { DomainError } from "../../../shared/errors/domain-error";
 
 type Settings = {
+  network?: "fork" | "testnet" | "mainnet";
   client?: ForkClient;
   custody: WalletCustody;
   deployment: ArcDeployment;
@@ -25,7 +26,7 @@ export function configureChainMarket(ports: Ports, value: Settings) {
   slippageBounds(0n, value.slippageBps);
   settings.set(ports, value);
 }
-export const isChain = (ports: Ports) => ports.chainExecutor?.mode === "fork";
+export const isChain = (ports: Ports) => ports.chainExecutor?.mode === "chain";
 export const nightHash = (key: string) => keccak256(stringToHex(key));
 export function chainMarket(ports: Ports) {
   let configured = settings.get(ports);

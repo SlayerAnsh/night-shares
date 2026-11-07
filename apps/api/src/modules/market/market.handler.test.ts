@@ -19,7 +19,7 @@ import { fixture } from "./testing/fixture";
 test("PostAsk scopes replay by deployment and human and validates its header", async () => {
   const deps = await fixture();
   const { ports } = deps;
-  ports.chainExecutor = { mode: "fork" } as NonNullable<
+  ports.chainExecutor = { mode: "chain" } as NonNullable<
     typeof ports.chainExecutor
   >;
   ports.chainReader = { fingerprint: "test-deployment" } as ChainReader;

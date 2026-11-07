@@ -13,7 +13,7 @@ test("canonical enrollment mapping accepts uint256 only", () => {
 test("Selfie guests never enter the human exposure namespace during sign-in", async () => {
   const { ports } = fixture();
   ports.chainExecutor = {
-    mode: "fork",
+    mode: "chain",
     pending: () => [],
     async execute() {
       throw new Error("Selfie must not link a human");

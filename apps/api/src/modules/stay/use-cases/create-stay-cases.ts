@@ -17,9 +17,9 @@ import { createTapReception } from "./trips/tap-reception";
 export function createStayCases(ports: Ports, repo: StayRepo) {
   return {
     refreshNights: async () => {
-      if (ports.chainExecutor?.mode === "fork") await openedNights(ports);
+      if (ports.chainExecutor?.mode === "chain") await openedNights(ports);
     },
-    onChain: ports.chainExecutor?.mode === "fork",
+    onChain: ports.chainExecutor?.mode === "chain",
     getPriceCalendar: createGetPriceCalendar(ports),
     quoteStay: createQuoteStay(ports, repo),
     lockQuote: createLockQuote(ports, repo),

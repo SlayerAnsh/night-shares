@@ -129,11 +129,11 @@ forkTest(
       const custody: WalletCustody = {
         ...anvil,
         resolveWallet: (id) =>
-          id === "fork:attester"
+          id === "chain:attester"
             ? required(signing.custody.resolveWallet)(id)
             : required(anvil.resolveWallet)(id),
         signTransaction: (id, tx) =>
-          id === "fork:attester"
+          id === "chain:attester"
             ? required(signing.custody.signTransaction)(id, tx)
             : required(anvil.signTransaction)(id, tx),
       };
@@ -199,7 +199,7 @@ forkTest(
             deadline,
             signature,
           });
-          await execute("fork:attester", {
+          await execute("chain:attester", {
             kind: "verifyHuman",
             humanId: id,
             orb: true,

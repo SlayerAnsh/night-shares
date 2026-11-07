@@ -4,7 +4,6 @@ import {
   createPublicClient,
   defineChain,
   hashDomain,
-  http,
   zeroAddress,
 } from "viem";
 import { serialize } from "../chain-executor/chain-executor";
@@ -12,21 +11,25 @@ import { authorizationAbi } from "../chain-executor/x402-codecs";
 import type { ArcDeployment } from "./arc-deployment";
 import { assertLocalForkRpc } from "./local-fork";
 import { legacyRequiredAbi, requiredAbi } from "./required-abi";
-export const forkChain = (rpcUrl: string) =>
+import { arcTransport } from "./transport";
+export const arcChain = (rpcUrl: string, chainId = 5042) =>
   defineChain({
-    id: 5042,
-    name: "Arc local fork",
+    id: chainId,
+    name: "Arc",
     nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
     rpcUrls: { default: { http: [rpcUrl] } },
   });
+export const forkChain = arcChain;
+export const chainClient = (urls: string[], chainId: number) =>
+  createPublicClient({
+    chain: arcChain(urls[0] as string, chainId),
+    transport: arcTransport(urls),
+  });
 export const forkClient = (rpcUrl: string) => {
   assertLocalForkRpc(rpcUrl);
-  return createPublicClient({
-    chain: forkChain(rpcUrl),
-    transport: http(rpcUrl),
-  });
+  return chainClient([rpcUrl], 5042);
 };
-export type ForkClient = ReturnType<typeof forkClient>;
+export type ForkClient = ReturnType<typeof chainClient>;
 export const digest = (value: unknown) =>
   createHash("sha256").update(serialize(value)).digest("hex");
 export function validateExecutionAbi(d: ArcDeployment): void {
@@ -47,8 +50,8 @@ export async function validateDeployment(
   validateExecutionAbi(d);
   if (d.x402Available && !d.USDC_EIP712)
     throw new Error("Missing USDC_EIP712 domain.");
-  if (d.chainId !== 5042 || (await client.getChainId()) !== 5042)
-    throw new Error("Fork chainId must equal 5042.");
+  if ((await client.getChainId()) !== d.chainId)
+    throw new Error("Arc RPC chainId must match deployment.");
   if (!Number.isSafeInteger(d.block) || (d.block ?? -1) < 0)
     throw new Error("Deployment block is required.");
   const block = await client.getBlock({
@@ -57,6 +60,7 @@ export async function validateDeployment(
   const addresses = Object.entries(d).filter(
     ([key, value]) =>
       typeof value === "string" &&
+      value !== zeroAddress &&
       /^0x[0-9a-fA-F]{40}$/.test(value) &&
       !["ATTESTER", "OWNER", "PLATFORM"].includes(key),
   );
@@ -86,7 +90,8 @@ export async function validateDeployment(
     owner: "OWNER",
   };
   for (const [contract, abi] of Object.entries(d.abis)) {
-    if (!(contract in d)) continue;
+    if (!(contract in d) || d[contract as "NightToken"] === zeroAddress)
+      continue;
     for (const item of abi) {
       if (
         item.type !== "function" ||
@@ -150,7 +155,7 @@ export async function validateDeployment(
               ? "NightShares Room Night"
               : "NightShares",
         version: name === "USDC" ? (d.USDC_EIP712?.version ?? "2") : "1",
-        chainId: 5042n,
+        chainId: BigInt(d.chainId),
         verifyingContract: d[name],
       },
     });

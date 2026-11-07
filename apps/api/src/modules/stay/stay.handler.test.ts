@@ -22,7 +22,7 @@ test("property detail and calendar expose chain mode before the first quote", as
       today: "2026-12-01",
     });
     if (chain)
-      ports.chainExecutor = { mode: "fork" } as NonNullable<
+      ports.chainExecutor = { mode: "chain" } as NonNullable<
         typeof ports.chainExecutor
       >;
     const catalog = createCatalogModule(ports).handler;

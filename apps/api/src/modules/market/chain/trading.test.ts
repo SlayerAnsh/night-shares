@@ -22,7 +22,7 @@ for (const approved of [false, true]) {
     const amount = approved ? 10n ** 20n : 0n;
     let transactions = 0;
     ports.chainExecutor = {
-      mode: "fork",
+      mode: "chain",
       pending: () => [],
       recover: async () => {
         throw new Error("unused");
@@ -120,3 +120,81 @@ for (const approved of [false, true]) {
     }
   });
 }
+
+test("testnet quotes project live pool positions without USDC simulation", async () => {
+  const { toHex } = await import("viem");
+  const { simulateQuote } = await import("./quote-simulation");
+  const deps = await fixture();
+  const { ports, key } = deps;
+  const address = "0x0000000000000000000000000000000000000001" as const;
+  const block = {
+    number: 71115581n,
+    timestamp: 1n,
+    hash: `0x${"00".repeat(32)}` as const,
+  };
+  let storageReads = 0;
+  ports.chainExecutor = { mode: "chain" } as NonNullable<
+    typeof ports.chainExecutor
+  >;
+  ports.chainReader = {
+    fingerprint: "testnet-pool",
+    head: async () => block,
+    assertCurrent: async () => {},
+    tokenOf: async () => address,
+    async read<T>(request: Parameters<ChainReader["read"]>[0]) {
+      const values: Record<string, unknown> = {
+        config: { F: 500000n, k: 10n ** 18n, S: 10n ** 19n, cutoff: 1000000n },
+        held: 0n,
+        ladderComplete: true,
+        closed: false,
+        paused: false,
+      };
+      return { block, value: values[request.functionName] as T };
+    },
+  } as unknown as ChainReader;
+  configureChainMarket(ports, {
+    network: "testnet",
+    custody: {} as never,
+    deployment: {
+      NightHook: address,
+      NightVault: address,
+      POOL_MANAGER: address,
+      USDC: address,
+    } as unknown as ArcDeployment,
+    client: {
+      getBlock: async () => block,
+      readContract: async () =>
+        toHex(
+          storageReads++ === 0
+            ? BigInt(Math.floor((Math.sqrt(0.5) / 1e6) * 2 ** 96))
+            : 100n * 10n ** 12n,
+          { size: 32 },
+        ),
+      simulateContract: async () => {
+        throw new Error("Arc USDC precompile simulation must not run");
+      },
+    } as unknown as ForkClient,
+  });
+  try {
+    const quote = await simulateQuote(
+      ports,
+      {
+        kind: "buy",
+        night: `0x${"00".repeat(32)}`,
+        qty: 10n ** 18n,
+        maxPaid: 1000000n,
+        asks: [],
+        hints: [],
+        deadline: 100n,
+      },
+      address,
+      key,
+    );
+    expect(quote.block.number).toBe(71115581n);
+    expect(quote.value).toBeGreaterThanOrEqual(500000n);
+    expect(quote.value).toBeLessThan(600000n);
+    expect(storageReads).toBe(11);
+  } finally {
+    ports.db.close();
+  }
+});

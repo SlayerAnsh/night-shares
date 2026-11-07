@@ -20,7 +20,7 @@ export function enrollmentId(subject: string): bigint {
 }
 
 export async function ensureChainIdentity(ports: Ports, user: User) {
-  if (ports.chainExecutor?.mode !== "fork") return;
+  if (ports.chainExecutor?.mode !== "chain") return;
   // Selfie credentials use the separate guest namespace, linked at first booking.
   if (user.level !== "orb") return;
   const { reader, attester } = chainPorts(ports);
@@ -59,7 +59,7 @@ export async function ensureChainIdentity(ports: Ports, user: User) {
       "Unsafe identity relink refused; existing holder attribution must be preserved.",
     );
   await ports.provisionWallet?.({
-    walletId: "fork:attester",
+    walletId: "chain:attester",
     address: attester.address,
   });
   if (linked === 0n)
@@ -72,7 +72,7 @@ export async function ensureChainIdentity(ports: Ports, user: User) {
       };
       return {
         operationId: "",
-        walletId: "fork:attester",
+        walletId: "chain:attester",
         command: { ...a, signature: await attester.sign(a) },
       };
     });
@@ -87,7 +87,7 @@ export async function ensureChainIdentity(ports: Ports, user: User) {
   )
     await executeIntent(ports, `identity:${user.id}:orb`, async () => ({
       operationId: "",
-      walletId: "fork:attester",
+      walletId: "chain:attester",
       command: { kind: "verifyHuman", humanId, orb: true },
     }));
   if (

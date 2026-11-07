@@ -167,6 +167,7 @@ export function createChainReader(
     async poll(maxBlocks = 100) {
       if (!Number.isSafeInteger(maxBlocks) || maxBlocks < 1)
         throw new Error("Invalid block batch.");
+      maxBlocks = Math.min(maxBlocks, 9999);
       await reader.assertCurrent();
       let cursor = db
         .query<{ number: bigint; hash: string }, [string]>(

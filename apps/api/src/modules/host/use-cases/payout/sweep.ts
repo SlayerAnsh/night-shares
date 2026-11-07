@@ -13,7 +13,7 @@ import { createGetPayout } from "./get-payout";
 export function createSweep(deps: HostDeps) {
   const { ports, repo } = deps;
   return async (userId: string, propertyId: string, walletAddress: string) => {
-    if (ports.chainExecutor?.mode === "fork") {
+    if (ports.chainExecutor?.mode === "chain") {
       await sweepChain(deps, userId, propertyId);
       return;
     }

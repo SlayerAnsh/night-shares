@@ -75,6 +75,12 @@ export function createPrivyWalletCustody(deps: {
     return response.status === 404 ? undefined : wallet(response);
   }
   return {
+    async resolveWallet(id) {
+      return wallet(await call(`/${encodeURIComponent(id)}`));
+    },
+    async signTransaction() {
+      throw new Error("Privy transaction sending not implemented");
+    },
     getWallet,
     async createWallet(owner) {
       const existing = await getWallet(owner);

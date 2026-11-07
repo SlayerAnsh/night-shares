@@ -6,7 +6,7 @@ import { slippageBound } from "./context";
 test("chain selection rejects multiple rooms or nights before reserving anything", () => {
   const f = fixture();
   f.ports.chainExecutor = {
-    mode: "fork",
+    mode: "chain",
     pending: () => [],
     execute: async () => {
       throw new Error("Unexpected execution");

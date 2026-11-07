@@ -46,6 +46,8 @@ export function createChainExecutor(deps: {
   reader: ChainReader;
   custody: WalletCustody;
   gasHeadroomBps?: number;
+  network?: "fork" | "testnet" | "mainnet";
+  sendingUnavailable?: boolean;
   afterBroadcast?: () => void;
 }): ChainExecutor {
   const { db, deployment: d, client, reader, custody } = deps;
@@ -143,7 +145,7 @@ export function createChainExecutor(deps: {
     return result(row(r.id) as Row);
   }
   const executor: ChainExecutor = {
-    mode: "fork",
+    mode: "chain",
     pending: () =>
       db
         .query<{ id: string }, [string]>(
@@ -152,6 +154,8 @@ export function createChainExecutor(deps: {
         .all(reader.fingerprint)
         .map((r) => r.id),
     async recover(id) {
+      if (deps.sendingUnavailable)
+        throw new Error("Privy transaction sending not implemented");
       const r = row(id);
       if (!r) throw new Error("Unknown chain operation.");
       if (r.fingerprint !== reader.fingerprint)
@@ -165,6 +169,14 @@ export function createChainExecutor(deps: {
       return deliver(r);
     },
     async execute(request: ExecutionRequest) {
+      if (deps.sendingUnavailable)
+        throw new Error("Privy transaction sending not implemented");
+      if (
+        deps.network &&
+        deps.network !== "fork" &&
+        request.command.kind === "provisionToken"
+      )
+        throw new Error("Token faucet requires ARC_NETWORK=fork.");
       if (db.inTransaction)
         throw new Error(
           "Chain execution cannot run inside a SQLite transaction.",
@@ -195,7 +207,8 @@ export function createChainExecutor(deps: {
         reader.tokenOf(night),
       );
       const data = calldata(call);
-      await client.simulateContract({ ...call, account: wallet.address });
+      if ((deps.network ?? "fork") === "fork")
+        await client.simulateContract({ ...call, account: wallet.address });
       const gas =
         ((await client.estimateGas({
           account: wallet.address,
@@ -237,7 +250,7 @@ export function createChainExecutor(deps: {
               : Number(max.nonce) + 1,
           );
           const envelope: TransactionEnvelope = {
-            chainId: 5042,
+            chainId: d.chainId,
             type: "eip1559",
             nonce,
             to: call.address,

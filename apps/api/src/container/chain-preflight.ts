@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { parseDeployment } from "../ports/arc-deployment/arc-deployment";
 import {
-  forkClient,
+  chainClient,
   validateDeployment,
 } from "../ports/arc-deployment/validate";
 
@@ -10,13 +10,13 @@ import {
 try {
   const input = JSON.parse(readFileSync(0, "utf8"));
   const fingerprint = await validateDeployment(
-    parseDeployment(input.deployment),
-    forkClient(input.rpcUrl),
+    parseDeployment(input.deployment, input.deployment.chainId),
+    chainClient(input.rpcUrls, input.deployment.chainId),
   );
   process.stdout.write(fingerprint);
 } catch {
   process.stderr.write(
-    "Fork deployment preflight failed (RPC, chain, code, dependency, domain or ABI mismatch).",
+    "Chain deployment preflight failed (RPC, chain, code, dependency, domain or ABI mismatch).",
   );
   process.exitCode = 1;
 }

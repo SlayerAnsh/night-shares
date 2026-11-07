@@ -1,8 +1,8 @@
 import { expect, test } from "bun:test";
-import { randomBytes } from "node:crypto";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { privateKeyToAccount } from "viem/accounts";
 import { loadConfig } from "../../config/load-config";
 import { assertOrderDomain } from "../../modules/market/orders/typed-data";
 import { loadDeployment, parseDeployment } from "./arc-deployment";
@@ -46,7 +46,14 @@ test("fork config selects deployment domain, refuses modes and hides attester", 
       fixture().EIP712Domain.verifyingContract,
     );
     expect(config.forkFaucet).toBe(false);
-    const secret = `0x${randomBytes(32).toString("hex")}`;
+    const secret = `0x${"01".repeat(32)}` as const;
+    writeFileSync(
+      file,
+      JSON.stringify({
+        ...fixture(),
+        ATTESTER: privateKeyToAccount(secret).address,
+      }),
+    );
     const secretConfig = loadConfig({ ...env, FORK_ATTESTER_KEY: secret });
     expect(secretConfig.forkAttesterKey?.() === secret).toBe(true);
     const serialized = JSON.stringify(secretConfig, (_, value) =>
@@ -54,10 +61,6 @@ test("fork config selects deployment domain, refuses modes and hides attester", 
     );
     expect(serialized.includes(secret)).toBe(false);
     expect(JSON.parse(serialized).forkAttesterKey).toBe("[REDACTED]");
-    expect(
-      loadConfig({ ARC_NETWORK: "mainnet", ARC_DEPLOYMENT_FILE: file })
-        .orderVerifyingContract,
-    ).toBe(config.orderVerifyingContract);
     expect(() => loadConfig({ ...env, ORDER_CHAIN_ID: "1" })).toThrow("domain");
     expect(() => loadConfig({ ...env, CHAIN_STATUS: "bad" })).toThrow(
       "CHAIN_STATUS",
@@ -68,9 +71,17 @@ test("fork config selects deployment domain, refuses modes and hides attester", 
       loadConfig({ FORK_ATTESTER_KEY: "invalid" }).forkAttesterKey,
     ).toBeUndefined();
     expect(() => loadConfig({ ...env, FORK_ATTESTER_KEY: "invalid" })).toThrow(
-      "FORK_ATTESTER_KEY",
+      "ATTESTER_KEY",
     );
   } finally {
     rmSync(dir, { recursive: true });
   }
+});
+
+test("network deployment selection loads legacy testnet and refuses missing mainnet", () => {
+  const testnet = loadDeployment("testnet");
+  expect(testnet?.chainId).toBe(5042002);
+  expect(testnet?.block).toBe(71115581);
+  expect(testnet?.x402Available).toBe(false);
+  expect(() => loadDeployment("mainnet")).toThrow("5042.json");
 });

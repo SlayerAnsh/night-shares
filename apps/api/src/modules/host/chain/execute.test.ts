@@ -15,7 +15,7 @@ test("ambiguous chain delivery retains one immutable intent across restart", asy
   let prepared = 0;
   const requests: string[] = [];
   ports.chainExecutor = {
-    mode: "fork",
+    mode: "chain",
     pending: () => [],
     async recover() {
       throw new Error("unused");

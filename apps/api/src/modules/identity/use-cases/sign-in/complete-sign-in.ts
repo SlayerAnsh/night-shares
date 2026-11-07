@@ -53,7 +53,7 @@ export function createCompleteSignIn(
     const found = await findOrCreate(verified.subject);
     const user = deps.repo.get(found.humanId) ?? found;
     if (verified.level === "orb") user.level = "orb";
-    if (deps.chainExecutor?.mode === "fork")
+    if (deps.chainExecutor?.mode === "chain")
       await ensureChainIdentity(deps as Ports, user);
     deps.repo.save(user);
     const sessionUser = { ...user, level: verified.level };

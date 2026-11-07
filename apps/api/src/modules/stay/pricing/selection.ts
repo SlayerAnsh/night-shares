@@ -34,7 +34,7 @@ export function selection(ports: Ports, input: StaySelection | undefined) {
       "Choose valid guest and room counts.",
     );
   if (
-    (ports.chainExecutor?.mode === "fork" ||
+    (ports.chainExecutor?.mode === "chain" ||
       process.env.ARC_NETWORK === "mainnet") &&
     (value.rooms !== 1 || count !== 1)
   )

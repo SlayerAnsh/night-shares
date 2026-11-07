@@ -1,5 +1,6 @@
-import { createPublicClient, http } from "viem";
+import { createPublicClient, zeroAddress } from "viem";
 import type { ArcDeployment } from "../arc-deployment/arc-deployment";
+import { arcTransport } from "../arc-deployment/transport";
 
 /** Synchronous guards consume a fail-closed snapshot; RPC never runs in SQLite transactions. */
 export function createOnchainChainStatus(
@@ -7,9 +8,13 @@ export function createOnchainChainStatus(
   rpcUrl: string,
   ttlMs = 5000,
   fetchFn?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
+  rpcUrls?: string[],
 ) {
   const client = createPublicClient({
-    transport: http(rpcUrl, { timeout: 3000, retryCount: 0, fetchFn }),
+    transport: arcTransport(rpcUrls ?? [rpcUrl], {
+      fetchFn: fetchFn as typeof fetch,
+      retries: fetchFn ? 0 : 4,
+    }),
   });
   for (const name of ["NightHook", "NightToken"] as const) {
     const matches = deployment.abis[name]?.filter(
@@ -37,13 +42,15 @@ export function createOnchainChainStatus(
         if ((await client.getChainId()) !== deployment.chainId)
           throw new Error("Arc RPC chainId does not match deployment.");
         const results = await Promise.all(
-          (["NightHook", "NightToken"] as const).map((name) =>
-            client.readContract({
-              address: deployment[name],
-              abi: deployment.abis[name] ?? [],
-              functionName: "paused",
-            }),
-          ),
+          (["NightHook", "NightToken"] as const)
+            .filter((name) => deployment[name] !== zeroAddress)
+            .map((name) =>
+              client.readContract({
+                address: deployment[name],
+                abi: deployment.abis[name] ?? [],
+                functionName: "paused",
+              }),
+            ),
         );
         if (results.some((result) => typeof result !== "boolean"))
           throw new Error("Invalid chain pause response.");

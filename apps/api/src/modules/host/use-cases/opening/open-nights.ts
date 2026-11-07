@@ -28,7 +28,7 @@ export function createOpenNights(deps: HostDeps) {
   return (userId: string, selection?: OpenNightsSelection) => {
     assertTrading(deps.ports);
     const plans = selectNights(deps, userId, selection);
-    if (deps.ports.chainExecutor?.mode === "fork")
+    if (deps.ports.chainExecutor?.mode === "chain")
       return openChainNights(deps, userId, plans);
     for (const { record } of plans) assertTrading(deps.ports, record.key);
     if (
