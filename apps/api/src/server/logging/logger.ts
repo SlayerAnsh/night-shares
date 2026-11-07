@@ -44,7 +44,10 @@ export function createLogger(
 // nullifiers. Mask long secret-like runs and cap the length so the log keeps
 // the diagnostic shape without the values.
 export function scrubMessage(message: string): string {
+  // Bound the input first so the patterns below stay linear-ish on hostile
+  // or huge messages; the output is capped again after masking.
   return message
+    .slice(0, 2048)
     .replace(/0x[0-9a-fA-F]{64,}/g, "0x<redacted>")
     .replace(/eyJ[\w-]+\.[\w-]+\.[\w-]*/g, "<redacted-jwt>")
     .replace(/[A-Za-z0-9+/_=-]{32,}/g, "<redacted>")
