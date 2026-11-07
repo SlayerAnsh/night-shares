@@ -10,7 +10,7 @@ export USDC_EIP712_NAME="${USDC_EIP712_NAME:-USDC}" USDC_EIP712_VERSION="${USDC_
 export USDC=0x3600000000000000000000000000000000000000
 export PERMIT2=0x000000000022D473030F116dDEE9F6B43aC78BA3
 export ATTESTER=0xa0Ee7A142d267C1f36714E4a8F75612F20a79720
-export PLATFORM=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 OWNER=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+export PLATFORM=0x23618e81E3f5cdF7f54C3d65f7FBc0aBf5B21E8f OWNER=0x14dC79964da2C08b23698B3D3cc7Ca32193d9955
 export DEPLOYER_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 # Public Anvil test wallets, never production keys.
 for wallet in $(cast wallet derive 'test test test test test test test test test test test junk' --accounts 10 --json | python3 -c 'import json,sys; print(" ".join(x["address"] for x in json.load(sys.stdin)))'); do
