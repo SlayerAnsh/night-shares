@@ -5,6 +5,8 @@ All notable changes to this monorepo. Newest first.
 
 ## Unreleased
 
+- Add fork-only scheduled recovery, permissionless cutoff/sweep workers, credit retries, disposable API acceptance, and guarded dev:fork startup.
+
 - Security: Stop repayment of false walk reports, serialize claim cancellation with payouts, and remove guest identity and private claim amounts from public walk incidents.
 
 - Add fork execution ports, deployment preflight, durable transaction recovery, native/cash provisioning and block reconciliation; reject legacy ledger settlement in fork mode.

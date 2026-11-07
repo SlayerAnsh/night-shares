@@ -237,3 +237,72 @@ Receipt ingestion and block polling use the same idempotent event reducer. Polli
 With `FORK_FAUCET=true`, wallet creation retries durable provisioning for existing allocations too. Native gas funding uses a guarded, idempotent local `anvil_setBalance` fixture operation; ERC-20 minting is a separately journaled command. Native USDC has 18 decimals, ERC-20 MockUSDC has 6. Execution estimates gas and current EIP-1559 fees and checks the native balance before each transaction; `FORK_GAS_HEADROOM_BPS` defaults to 12000 (120%). Explicitly provision the attester wallet before using it as a sender if necessary.
 
 Run `cd apps/api && npx tsc --noEmit`, `bun test`, and `FORK_IT=1 bun test fork`. Fork tests require `anvil` on PATH and a reviewed deployment running at the local upstream RPC. They launch a disposable local child fork on an available ephemeral port, use a fresh SQLite journal, and never mutate the shared upstream. They cover wallet funding retry, separate gas/cash balances, both approvals, post-broadcast crash recovery across database reopen, idempotency and stale-operation rejection. Without `FORK_IT=1`, no integration transaction is broadcast.
+
+## Local Arc fork API
+
+Start the existing chain service from the repository root with
+`docker compose -f docker-compose.chain.yml up -d`. Do not reset or redeploy a
+shared fork. The deployment artifact must match that running instance and include
+all reviewed credit and guest-link ABIs. Addresses are read at startup.
+
+Run from the repository root (supply account 9's key through your local shell or
+secret manager; do not commit it):
+
+```sh
+export ARC_NETWORK=fork
+export CHAIN_STATUS=onchain
+export WALLET_CUSTODY=anvil
+export ARC_RPC_URL=http://127.0.0.1:8545
+export ARC_DEPLOYMENT_FILE="$PWD/packages/contracts/deployments/5042-fork.json"
+export FORK_FAUCET=true
+export FORK_ATTESTER_KEY='<anvil 9 private key>'
+export ADAPTERS=mock
+export WORLD_ID_MODE=mock
+export CLOCK=system
+export IDS=random
+export DB_PATH="$PWD/apps/api/data/fork.db"
+export PORT=8787
+export JOB_INTERVAL_MS=60000
+export MARKET_SLIPPAGE_BPS=50
+export DEV_TAG_ISSUER=true
+pnpm --filter api dev:fork
+```
+
+`dev:fork` rejects non-local RPC URLs before importing the server. The deployment
+preflight checks chain ID 5042, deployed code, dependencies, domains, and ABI
+compatibility. Verify startup with `curl --fail http://127.0.0.1:8787/readyz`.
+Native gas and the six-decimal mock USDC token are provisioned separately.
+Keep this database separate from mock development. After a deployment reset,
+restart against the new artifact and a new database; stale operation IDs must
+never be replayed against another deployment.
+
+Chain jobs poll canonical logs, recover pending execution and host/market/stay
+intents, expire invalid signed asks using chain time, sweep permissionlessly,
+and settle cutoff before pushing at most 100 holders per night per tick. Failed
+pushes remain claimable by the holder. Token, hook, and settlement credits are
+retried separately. NightVault credit retries require the outstanding
+`task5-ports.patch`; its credit balance is watched in the meantime. Mock jobs
+retain their existing ledger behavior. A failed deployment check stops chain
+work; a successful simulation alone never finalizes a payout.
+
+Run acceptance with `cd apps/api && FORK_IT=1 bun test test/fork`. It creates and
+stops a disposable child Anvil fork, uses custody indices above 40001, and changes
+only the child's clock and blacklist fixtures. The shared RPC must already be
+running; the test never deploys or resets it.
+
+Current integration follow-ups are recorded in the task brief directory:
+`task5-ports.patch` adds NightVault withdrawal commands and skips token watches
+before token creation during replay; `task5-stay.patch` accepts the same bare-hex
+mock enrollment identifiers as the identity module; `task5-market.patch` treats
+an empty RPC signature as a request for custody signing. These patches are not
+applied to the owned port/module files. The acceptance fixture uses canonical
+`0x` enrollment identifiers and explicitly signs asks through custody.
+
+Acceptance covers a changed-fingerprint quarantine, not a full redeploy/reset
+bootstrap. The independent Forge `ForkFlowTest.testLiveForkFullFlow` currently
+reverts decoding `NightFactory.dependencies()`: the checked-out Solidity struct
+has 13 addresses (including `settler`), while the running artifact returns 12.
+Resolve that deployment/source mismatch before claiming full reference-flow
+acceptance. Running `bun test` at the repository root also currently fails the
+market-model fingerprint assertion (`53a8f129bd65` versus `5ed0433226df`); the API
+suite and the fork acceptance suite are run from `apps/api`.

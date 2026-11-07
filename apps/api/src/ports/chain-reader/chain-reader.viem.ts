@@ -253,14 +253,22 @@ export function createChainReader(
           .query<{ key: string; request: string }, [string]>(
             "SELECT key, request FROM chain_watches WHERE fingerprint = ?",
           )
-          .all(fingerprint))
+          .all(fingerprint)) {
+          const request = deserialize<ReadRequest>(watch.request);
+          // A reorg replay can precede the creation of a watched token.
+          if (request.contract === "NightToken") {
+            const token = await reader.read<Address>({
+              contract: "NightFactory",
+              functionName: "tokenOf",
+              args: [request.night],
+            }, n);
+            if (token.value === zeroAddress) continue;
+          }
           snapshots.push({
             key: watch.key,
-            snapshot: await reader.read(
-              deserialize<ReadRequest>(watch.request),
-              n,
-            ),
+            snapshot: await reader.read(request, n),
           });
+        }
         if ((await blockAt(n)).hash !== block.hash)
           throw new Error("Block changed during reconciliation.");
         db.transaction(() => {

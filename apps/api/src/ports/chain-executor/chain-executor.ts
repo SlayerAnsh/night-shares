@@ -57,7 +57,7 @@ export type ChainCommand =
   | { kind: "pushBatch"; night: Hex; count: bigint }
   | {
       kind: "withdrawCredit";
-      contract: "NightToken" | "NightHook" | "Settlement";
+      contract: "NightToken" | "NightHook" | "Settlement" | "NightVault";
       night?: Hex;
       recipient: Address;
     }
