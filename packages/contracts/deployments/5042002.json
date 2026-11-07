@@ -12504,5 +12504,8 @@
         "stateMutability": "view"
       }
     ]
-  }
+  },
+  "NightToken": "0x1BFE065De8f26F9894098b9E9D362C72cAEb8433",
+  "demoNight": "0x917fa947e6b95567d2d793649fa178dbeacf6177010381f468e2fb69a524b660",
+  "demoPoolCost": 9660865
 }
