@@ -10,6 +10,7 @@ export type Attestation =
       wallet: Address;
       deadline: bigint;
     }
+  | { kind: "linkGuest"; guestId: bigint; wallet: Address; deadline: bigint }
   | { kind: "bind"; property: Hex; hostPayout: Address; deadline: bigint }
   | { kind: "walk"; report: WalkAttestation };
 export interface ChainAttester {
@@ -32,13 +33,15 @@ export function createChainAttester(
       address: account.address,
       async sign(a) {
         const primaryType =
-          a.kind === "link"
-            ? "LinkWallet"
-            : a.kind === "relink"
-              ? "RelinkWallet"
-              : a.kind === "bind"
-                ? "BindProperty"
-                : "WalkAttestation";
+          a.kind === "linkGuest"
+            ? "LinkGuest"
+            : a.kind === "link"
+              ? "LinkWallet"
+              : a.kind === "relink"
+                ? "RelinkWallet"
+                : a.kind === "bind"
+                  ? "BindProperty"
+                  : "WalkAttestation";
         const fields =
           a.kind === "walk"
             ? [
@@ -58,7 +61,7 @@ export function createChainAttester(
                   ["deadline", "uint64"],
                 ]
               : [
-                  ["humanId", "uint256"],
+                  [a.kind === "linkGuest" ? "guestId" : "humanId", "uint256"],
                   ["wallet", "address"],
                   ["deadline", "uint64"],
                 ];
@@ -71,7 +74,13 @@ export function createChainAttester(
                   hostPayout: a.hostPayout,
                   deadline: a.deadline,
                 }
-              : { humanId: a.humanId, wallet: a.wallet, deadline: a.deadline };
+              : a.kind === "linkGuest"
+                ? { guestId: a.guestId, wallet: a.wallet, deadline: a.deadline }
+                : {
+                    humanId: a.humanId,
+                    wallet: a.wallet,
+                    deadline: a.deadline,
+                  };
         return account.signTypedData({
           domain: {
             name: "NightShares",

@@ -110,6 +110,13 @@ export async function commandCall(
         c.kind === "link" ? "linkWallet" : "relinkWallet",
         [c.humanId, c.wallet, c.deadline, c.signature],
       );
+    case "linkGuest":
+      return call("HumanRegistry", "linkGuest", [
+        c.guestId,
+        c.wallet,
+        c.deadline,
+        c.signature,
+      ]);
     case "verifyHuman":
       return call("HumanRegistry", "setOrb", [c.humanId, c.orb]);
     case "bind":

@@ -115,6 +115,12 @@ export function BookCard({
       {quote ? (
         <>
           <PriceLines quote={quote} />
+          {quote.onChain && (
+            <p className={styles.sure}>
+              On-chain bookings support exactly 1 room for 1 night. Your final
+              price is confirmed before payment and cannot exceed this quote.
+            </p>
+          )}
           <p className={styles.sure}>
             Guests come first. If rooms run short, one is taken back from a
             trader for you, and the price is capped.

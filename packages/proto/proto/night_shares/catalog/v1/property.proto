@@ -47,9 +47,6 @@ message WalkIncident {
   google.protobuf.Timestamp reported_at = 2;
   bool is_false = 3;
   string evidence_hash = 4;
-  string guest_id = 5;
-  night_shares.common.v1.Usdc from_pending = 6;
-  night_shares.common.v1.Usdc from_fund = 7;
-  night_shares.common.v1.Usdc owed_to_guest = 8;
-  night_shares.common.v1.Usdc owed_paid = 9;
+  reserved 5, 6, 7, 8, 9;
+  reserved "guest_id", "from_pending", "from_fund", "owed_to_guest", "owed_paid";
 }

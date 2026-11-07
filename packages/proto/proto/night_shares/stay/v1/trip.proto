@@ -39,6 +39,9 @@ message Trip {
   reserved "pay_method";
   bool checked_in = 14;
   WalkRefund walk = 15;
+  string chain_booking_id = 16;
+  string chain_transaction_hash = 17;
+  bool hotel_sync_pending = 18;
 }
 
 message NightPrice {
@@ -50,6 +53,7 @@ message NightPrice {
 }
 
 message StayQuote {
+  bool on_chain = 8;
   bool trading_paused = 7;
   string id = 1;
   StaySelection selection = 2;

@@ -5,6 +5,8 @@ All notable changes to this monorepo. Newest first.
 
 ## Unreleased
 
+- Security: Stop repayment of false walk reports, serialize claim cancellation with payouts, and remove guest identity and private claim amounts from public walk incidents.
+
 - Add fork execution ports, deployment preflight, durable transaction recovery, native/cash provisioning and block reconciliation; reject legacy ledger settlement in fork mode.
 
 - Match walk refunds to per-night unswept earnings and available cover funds; persist unpaid guest claims, repay them FIFO before host payouts, expose trip balances, and retain guest-ID bans.

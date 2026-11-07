@@ -15,6 +15,7 @@ export function createQuoteStay(ports: Ports, repo: StayRepo) {
       quoteNight(ports, value.propertyId, value.roomTypeId, date, value.rooms),
     );
     const quote = create(StayQuoteSchema, {
+      onChain: ports.chainExecutor?.mode === "fork",
       tradingPaused: dates.some((date) =>
         chainStatus(ports).isPaused(
           `${value.propertyId}:${value.roomTypeId}:${date}`,

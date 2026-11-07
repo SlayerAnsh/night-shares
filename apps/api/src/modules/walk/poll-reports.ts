@@ -10,7 +10,11 @@ export async function pollReports(
   const errors: unknown[] = [];
   for (const report of await reports.poll()) {
     if (
-      ports.db.query("SELECT 1 FROM walk_reports WHERE id = ?").get(report.id)
+      ports.db
+        .query(
+          "SELECT 1 FROM walk_reports WHERE id = ? AND status != 'pending'",
+        )
+        .get(report.id)
     )
       continue;
     try {

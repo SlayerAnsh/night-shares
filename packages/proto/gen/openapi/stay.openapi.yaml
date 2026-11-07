@@ -922,6 +922,9 @@ components:
     night_shares.stay.v1.StayQuote:
       type: object
       properties:
+        onChain:
+          type: boolean
+          title: on_chain
         tradingPaused:
           type: boolean
           title: trading_paused
@@ -1059,6 +1062,15 @@ components:
         walk:
           title: walk
           $ref: '#/components/schemas/night_shares.stay.v1.WalkRefund'
+        chainBookingId:
+          type: string
+          title: chain_booking_id
+        chainTransactionHash:
+          type: string
+          title: chain_transaction_hash
+        hotelSyncPending:
+          type: boolean
+          title: hotel_sync_pending
       title: Trip
       additionalProperties: false
     night_shares.stay.v1.WalkRefund:

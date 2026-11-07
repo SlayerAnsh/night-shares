@@ -94,7 +94,7 @@ for (const emptyFund of [false, true])
       const property = await guest.clients.catalog.getProperty({
         propertyId: trip.propertyId,
       });
-      expect(property.walkIncidents[0]?.owedToGuest?.micros).toBe(expectedOwed);
+      expect(property.walkIncidents[0]).not.toHaveProperty("owedToGuest");
       expect(await ports.walletProvider.balance(guest.user.walletAddress)).toBe(
         guestBefore + expectedPaid,
       );

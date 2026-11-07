@@ -33,5 +33,14 @@ export function selection(ports: Ports, input: StaySelection | undefined) {
       "INVALID_ARGUMENT",
       "Choose valid guest and room counts.",
     );
+  if (
+    (ports.chainExecutor?.mode === "fork" ||
+      process.env.ARC_NETWORK === "mainnet") &&
+    (value.rooms !== 1 || count !== 1)
+  )
+    throw new DomainError(
+      "INVALID_ARGUMENT",
+      "On-chain bookings support exactly 1 room for 1 night. Choose a single room and night.",
+    );
   return { value, dates: range(value.checkIn, value.checkOut) };
 }

@@ -499,21 +499,6 @@ components:
         evidenceHash:
           type: string
           title: evidence_hash
-        guestId:
-          type: string
-          title: guest_id
-        fromPending:
-          title: from_pending
-          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
-        fromFund:
-          title: from_fund
-          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
-        owedToGuest:
-          title: owed_to_guest
-          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
-        owedPaid:
-          title: owed_paid
-          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
       title: WalkIncident
       additionalProperties: false
     night_shares.common.v1.NightKey:

@@ -54,7 +54,7 @@ export function outstandingGuest(db: Database, propertyId: string) {
   return (
     db
       .query<{ amount: bigint }, [string]>(
-        "SELECT COALESCE(SUM(owed_to_guest - owed_paid), 0) AS amount FROM walk_reports WHERE property_id = ?",
+        "SELECT COALESCE(SUM(owed_to_guest - owed_paid), 0) AS amount FROM walk_reports WHERE property_id = ? AND status = 'done'",
       )
       .get(propertyId)?.amount ?? 0n
   );
@@ -73,7 +73,7 @@ export function reserveOwed(
     .query<{ id: string; owed: bigint; wallet_address: string }, [string]>(`
     SELECT w.id, w.owed_to_guest - w.owed_paid AS owed, t.wallet_address
     FROM walk_reports w JOIN stay_trips t ON t.id = w.booking_id
-    WHERE w.property_id = ? AND w.status != 'pending' AND w.owed_to_guest > w.owed_paid
+    WHERE w.property_id = ? AND w.status = 'done' AND w.owed_to_guest > w.owed_paid
     ORDER BY w.reported_at, w.rowid
   `)
     .all(propertyId);

@@ -15,7 +15,11 @@ export function createStayHandler(
     createBooking: async (req, ctx) => ({
       trip: await cases.createBooking(req, requireUser(ctx)),
     }),
-    listTrips: (_req, ctx) => cases.listTrips(requireUser(ctx).id),
+    listTrips: async (_req, ctx) => {
+      const userId = requireUser(ctx).id;
+      await cases.refreshClaims(userId);
+      return cases.listTrips(userId);
+    },
     issueReceptionTag: (req, ctx) =>
       cases.issueReceptionTag(req.bookingId, requireUser(ctx).id),
     tapReception: (req, ctx) =>
@@ -28,9 +32,11 @@ export function createStayHandler(
         requireUser(ctx).id,
       ),
     }),
-    getReceipt: (req, ctx) => ({
-      receipt: cases.getReceipt(req.tripId, requireUser(ctx).id),
-    }),
+    getReceipt: async (req, ctx) => {
+      const userId = requireUser(ctx).id;
+      await cases.refreshClaims(userId);
+      return { receipt: cases.getReceipt(req.tripId, userId) };
+    },
     toggleSave: (req, ctx) => ({
       isSaved: cases.toggleSave(req.propertyId, requireUser(ctx).id),
     }),

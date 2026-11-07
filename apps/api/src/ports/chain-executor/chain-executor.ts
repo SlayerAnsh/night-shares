@@ -68,6 +68,13 @@ export type ChainCommand =
       deadline: bigint;
       signature: Hex;
     }
+  | {
+      kind: "linkGuest";
+      guestId: bigint;
+      wallet: Address;
+      deadline: bigint;
+      signature: Hex;
+    }
   | { kind: "verifyHuman"; humanId: bigint; orb: boolean }
   | {
       kind: "bind";

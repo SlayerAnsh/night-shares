@@ -1,4 +1,5 @@
 import type { Ports } from "../../../container/ports";
+import { refreshChainWalkClaims } from "../chain/claims";
 import type { StayRepo } from "../repo/stay-repo";
 import { createCreateBooking } from "./booking/create-booking";
 import { createGetPriceCalendar } from "./quotes/get-price-calendar";
@@ -19,6 +20,7 @@ export function createStayCases(ports: Ports, repo: StayRepo) {
     lockQuote: createLockQuote(ports, repo),
     createBooking: createCreateBooking(ports, repo),
     listTrips: createListTrips(ports, repo),
+    refreshClaims: (userId: string) => refreshChainWalkClaims(ports, userId),
     issueReceptionTag: createIssueReceptionTag(ports, repo),
     tapReception: createTapReception(ports, repo),
     reportWalk: createReportWalk(ports, repo),

@@ -1,9 +1,13 @@
 import { expect, test } from "bun:test";
+import { WalkIncidentSchema } from "@night-shares/proto/catalog/v1/property_pb";
 import { createSqliteHostRepo } from "../../host/repo/host-repo.sqlite";
 import { createGetPayout } from "../../host/use-cases/payout/get-payout";
 import { createSweep } from "../../host/use-cases/payout/sweep";
+import { walkIncidents } from "../repo/incidents";
+import { finishOwed, outstandingGuest, reserveOwed } from "../repo/owed";
 import { fixture } from "../testing/fixture";
 import { handleReport } from "./handle-report";
+import { markWalkFalse } from "./mark-false";
 
 async function owedFixture() {
   const f = await fixture(0n);
@@ -127,5 +131,69 @@ test("walk cannot reuse earnings consumed by a previous property sweep", async (
   const report = await handleReport(f.ports, f.report);
   expect(report.fromPending.micros).toBe(0n);
   expect(report.fromFund.micros).toBe(10000n);
+  f.ports.db.close();
+});
+
+test("false reports cancel unpaid claims and never receive future payouts", async () => {
+  const f = await owedFixture();
+  await handleReport(f.ports, f.report);
+  const partial = reserveOwed(f.ports.db, f.trip.propertyId, 3000n);
+  finishOwed(f.ports.db, partial);
+  markWalkFalse(f.ports, f.report.id);
+  expect(outstandingGuest(f.ports.db, f.trip.propertyId)).toBe(0n);
+  expect(f.repo.trips.get(f.trip.id)?.trip.walk?.owedToGuest?.micros).toBe(
+    3000n,
+  );
+  expect(f.repo.trips.get(f.trip.id)?.trip.walk?.owedPaid?.micros).toBe(3000n);
+  // Even an old false row with an uncancelled balance must be excluded.
+  f.ports.db.query("UPDATE walk_reports SET owed_to_guest = 10000").run();
+  expect(outstandingGuest(f.ports.db, f.trip.propertyId)).toBe(0n);
+  const next = reserveOwed(f.ports.db, f.trip.propertyId, 10000n);
+  expect(next.legs).toEqual([]);
+  finishOwed(f.ports.db, next);
+  f.ports.db.query("UPDATE walk_reports SET status = 'pending'").run();
+  expect(outstandingGuest(f.ports.db, f.trip.propertyId)).toBe(0n);
+  const pending = reserveOwed(f.ports.db, f.trip.propertyId, 10000n);
+  expect(pending.legs).toEqual([]);
+  finishOwed(f.ports.db, pending);
+  f.ports.db.close();
+});
+
+test("false moderation refuses a property claim lock, including other claims", async () => {
+  const f = await owedFixture();
+  await handleReport(f.ports, f.report);
+  const reservation = reserveOwed(f.ports.db, f.trip.propertyId, 5000n);
+  expect(() => markWalkFalse(f.ports, f.report.id)).toThrow(
+    "settlement is in progress",
+  );
+  expect(
+    f.ports.db.query("SELECT status, owed_to_guest FROM walk_reports").get(),
+  ).toEqual({ status: "done", owed_to_guest: 10000n });
+  finishOwed(f.ports.db, reservation, true);
+  markWalkFalse(f.ports, f.report.id);
+  expect(outstandingGuest(f.ports.db, f.trip.propertyId)).toBe(0n);
+  f.ports.db.close();
+});
+
+test("public incidents omit identity and private claim amounts", async () => {
+  const f = await owedFixture();
+  await handleReport(f.ports, f.report);
+  const [incident] = walkIncidents(f.ports.db, f.trip.propertyId);
+  expect(Object.keys(incident ?? {}).sort()).toEqual([
+    "evidenceHash",
+    "id",
+    "isFalse",
+    "reportedAt",
+  ]);
+  expect(WalkIncidentSchema.fields.map((field) => field.name)).toEqual([
+    "id",
+    "reported_at",
+    "is_false",
+    "evidence_hash",
+  ]);
+  expect(f.repo.trips.get(f.trip.id)?.trip.walk?.guestId).toBe(f.user.humanId);
+  expect(f.repo.trips.get(f.trip.id)?.trip.walk?.owedToGuest?.micros).toBe(
+    10000n,
+  );
   f.ports.db.close();
 });

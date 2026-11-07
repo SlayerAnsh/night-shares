@@ -7,6 +7,7 @@ import { transaction } from "../../../../db/transaction";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { format } from "../../../../shared/night-key";
+import { bookOnChain } from "../../chain/book";
 import { minMicros } from "../../pricing/min-micros";
 import { routeNight } from "../../pricing/quote-night";
 import { selection } from "../../pricing/selection";
@@ -16,6 +17,13 @@ import { settlement } from "./settlement";
 
 export function createCreateBooking(ports: Ports, repo: StayRepo) {
   return async (input: CreateBookingRequest, user: User) => {
+    if (process.env.ARC_NETWORK === "mainnet" && !ports.chainExecutor)
+      throw new DomainError(
+        "FAILED_PRECONDITION",
+        "On-chain booking execution is unavailable on this network.",
+      );
+    if (ports.chainExecutor && ports.chainExecutor.mode !== "mock")
+      return bookOnChain(ports, repo, input, user);
     const { lock, value, current, paid, reservation } = transaction(
       ports.db,
       () => {

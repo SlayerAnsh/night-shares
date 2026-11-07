@@ -6,6 +6,7 @@ import type { StayRepo } from "../../stay/repo/stay-repo";
 import { createSqliteStayRepo } from "../../stay/repo/stay-repo.sqlite";
 import { adjustCoverAccount } from "../repo/cover-accounts";
 import { syncWalkTrip } from "../repo/owed";
+import { reportOnChain } from "./chain-report";
 import { reserveReport } from "./reserve-report";
 
 export async function handleReport(
@@ -13,6 +14,8 @@ export async function handleReport(
   report: WalkReport,
   repo: StayRepo = createSqliteStayRepo(ports.db),
 ) {
+  if (ports.chainExecutor && ports.chainExecutor.mode !== "mock")
+    return reportOnChain(ports, repo, report);
   if (ports.db.query("SELECT 1 FROM walk_fund_lock").get())
     throw new DomainError(
       "FAILED_PRECONDITION",
