@@ -3,6 +3,8 @@ import { buttonClass, Photo } from "@night-shares/design-system";
 import type { Trip } from "@night-shares/proto/stay/v1/trip_pb";
 import Link from "next/link";
 import { formatUsdc } from "../../../../shared/format";
+import { TxHash } from "../../../../shared/tx/TxHash";
+import { txHashOf } from "../../../../shared/tx/tx";
 import { useTripProperty } from "../../hooks/use-trip-property";
 import { useTripActions } from "../../hooks/use-trips";
 import { formatShort, nightsBetween, plural } from "../../model/dates";
@@ -22,6 +24,7 @@ export function TripCard({
   const { property, room } = useTripProperty(trip.propertyId, trip.roomTypeId);
   const nights = nightsBetween(trip.checkIn, trip.checkOut);
   const guests = trip.adults + trip.kids;
+  const hash = txHashOf(trip);
   return (
     <article className={`${styles.trip} ${upcoming ? "" : styles.past}`}>
       <Photo src={property?.photos[0]} className={styles.tripPhoto} />
@@ -54,7 +57,11 @@ export function TripCard({
           </div>
           <div>
             <span>Hotel reference</span>
-            <b className={styles.mono}>{trip.hotelRef}</b>
+            {trip.hotelSyncPending ? (
+              <b>Sending to the hotel</b>
+            ) : (
+              <b className={styles.mono}>{trip.hotelRef}</b>
+            )}
             <em>Booking {trip.ref}</em>
           </div>
           <div>
@@ -65,6 +72,7 @@ export function TripCard({
             <em>From your wallet on Arc</em>
           </div>
         </div>
+        {hash && <TxHash hash={hash} block />}
         <TripStatus
           trip={trip}
           upcoming={upcoming}

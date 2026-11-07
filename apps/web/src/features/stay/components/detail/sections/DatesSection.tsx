@@ -1,4 +1,5 @@
 "use client";
+import { useStaysOnChain } from "../../../hooks/use-on-chain";
 import { usePriceCalendar } from "../../../hooks/use-price-calendar";
 import { useProperty } from "../../../hooks/use-property";
 import { compactPrice, priceTiers } from "../../../model/calendar";
@@ -12,6 +13,7 @@ export const DATES_ID = "stay-dates";
 export function DatesSection({ propertyId }: { propertyId: string }) {
   const model = useProperty(propertyId);
   const { calendar, onView } = usePriceCalendar(propertyId, model.roomTypeId);
+  const onChain = useStaysOnChain();
   const nights = calendar.data?.nights ?? [];
   const prices = new Map(nights.map((n) => [n.date, n.price?.micros ?? 0n]));
   const tier = priceTiers([...prices.values()]);
@@ -27,6 +29,8 @@ export function DatesSection({ propertyId }: { propertyId: string }) {
       <p className={styles.lead}>
         Prices are per night in USDC and change with demand. Green nights are
         cheaper than usual.
+        {onChain &&
+          " On-chain stays are 1 night for 1 room, so pick one night."}
       </p>
       <div id={DATES_ID} className={styles.inlineCal}>
         <RangeCalendar

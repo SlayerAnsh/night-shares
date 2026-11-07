@@ -1,9 +1,10 @@
 "use client";
-import { useMutation, useQuery } from "@connectrpc/connect-query";
+import { useQuery } from "@connectrpc/connect-query";
 import type { NightKey } from "@night-shares/proto/common/v1/night_pb";
 import * as rpc from "@night-shares/proto/market/v1/market-MarketService_connectquery";
 import { parseMicros, parseTenths } from "../model/market";
-import { useMarketActions } from "./use-market-actions";
+import { priceLimit } from "../model/slippage";
+import { useTradeTx } from "./use-trade-tx";
 import { useUrlState } from "./use-url-state";
 export function useTicket(
   night: Pick<NightKey, "propertyId" | "roomTypeId" | "date">,
@@ -28,24 +29,21 @@ export function useTicket(
   });
   const preview = mode === "sell" ? sellQuote : buyQuote;
   const quote = mode === "ask" ? undefined : preview.data?.quote;
-  const buy = useMutation(rpc.buy),
-    sell = useMutation(rpc.sell),
-    ask = useMutation(rpc.postAsk);
-  const actions = useMarketActions();
+  const tx = useTradeTx();
+  // The limit sent with the order: the quote plus the 0.5% slippage.
+  const limit =
+    quote?.total && mode !== "ask"
+      ? priceLimit(quote.total.micros, mode)
+      : undefined;
   async function submit() {
+    if (tx.unresolved) return tx.checkAgain();
     if (tenths === null) return;
-    await actions.run(
-      async () => {
-        if (mode === "ask" && micros !== null) {
-          await ask.mutateAsync({ ...input, price: { micros } });
-        } else if (quote?.total && mode === "buy")
-          await buy.mutateAsync({ ...input, maxTotal: quote.total });
-        else if (quote?.total && mode === "sell")
-          await sell.mutateAsync({ ...input, minTotal: quote.total });
-      },
-      "trade",
-      mode === "ask" ? "Listing posted." : "Trade executed.",
-    );
+    if (mode === "ask" && micros !== null)
+      await tx.send({ mode, input: { ...input, price: { micros } } });
+    else if (limit !== undefined && mode === "buy")
+      await tx.send({ mode, input: { ...input, maxTotal: { micros: limit } } });
+    else if (limit !== undefined && mode === "sell")
+      await tx.send({ mode, input: { ...input, minTotal: { micros: limit } } });
   }
   const valid =
     tenths !== null &&
@@ -63,7 +61,8 @@ export function useTicket(
     update,
     quote,
     preview,
-    actions,
+    tx,
+    limit,
     valid,
     submit,
   };

@@ -8,7 +8,7 @@ import {
 } from "@night-shares/design-system";
 import { formatUsdc } from "../../../../shared/format";
 import type { useCheckout } from "../../hooks/use-checkout";
-import { QueryState } from "../shared/QueryState";
+import { BookingError } from "./BookingError";
 import styles from "./Checkout.module.css";
 import { PayProgress } from "./PayProgress";
 
@@ -91,7 +91,11 @@ export function CheckoutForm({ c }: { c: Checkout }) {
         )}
       </Button>
       {c.booking.isPending && <PayProgress />}
-      <QueryState error={c.booking.error} />
+      <BookingError
+        error={c.booking.error}
+        checking={c.booking.isPending}
+        onCheckAgain={() => void c.pay().catch(() => {})}
+      />
       <p className={styles.terms}>
         Paying books your room straight away, in one step. By paying you agree
         to the house rules.

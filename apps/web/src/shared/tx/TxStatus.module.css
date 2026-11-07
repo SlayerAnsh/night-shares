@@ -1,0 +1,127 @@
+/* A write's state: a coloured rule, a mark, the result and its hash. */
+.tx {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: var(--sp-8);
+  margin: var(--sp-8) 0;
+  padding: var(--sp-8) var(--sp-10);
+  border-left: 2px solid var(--line-2);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  background: var(--surface-2);
+  font-size: var(--fs-13);
+  line-height: var(--lh-normal);
+  color: var(--ink);
+}
+
+.pending {
+  border-left-color: var(--accent);
+}
+
+.confirming {
+  border-left-color: var(--warn);
+}
+
+.confirmed {
+  border-left-color: var(--pos);
+}
+
+.failed {
+  border-left-color: var(--neg);
+}
+
+.mark {
+  display: grid;
+  place-items: start center;
+  padding-top: var(--sp-2);
+  color: var(--ink-2);
+}
+
+.mark svg,
+.mark > span {
+  width: 14px;
+  height: 14px;
+}
+
+.confirmed .mark {
+  color: var(--pos);
+}
+
+.failed .mark {
+  color: var(--neg);
+}
+
+.confirming .mark {
+  color: var(--warn);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+
+.title {
+  font-weight: var(--fw-semibold);
+}
+
+.detail {
+  color: var(--ink-2);
+}
+
+.hash {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-6);
+  color: var(--muted);
+  font-size: var(--fs-12);
+}
+
+.block {
+  margin: 0 0 var(--sp-12);
+}
+
+.hashLabel {
+  color: var(--muted);
+}
+
+.hash code {
+  font-family: var(--mono);
+  color: var(--ink);
+}
+
+.hash a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.copy {
+  padding: 0 var(--sp-6);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-11-5);
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.copy:hover {
+  color: var(--ink);
+  border-color: var(--ink-2);
+}
+
+.copy:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.action {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-8);
+  margin-top: var(--sp-2);
+}

@@ -4,6 +4,7 @@ import type { useTicket } from "../../hooks/use-ticket";
 import { usd } from "../../model/display";
 import { parseTenths } from "../../model/market";
 import { Stepper } from "../ui/Stepper";
+import { TradeResult } from "./TradeResult";
 import styles from "./ticket.module.css";
 
 // List at your own price: price, size, what it brings if it sells.
@@ -25,8 +26,8 @@ export function TicketAsk({
       : 0n;
   const label = !signedIn
     ? "Sign in with World ID to list"
-    : t.actions.pending
-      ? "Submitting…"
+    : t.tx.pending
+      ? "Posting…"
       : `List ${t.amount || 0} room nights at ${usd(t.micros ?? 0n, 2)}`;
   return (
     <>
@@ -77,10 +78,11 @@ export function TicketAsk({
         block
         className={styles.go}
         type="submit"
-        disabled={signedIn && (!t.valid || t.actions.pending)}
+        disabled={signedIn && (!t.valid || t.tx.pending)}
       >
         {label}
       </Button>
+      <TradeResult tx={t.tx.state} />
       <Button
         variant="text"
         className={styles.act}

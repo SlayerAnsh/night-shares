@@ -4,8 +4,10 @@ import { formatRoomNights } from "../../../../shared/format";
 import type { useTicket } from "../../hooks/use-ticket";
 import { usd } from "../../model/display";
 import { parseTenths } from "../../model/market";
+import { slippageLabel } from "../../model/slippage";
 import { Stepper } from "../ui/Stepper";
 import { QuotePreview } from "./QuotePreview";
+import { TradeResult } from "./TradeResult";
 import styles from "./ticket.module.css";
 
 const QUICK = ["0.5", "1", "2"];
@@ -26,9 +28,11 @@ export function TicketTrade({
   const verb = isSell ? "Sell" : "Buy";
   const label = !signedIn
     ? "Sign in with World ID to trade"
-    : t.actions.pending
-      ? "Submitting…"
-      : `${verb} ${size} room night${tenths === 10 ? "" : "s"}`;
+    : t.tx.pending
+      ? "Waiting for the receipt…"
+      : t.tx.unresolved
+        ? "Check again"
+        : `${verb} ${size} room night${tenths === 10 ? "" : "s"}`;
   return (
     <>
       <Stepper
@@ -57,6 +61,13 @@ export function TicketTrade({
             : usd(t.quote?.total?.micros ?? 0n, 2)}
         </b>
       </div>
+      {t.limit !== undefined && (
+        <p className={styles.updating}>
+          Price protection {slippageLabel()}: you{" "}
+          {isSell ? "get at least" : "pay at most"} {usd(t.limit, 2)}, or
+          nothing trades.
+        </p>
+      )}
       <Button
         variant="primary"
         size="lg"
@@ -64,11 +75,13 @@ export function TicketTrade({
         className={styles.go}
         type="submit"
         disabled={
-          tradingPaused || (signedIn && (!t.valid || t.actions.pending))
+          tradingPaused ||
+          (signedIn && (t.tx.pending || (!t.valid && !t.tx.unresolved)))
         }
       >
         {label}
       </Button>
+      <TradeResult tx={t.tx.state} />
       {isSell && (
         <Button
           variant="text"
@@ -84,12 +97,6 @@ export function TicketTrade({
         </p>
       )}
       {t.quote && <QuotePreview quote={t.quote} mode={t.mode} />}
-      {t.quote && (
-        <p className={styles.updating}>
-          Trades respect your submitted price limit. On-chain slippage defaults
-          to 0.5%.
-        </p>
-      )}
       {t.preview.isFetching && (
         <p className={styles.updating} role="status">
           Updating quote…

@@ -4,6 +4,8 @@ import type { Trip } from "@night-shares/proto/stay/v1/trip_pb";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { formatUsdc } from "../../../../shared/format";
+import { TxHash } from "../../../../shared/tx/TxHash";
+import { txHashOf } from "../../../../shared/tx/tx";
 import { formatShort, nightsBetween, plural } from "../../model/dates";
 import styles from "./Checkout.module.css";
 
@@ -17,6 +19,8 @@ export function BookingSuccess({
   property?: Property;
 }) {
   const nights = nightsBetween(trip.checkIn, trip.checkOut);
+  const hash = txHashOf(trip);
+  const hotel = property?.name ?? "the hotel";
   return (
     <div className={styles.success}>
       <div className={styles.ok}>
@@ -38,11 +42,26 @@ export function BookingSuccess({
         <Step done title="Booked">
           {plural(nights * trip.rooms, "room night")}, paid{" "}
           {formatUsdc(trip.total?.micros ?? 0n)}. Price locked.
+          {hash && (
+            <>
+              {" "}
+              Settled on Arc.
+              <TxHash hash={hash} />
+            </>
+          )}
         </Step>
-        <Step done title="Your hotel has your booking">
-          Sent to {property?.name ?? "the hotel"}'s reservation system. Hotel
-          reference <span className={styles.mono}>{trip.hotelRef}</span>.
-        </Step>
+        {trip.hotelSyncPending ? (
+          <Step title="Sending to your hotel">
+            Your room is booked and paid. We are still passing it to {hotel}'s
+            reservation system, and the hotel reference shows in My trips once
+            it lands. Nothing more to do.
+          </Step>
+        ) : (
+          <Step done title="Your hotel has your booking">
+            Sent to {hotel}'s reservation system. Hotel reference{" "}
+            <span className={styles.mono}>{trip.hotelRef}</span>.
+          </Step>
+        )}
         <Step title="Check in with World ID">
           Optional. At the property, tap the tag at reception and check in from
           My trips. The front desk can check you in too.

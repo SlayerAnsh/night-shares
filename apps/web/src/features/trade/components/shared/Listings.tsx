@@ -3,6 +3,7 @@ import { Button, buttonClass, EmptyState } from "@night-shares/design-system";
 import type { NightKey } from "@night-shares/proto/common/v1/night_pb";
 import Link from "next/link";
 import { formatRoomNights } from "../../../../shared/format";
+import { TxStatus } from "../../../../shared/tx/TxStatus";
 import { useAccount } from "../../hooks/use-account";
 import { shortDate, usd } from "../../model/display";
 import { nightHref } from "../../model/market";
@@ -24,6 +25,8 @@ export function Listings({
       (ask) =>
         !night || (ask.night && nightHref(ask.night) === nightHref(night)),
     ) ?? [];
+  // Open listings on any night: one on-chain cancel touches all of one wallet.
+  const mine = account.portfolio.data?.listings ?? [];
   return (
     <Section
       id={night ? "h-lst-night" : "h-lst"}
@@ -31,10 +34,18 @@ export function Listings({
       line={`${rows.length ? `${rows.length} ${rows.length === 1 ? "listing" : "listings"}. ` : ""}Guests and traders can buy them until release.`}
       plain={!!night}
     >
-      <Feedback
-        error={account.portfolio.error?.message || account.actions.error}
-        notice={account.actions.notice}
-      />
+      {account.cancelling ? (
+        <TxStatus phase="pending" title="Cancelling your listing">
+          {account.cancelling.others > 0
+            ? "Waiting for the receipt. A cancel on chain clears all your signed listings, so your others are signed again right after."
+            : "Waiting for the receipt."}
+        </TxStatus>
+      ) : (
+        <Feedback
+          error={account.portfolio.error?.message || account.actions.error}
+          notice={account.actions.notice}
+        />
+      )}
       {rows.length ? (
         <div className={styles.lists}>
           {rows.map((ask) => (
@@ -66,9 +77,14 @@ export function Listings({
                   size="sm"
                   title="On-chain cancellation revokes old signatures and automatically re-signs your other open listings."
                   disabled={account.actions.pending}
-                  onClick={() => void account.cancel(ask.id)}
+                  onClick={() =>
+                    void account.cancel(
+                      ask.id,
+                      mine.filter((a) => a.maker === ask.maker).length - 1,
+                    )
+                  }
                 >
-                  Cancel
+                  {account.cancelling?.id === ask.id ? "Cancelling…" : "Cancel"}
                 </Button>
               </div>
             </div>

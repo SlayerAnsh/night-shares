@@ -4,7 +4,6 @@ import type { NightKey } from "@night-shares/proto/common/v1/night_pb";
 import { useRequireAccess } from "../../../../session/require-access";
 import { useSession } from "../../../../session/SessionProvider";
 import { useTicket } from "../../hooks/use-ticket";
-import { Feedback } from "../shared/Feedback";
 import { TicketAsk } from "./TicketAsk";
 import { TicketPosition } from "./TicketPosition";
 import { TicketTrade } from "./TicketTrade";
@@ -36,7 +35,7 @@ export function Ticket({
           access.require("trade", "orb");
           return;
         }
-        if (t.valid) void t.submit();
+        if (t.valid || t.tx.unresolved) void t.submit();
       }}
     >
       <Segmented
@@ -58,7 +57,6 @@ export function Ticket({
           tradingPaused={tradingPaused}
         />
       )}
-      <Feedback error={t.actions.error} notice={t.actions.notice} />
       {signedIn && <TicketPosition night={night} />}
     </form>
   );

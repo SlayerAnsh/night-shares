@@ -1,11 +1,13 @@
 "use client";
-import { Button, Card, Icon } from "@night-shares/design-system";
+import { Alert, Button, Card, Icon } from "@night-shares/design-system";
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
 import { useState } from "react";
 import { useSession } from "../../../../../session/SessionProvider";
 import { formatUsdc } from "../../../../../shared/format";
+import { useStaysOnChain } from "../../../hooks/use-on-chain";
 import { useProperty } from "../../../hooks/use-property";
-import { formatShort, plural } from "../../../model/dates";
+import { formatShort, nightsBetween, plural } from "../../../model/dates";
+import { isOneNightRejection, overOneNight } from "../../../model/on-chain";
 import { summarizeQuote } from "../../../model/quote";
 import { GuestCounters } from "../../shared/GuestCounters";
 import { QueryState } from "../../shared/QueryState";
@@ -43,6 +45,13 @@ export function BookCard({
   const quote = hasDates ? model.quote.data?.quote : undefined;
   const summary = quote && summarizeQuote(quote);
   const room = property.roomTypes.find((r) => r.id === model.roomTypeId);
+  // On chain the API books exactly 1 room for 1 night: say so before the
+  // guest picks more, and in plain words if a quote was turned down for it.
+  const onChain = useStaysOnChain();
+  const rejected = isOneNightRejection(model.quote.error);
+  const over =
+    hasDates &&
+    overOneNight(nightsBetween(state.checkIn, state.checkOut), state.rooms);
   return (
     <Card as="aside" className={styles.book} aria-label="Book this stay">
       <div className={styles.ptop}>
@@ -54,7 +63,11 @@ export function BookCard({
             </>
           ) : (
             <b className={styles.pick}>
-              {hasDates ? "Pricing your stay" : "Pick your dates"}
+              {rejected
+                ? "Pick one night"
+                : hasDates
+                  ? "Pricing your stay"
+                  : "Pick your dates"}
             </b>
           )}
         </div>
@@ -95,6 +108,12 @@ export function BookCard({
           <GuestCounters onDone={() => setGuestsOpen(false)} />
         </div>
       )}
+      {onChain && !rejected && (
+        <p className={styles.sure} role="note">
+          On-chain stays are 1 room for 1 night.
+          {over && " Choose a single night and one room to book."}
+        </p>
+      )}
       <Button
         variant="primary"
         size="lg"
@@ -105,20 +124,26 @@ export function BookCard({
       >
         {hasDates ? "Book now" : "Check availability"}
       </Button>
-      {hasDates && (
-        <QueryState
-          pending={model.quote.isPending}
-          error={model.quote.error}
-          label="Pricing your stay"
-        />
-      )}
+      {hasDates &&
+        (rejected ? (
+          <Alert>
+            On-chain stays are 1 room for 1 night. Pick a single night and one
+            room to see the price.
+          </Alert>
+        ) : (
+          <QueryState
+            pending={model.quote.isPending}
+            error={model.quote.error}
+            label="Pricing your stay"
+          />
+        ))}
       {quote ? (
         <>
           <PriceLines quote={quote} />
           {quote.onChain && (
             <p className={styles.sure}>
-              On-chain bookings support exactly 1 room for 1 night. Your final
-              price is confirmed before payment and cannot exceed this quote.
+              Your final price is confirmed on chain before payment and cannot
+              exceed this quote.
             </p>
           )}
           <p className={styles.sure}>

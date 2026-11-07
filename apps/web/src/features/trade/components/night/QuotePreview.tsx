@@ -28,8 +28,9 @@ export function QuotePreview({
           </li>
         )}
         <li>
-          {isSell ? "You get at least " : "You pay at most "}
-          <b>{usd(q.total?.micros, 2)}</b> after the {usd(q.fee?.micros, 2)} fee
+          {isSell ? "You get " : "You pay "}
+          <b>{usd(q.total?.micros, 2)}</b> {isSell ? "after" : "including"} the{" "}
+          {usd(q.fee?.micros, 2)} fee
         </li>
         <li>
           <span className={styles.wid}>

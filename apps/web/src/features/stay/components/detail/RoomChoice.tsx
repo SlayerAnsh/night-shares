@@ -3,6 +3,7 @@ import type { RoomType } from "@night-shares/proto/catalog/v1/property_pb";
 import { formatUsdc } from "../../../../shared/format";
 import { useRoomQuote } from "../../hooks/use-room-quote";
 import { useStaySearch } from "../../hooks/use-stay-search";
+import { isOneNightRejection } from "../../model/on-chain";
 import { summarizeQuote } from "../../model/quote";
 import { QueryState } from "../shared/QueryState";
 import styles from "./RoomChoice.module.css";
@@ -43,6 +44,8 @@ export function RoomChoice({
             {formatUsdc(summary.perNight, { decimals: 0 })}
             <span className={styles.sub}>avg / night</span>
           </>
+        ) : isOneNightRejection(quote.error) ? (
+          <span className={styles.sub}>1 room, 1 night on chain</span>
         ) : (
           <QueryState
             pending={quote.isPending}
