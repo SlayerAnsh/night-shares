@@ -40,20 +40,42 @@ export function createConnectChannelManager({ ports, repo }: HostDeps) {
       propertyId,
       pms: name,
     });
+    let provisional = false;
     transaction(ports.db, () => {
-      if (
-        !(
-          ports.chainExecutor?.mode === "fork" &&
-          repo.owner(propertyId) === userId
-        )
-      )
+      const owner = repo.owner(propertyId);
+      if (owner && !(ports.chainExecutor?.mode === "fork" && owner === userId))
+        throw new DomainError(
+          "PERMISSION_DENIED",
+          "This property is managed by another host.",
+        );
+      if (!owner) {
         repo.claim(userId, propertyId);
-      repo
-        .connections(userId)
-        .set(propertyId, { pms: name, roomTypes: imported.roomTypes });
+        provisional = true;
+      }
+      if (ports.chainExecutor?.mode !== "fork")
+        repo
+          .connections(userId)
+          .set(propertyId, { pms: name, roomTypes: imported.roomTypes });
     });
-    if (ports.chainExecutor?.mode === "fork")
-      await bindProperty({ ports, repo }, userId, propertyId, payout ?? "");
+    if (ports.chainExecutor?.mode === "fork") {
+      try {
+        await bindProperty({ ports, repo }, userId, propertyId, payout ?? "");
+        repo
+          .connections(userId)
+          .set(propertyId, { pms: name, roomTypes: imported.roomTypes });
+      } catch (error) {
+        if (provisional)
+          transaction(ports.db, () => {
+            repo.connections(userId).delete(propertyId);
+            ports.db
+              .query(
+                "DELETE FROM host_owners WHERE property_id = ? AND user_id = ?",
+              )
+              .run(propertyId, userId);
+          });
+        throw error;
+      }
+    }
     return { ...property, roomTypes: imported.roomTypes };
   };
 }

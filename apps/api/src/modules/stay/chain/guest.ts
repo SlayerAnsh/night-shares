@@ -7,6 +7,7 @@ import {
 import type { User } from "../../../ports/sessions/session-store";
 import type { CustodyWallet } from "../../../ports/wallet-custody/wallet-custody";
 import { DomainError } from "../../../shared/errors/domain-error";
+import { enrollmentId } from "../../identity/chain-ready";
 import { chainContext, confirmed } from "./context";
 
 export async function ensureGuest(
@@ -16,14 +17,7 @@ export async function ensureGuest(
   operationId: string,
 ) {
   const { reader } = chainContext(ports);
-  const id = /^(0x[0-9a-fA-F]+|[0-9]+)$/.test(user.humanId)
-    ? BigInt(user.humanId)
-    : 0n;
-  if (id <= 0n || id >= 2n ** 256n)
-    throw new DomainError(
-      "FAILED_PRECONDITION",
-      "A canonical enrollment nullifier is required for chain booking.",
-    );
+  const id = enrollmentId(user.humanId);
   const linked = (
     await reader.read<bigint>({
       contract: "HumanRegistry",

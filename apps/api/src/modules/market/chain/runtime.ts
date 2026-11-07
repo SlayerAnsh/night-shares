@@ -3,6 +3,10 @@ import { keccak256, stringToHex } from "viem";
 import type { Ports } from "../../../container/ports";
 import type { ArcDeployment } from "../../../ports/arc-deployment/arc-deployment";
 import {
+  type ForkClient,
+  forkClient,
+} from "../../../ports/arc-deployment/validate";
+import {
   deserialize,
   type ExecutionResult,
 } from "../../../ports/chain-executor/chain-executor";
@@ -11,6 +15,7 @@ import type { WalletCustody } from "../../../ports/wallet-custody/wallet-custody
 import { DomainError } from "../../../shared/errors/domain-error";
 
 type Settings = {
+  client?: ForkClient;
   custody: WalletCustody;
   deployment: ArcDeployment;
   slippageBps?: number;
@@ -52,6 +57,9 @@ export function chainMarket(ports: Ports) {
     );
   return {
     ...configured,
+    client:
+      configured.client ??
+      forkClient(process.env.ARC_RPC_URL ?? "http://127.0.0.1:8545"),
     executor: ports.chainExecutor,
     reader: ports.chainReader,
   };

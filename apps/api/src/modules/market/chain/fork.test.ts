@@ -23,6 +23,11 @@ import {
   forkClient,
   validateDeployment,
 } from "../../../ports/arc-deployment/validate";
+import { ensureRouterAllowance } from "../../../ports/chain-executor/approvals";
+import {
+  type ChainCommand,
+  deserialize,
+} from "../../../ports/chain-executor/chain-executor";
 import { createChainExecutor } from "../../../ports/chain-executor/chain-executor.viem";
 import { createChainReader } from "../../../ports/chain-reader/chain-reader.viem";
 import { forkProvisioner } from "../../../ports/wallet-custody/provision-fork";
@@ -110,9 +115,9 @@ forkTest(
       // Isolated child fork plus a separate derivation range avoids parallel test identities.
       db.query("INSERT INTO anvil_wallets VALUES (?, ?, ?, ?)").run(
         "system:reserved",
-        30100,
-        "anvil:30100",
-        anvilAccount(30100).address,
+        60100,
+        "anvil:60100",
+        anvilAccount(60100).address,
       );
       const attester = anvilAccount(9);
       const custody: WalletCustody = {
@@ -178,7 +183,7 @@ forkTest(
           });
         },
       };
-      configureChainMarket(deps.ports, { custody, deployment });
+      configureChainMarket(deps.ports, { custody, deployment, client });
       const key = "demo:double:2030-01-01";
       expect(nightHash(key)).toBe(deployment.demoNight as Hex);
       const record = {
@@ -251,17 +256,42 @@ forkTest(
           wallet,
         };
       }
-      const maker = await enroll("market-maker", 30101n);
-      const taker = await enroll("market-taker", 30102n);
-      const quote = await quoteChainTrade(deps, key, 2, maker.user, "buy");
-      if (!quote.total) throw new Error("Missing quote total.");
-      const before = (await reader.cash(maker.wallet.address)).value.usdc;
-      const execution = await buy(deps, maker.user, key, 2, quote.total.micros);
-      expect(execution.quote?.total?.micros).toBe(quote.total.micros);
-      expect((await reader.cash(maker.wallet.address)).value.usdc).toBe(
-        before - quote.total.micros,
+      const maker = await enroll("market-maker", 60101n);
+      const taker = await enroll("market-taker", 60102n);
+      const journalBefore = db.query("SELECT * FROM chain_operations").all();
+      const nonceBefore = await client.getTransactionCount({
+        address: maker.wallet.address,
+      });
+      for (let i = 0; i < 3; i++) {
+        expect(
+          (await quoteChainTrade(deps, key, 2, maker.user, "buy")).total
+            ?.micros,
+        ).toBeGreaterThan(0n);
+      }
+      expect(db.query("SELECT * FROM chain_operations").all()).toEqual(
+        journalBefore,
       );
-      await postAskWithCustody(deps, maker.user, key, 1, 1n);
+      expect(
+        await client.getTransactionCount({ address: maker.wallet.address }),
+      ).toBe(nonceBefore);
+      expect(
+        db.query("SELECT * FROM market_chain_preparations").all(),
+      ).toHaveLength(0);
+      const before = (await reader.cash(maker.wallet.address)).value.usdc;
+      const execution = await buy(deps, maker.user, key, 2, 1000000n);
+      expect((await reader.cash(maker.wallet.address)).value.usdc).toBe(
+        before - (execution.quote?.total?.micros ?? 0n),
+      );
+      for (const row of db
+        .query<{ command: string }, []>(
+          "SELECT command FROM chain_operations WHERE id LIKE '%approve%'",
+        )
+        .all()) {
+        const command = deserialize<ChainCommand>(row.command);
+        if (command.kind === "approveUsdc" || command.kind === "approvePermit2")
+          expect(command.amount).toBe(1000000n);
+      }
+      await postAskWithCustody(deps, maker.user, key, 1, 1n, { signature: "" });
       const digest = askRows(deps, key)[0]?.digest;
       if (!digest) throw new Error("Missing ask digest.");
       await buy(deps, taker.user, key, 1, 1000000n);
@@ -274,7 +304,33 @@ forkTest(
           })
         ).value,
       ).toBe(100000000000000000n);
-      await sell(deps, taker.user, key, 1, 0n);
+      const sellJournal = db.query("SELECT * FROM chain_operations").all();
+      const sellNonce = await client.getTransactionCount({
+        address: taker.wallet.address,
+      });
+      for (let i = 0; i < 3; i++)
+        expect(
+          (await quoteChainTrade(deps, key, 1, taker.user, "sell")).total
+            ?.micros,
+        ).toBeGreaterThan(0n);
+      expect(db.query("SELECT * FROM chain_operations").all()).toEqual(
+        sellJournal,
+      );
+      expect(
+        await client.getTransactionCount({ address: taker.wallet.address }),
+      ).toBe(sellNonce);
+      const sold = await sell(deps, taker.user, key, 1, 0n);
+      const tokenApproval = db
+        .query<{ command: string }, [string]>(
+          "SELECT command FROM chain_operations WHERE id = ?",
+        )
+        .get(`${sold.id}:approve-token`);
+      if (!tokenApproval) throw new Error("Missing bounded token approval.");
+      expect(deserialize<ChainCommand>(tokenApproval.command)).toEqual({
+        kind: "approveToken",
+        night: nightHash(key),
+        amount: 100000000000000000n,
+      });
       await postAskWithCustody(deps, maker.user, key, 1, 2n);
       const old = (await liveAsks(deps, key))[0];
       if (!old) throw new Error("Missing signed ask.");
@@ -423,8 +479,25 @@ forkTest(
           throw new Error("Injected receipt interruption.");
         },
       });
-      // Provision approvals first so the injection hits the router transaction.
-      await quoteChainTrade(deps, key, 1, maker.user, "buy", agent);
+      // Explicit fixture approvals isolate the injected failure to the trade transaction.
+      async function approveAgentFixture(operationId: string) {
+        if (!deployment) throw new Error("Missing deployment.");
+        if (!deps.ports.chainExecutor) throw new Error("Missing executor.");
+        await ensureRouterAllowance({
+          reader,
+          executor: deps.ports.chainExecutor,
+          deployment,
+          operationId,
+          walletId: agent.walletId,
+          owner: agent.address,
+          router: "TradeRouter",
+          amount: 1000000n,
+          expiration: Number(
+            ((await reader.head()).timestamp / 3600n + 3n) * 3600n,
+          ),
+        });
+      }
+      await approveAgentFixture("fixture-restart");
       deps.ports.chainExecutor = executor;
       await expect(
         buyAgent(deps, maker.user, key, 1, 1000000n, "agent-order:restart"),
@@ -564,7 +637,7 @@ forkTest(
       if (!attempt) throw new Error("Missing checkpoint.");
       attempt.browser = "chain-browser";
       settings.store.save(attempt);
-      await quoteChainTrade(deps, key, 1, maker.user, "buy", agent);
+      await approveAgentFixture("fixture-checkpoint");
       deps.ports.chainExecutor = createChainExecutor({
         db,
         deployment,
@@ -606,7 +679,7 @@ forkTest(
       // External token transfer must appear without an API settlement mutation.
       const token = await reader.tokenOf(nightHash(key));
       const external = createWalletClient({
-        account: anvilAccount(30101),
+        account: anvilAccount(60101),
         transport: http(rpcUrl),
       });
       const hash = await external.writeContract({

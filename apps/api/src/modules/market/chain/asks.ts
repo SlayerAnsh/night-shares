@@ -217,7 +217,7 @@ export async function postChainAsk(
   if (balance < p.chainOrder.size)
     throw new DomainError("FAILED_PRECONDITION", "Not enough room nights.");
   const signature =
-    (options.signature as Hex | undefined) ??
+    (options.signature as Hex | undefined) ||
     (await custody.signTypedData(p.wallet.walletId, p.data));
   if (
     !(await verifyTypedData({

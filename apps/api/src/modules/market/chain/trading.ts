@@ -19,6 +19,7 @@ import { toProto } from "../../../shared/night-key";
 import { agentWallets } from "../repo/agent-wallets.sqlite";
 import { type Deps, quantity } from "../use-cases/context";
 import { liveAsks } from "./asks";
+import { simulateQuote } from "./quote-simulation";
 import {
   assertOrb,
   chainMarket,
@@ -64,6 +65,7 @@ async function prepare(
   kind: "buy" | "sell",
   id: string,
   limit?: bigint,
+  execute = false,
 ) {
   quantity({ tenths: size });
   const { reader, executor, deployment } = chainMarket(deps.ports);
@@ -71,18 +73,20 @@ async function prepare(
   await assertOrb(deps.ports, wallet.address);
   const head = await reader.head();
   const preparationRequest = serialize({ key, size, kind, limit });
-  const prepared = deps.ports.db
-    .query<
-      {
-        fingerprint: string;
-        wallet_id: string;
-        deadline: string;
-        amount: string;
-        request: string;
-      },
-      [string]
-    >("SELECT * FROM market_chain_preparations WHERE id = ?")
-    .get(id);
+  const prepared = execute
+    ? deps.ports.db
+        .query<
+          {
+            fingerprint: string;
+            wallet_id: string;
+            deadline: string;
+            amount: string;
+            request: string;
+          },
+          [string]
+        >("SELECT * FROM market_chain_preparations WHERE id = ?")
+        .get(id)
+    : null;
   if (
     prepared &&
     (prepared.fingerprint !== reader.fingerprint ||
@@ -102,7 +106,9 @@ async function prepare(
   const night = nightHash(key);
   const qty = tokenTenths(size);
   if (kind === "buy") {
-    const cash = (await reader.cash(wallet.address)).value.usdc;
+    const cash = execute
+      ? (await reader.cash(wallet.address)).value.usdc
+      : 2n ** 128n;
     const amount = prepared
       ? BigInt(prepared.amount)
       : limit === undefined || limit > cash
@@ -113,7 +119,7 @@ async function prepare(
         "FAILED_PRECONDITION",
         "Insufficient USDC balance.",
       );
-    if (!prepared)
+    if (execute && !prepared)
       deps.ports.db
         .query(
           "INSERT INTO market_chain_preparations VALUES (?, ?, ?, ?, ?, ?)",
@@ -126,18 +132,20 @@ async function prepare(
           amount.toString(),
           preparationRequest,
         );
-    const approvals = await ensureRouterAllowance({
-      reader,
-      executor,
-      deployment,
-      walletId: wallet.walletId,
-      owner: wallet.address,
-      operationId: id,
-      router: "TradeRouter",
-      amount,
-      expiration: Number((deadline / 3600n + 2n) * 3600n),
-    });
-    for (const result of approvals) confirmed(result);
+    if (execute) {
+      const approvals = await ensureRouterAllowance({
+        reader,
+        executor,
+        deployment,
+        walletId: wallet.walletId,
+        owner: wallet.address,
+        operationId: id,
+        router: "TradeRouter",
+        amount,
+        expiration: Number((deadline / 3600n + 2n) * 3600n),
+      });
+      for (const result of approvals) confirmed(result);
+    }
     return {
       kind,
       night,
@@ -156,7 +164,7 @@ async function prepare(
       args: [wallet.address, deployment.TradeRouter],
     })
   ).value;
-  if (allowance < qty)
+  if (allowance < qty && execute)
     confirmed(
       await executor.execute({
         operationId: `${id}:approve-token`,
@@ -195,8 +203,7 @@ export async function quoteChainTrade(
     kind,
     deps.ports.ids.next("quote"),
   );
-  const { reader } = chainMarket(deps.ports);
-  const quote = await reader.simulate(command, wallet.address);
+  const quote = await simulateQuote(deps.ports, command, wallet.address);
   if (typeof quote.value !== "bigint")
     throw new Error("Router quote did not return micro USDC.");
   return routeQuote(key, size, quote.value);
@@ -271,14 +278,22 @@ export async function executeChainTrade(
     throw new DomainError("FAILED_PRECONDITION", "Chain transaction reverted.");
   if (!intent) {
     const id = options.operationId ?? ports.ids.next("trade");
-    const command = await prepare(deps, wallet, key, size, kind, id, limit);
+    const command = await prepare(
+      deps,
+      wallet,
+      key,
+      size,
+      kind,
+      id,
+      limit,
+      true,
+    );
     const simulated = await reader.simulate(command, wallet.address);
     if (typeof simulated.value !== "bigint")
       throw new Error("Router quote did not return micro USDC.");
     const bounds = slippageBounds(simulated.value, slippageBps);
-    if (command.kind === "buy")
-      command.maxPaid = bounds.max < limit ? bounds.max : limit;
-    else command.minReceived = bounds.min > limit ? bounds.min : limit;
+    if (command.kind === "sell")
+      command.minReceived = bounds.min > limit ? bounds.min : limit;
     const reserved = command.kind === "buy" ? command.maxPaid : 0n;
     intent = {
       id,

@@ -57,11 +57,14 @@ export async function bindProperty(
   const { reader, attester } = chainPorts(ports);
   await hostWallet(deps, userId);
   const previous = ports.db
-    .query<{ payout: string }, [string, string]>(
-      "SELECT payout FROM host_chain_bindings WHERE fingerprint = ? AND property_id = ?",
+    .query<{ payout: string; user_id: string }, [string, string]>(
+      "SELECT payout, user_id FROM host_chain_bindings WHERE fingerprint = ? AND property_id = ?",
     )
     .get(reader.fingerprint, propertyId);
-  if (previous && previous.payout !== hostPayout)
+  if (
+    previous &&
+    (previous.payout !== hostPayout || previous.user_id !== userId)
+  )
     throw new DomainError(
       "FAILED_PRECONDITION",
       "Property payout binding is permanent.",
@@ -79,9 +82,6 @@ export async function bindProperty(
       "FAILED_PRECONDITION",
       "Property payout binding is permanent.",
     );
-  ports.db
-    .query("INSERT OR IGNORE INTO host_chain_bindings VALUES (?, ?, ?, ?)")
-    .run(reader.fingerprint, propertyId, userId, hostPayout);
   if (owner === zeroAddress)
     await executeIntent(ports, `bind:${propertyId}`, async () => {
       const a = {
@@ -106,4 +106,7 @@ export async function bindProperty(
     ).value.toLowerCase() !== hostPayout.toLowerCase()
   )
     throw new Error("Property binding read-back failed.");
+  ports.db
+    .query("INSERT OR IGNORE INTO host_chain_bindings VALUES (?, ?, ?, ?)")
+    .run(reader.fingerprint, propertyId, userId, hostPayout);
 }

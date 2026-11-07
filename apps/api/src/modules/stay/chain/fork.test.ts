@@ -109,7 +109,7 @@ forkTest(
         rpcUrl: rpc,
       });
       // This test owns a fresh range, independent of all other integration tasks.
-      const firstIndex = 24000 + Math.floor(Math.random() * 10000);
+      const firstIndex = 60001 + Math.floor(Math.random() * 10000);
       const sentinel = anvilAccount(firstIndex);
       ports.db
         .query("INSERT INTO anvil_wallets VALUES (?, ?, ?, ?)")
@@ -324,6 +324,19 @@ forkTest(
       expect(() => cases.quoteStay({ ...selection, rooms: 2 })).toThrow(
         "1 room for 1 night",
       );
+      const quoteJournal = ports.db
+        .query("SELECT * FROM chain_operations")
+        .all();
+      const quoteNonce = await client.getTransactionCount({
+        address: guest.wallet.address,
+      });
+      for (let i = 0; i < 3; i++) cases.quoteStay(selection);
+      expect(ports.db.query("SELECT * FROM chain_operations").all()).toEqual(
+        quoteJournal,
+      );
+      expect(
+        await client.getTransactionCount({ address: guest.wallet.address }),
+      ).toBe(quoteNonce);
       const quote = create(StayQuoteSchema, {
         id: "chain-quote",
         selection,
