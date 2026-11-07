@@ -76,14 +76,14 @@ function PayoutRow({
             rows={[[120, 120, 120, 120]]}
           />
         )}
-        {query.data?.chain && (
+        {query.data?.payoutCredit && (
           <dl>
             <dt>Payout credit awaiting transfer retry</dt>
-            <dd>{usd(query.data.chain.payoutCredit)}</dd>
+            <dd>{usd(query.data.payoutCredit.micros)}</dd>
             <dt>Host debt</dt>
-            <dd>{usd(query.data.chain.debt)}</dd>
+            <dd>{usd(query.data.hostDebt?.micros)}</dd>
             <dt>Still owed to guests</dt>
-            <dd>{usd(query.data.chain.owedToGuest)}</dd>
+            <dd>{usd(query.data.owedToGuest?.micros)}</dd>
           </dl>
         )}
         <ErrorNote error={query.error} />

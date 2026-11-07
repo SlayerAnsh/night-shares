@@ -577,6 +577,9 @@ components:
         pms:
           title: pms
           $ref: '#/components/schemas/night_shares.host.v1.Pms'
+        payoutAddress:
+          type: string
+          title: payout_address
       title: ConnectChannelManagerRequest
       additionalProperties: false
     night_shares.host.v1.ConnectChannelManagerResponse:
@@ -685,6 +688,21 @@ components:
         payout:
           title: payout
           $ref: '#/components/schemas/night_shares.host.v1.Payout'
+        payoutCredit:
+          title: payout_credit
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        hostDebt:
+          title: host_debt
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        owedToGuest:
+          title: owed_to_guest
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        payoutBlock:
+          type:
+            - integer
+            - string
+          title: payout_block
+          format: int64
       title: GetPayoutResponse
       additionalProperties: false
     night_shares.host.v1.GetPortfolioRequest:

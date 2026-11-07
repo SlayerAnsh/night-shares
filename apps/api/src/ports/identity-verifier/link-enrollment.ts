@@ -2,7 +2,7 @@ import type { Database } from "bun:sqlite";
 import { DomainError } from "../../shared/errors/domain-error";
 import type { VerificationLevel } from "./identity-verifier";
 
-// A credential upgrade changes the canonical key once; every alias and penalty follows it.
+// Chain upgrades preserve the custody identity; local upgrades migrate the canonical key.
 export function linkEnrollment(
   db: Database,
   nullifier: string,
@@ -33,32 +33,39 @@ export function linkEnrollment(
         "This Orb credential belongs to another identity. Switch accounts to continue.",
       );
     // Preserve the previous key even for users enrolled before alias tracking.
-    db.query("INSERT OR IGNORE INTO world_id_enrollments VALUES (?, ?, ?)").run(
-      user.humanId,
-      user.humanId,
-      user.level,
-    );
-    // Ban keys are permanent; alias lookups carry penalties to the upgraded identity.
-    // Device users cannot own trader or host positions. Still migrate all indexed human references.
-    for (const table of [
-      "identity_users",
-      "world_id_enrollments",
-      "world_id_sessions",
-      "walk_reports",
-      "market_watchlist",
-      "market_human_wallets",
-      "market_holders",
-    ]) {
-      db.query(`UPDATE ${table} SET human_id = ? WHERE human_id = ?`).run(
-        nullifier,
-        user.humanId,
-      );
+    db.query(
+      "INSERT OR IGNORE INTO world_id_enrollments (nullifier, human_id, level) VALUES (?, ?, ?)",
+    ).run(user.humanId, user.humanId, user.level);
+    const chainActive = db
+      .query("SELECT 1 FROM chain_instances WHERE active = 1")
+      .get();
+    const humanId = chainActive ? user.humanId : nullifier;
+    if (!chainActive) {
+      // Ban keys are permanent; alias lookups carry penalties to the upgraded identity.
+      // Device users cannot own trader or host positions. Still migrate all indexed human references.
+      for (const table of [
+        "identity_users",
+        "world_id_enrollments",
+        "world_id_sessions",
+        "walk_reports",
+        "market_watchlist",
+        "market_human_wallets",
+        "market_holders",
+      ]) {
+        db.query(`UPDATE ${table} SET human_id = ? WHERE human_id = ?`).run(
+          nullifier,
+          user.humanId,
+        );
+      }
     }
+    db.query(
+      "INSERT INTO world_id_enrollments (nullifier, human_id, level) VALUES (?, ?, ?)",
+    ).run(nullifier, humanId, level);
     db.query("UPDATE identity_users SET level = 'orb' WHERE id = ?").run(
       userId,
     );
     db.query(
       "UPDATE sessions SET user = json_set(user, '$.humanId', ?) WHERE json_extract(user, '$.id') = ?",
-    ).run(nullifier, userId);
+    ).run(humanId, userId);
   }).immediate();
 }

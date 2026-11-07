@@ -4,6 +4,7 @@ package night_shares.host.v1;
 
 import "night_shares/auth/v1/access.proto";
 import "night_shares/catalog/v1/property.proto";
+import "night_shares/common/v1/money.proto";
 import "night_shares/host/v1/hotel.proto";
 import "night_shares/host/v1/opening.proto";
 
@@ -36,6 +37,7 @@ service HostService {
 message ConnectChannelManagerRequest {
   string property_id = 1;
   Pms pms = 2;
+  string payout_address = 3;
 }
 
 message ConnectChannelManagerResponse {
@@ -111,6 +113,10 @@ message GetPayoutRequest {
 
 message GetPayoutResponse {
   Payout payout = 1;
+  night_shares.common.v1.Usdc payout_credit = 2;
+  night_shares.common.v1.Usdc host_debt = 3;
+  night_shares.common.v1.Usdc owed_to_guest = 4;
+  uint64 payout_block = 5;
 }
 
 message WithdrawRequest {
