@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
+import {X402Settler} from "../../src/X402Settler.sol";
+import {IX402Settler} from "../../src/interfaces/IX402Settler.sol";
+import {IERC3009} from "../../src/interfaces/IERC3009.sol";
 import {Test} from "forge-std/Test.sol";
 import {INightTypes} from "../../src/interfaces/INightTypes.sol";
 import {NightFactory} from "../../src/NightFactory.sol";
@@ -59,6 +62,7 @@ contract ForkFlowTest is Test, INightTypes {
         _open();
         uint256 count = factory.openNights();
         _trade();
+        _x402();
         // Buy the remaining inventory across four independent humans, each below the 30% cap.
         uint256 n;
         while (token.released() < c.S) {
@@ -161,6 +165,30 @@ contract ForkFlowTest is Test, INightTypes {
         token.approve(d.tradeRouter, 1e17);
         assertGt(trade.sell(night, 1e17, 1, new Hint[](0), type(uint64).max), 0);
         vm.stopPrank();
+    }
+
+    function _x402() private {
+        X402Settler settler = X402Settler(d.settler);
+        assertGt(d.settler.code.length, 0);
+        uint64 deadline = c.cutoff - 1;
+        IX402Settler.Authorization memory a = IX402Settler.Authorization(wallets[2], d.settler, 5e6, 0, c.cutoff,
+            settler.buyNonce(night, 5e17, deadline, bytes32(uint256(1))));
+        uint256 cashBefore = cash.balanceOf(wallets[2]);
+        uint256 tokenBefore = token.balanceOf(wallets[2]);
+        uint256 paid = settler.buy(a, _authSig(d.usdc, a), night, 5e17, new Ask[](0), new Hint[](0), deadline, bytes32(uint256(1)));
+        assertEq(cashBefore - cash.balanceOf(wallets[2]), paid);
+        assertEq(token.balanceOf(wallets[2]) - tokenBefore, 5e17);
+        a.value = 5e17; a.nonce = settler.sellNonce(night, 1, deadline, bytes32(uint256(2)));
+        uint256 received = settler.sell(a, _authSig(address(token), a), night, 1, new Hint[](0), deadline, bytes32(uint256(2)));
+        assertEq(cash.balanceOf(wallets[2]), cashBefore - paid + received);
+        assertEq(token.balanceOf(wallets[2]), tokenBefore);
+        assertEq(cash.balanceOf(d.settler), 0); assertEq(token.balanceOf(d.settler), 0);
+        assertEq(cash.allowance(d.settler, d.tradeRouter), 0); assertEq(token.allowance(d.settler, d.tradeRouter), 0);
+    }
+
+    function _authSig(address asset, IX402Settler.Authorization memory a) private view returns (bytes memory) {
+        return _sig(102, keccak256(abi.encodePacked(hex"1901", IERC3009(asset).DOMAIN_SEPARATOR(), keccak256(abi.encode(
+            IERC3009(asset).TRANSFER_WITH_AUTHORIZATION_TYPEHASH(), a.from, a.to, a.value, a.validAfter, a.validBefore, a.nonce)))));
     }
 
     function _sig(uint256 key, bytes32 digest) private pure returns (bytes memory) {

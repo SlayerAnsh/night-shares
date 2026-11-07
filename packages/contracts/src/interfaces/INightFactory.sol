@@ -5,6 +5,7 @@ import {PoolKey} from "v4-core/src/types/PoolKey.sol";
 
 /// @notice Immutable deployment dependencies; night configs, token addresses, pool keys and property owners. Property ownership is bound by an attester signature, never by the first opener.
 interface INightFactory is INightTypes {
+    function tokenDeployer() external view returns (address);
     error InvalidTokenOrder();
     error MaxFExceeded();
     error MaxPoolExceeded();

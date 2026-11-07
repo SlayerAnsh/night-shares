@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 
+import {SignatureCheckerLib} from "solady/utils/SignatureCheckerLib.sol";
 import {CreditLib} from "./libraries/CreditLib.sol";
 import {NightPosition} from "./libraries/NightPosition.sol";
 import {INightToken} from "./interfaces/INightToken.sol";
@@ -58,6 +59,32 @@ contract NightToken is INightToken {
         entered = true;
         _;
         entered = false;
+    }
+
+    mapping(address => mapping(bytes32 => bool)) public authorizationState;
+    bytes32 public constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH = keccak256("TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)");
+    function DOMAIN_SEPARATOR() public view returns (bytes32) {
+        return keccak256(abi.encode(keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+            keccak256("NightShares Room Night"), keccak256("1"), block.chainid, address(this)));
+    }
+
+    function transferWithAuthorization(address from, address to, uint256 value, uint256 validAfter,
+        uint256 validBefore, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) external {
+        transferWithAuthorization(from, to, value, validAfter, validBefore, nonce, abi.encodePacked(r, s, v));
+    }
+
+    function transferWithAuthorization(address from, address to, uint256 value, uint256 validAfter,
+        uint256 validBefore, bytes32 nonce, bytes memory signature) public guard {
+        if (to == d.settler && msg.sender != d.settler) revert Unauthorized();
+        if (block.timestamp <= validAfter) revert AuthorizationNotYetValid();
+        if (block.timestamp >= validBefore) revert AuthorizationExpired();
+        if (authorizationState[from][nonce]) revert AuthorizationReused();
+        bytes32 digest = keccak256(abi.encodePacked(hex"1901", DOMAIN_SEPARATOR(), keccak256(abi.encode(
+            TRANSFER_WITH_AUTHORIZATION_TYPEHASH, from, to, value, validAfter, validBefore, nonce))));
+        if (!SignatureCheckerLib.isValidSignatureNow(from, digest, signature)) revert InvalidAuthorization();
+        authorizationState[from][nonce] = true;
+        emit AuthorizationUsed(from, nonce);
+        _update(from, to, value);
     }
 
     function withdrawCredit(address recipient) external guard returns (uint256) {
@@ -154,6 +181,7 @@ contract NightToken is INightToken {
         excluded[d.tradeRouter] = true;
         excluded[d.bookingRouter] = true;
         excluded[d.settlement] = true;
+        excluded[d.settler] = true;
         uint256 supply;
         for (uint256 i; i < S / 1e18; i++) {
             (,,, uint256 deposit) = seedPosition(i);
@@ -196,7 +224,13 @@ contract NightToken is INightToken {
     }
 
     function _update(address from, address to, uint256 amount) private {
-        if ((!excluded[from] || !excluded[to]) && (paused || INightHook(d.hook).paused())) revert Paused();
+        if ((!excluded[from] || !excluded[to]) && (paused || INightHook(d.hook).paused())) {
+            bool sameHuman = !excluded[from] && !excluded[to] && cachedHuman[from] != 0
+                && cachedHuman[from] == IHumanRegistry(d.registry).humanIdOf(to)
+                && IHumanRegistry(d.registry).humanIdOf(from) != 0
+                && IHumanRegistry(d.registry).humanIdOf(from) == IHumanRegistry(d.registry).humanIdOf(to);
+            if (!sameHuman) revert Paused();
+        }
         if (cutoffCollected && (!excluded[from] || !excluded[to])) revert CutoffReached();
         if (to == address(0) || from == address(0)) revert ZeroAddress();
         if (

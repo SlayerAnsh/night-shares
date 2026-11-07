@@ -33,6 +33,7 @@ interface INightTypes {
         address rebatePool;
         address registry;
         address platform;
+        address settler;
     }
 
     struct Order {

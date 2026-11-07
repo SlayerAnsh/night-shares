@@ -11,6 +11,11 @@ import {INightTypes} from "./INightTypes.sol";
 
 /// @notice Immutable dependencies; active msgSender; reentrancy guard; per-maker nonce; cumulative fill quantity per order digest. No admin.
 interface ITradeRouter is INightTypes, IRouterCore {
+    function settler() external view returns (address);
+    function buyFor(address recipient, bytes32 night, uint256 qty, uint256 maxPaid,
+        Ask[] calldata asks, Hint[] calldata hints, uint64 deadline) external returns (uint256 paid);
+    function sellFor(address owner, bytes32 night, uint256 qty, uint256 minReceived,
+        Hint[] calldata hints, uint64 deadline) external returns (uint256 received);
     error InvalidNonce();
     error Overfilled();
     /// @notice Immutable BookingRouter only, during its active booking/void execution.

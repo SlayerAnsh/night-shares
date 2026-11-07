@@ -65,6 +65,7 @@ contract NightMarketTest is Test, INightTypes {
         settlement.setVault(address(vault));
         token.endpoints(address(vault), address(manager), address(settlement));
         Deployment memory d;
+        d.settler = address(0x402);
         d.poolManager = address(manager);
         d.usdc = address(usdc);
         d.vault = address(vault);

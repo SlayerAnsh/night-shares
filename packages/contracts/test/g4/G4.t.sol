@@ -67,6 +67,7 @@ contract G4Test is Test, INightTypes {
         fund = new CoverFund(cash, predicted);
         rebate = new RebatePool(cash, address(manager), address(factory), address(this), address(bookings));
         Deployment memory d;
+        d.settler = address(0x402);
         d.platform = address(this);
         d.usdc = cash;
         d.poolManager = address(manager);
@@ -483,6 +484,7 @@ contract G4Test is Test, INightTypes {
         vm.expectRevert(InvalidConfig.selector);
         new RebatePool(address(usdc), address(manager), address(factory), address(0), OTHER);
         Deployment memory d;
+        d.settler = address(0x402);
         vm.expectRevert(InvalidConfig.selector);
         new Settlement(address(factory), d, OTHER);
     }

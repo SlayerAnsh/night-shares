@@ -198,7 +198,7 @@ contract FullFlowTest is Test, INightTypes {
     }
 
     function _conserved() internal view {
-        uint256 total = cash.balanceOf(hookDeployer);
+        uint256 total = cash.balanceOf(hookDeployer) + cash.balanceOf(d.settler) + cash.balanceOf(factory.tokenDeployer());
         for (uint256 i; i < accounts.length; ++i) {
             total += cash.balanceOf(accounts[i]);
         }

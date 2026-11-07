@@ -1,6 +1,6 @@
 # Night Shares contract system
 
-The ten production contracts form one system. `app/SPECS.md`, its Chain design section, and the decisions below govern the implementation. Amounts are micro USDC. Token quantities are 18-decimal room nights. User balances and fills are whole tenths, or `1e17`. The maximum allotment is `100e18`.
+The production contracts form one system. `app/SPECS.md`, its Chain design section, and the decisions below govern the implementation. Amounts are micro USDC. Token quantities are 18-decimal room nights. User balances and fills are whole tenths, or `1e17`. The maximum allotment is `100e18`.
 
 ## Decisions
 
@@ -21,7 +21,7 @@ The ten production contracts form one system. `app/SPECS.md`, its Chain design s
 
 `script/DeployLib.sol` is the reusable Foundry deployment library. It predicts the CREATE addresses of the factory and its peers, mines the hook CREATE2 salt for permission bits `0x2aec`, and deploys all peers normally with immutable wiring. A one-shot HookDeployer created at nonce + 8 performs the hook CREATE2 in its constructor. This makes the CREATE2 sender explicit in both tests and broadcasts. Pass the current CREATE sender as `deployer`; a broadcast script passes its broadcaster. The hook constructor does not read `Deployment.hook`, so its creation arguments use zero for that self-reference before the final hook address is calculated. Other peers receive the actual hook address. Every predicted address is checked after deployment.
 
-The factory deploys each NightToken using CREATE2, with the host supplying a mined salt that sorts the token below USDC. PoolManager, USDC and Permit2 are explicit configuration. Production source contains no canonical chain-specific endpoint constants.
+The factory calls its immutable NightTokenDeployer to deploy each NightToken using CREATE2, with the host supplying a mined salt that sorts the token below USDC. NightTokenDeployer is created at nonce + 9 and accepts deployments only from its immutable factory. Token prediction uses the deployer address and its creation code hash. The NightFactory constructor takes the deployer address immediately after Deployment. PoolManager, USDC and Permit2 are explicit configuration. Production source contains no canonical chain-specific endpoint constants.
 
 The e2e environment uses chain ID 5042002, a freshly deployed real PoolManager, MockUSDC runtime etched at `0x3600000000000000000000000000000000000000`, and pinned real Permit2 runtime etched at `0x000000000022D473030F116dDEE9F6B43aC78BA3`. See `test/fixtures/README.md` for runtime provenance and hash. No test doubles, mocked calls or fork network requests are used in `test/e2e`.
 
@@ -32,9 +32,11 @@ The e2e environment uses chain ID 5042002, a freshly deployed real PoolManager, 
 | Factory.bindProperty | Anyone relays a valid current Settlement attester signature. |
 | Factory.openNight | Bound Orb host only. Validate identity and incidents, deploy and initialize token, initialize PoolManager, initialize vault. |
 | Factory.addLadderChunk | Bound host only. Vault unlocks PoolManager once for the chunk; hook validates every unique vault-owned position. |
-| Token transfers | Owners or approved spenders. Verify recipients, enforce cached human caps, maintain descending holder links and enforce released inventory. Fixed excluded endpoints are vault, manager, routers, Settlement and zero. |
+| Token transfers | Owners or approved spenders. Verify recipients, enforce cached human caps, maintain descending holder links and enforce released inventory. Fixed excluded endpoints are vault, manager, routers, Settlement, X402Settler and zero. |
 | Token.routerTransfer | Fixed TradeRouter or BookingRouter only. Routers perform signature and fill checks first. |
 | Token.setHints | Anyone may provide transaction-scoped validated list hints. Hints require live `inList` membership and reciprocal adjacency. Transfer counterparties cannot be hint neighbors. Invalid hints fall back to traversal of at most 64 nodes. |
+| TradeRouter.buyFor/sellFor | Immutable X402Settler only. Orb identity, cap, hook context, host fee split and Trade.taker use the agent wallet. USDC and sold tokens come from the settler. |
+| X402Settler.buy/sell | Anyone relays an authorization whose nonce binds the trade terms. Payment and trade are atomic. Exact allowances are cleared after routing. |
 | TradeRouter.buy/sell | Orb trader only. Shared execution guard, timestamp and ladder gates. PoolManager unlock callback verifies caller and operation hash. Buys deliver exact token output; sells take exact token input through ordinary allowance. |
 | TradeRouter.fillBookingAsk | BookingRouter only, with taker equal to its active msgSender. TradeRouter owns verification, fills, maker pull, fees, rebate and Trade event. |
 | TradeRouter.cancelAll | Maker increments its own nonce outside active execution. |
@@ -523,7 +525,9 @@ The immutable hook owner controls the global hook pause and each NightToken paus
 | --- | --- | --- |
 | Buy, sellback and ask fill | Blocked | Blocked |
 | Booking and host buy-and-void | Blocked | Blocked |
-| Trader transfers and router pulls | Blocked | Blocked |
+| Cross-human transfers and router pulls | Blocked | Blocked |
+| Ordinary same-human transfers | Allowed before cutoff | Allowed before cutoff |
+| Settler transfers to ordinary holders | Blocked | Blocked |
 | New opens | Blocked | Not applicable to a new token |
 | Authorized burns | Allowed | Allowed |
 | Cutoff settlement and reserve transfers | Allowed | Allowed |
@@ -532,6 +536,8 @@ The immutable hook owner controls the global hook pause and each NightToken paus
 | Walk payout | Allowed | Allowed |
 
 ## Deployment configuration
+
+On Arc mainnet, chain ID 5042, Deploy.s.sol requires the default limits unless `ALLOW_CUSTOM_LIMITS=true`. OWNER, ATTESTER and PLATFORM must be distinct from each other and from the broadcasting deployer, identified by `msg.sender` in the script. The limits override does not bypass role separation. These checks run before broadcasting. The NightFactory constructor rejects a zero settler address.
 
 Deploy.s.sol checks `CHAIN_ID` and reads `POOL_MANAGER`, `USDC`, `PERMIT2`, `ATTESTER`, `PLATFORM`, `OWNER` and the four limits. OWNER controls the hook and registry; PLATFORM remains the fee recipient and Settlement attester-rotation authority. The reusable DeployLib overload accepts these separately. The shorter overload uses the safety defaults and PLATFORM as OWNER. Regression fixtures explicitly request larger price limits without changing historical test assertions.
 
@@ -583,3 +589,25 @@ The original source was retained in a temporary offline fixture for before-and-a
 | L3 | `test_L3_WalkAfterSellBack` | No |
 
 Using `forge test --offline --match-contract ReviewFlowTest --match-test test_F5_NoUnsweptUsesCoverDebt --gas-report`, the same funded walk after a one-booking sweep measured `reportWalk` at 298,637 gas before and 338,068 gas after, an increase of 39,431 gas. `sweep` measured 376,614 gas before and 424,168 gas after, an increase of 47,554 gas. These are scenario-specific function measurements, not averages over different test populations. The scenario has no queued guest claims at sweep time. FIFO payment cost additionally scales with the number of claims processed.
+
+## Authorized token transfers
+
+NightToken implements IERC3009 with both bytes and v/r/s signature overloads. Its EIP-712 domain is NightShares Room Night, version 1, the current chain ID and the token address. Authorization nonces belong to each authorizer. The validity window is strict at both boundaries. SignatureCheckerLib supports EOAs and ERC-1271 accounts. Every successful authorization emits AuthorizationUsed and runs the normal guarded token update, including quantity, cap, cutoff and holder-list checks.
+
+While either pause is active, transfers between ordinary holders remain available only when the sender has a nonzero live registry human ID equal to the recipient's live registry human ID and the sender's cached human ID also matches that recipient ID. A wallet relinked to another human cannot transfer under its old cached ID while paused. There is no settler pause exemption. Excluded endpoints cannot use this exemption. Cutoff still freezes ordinary transfers.
+
+## X402 settlement
+
+Deployment appends `settler` as its last field. DeployLib reserves nonce + 10 for X402Settler after HookDeployer at + 8 and NightTokenDeployer at + 9. Deployment JSON adds X402Settler, NightTokenDeployer and USDC_EIP712. The domain metadata defaults to name USDC and version 2 and can be configured with USDC_EIP712_NAME and USDC_EIP712_VERSION. Exported ABIs include both new contracts and updated token, factory and router interfaces.
+
+TradeRouter exposes `settler()`, `buyFor(recipient, night, qty, maxPaid, asks, hints, deadline)` and `sellFor(owner, night, qty, minReceived, hints, deadline)`. These routes preserve the agent's Orb check, shared human cap, host self-trade fee treatment and Trade event identity. Normal buy and sell retain Permit2 and owner allowance behavior. Settler buys use ERC-20 allowance instead of Permit2. Quotes bound provisional funding by the settler balance and allowance and revert all provisional state.
+
+X402Settler exposes `buy`, `sell`, `buyNonce`, `sellNonce` and `processed`. IX402Settler defines the complete Authorization tuple and events X402Bought and X402Sold. Buy nonces bind night, quantity, deadline and salt. Sell nonces bind night, minimum proceeds, deadline and salt. Authorization signatures separately bind payer, recipient, value and validity window. The settler checks its token and USDC balances against each call's starting balances. Donations neither subsidize trades nor block them. USDC and NightToken allowances equal the current authorization value and are reset to zero. There is no owner, pause or withdrawal entry point.
+
+NightToken rejects authorized transfers to X402Settler unless the settler submits them. Holders never use the same-human pause exemption to reach excluded endpoints.
+
+### Accepted limitation for direct payments
+
+X402Settler keeps `transferWithAuthorization` as its payment method and has no recovery function for consumed authorizations. EIP-3009 `authorizationState` reports whether a nonce was consumed, but not which value it moved. A new signature using that nonce cannot prove the amount previously transferred, so the settler cannot safely calculate a refund from it.
+
+Successful buys and sells leave no funds from their payments stranded in the settler. A buy returns unused payment funds atomically. A payment sent straight to the settler outside `buy` or `sell`, including a USDC authorization submitted directly to USDC, is not recoverable through the settler. This is an accepted limitation. Such funds remain in the settler, and subsequent buys and sells preserve that balance through their per call balance checks.

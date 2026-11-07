@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.26;
 import {Test} from "forge-std/Test.sol";
+import {NightTokenDeployer} from "../../src/NightTokenDeployer.sol";
 import {NightFactory} from "../../src/NightFactory.sol";
 import {NightToken} from "../../src/NightToken.sol";
 import {INightTypes} from "../../src/interfaces/INightTypes.sol";
@@ -48,9 +49,11 @@ contract NightTest is Test, INightTypes {
             address(0x111),
             address(0x222),
             address(registry),
-            address(0x333)
+            address(0x333),
+            address(0x402)
         );
-        f = new NightFactory(d, 6000e6, 2000000e6, 100e18, 20);
+        address td = address(new NightTokenDeployer(vm.computeCreateAddress(address(this), vm.getNonce(address(this)) + 1)));
+        f = new NightFactory(d, td, 6000e6, 2000000e6, 100e18, 20);
         vault.setup(f, manager);
         registry.set(HOST, 1, true);
         registry.set(A, 2, true);
@@ -96,7 +99,8 @@ contract NightTest is Test, INightTypes {
     }
 
     function _limits(uint256 maxF, uint256 maxPool, uint256 maxS, uint256 maxOpen) private {
-        f = new NightFactory(f.dependencies(), maxF, maxPool, maxS, maxOpen);
+        address td = address(new NightTokenDeployer(vm.computeCreateAddress(address(this), vm.getNonce(address(this)) + 1)));
+        f = new NightFactory(f.dependencies(), td, maxF, maxPool, maxS, maxOpen);
         vault.setup(f, manager);
         _bind();
         id = f.registerNightIdentity("hotel", "double", "2030-01-01");
@@ -556,11 +560,20 @@ contract NightTest is Test, INightTypes {
         assertEq(t.balanceOf(A),1e18); assertEq(t.balanceOf(BOOK),0);
         assertEq(usdc.balanceOf(HOOK),0); assertEq(t.head(),A);
     }
+    function test_constructorRejectsZeroSettler() public {
+        Deployment memory deps = f.dependencies();
+        deps.settler = address(0);
+        address td = f.tokenDeployer();
+        vm.expectRevert(InvalidConfig.selector);
+        new NightFactory(deps, td, 6000e6, 2000000e6, 100e18, 20);
+    }
+
     function testDeploymentValidationAndSmallCap() public {
+        address td = f.tokenDeployer();
         Deployment memory deps=f.dependencies(); deps.usdc=address(0);
-        vm.expectRevert(InvalidConfig.selector); new NightFactory(deps, 6000e6, 2000000e6, 100e18, 20);
+        vm.expectRevert(InvalidConfig.selector); new NightFactory(deps, td, 6000e6, 2000000e6, 100e18, 20);
         deps=f.dependencies(); deps.hook=address(0x1234);
-        vm.expectRevert(InvalidConfig.selector); new NightFactory(deps, 6000e6, 2000000e6, 100e18, 20);
+        vm.expectRevert(InvalidConfig.selector); new NightFactory(deps, td, 6000e6, 2000000e6, 100e18, 20);
         c.S=1e18; _open(); assertEq(t.cap(),1e18); assertEq(t.name(),"NightShares Room Night"); assertEq(t.symbol(),"NIGHT");
         assertEq(f.MAX_S(),100e18); assertGt(f.config(id).X,c.F);
         assertTrue(t.excluded(BOOK)); assertFalse(t.excluded(A));

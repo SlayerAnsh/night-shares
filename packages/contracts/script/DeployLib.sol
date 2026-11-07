@@ -38,6 +38,8 @@ library DeployLib {
         d.rebatePool = vm.computeCreateAddress(deployer, nonce + 6);
         d.registry = vm.computeCreateAddress(deployer, nonce + 7);
         address hookDeployer = vm.computeCreateAddress(deployer, nonce + 8);
+        address tokenDeployer = vm.computeCreateAddress(deployer, nonce + 9);
+        d.settler = vm.computeCreateAddress(deployer, nonce + 10);
         // The hook does not read Deployment.hook. Keeping it zero avoids a CREATE2 cycle.
         bytes memory hookCode =
             abi.encodePacked(vm.getCode("src/NightHook.sol:NightHook"), abi.encode(factory, d, owner));
@@ -48,7 +50,7 @@ library DeployLib {
             d.hook = address(uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), hookDeployer, salt, hash)))));
             if (uint160(d.hook) & 0x3fff == 0x2aec) break;
         }
-        require(_create("src/NightFactory.sol:NightFactory", abi.encode(d, maxF, maxPool, maxS, maxOpenNights)) == factory, "factory address");
+        require(_create("src/NightFactory.sol:NightFactory", abi.encode(d, tokenDeployer, maxF, maxPool, maxS, maxOpenNights)) == factory, "factory address");
         require(
             _create("src/NightVault.sol:NightVault", abi.encode(factory, manager, usdc, d.settlement)) == d.vault,
             "vault address"
@@ -73,6 +75,8 @@ library DeployLib {
         );
         HookDeployer helper = new HookDeployer(salt, hookCode);
         require(address(helper) == hookDeployer && helper.hook() == d.hook, "hook address");
+        require(_create("src/NightTokenDeployer.sol:NightTokenDeployer", abi.encode(factory)) == tokenDeployer, "token deployer address");
+        require(_create("src/X402Settler.sol:X402Settler", abi.encode(factory, d)) == d.settler, "settler address");
     }
 
     function _create(string memory artifact, bytes memory args) private returns (address deployed) {

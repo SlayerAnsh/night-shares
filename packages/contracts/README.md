@@ -58,6 +58,8 @@ mkdir -p deployments
 forge script script/Deploy.s.sol:Deploy --rpc-url https://rpc.mainnet.arc.io --account night-shares-deployer
 ```
 
+On chain ID 5042, the script requires `MAX_F=1000000`, `MAX_POOL=50000000`, `MAX_S=100` and `MAX_OPEN_NIGHTS=20` unless `ALLOW_CUSTOM_LIMITS=true`. OWNER, ATTESTER and PLATFORM must be distinct from each other and from the broadcasting deployer. The limits override does not bypass role separation. These guards run before broadcasting.
+
 The command above only simulates. A later authorized deployment adds `--broadcast --slow`. Never run `Seed.s.sol` or the fork shell wrapper against a production network. `MAX_S` is expressed in rooms in the environment and converted to 18-decimal token units in the constructor. Other monetary limits use micro USDC. The supplied PoolManager, USDC and Permit2 must already contain code, and `CHAIN_ID` must match the connected chain. The script has no path that deploys a PoolManager.
 
 The JSON is generated during simulation, so it is not proof of successful broadcast. Check receipts and deployed code after broadcasting before publishing addresses. Preserve the broadcast artifacts alongside the JSON.
@@ -73,3 +75,13 @@ The mainnet PoolManager runtime is 24,009 bytes and differs from the pinned v4-c
 The bootstrap additionally clears delegated code on public Anvil test accounts because the upstream attester fixture address had existing delegation and was being treated as an ERC-1271 contract. This change is confined to fixture accounts on the local fork. Only the USDC dependency is mocked. The live test's timestamp jump also uses an explicit check-in-based attestation deadline to avoid compiler assumptions that block.timestamp cannot change within one transaction.
 
 Both compose configurations validated. The chain and deploy containers were removed with `docker compose down`; the `app_arc-fork-state` volume remains. See [compose status](evidence/compose-status.json), [successful deployment output](evidence/deploy-final.txt) and [teardown output](evidence/teardown.txt). No real network transaction was broadcast, and no Foundry keystore was accessed.
+
+## X402 offline implementation
+
+NightToken supports EIP-3009 under its own NightShares Room Night version 1 domain. X402Settler combines authorized USDC buys and authorized NightToken sells with agent-aware TradeRouter routes. Agents and user wallets share the registry human cap. Same-human token withdrawals remain available during protocol pause before cutoff only when the sender and recipient have the same nonzero live registry human ID and the sender's cached ID matches the recipient's live ID. Relinked wallets cannot use an old cached ID. Transfers from the settler to ordinary holders are blocked during either global or token pause, with no settler exemption. See the pause matrix in CONTRACTS.md. Cutoff settlement and batching pay remaining holdings to the agent wallet, whose USDC can then be swept by authorization.
+
+Run `forge build --offline`, `forge test --offline` and `forge build --offline --sizes`. The x402 tests use a real local PoolManager and captured Permit2 runtime without RPC. X402Flow covers buy, recall, sell, paused withdrawal, cutoff refunds, USDC conservation and deployment manifest serialization. The optional ForkFlow test now includes x402 buys and sells but was not run against the shared fork for this change. No Docker command, deployment broadcast or edit to deployments/5042-fork.json was performed.
+
+The next coordinator deployment exports X402Settler, NightTokenDeployer, USDC_EIP712 and their ABIs. The shell wrapper defaults USDC_EIP712_NAME to USDC and USDC_EIP712_VERSION to 2. Existing deployed contracts and manifests must be regenerated together because the Deployment tuple gains its final settler field.
+
+X402Settler keeps `transferWithAuthorization` as its payment method and has no recovery function for consumed authorizations. A consumed nonce does not reveal which value it moved, so the settler cannot safely calculate a refund from it. Successful buys and sells leave no payment funds stranded, and buys return unused payment funds atomically. A payment sent straight to the settler outside `buy` or `sell`, including a USDC authorization submitted directly to USDC, is not recoverable through the settler. This is an accepted limitation. Subsequent trades preserve those funds through their per call balance checks. See CONTRACTS.md for details.

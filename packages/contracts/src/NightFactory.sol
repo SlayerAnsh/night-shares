@@ -7,7 +7,7 @@ import {INightVault} from "./interfaces/INightVault.sol";
 import {IHumanRegistry} from "./interfaces/IHumanRegistry.sol";
 import {ISettlement} from "./interfaces/ISettlement.sol";
 import {INightToken} from "./interfaces/INightToken.sol";
-import {NightToken} from "./NightToken.sol";
+import {NightTokenDeployer} from "./NightTokenDeployer.sol";
 import {NightKeyLib} from "./libraries/NightKeyLib.sol";
 import {OrderLib} from "./libraries/OrderLib.sol";
 import {IPoolManager} from "v4-core/src/interfaces/IPoolManager.sol";
@@ -17,6 +17,7 @@ import {Currency} from "v4-core/src/types/Currency.sol";
 import {ECDSA} from "solady/utils/ECDSA.sol";
 
 contract NightFactory is INightFactory {
+    address public immutable tokenDeployer;
     uint256 public immutable MAX_S;
     uint256 public immutable MAX_F;
     uint256 public immutable MAX_POOL;
@@ -43,14 +44,16 @@ contract NightFactory is INightFactory {
         entered = false;
     }
 
-    constructor(Deployment memory deps, uint256 maxF, uint256 maxPool, uint256 maxS, uint256 maxOpenNights) {
+    constructor(Deployment memory deps, address tokenDeployer_, uint256 maxF, uint256 maxPool, uint256 maxS, uint256 maxOpenNights) {
         if (maxF == 0 || maxPool == 0 || maxS == 0 || maxS > 100e18 || maxS % 1e18 != 0 || maxOpenNights == 0) revert InvalidConfig();
+        if (tokenDeployer_ == address(0)) revert InvalidConfig();
+        tokenDeployer = tokenDeployer_;
         MAX_F = maxF; MAX_POOL = maxPool; MAX_S = maxS; MAX_OPEN_NIGHTS = maxOpenNights;
         if (
             deps.poolManager == address(0) || deps.usdc == address(0) || deps.permit2 == address(0)
                 || deps.vault == address(0) || deps.hook == address(0) || deps.bookingRouter == address(0)
                 || deps.tradeRouter == address(0) || deps.settlement == address(0) || deps.registry == address(0)
-                || deps.platform == address(0) || deps.coverFund == address(0) || deps.rebatePool == address(0)
+                || deps.settler == address(0) || deps.platform == address(0) || deps.coverFund == address(0) || deps.rebatePool == address(0)
         ) revert InvalidConfig();
         // beforeInitialize/add/remove/swap, afterSwap, beforeDonate and both swap deltas.
         if (uint160(deps.hook) & ((1 << 14) - 1) != 0x2aec) revert InvalidConfig();
@@ -96,10 +99,10 @@ contract NightFactory is INightFactory {
     }
 
     function _predict(bytes32 id, bytes32 salt) private view returns (address) {
-        bytes32 codeHash = keccak256(abi.encodePacked(type(NightToken).creationCode, abi.encode(address(this))));
+        bytes32 codeHash = NightTokenDeployer(tokenDeployer).codeHash();
         return
             address(
-                uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), address(this), _salt(id, salt), codeHash))))
+                uint160(uint256(keccak256(abi.encodePacked(bytes1(0xff), tokenDeployer, _salt(id, salt), codeHash))))
             );
     }
 
@@ -192,7 +195,7 @@ contract NightFactory is INightFactory {
         if (token >= d.usdc) revert InvalidTokenOrder();
         configs[id] = c;
         tokenOf[id] = token;
-        new NightToken{salt: _salt(id, salt)}(address(this));
+        NightTokenDeployer(tokenDeployer).deploy(_salt(id, salt));
         INightToken(token).initialize(id);
         IPoolManager(d.poolManager).initialize(poolKey(id), initialPrice);
         INightVault(d.vault).openNight(id);

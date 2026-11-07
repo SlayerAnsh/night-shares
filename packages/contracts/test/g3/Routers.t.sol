@@ -62,6 +62,7 @@ contract RoutersTest is Test, INightTypes {
         hook = new HookDouble(address(cash));
         rebate = new RebateDouble(IPoolManager(address(manager)), factory, address(cash));
         Deployment memory d;
+        d.settler = address(0x402);
         d.poolManager = address(manager);
         d.usdc = address(cash);
         d.permit2 = address(permit);
@@ -558,6 +559,7 @@ contract RoutersTest is Test, INightTypes {
 
     function testConstructorsRejectMissingWiring() public {
         Deployment memory d;
+        d.settler = address(0x402);
         vm.expectRevert(InvalidConfig.selector);
         new TradeRouter(address(factory), d);
         vm.expectRevert(InvalidConfig.selector);

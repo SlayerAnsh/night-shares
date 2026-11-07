@@ -20,6 +20,7 @@ import {Currency} from "v4-core/src/types/Currency.sol";
 import {Pool} from "v4-core/src/libraries/Pool.sol";
 import {TickMath} from "v4-core/src/libraries/TickMath.sol";
 import {IAllowanceTransfer} from "permit2/src/interfaces/IAllowanceTransfer.sol";
+import {IERC20Minimal} from "v4-core/src/interfaces/external/IERC20Minimal.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 import {SignatureCheckerLib} from "solady/utils/SignatureCheckerLib.sol";
 
@@ -38,6 +39,7 @@ abstract contract RouterCore is INightTypes, IRouterCore {
     INightHook public immutable hook;
     bool internal immutable bookingRoute;
     address internal activeUser;
+    address internal activePayer;
     bytes32 private activeUnlock;
 
     error QuoteResult(uint256 paid);
@@ -60,8 +62,10 @@ abstract contract RouterCore is INightTypes, IRouterCore {
     modifier execution() {
         if (activeUser != address(0)) revert Reentrancy();
         activeUser = msg.sender;
+        activePayer = msg.sender;
         _;
         activeUser = address(0);
+        activePayer = address(0);
     }
 
     function _check(bytes32 night, uint256 qty, uint64 deadline) internal view returns (NightConfig memory c) {
@@ -76,7 +80,10 @@ abstract contract RouterCore is INightTypes, IRouterCore {
 
     function _pull(address to, uint256 amount) internal {
         if (amount > type(uint160).max) revert Slippage();
-        if (amount != 0) permit2.transferFrom(activeUser, to, uint160(amount), usdc);
+        if (amount != 0) {
+            if (activePayer == activeUser) permit2.transferFrom(activeUser, to, uint160(amount), usdc);
+            else usdc.safeTransferFrom(activePayer, to, amount);
+        }
     }
 
     function _limit(bytes32 night, uint256 price) internal view returns (uint160) {
@@ -157,11 +164,16 @@ abstract contract RouterCore is INightTypes, IRouterCore {
             NightConfig memory c = factory.config(night);
             uint256 bound = OrderLib.fillCost(qty, LadderMath.priceWad(c.F, c.k, c.S, c.S) / 1e18 + 1);
             bound += FeeMath.halfUp(bound, 130, 10000) + 100;
-            (uint160 allowed, uint48 expiration,) = permit2.allowance(activeUser, usdc, address(this));
-            uint256 available = usdc.balanceOf(activeUser);
+            uint256 available = usdc.balanceOf(activePayer);
             prepaid = available < bound ? available : bound;
-            if (prepaid > allowed) prepaid = allowed;
-            if (expiration < block.timestamp) prepaid = 0;
+            if (activePayer == activeUser) {
+                (uint160 allowed, uint48 expiration,) = permit2.allowance(activeUser, usdc, address(this));
+                if (prepaid > allowed) prepaid = allowed;
+                if (expiration < block.timestamp) prepaid = 0;
+            } else {
+                uint256 allowed = IERC20Minimal(usdc).allowance(activePayer, address(this));
+                if (prepaid > allowed) prepaid = allowed;
+            }
             // The provisional pull exists only inside the reverting quote. Execution
             // consumes exactly the quoted payment from the user's Permit2 allowance.
             if (!quote) prepaid = funding;
@@ -196,7 +208,7 @@ abstract contract RouterCore is INightTypes, IRouterCore {
                 _pull(address(poolManager), amount - prepaid);
                 poolManager.settle();
             } else if (prepaid > amount) {
-                poolManager.take(key.currency1, activeUser, prepaid - amount);
+                poolManager.take(key.currency1, activePayer, prepaid - amount);
             }
             poolManager.take(key.currency0, address(this), qty);
         }
@@ -210,7 +222,11 @@ abstract contract RouterCore is INightTypes, IRouterCore {
         returns (uint256 paid, uint256 missing)
     {
         if (asks.length == 0 && ceiling == type(uint256).max) {
-            paid = _swap(night, qty, false, _limit(night, ceiling), false);
+            uint160 limit = _limit(night, ceiling);
+            (bool available, uint256 cost) = _quote(night, qty, limit);
+            if (!available) revert SoldOut();
+            if (cost > maxPaid) revert Slippage();
+            paid = _swapFunded(night, qty, false, limit, false, cost);
             if (paid > maxPaid) revert Slippage();
             return (paid, 0);
         }
@@ -263,6 +279,7 @@ abstract contract RouterCore is INightTypes, IRouterCore {
 contract TradeRouter is RouterCore, ITradeRouter {
     using SafeTransferLib for address;
 
+    address public immutable settler;
     address public immutable bookingRouter;
     IRebatePool public immutable rebatePool;
     mapping(address => uint256) public nonces;
@@ -270,6 +287,7 @@ contract TradeRouter is RouterCore, ITradeRouter {
 
     constructor(address factory_, Deployment memory d) RouterCore(factory_, d, false) {
         if (d.bookingRouter == address(0) || d.rebatePool == address(0)) revert InvalidConfig();
+        settler = d.settler;
         bookingRouter = d.bookingRouter;
         rebatePool = IRebatePool(d.rebatePool);
     }
@@ -288,34 +306,57 @@ contract TradeRouter is RouterCore, ITradeRouter {
         emit OrderCancelledAll(msg.sender, newNonce);
     }
 
-    function buy(
-        bytes32 night,
-        uint256 qty,
-        uint256 maxPaid,
-        Ask[] calldata asks,
-        Hint[] calldata hints,
-        uint64 deadline
-    ) external execution returns (uint256 paid) {
+    function buy(bytes32 night, uint256 qty, uint256 maxPaid, Ask[] calldata asks,
+        Hint[] calldata hints, uint64 deadline) external execution returns (uint256 paid) {
+        return _buy(night, qty, maxPaid, asks, hints, deadline);
+    }
+
+    modifier forExecution(address user) {
+        if (msg.sender != settler || user == address(0)) revert Unauthorized();
+        if (activeUser != address(0)) revert Reentrancy();
+        activeUser = user;
+        activePayer = msg.sender;
+        _;
+        activeUser = address(0);
+        activePayer = address(0);
+    }
+
+    function buyFor(address recipient, bytes32 night, uint256 qty, uint256 maxPaid,
+        Ask[] calldata asks, Hint[] calldata hints, uint64 deadline)
+        external forExecution(recipient) returns (uint256 paid) {
+        return _buy(night, qty, maxPaid, asks, hints, deadline);
+    }
+
+    function _buy(bytes32 night, uint256 qty, uint256 maxPaid, Ask[] calldata asks,
+        Hint[] calldata hints, uint64 deadline) private returns (uint256 paid) {
         _check(night, qty, deadline);
-        if (!registry.isOrb(msg.sender)) revert Unauthorized();
+        if (!registry.isOrb(activeUser)) revert Unauthorized();
         INightToken token = INightToken(factory.tokenOf(night));
         token.setHints(hints);
         uint256 missing;
         (paid, missing) = _route(night, qty, maxPaid, asks, type(uint256).max);
         if (missing != 0) revert SoldOut();
-        address(token).safeTransfer(msg.sender, qty);
+        if (activePayer == activeUser) address(token).safeTransfer(activeUser, qty);
+        else token.transfer(activeUser, qty);
     }
 
     function sell(bytes32 night, uint256 qty, uint256 minReceived, Hint[] calldata hints, uint64 deadline)
-        external
-        execution
-        returns (uint256 received)
-    {
+        external execution returns (uint256 received) {
+        return _sell(night, qty, minReceived, hints, deadline);
+    }
+
+    function sellFor(address owner, bytes32 night, uint256 qty, uint256 minReceived,
+        Hint[] calldata hints, uint64 deadline) external forExecution(owner) returns (uint256 received) {
+        return _sell(night, qty, minReceived, hints, deadline);
+    }
+
+    function _sell(bytes32 night, uint256 qty, uint256 minReceived, Hint[] calldata hints, uint64 deadline)
+        private returns (uint256 received) {
         _check(night, qty, deadline);
-        if (!registry.isOrb(msg.sender)) revert Unauthorized();
+        if (!registry.isOrb(activeUser)) revert Unauthorized();
         address token = factory.tokenOf(night);
         INightToken(token).setHints(hints);
-        token.safeTransferFrom(msg.sender, address(this), qty);
+        token.safeTransferFrom(activePayer, address(this), qty);
         received = _swap(night, qty, true, TickMath.MIN_SQRT_PRICE + 1, false);
         if (received < minReceived) revert Slippage();
     }
@@ -334,6 +375,7 @@ contract TradeRouter is RouterCore, ITradeRouter {
         if (!registry.isVerified(taker)) revert Unauthorized();
         (gross, fee) = _executeAsk(ask, bookingRouter, true);
         activeUser = address(0);
+        activePayer = address(0);
     }
 
     function _fillAsk(Ask memory ask) internal override returns (uint256 gross) {
