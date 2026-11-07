@@ -1,106 +1,65 @@
-import { type Address, type Hex, zeroAddress } from "viem";
+import { type Address, zeroAddress } from "viem";
 import type { Ports } from "../../../container/ports";
 import {
   deserialize,
-  type NightConfig,
+  serialize,
 } from "../../../ports/chain-executor/chain-executor";
+import { addDays } from "../../../shared/dates";
 import { DomainError } from "../../../shared/errors/domain-error";
 import { format, parse } from "../../../shared/night-key";
+import { type Pool, readPoolAt } from "./pool";
 import { chainMarket, nightHash } from "./runtime";
 
-/** Resolve catalog identities from factory events, then verify live factory state. */
-export async function openedNights(ports: Ports) {
-  const { reader } = chainMarket(ports);
-  await reader.poll(1000);
-  const keys = new Set(
-    ports.inventory
-      .list()
-      .filter(
-        (r) => r.openedAt > 0 && r.chainFingerprint === reader.fingerprint,
-      )
-      .map((r) => r.key),
-  );
-  for (const row of ports.db
-    .query<{ args: string }, [string]>(
-      "SELECT args FROM chain_events WHERE fingerprint = ? AND event = 'NightOpened'",
-    )
-    .all(reader.fingerprint)) {
-    const event = deserialize<{ night: Hex }>(row.args);
-    const { value: config } = await reader.read<NightConfig>({
-      contract: "NightFactory",
-      functionName: "config",
-      args: [event.night],
-    });
-    const property = ports.catalog
-      .list()
-      .find((p) => nightHash(p.id) === config.property);
-    const room = property?.roomTypes.find(
-      (r) => nightHash(r.id) === config.roomType,
-    );
-    if (property && room)
-      keys.add(
-        format({
-          propertyId: property.id,
-          roomTypeId: room.id,
-          date: new Date(Number(config.checkIn) * 1000)
-            .toISOString()
-            .slice(0, 10),
-        }),
+const indexed = new WeakMap<Ports, string>();
+function indexKeys(ports: Ports) {
+  const today = ports.clock.today();
+  const catalog = ports.catalog.list();
+  const version = JSON.stringify([
+    today,
+    catalog.map((p) => [p.id, p.roomTypes.map((r) => r.id)]),
+  ]);
+  if (indexed.get(ports) === version) return;
+  ports.db
+    .transaction(() => {
+      const insert = ports.db.query(
+        "INSERT OR IGNORE INTO chain_night_keys VALUES (?, ?)",
       );
-  }
-  const records = [];
-  for (const key of keys) {
-    const token = (
-      await reader.read<Address>({
-        contract: "NightFactory",
-        functionName: "tokenOf",
-        args: [nightHash(key)],
-      })
-    ).value;
-    if (token !== zeroAddress) records.push(await openedNight(ports, key));
-    else
-      ports.inventory.update(key, (record) => ({
-        ...record,
-        openedAt: 0,
-        stopped: true,
-      }));
-  }
-  return records;
+      for (const property of catalog)
+        for (const room of property.roomTypes)
+          for (let day = -31; day < 366; day++) {
+            const key = format({
+              propertyId: property.id,
+              roomTypeId: room.id,
+              date: addDays(today, day),
+            });
+            insert.run(nightHash(key), key);
+          }
+      for (const row of ports.inventory.list())
+        insert.run(nightHash(row.key), row.key);
+    })
+    .immediate();
+  indexed.set(ports, version);
 }
-
-export async function openedNight(ports: Ports, key: string) {
-  const { reader } = chainMarket(ports);
-  const night = nightHash(key);
-  const head = await reader.head();
-  const token = (
-    await reader.read<Address>(
-      { contract: "NightFactory", functionName: "tokenOf", args: [night] },
-      head.number,
+export function projectedPool(ports: Ports, key: string): Pool | undefined {
+  const row = ports.db
+    .query<{ value: string }, [string, string]>(
+      "SELECT value FROM chain_market_snapshots WHERE fingerprint = ? AND night = ?",
     )
-  ).value;
-  if (token === zeroAddress)
-    throw new DomainError("NOT_FOUND", "Night is not open on chain.");
-  const { value: config } = await reader.read<NightConfig>(
-    { contract: "NightFactory", functionName: "config", args: [night] },
-    head.number,
-  );
-  const read = async (functionName: string) =>
-    (
-      await reader.read<bigint>(
-        { contract: "NightToken", night, functionName },
-        head.number,
-      )
-    ).value;
-  const held = Number(await read("held")) / 1e18;
-  const booked = Number(await read("burned")) / 1e18;
+    .get(chainMarket(ports).reader.fingerprint, nightHash(key));
+  return row ? deserialize<Pool>(row.value) : undefined;
+}
+function recordFromPool(ports: Ports, key: string, pool: Pool) {
   const record = ports.inventory.seedNight(parse(key));
+  const { config, block } = pool;
+  const held = Number(pool.held) / 1e18,
+    booked = Number(pool.burned) / 1e18;
   const projected = {
     ...record,
-    chainFingerprint: reader.fingerprint,
-    chainBlock: head.number.toString(),
-    openedAt: Number(head.timestamp) * 1000,
+    chainFingerprint: chainMarket(ports).reader.fingerprint,
+    chainBlock: block.number.toString(),
+    openedAt: Number(block.timestamp) * 1000,
     cutoffAt: Number(config.cutoff) * 1000,
-    stopped: config.cutoff <= head.timestamp,
+    stopped: config.cutoff <= BigInt(Math.floor(ports.clock.now() / 1000)),
     state: {
       ...record.state,
       F: Number(config.F) / 1e6,
@@ -114,4 +73,70 @@ export async function openedNight(ports: Ports, key: string) {
   };
   ports.inventory.save(projected);
   return projected;
+}
+/** Listing never catches up the chain or resolves arbitrary candidate keys by RPC. */
+export async function openedNights(ports: Ports) {
+  indexKeys(ports);
+  const rows = ports.db
+    .query<
+      { key: string; value: string },
+      [string]
+    >(`SELECT k.key, s.value FROM chain_nights n
+    JOIN chain_night_keys k ON k.night = n.night
+    JOIN chain_market_snapshots s ON s.fingerprint = n.fingerprint AND s.night = n.night
+    WHERE n.fingerprint = ?`)
+    .all(chainMarket(ports).reader.fingerprint);
+  return rows.map((row) =>
+    recordFromPool(ports, row.key, deserialize<Pool>(row.value)),
+  );
+}
+export async function openedNight(ports: Ports, key: string) {
+  parse(key);
+  const cached = projectedPool(ports, key);
+  if (cached) return recordFromPool(ports, key, cached);
+  const { reader, client, deployment } = chainMarket(ports);
+  const night = nightHash(key);
+  const head = await reader.head();
+  const projected = ports.db
+    .query<{ token: Address }, [string, string]>(
+      "SELECT token FROM chain_nights WHERE fingerprint = ? AND night = ?",
+    )
+    .get(reader.fingerprint, night);
+  const token =
+    projected?.token ??
+    ((await client.readContract({
+      address: deployment.NightFactory,
+      abi: deployment.abis.NightFactory ?? [],
+      functionName: "tokenOf",
+      args: [night],
+      blockNumber: head.number,
+    })) as Address);
+  if (token === zeroAddress)
+    throw new DomainError("NOT_FOUND", "Night is not open on chain.");
+  const pool = await readPoolAt(deployment, client, night, token, head);
+  ports.db
+    .transaction(() => {
+      ports.db
+        .query("INSERT OR IGNORE INTO chain_nights VALUES (?, ?, ?, ?, ?)")
+        .run(reader.fingerprint, night, token, head.number, head.hash);
+      ports.db
+        .query("INSERT OR IGNORE INTO chain_night_keys VALUES (?, ?)")
+        .run(night, key);
+      ports.db
+        .query("INSERT OR REPLACE INTO chain_market_snapshots VALUES (?, ?, ?)")
+        .run(reader.fingerprint, night, serialize(pool));
+    })
+    .immediate();
+  ports.db
+    .query(
+      "INSERT INTO chain_snapshots VALUES (?, ?, ?, ?, ?) ON CONFLICT(fingerprint, key) DO UPDATE SET block_number = excluded.block_number, block_hash = excluded.block_hash, value = excluded.value WHERE excluded.block_number >= chain_snapshots.block_number",
+    )
+    .run(
+      reader.fingerprint,
+      "market:paused",
+      head.number,
+      head.hash,
+      serialize(pool.paused),
+    );
+  return recordFromPool(ports, key, pool);
 }

@@ -18,6 +18,7 @@ import type { User } from "../../../ports/sessions/session-store";
 import { DomainError } from "../../../shared/errors/domain-error";
 import { toProto } from "../../../shared/night-key";
 import { type Deps, quantity } from "../use-cases/context";
+import { multicallAddress } from "./pool";
 import {
   assertOrb,
   chainMarket,
@@ -71,34 +72,46 @@ export function askRows(deps: Deps, key?: string) {
     .filter((r) => key === undefined || r.night_key === key);
 }
 export async function liveAsks(deps: Deps, key: string): Promise<Ask[]> {
-  const { reader } = chainMarket(deps.ports);
+  const rows = askRows(deps, key);
+  if (!rows.length) return [];
+  if (rows.length > 1000) throw new Error("Too many open asks.");
+  const { reader, client, deployment: d } = chainMarket(deps.ports);
   const head = await reader.head();
+  const token = await reader.tokenOf(nightHash(key), head.number);
+  const values = await client.multicall({
+    multicallAddress,
+    blockNumber: head.number,
+    allowFailure: false,
+    batchSize: 0,
+    contracts: rows.flatMap((row) => [
+      {
+        address: d.TradeRouter,
+        abi: d.abis.TradeRouter ?? [],
+        functionName: "nonces",
+        args: [row.maker],
+      },
+      {
+        address: d.TradeRouter,
+        abi: d.abis.TradeRouter ?? [],
+        functionName: "filled",
+        args: [row.digest],
+      },
+      {
+        address: token,
+        abi: d.abis.NightToken ?? [],
+        functionName: "balanceOf",
+        args: [row.maker],
+      },
+    ]),
+  });
   const asks: Ask[] = [];
-  for (const row of askRows(deps, key)) {
+  for (const [i, row] of rows.entries()) {
     const a = deserialize<Ask>(row.payload);
-    const nonce = (
-      await reader.read<bigint>(
-        { contract: "TradeRouter", functionName: "nonces", args: [row.maker] },
-        head.number,
-      )
-    ).value;
-    const filled = (
-      await reader.read<bigint>(
-        { contract: "TradeRouter", functionName: "filled", args: [row.digest] },
-        head.number,
-      )
-    ).value;
-    const balance = (
-      await reader.read<bigint>(
-        {
-          contract: "NightToken",
-          night: a.order.night,
-          functionName: "balanceOf",
-          args: [row.maker],
-        },
-        head.number,
-      )
-    ).value;
+    const [nonce, filled, balance] = values.slice(i * 3, i * 3 + 3) as [
+      bigint,
+      bigint,
+      bigint,
+    ];
     if (
       nonce !== a.order.nonce ||
       head.timestamp >= a.order.expiry ||

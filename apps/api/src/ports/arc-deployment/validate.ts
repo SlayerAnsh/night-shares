@@ -43,12 +43,11 @@ export function validateExecutionAbi(d: ArcDeployment): void {
     }
   }
 }
-const deferred = new WeakSet<ArcDeployment>();
 
 export async function validateDeployment(
   d: ArcDeployment,
   client: ForkClient,
-  warn: (message: string) => void = console.warn,
+  _warn: (message: string) => void = console.warn,
 ): Promise<string> {
   let check = "ABI";
   try {
@@ -136,37 +135,14 @@ export async function validateDeployment(
       if (!key || String(d[key]).toLowerCase() !== actual.toLowerCase())
         throw new Error(`Factory dependency mismatch: ${name}.`);
     }
-    let token = d.NightToken;
-    if (d.demoNight) {
-      check = `tokenOf NightFactory ${d.NightFactory}`;
-      const found = (await client.readContract({
-        address: d.NightFactory,
-        abi: d.abis.NightFactory ?? [],
-        functionName: "tokenOf",
-        args: [d.demoNight],
-      })) as Address;
-      if (
-        d.NightToken !== zeroAddress &&
-        found.toLowerCase() !== d.NightToken.toLowerCase()
-      )
-        throw new Error("Demo token mismatch.");
-      token = found;
-    }
-    if (d.x402Available && token === zeroAddress && !deferred.has(d)) {
-      deferred.add(d);
-      warn(
-        "domain NightToken: deferred; no factory-created demo token available.",
-      );
-    }
     for (const name of [
       "TradeRouter",
       "HumanRegistry",
       "NightFactory",
       "Settlement",
-      ...(d.x402Available ? (["USDC", "NightToken"] as const) : []),
+      ...(d.x402Available ? (["USDC"] as const) : []),
     ] as const) {
-      const address = name === "NightToken" ? token : d[name];
-      if (name === "NightToken" && address === zeroAddress) continue;
+      const address = d[name];
       check = `domain ${name} ${address}`;
       const actual = await client.readContract({
         address,
@@ -184,11 +160,7 @@ export async function validateDeployment(
         },
         domain: {
           name:
-            name === "USDC"
-              ? (d.USDC_EIP712?.name ?? "USDC")
-              : name === "NightToken"
-                ? "NightShares Room Night"
-                : "NightShares",
+            name === "USDC" ? (d.USDC_EIP712?.name ?? "USDC") : "NightShares",
           version: name === "USDC" ? (d.USDC_EIP712?.version ?? "2") : "1",
           chainId: BigInt(d.chainId),
           verifyingContract: address,

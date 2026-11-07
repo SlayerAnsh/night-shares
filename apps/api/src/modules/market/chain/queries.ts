@@ -6,13 +6,13 @@ import {
   NightStatsSchema,
 } from "@night-shares/proto/market/v1/analytics_pb";
 import type { DiscoverRequest } from "@night-shares/proto/market/v1/market_pb";
+import { deserialize } from "../../../ports/chain-executor/chain-executor";
 import type { User } from "../../../ports/sessions/session-store";
 import { addDays } from "../../../shared/dates";
 import { toProto } from "../../../shared/night-key";
 import type { NightRecord } from "../../inventory/inventory-repo";
 import type { Deps } from "../use-cases/context";
-import { openedNight, openedNights } from "./nights";
-import { chainPool } from "./pool";
+import { openedNight, openedNights, projectedPool } from "./nights";
 import { chainMarket } from "./runtime";
 
 export async function chainDiscover(
@@ -72,17 +72,18 @@ export async function chainNight(deps: Deps, key: string) {
   };
 }
 async function paused(deps: Deps) {
-  return (
-    await chainMarket(deps.ports).reader.read<boolean>({
-      contract: "NightHook",
-      functionName: "paused",
-    })
-  ).value;
+  const row = deps.ports.db
+    .query<{ value: string }, [string]>(
+      "SELECT value FROM chain_snapshots WHERE fingerprint = ? AND key = 'market:paused'",
+    )
+    .get(chainMarket(deps.ports).reader.fingerprint);
+  return row ? deserialize<boolean>(row.value) : true;
 }
 
 async function chainCard(deps: Deps, record: NightRecord) {
   const property = deps.ports.catalog.get(record.propertyId);
-  const pool = await chainPool(deps.ports, record.key);
+  const pool = projectedPool(deps.ports, record.key);
+  if (!pool) throw new Error("Missing projected market snapshot.");
   // Opening parameters define the curve, not demand or a fair-value forecast.
   // Absent forecasts deliberately leave optional money fields unset.
   return {

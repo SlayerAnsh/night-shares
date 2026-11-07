@@ -1,10 +1,4 @@
-import {
-  type Address,
-  createPublicClient,
-  keccak256,
-  stringToHex,
-  zeroAddress,
-} from "viem";
+import { createPublicClient } from "viem";
 import type { ArcDeployment } from "../arc-deployment/arc-deployment";
 import { arcTransport } from "../arc-deployment/transport";
 
@@ -22,7 +16,7 @@ export function createOnchainChainStatus(
       retries: fetchFn ? 0 : 4,
     }),
   });
-  for (const name of ["NightHook", "NightToken"] as const) {
+  for (const name of ["NightHook"] as const) {
     const matches = deployment.abis[name]?.filter(
       (item) =>
         item.type === "function" &&
@@ -59,28 +53,13 @@ export function createOnchainChainStatus(
       try {
         if ((await client.getChainId()) !== deployment.chainId)
           throw new Error("Arc RPC chainId does not match deployment.");
-        let token = deployment.NightToken;
-        if (nightKey) {
-          token = (await client.readContract({
-            address: deployment.NightFactory,
-            abi: deployment.abis.NightFactory ?? [],
-            functionName: "tokenOf",
-            args: [keccak256(stringToHex(nightKey))],
-          })) as Address;
-          if (token === zeroAddress)
-            throw new Error("Night token unavailable.");
-        }
-        const results = await Promise.all(
-          (["NightHook", "NightToken"] as const)
-            .filter((name) => name !== "NightToken" || token !== zeroAddress)
-            .map((name) =>
-              client.readContract({
-                address: name === "NightToken" ? token : deployment.NightHook,
-                abi: deployment.abis[name] ?? [],
-                functionName: "paused",
-              }),
-            ),
-        );
+        const results = [
+          await client.readContract({
+            address: deployment.NightHook,
+            abi: deployment.abis.NightHook ?? [],
+            functionName: "paused",
+          }),
+        ];
         if (results.some((result) => typeof result !== "boolean"))
           throw new Error("Invalid chain pause response.");
         state.paused = results.some(Boolean);

@@ -64,8 +64,8 @@ export function parseDeployment(value: unknown, chainId = 5042): ArcDeployment {
   const addresses = Object.fromEntries(
     addressKeys.map((key) => [
       key,
-      // Older testnet deployments have no demo token instance.
-      key === "NightToken" && chainId === 5042002 && data[key] === undefined
+      // A deployment need not include a demo token instance.
+      key === "NightToken" && data[key] === undefined
         ? zeroAddress
         : address(data[key], key),
     ]),

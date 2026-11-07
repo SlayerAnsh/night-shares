@@ -24,6 +24,7 @@ import { createHarness } from "../e2e/harness";
       const config = seedConfig({
         ...process.env,
         ARC_RPC_URL: child.rpcUrl,
+        ARC_RPC_URLS: child.rpcUrl,
         DB_PATH: ":memory:",
         WORLD_ID_MODE: "mock",
       });
@@ -44,6 +45,7 @@ import { createHarness } from "../e2e/harness";
         roomTypeId: "rt_velana_0",
         date: "2030-01-01",
       });
+      await container.ports.chainReader?.poll(9999);
       const discovered = await market.discover({});
       expect(
         discovered.nights.some((n) => n.night?.date === "2030-01-01"),

@@ -74,6 +74,20 @@ for (const approved of [false, true]) {
       custody,
       client: {
         getBlock: async () => block,
+        multicall: async (request: {
+          contracts: { functionName: string }[];
+        }) =>
+          request.contracts[0]?.functionName === "config"
+            ? [
+                { F: 10000n, k: 10n ** 18n, S: 10n ** 19n, cutoff: 1000000n },
+                0n,
+                0n,
+                true,
+                false,
+                false,
+                0n,
+              ]
+            : request.contracts.map(() => `0x${"00".repeat(32)}`),
         readContract: async (request: { functionName: string }) =>
           request.functionName === "extsload"
             ? `0x${"00".repeat(32)}`
@@ -156,6 +170,7 @@ test("testnet quotes project live pool positions without USDC simulation", async
     network: "testnet",
     custody: {} as never,
     deployment: {
+      abis: {},
       NightHook: address,
       NightVault: address,
       POOL_MANAGER: address,
@@ -163,13 +178,25 @@ test("testnet quotes project live pool positions without USDC simulation", async
     } as unknown as ArcDeployment,
     client: {
       getBlock: async () => block,
-      readContract: async () =>
-        toHex(
-          storageReads++ === 0
-            ? BigInt(Math.floor((Math.sqrt(0.5) / 1e6) * 2 ** 96))
-            : 100n * 10n ** 12n,
-          { size: 32 },
-        ),
+      multicall: async (request: { contracts: { functionName: string }[] }) =>
+        request.contracts[0]?.functionName === "config"
+          ? [
+              { F: 500000n, k: 10n ** 18n, S: 10n ** 19n, cutoff: 1000000n },
+              0n,
+              0n,
+              true,
+              false,
+              false,
+              0n,
+            ]
+          : request.contracts.map(() =>
+              toHex(
+                storageReads++ === 0
+                  ? BigInt(Math.floor((Math.sqrt(0.5) / 1e6) * 2 ** 96))
+                  : 100n * 10n ** 12n,
+                { size: 32 },
+              ),
+            ),
       simulateContract: async () => {
         throw new Error("Arc USDC precompile simulation must not run");
       },

@@ -1,44 +1,71 @@
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
 import { BookSource } from "@night-shares/proto/market/v1/book_pb";
 import { type Address, zeroAddress } from "viem";
-import type { NightConfig } from "../../../ports/chain-executor/chain-executor";
+import { deserialize } from "../../../ports/chain-executor/chain-executor";
 import type { Deps } from "../use-cases/context";
 import { liveAsks } from "./asks";
-import { openedNight } from "./nights";
-import { chainPool } from "./pool";
+import { openedNight, projectedPool } from "./nights";
 import { chainMarket, nightHash } from "./runtime";
 export async function chainBook(deps: Deps, key: string) {
   await openedNight(deps.ports, key);
-  const { reader } = chainMarket(deps.ports);
-  const night = nightHash(key),
-    head = await reader.head();
-  const read = async <T>(
-    contract: string,
-    functionName: string,
-    args: readonly unknown[] = [],
-  ) =>
-    (await reader.read<T>({ contract, night, functionName, args }, head.number))
-      .value;
-  const config = await read<NightConfig>("NightFactory", "config", [night]);
-  const holders = [];
-  let wallet = await read<Address>("NightToken", "head");
-  const seen = new Set<string>();
-  while (wallet !== zeroAddress) {
-    if (seen.has(wallet.toLowerCase()) || seen.size >= 1000)
-      throw new Error("Invalid chain holder list.");
-    seen.add(wallet.toLowerCase());
-    const size = await read<bigint>("NightToken", "balanceOf", [wallet]);
-    holders.push({
+  const { reader, deployment: d } = chainMarket(deps.ports);
+  const pool = projectedPool(deps.ports, key);
+  if (!pool) throw new Error("Missing projected market snapshot.");
+  const { config } = pool;
+  const token = deps.ports.db
+    .query<{ token: Address }, [string, string]>(
+      "SELECT token FROM chain_nights WHERE fingerprint = ? AND night = ?",
+    )
+    .get(reader.fingerprint, nightHash(key))?.token;
+  const balances = new Map<Address, bigint>();
+  const excluded = new Set(
+    [
+      zeroAddress,
+      d.NightVault,
+      d.POOL_MANAGER,
+      d.TradeRouter,
+      d.BookingRouter,
+      d.Settlement,
+      d.X402Settler,
+    ]
+      .filter(Boolean)
+      .map((a) => a?.toLowerCase()),
+  );
+  if (token && pool.held > 0n)
+    for (const row of deps.ports.db
+      .query<{ args: string }, [string, string]>(
+        "SELECT args FROM chain_events WHERE fingerprint = ? AND lower(address) = lower(?) AND event = 'Transfer' ORDER BY block_number, log_index",
+      )
+      .all(reader.fingerprint, token)) {
+      const { from, to, amount, value } = deserialize<{
+        from: Address;
+        to: Address;
+        amount?: bigint;
+        value?: bigint;
+      }>(row.args);
+      const quantity = amount ?? value ?? 0n;
+      for (const [address, delta] of [
+        [from, -quantity],
+        [to, quantity],
+      ] as const) {
+        const normalized = address.toLowerCase() as Address;
+        if (!excluded.has(normalized))
+          balances.set(normalized, (balances.get(normalized) ?? 0n) + delta);
+      }
+    }
+  const holders = [...balances]
+    .filter(([, balance]) => balance > 0n)
+    .sort((a, b) =>
+      a[1] === b[1] ? a[0].localeCompare(b[0]) : a[1] > b[1] ? -1 : 1,
+    )
+    .map(([wallet, balance]) => ({
       walletAddress: wallet,
-      size: { tenths: Number(size / 100000000000000000n) },
-      isHost: wallet.toLowerCase() === config.host.toLowerCase(),
-    });
-    wallet = await read<Address>("NightToken", "next", [wallet]);
-  }
+      size: { tenths: Number(balance / 100000000000000000n) },
+      isHost: wallet === config.host.toLowerCase(),
+    }));
   const asks = await liveAsks(deps, key);
-  const pool = await chainPool(deps.ports, key);
   return {
-    tradingPaused: await read<boolean>("NightHook", "paused"),
+    tradingPaused: pool.paused,
     holders,
     asks: [
       ...pool.asks,

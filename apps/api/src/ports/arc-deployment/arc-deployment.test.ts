@@ -85,3 +85,13 @@ test("network deployment selection loads current testnet and refuses missing mai
   expect(testnet?.x402Available).toBe(true);
   expect(() => loadDeployment("mainnet")).toThrow("5042.json");
 });
+
+test("mainnet deployment requires neither NightToken nor demoNight", () => {
+  const data = parseDeployment({
+    ...fixture(),
+    NightToken: undefined,
+    demoNight: undefined,
+  });
+  expect(data.NightToken).toBe("0x0000000000000000000000000000000000000000");
+  expect(data.demoNight).toBeUndefined();
+});

@@ -133,7 +133,6 @@ test("x402 startup fails on settler, deployer wiring and either authorization do
     "X402Settler.usdc",
     "TradeRouter.settler",
     "USDC.DOMAIN_SEPARATOR",
-    "NightToken.DOMAIN_SEPARATOR",
   ]) {
     await expect(validateDeployment(d, clientFor(d, broken))).rejects.toThrow(
       "mismatch",
@@ -167,30 +166,12 @@ test("required x402 functions, events, errors and dependencies are pinned", () =
   }
 });
 
-test("missing NightToken defers once or validates the factory demo token", async () => {
+test("no-demo deployment validates without a NightToken domain read", async () => {
   const original = deployment();
-  const d = { ...original, NightToken: zeroAddress };
-  const warnings: string[] = [];
-  const client = clientFor(original);
-  const warn = (message: string) => {
-    warnings.push(message);
-  };
-  await validateDeployment(d, client, warn);
-  await validateDeployment(d, client, warn);
-  expect(warnings).toHaveLength(1);
-  expect(warnings[0]).toContain("deferred");
-  d.demoNight = `0x${"ab".repeat(32)}`;
-  await expect(validateDeployment(d, client, warn)).resolves.toMatch(
-    /^[a-f0-9]{64}$/,
-  );
+  const d = { ...original, NightToken: zeroAddress, demoNight: undefined };
   await expect(
-    validateDeployment(
-      d,
-      clientFor(original, "NightToken.DOMAIN_SEPARATOR"),
-      warn,
-    ),
-  ).rejects.toThrow("domain NightToken");
-  expect(warnings).toHaveLength(1);
+    validateDeployment(d, clientFor(original, "NightToken.DOMAIN_SEPARATOR")),
+  ).resolves.toMatch(/^[a-f0-9]{64}$/);
 });
 
 test("preflight includes failing check and redacts endpoint secrets", async () => {
@@ -201,10 +182,7 @@ test("preflight includes failing check and redacts endpoint secrets", async () =
   const secret = "preflight-secret-123456789";
   const url = `https://rpc.invalid/v2/${secret}`;
   client.readContract = (async (args: Parameters<typeof read>[0]) => {
-    if (
-      args.address === d.NightToken &&
-      args.functionName === "DOMAIN_SEPARATOR"
-    )
+    if (args.address === d.USDC && args.functionName === "DOMAIN_SEPARATOR")
       throw new Error(
         `The contract function "DOMAIN_SEPARATOR" returned no data.\n${url} ${secret}`,
       );
@@ -219,7 +197,7 @@ test("preflight includes failing check and redacts endpoint secrets", async () =
   } catch (error) {
     reason = (error as Error).message;
   }
-  expect(reason).toContain(`domain NightToken ${d.NightToken}`);
+  expect(reason).toContain(`domain USDC ${d.USDC}`);
   expect(reason).toContain("returned no data");
   expect(reason).not.toContain(secret);
   expect(reason).not.toContain("\n");

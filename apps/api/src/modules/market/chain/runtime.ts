@@ -1,5 +1,5 @@
 import type { Address } from "viem";
-import { keccak256, stringToHex } from "viem";
+import { hashDomain, keccak256, stringToHex } from "viem";
 import { envValue } from "../../../config/env";
 import type { Ports } from "../../../container/ports";
 import type { ArcDeployment } from "../../../ports/arc-deployment/arc-deployment";
@@ -25,7 +25,67 @@ type Settings = {
 const settings = new WeakMap<Ports, Settings>();
 export function configureChainMarket(ports: Ports, value: Settings) {
   slippageBounds(0n, value.slippageBps);
-  settings.set(ports, value);
+  const verified = new Map<string, Promise<void>>();
+  const custody: WalletCustody = {
+    ...value.custody,
+    async signTypedData(walletId, data) {
+      if (
+        data.primaryType === "ReceiveWithAuthorization" ||
+        data.primaryType === "TransferWithAuthorization"
+      ) {
+        const token = data.domain?.verifyingContract;
+        if (!token || Number(data.domain?.chainId) !== value.deployment.chainId)
+          throw new Error("Invalid authorization domain.");
+        const expected = hashDomain({
+          domain: {
+            name: data.domain?.name ?? "",
+            version: data.domain?.version ?? "",
+            chainId: BigInt(value.deployment.chainId),
+            verifyingContract: token,
+          },
+          types: {
+            EIP712Domain: [
+              { name: "name", type: "string" },
+              { name: "version", type: "string" },
+              { name: "chainId", type: "uint256" },
+              { name: "verifyingContract", type: "address" },
+            ],
+          },
+        });
+        const key = `${token.toLowerCase()}:${expected}`;
+        let pending = verified.get(key);
+        if (!pending) {
+          pending = (async () => {
+            const client = value.client ?? chainMarket(ports).client;
+            const actual = await client.readContract({
+              address: token,
+              abi: [
+                {
+                  type: "function",
+                  name: "DOMAIN_SEPARATOR",
+                  inputs: [],
+                  outputs: [{ type: "bytes32" }],
+                  stateMutability: "view",
+                },
+              ],
+              functionName: "DOMAIN_SEPARATOR",
+            });
+            if (actual !== expected)
+              throw new Error("Token authorization domain mismatch.");
+          })();
+          verified.set(key, pending);
+        }
+        try {
+          await pending;
+        } catch (error) {
+          verified.delete(key);
+          throw error;
+        }
+      }
+      return value.custody.signTypedData(walletId, data);
+    },
+  };
+  settings.set(ports, { ...value, custody });
 }
 export const isChain = (ports: Ports) => ports.chainExecutor?.mode === "chain";
 export const nightHash = (key: string) => keccak256(stringToHex(key));
@@ -61,6 +121,7 @@ export function chainMarket(ports: Ports) {
     ...configured,
     client:
       configured.client ??
+      ports.chainReader.client ??
       forkClient(envValue("ARC_RPC_URL") ?? "http://127.0.0.1:8545"),
     executor: ports.chainExecutor,
     reader: ports.chainReader,

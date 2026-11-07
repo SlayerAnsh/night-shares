@@ -1,4 +1,5 @@
 import type { Address, Hex, TransactionReceipt } from "viem";
+import type { ForkClient } from "../arc-deployment/validate";
 import type { ChainCommand } from "../chain-executor/chain-executor";
 export type BlockStamp = { number: bigint; hash: Hex; timestamp: bigint };
 export type ReadRequest = {
@@ -10,6 +11,7 @@ export type ReadRequest = {
 export type Snapshot<T = unknown> = { block: BlockStamp; value: T };
 export interface ChainReader {
   readonly fingerprint: string;
+  readonly client?: ForkClient;
   head(): Promise<BlockStamp>;
   assertCurrent(): Promise<void>;
   read<T = unknown>(

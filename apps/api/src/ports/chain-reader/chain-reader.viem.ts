@@ -7,6 +7,7 @@ import {
   type Log,
   zeroAddress,
 } from "viem";
+import { type Pool, readPoolAt } from "../../modules/market/chain/pool";
 import type { ArcDeployment } from "../arc-deployment/arc-deployment";
 import {
   type ForkClient,
@@ -67,6 +68,18 @@ export function createChainReader(
         }
       })();
       if (!decoded) continue;
+      if (name === "NightFactory" && decoded.eventName === "NightOpened") {
+        const args = decoded.args as unknown as { night: Hex; token: Address };
+        db.query(
+          "INSERT OR REPLACE INTO chain_nights VALUES (?, ?, ?, ?, ?)",
+        ).run(
+          fingerprint,
+          args.night,
+          args.token,
+          log.blockNumber,
+          log.blockHash,
+        );
+      }
       // Database errors must propagate: receipt finalization must remain replayable.
       db.query(
         "INSERT OR IGNORE INTO chain_events VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -82,8 +95,24 @@ export function createChainReader(
       );
     }
   };
+  const saveMarket = (night: Hex, value: Pool) => {
+    const previous = db
+      .query<{ value: string }, [string, string]>(
+        "SELECT value FROM chain_market_snapshots WHERE fingerprint = ? AND night = ?",
+      )
+      .get(fingerprint, night);
+    if (
+      previous &&
+      deserialize<Pool>(previous.value).block.number > value.block.number
+    )
+      return;
+    db.query(
+      "INSERT OR REPLACE INTO chain_market_snapshots VALUES (?, ?, ?)",
+    ).run(fingerprint, night, serialize(value));
+  };
   const reader: ChainReader = {
     fingerprint,
+    client,
     head: () => blockAt(),
     async assertCurrent() {
       if ((await validateDeployment(d, client)) !== fingerprint)
@@ -92,6 +121,17 @@ export function createChainReader(
         );
     },
     async tokenOf(night, blockNumber) {
+      const projected = db
+        .query<{ token: Address; block_number: number }, [string, string]>(
+          "SELECT token, block_number FROM chain_nights WHERE fingerprint = ? AND night = ?",
+        )
+        .get(fingerprint, night);
+      if (
+        projected &&
+        (blockNumber === undefined ||
+          BigInt(projected.block_number) <= blockNumber)
+      )
+        return projected.token;
       const token = (await client.readContract({
         address: d.NightFactory,
         abi: d.abis.NightFactory ?? [],
@@ -163,6 +203,33 @@ export function createChainReader(
       if (block.hash !== receipt.blockHash)
         throw new Error("Receipt is not canonical.");
       db.transaction(() => reduce(receipt.logs)).immediate();
+      const addresses = new Set(
+        receipt.logs.map((log) => log.address.toLowerCase()),
+      );
+      const nights = db
+        .query<{ night: Hex; token: Address }, [string, bigint]>(
+          "SELECT night, token FROM chain_nights WHERE fingerprint = ? AND block_number <= ?",
+        )
+        .all(fingerprint, block.number);
+      for (const { night, token } of nights) {
+        if (
+          !addresses.has(token.toLowerCase()) &&
+          !addresses.has(d.NightFactory.toLowerCase()) &&
+          !addresses.has(d.NightVault.toLowerCase())
+        )
+          continue;
+        const pool = await readPoolAt(d, client, night, token, block);
+        saveMarket(night, pool);
+        db.query(
+          "INSERT INTO chain_snapshots VALUES (?, ?, ?, ?, ?) ON CONFLICT(fingerprint, key) DO UPDATE SET block_number = excluded.block_number, block_hash = excluded.block_hash, value = excluded.value WHERE excluded.block_number >= chain_snapshots.block_number",
+        ).run(
+          fingerprint,
+          "market:paused",
+          block.number,
+          block.hash,
+          serialize(pool.paused),
+        );
+      }
     },
     async poll(maxBlocks = 100) {
       if (!Number.isSafeInteger(maxBlocks) || maxBlocks < 1)
@@ -191,6 +258,8 @@ export function createChainReader(
             "chain_blocks",
             "chain_events",
             "chain_snapshots",
+            "chain_nights",
+            "chain_market_snapshots",
           ])
             db.query(`DELETE FROM ${table} WHERE fingerprint = ?`).run(
               fingerprint,
@@ -210,11 +279,12 @@ export function createChainReader(
         head.number < start + BigInt(maxBlocks - 1)
           ? head.number
           : start + BigInt(maxBlocks - 1);
-      for (let n = start; n <= end; n++) {
+      if (start <= end) {
+        const n = end;
         const block = await blockAt(n);
         // Read all logs to include tokens created in this very block. Filter by known factory creations.
-        const logs = await client.getLogs({ fromBlock: n, toBlock: n });
-        const tokens = new Set<string>([d.NightToken.toLowerCase()]);
+        const logs = await client.getLogs({ fromBlock: start, toBlock: end });
+        const tokens = new Set<string>();
         for (const row of db
           .query<{ args: string }, [string]>(
             "SELECT args FROM chain_events WHERE fingerprint = ? AND event = 'NightOpened'",
@@ -273,10 +343,56 @@ export function createChainReader(
             snapshot: await reader.read(request, n),
           });
         }
+        const opened = new Map(
+          db
+            .query<{ night: Hex; token: Address }, [string, bigint]>(
+              "SELECT night, token FROM chain_nights WHERE fingerprint = ? AND block_number <= ?",
+            )
+            .all(fingerprint, n)
+            .map((row) => [row.night, row.token]),
+        );
+        for (const log of filtered) {
+          if (log.address.toLowerCase() !== d.NightFactory.toLowerCase())
+            continue;
+          try {
+            const event = decodeEventLog({
+              abi: d.abis.NightFactory ?? [],
+              data: log.data,
+              topics: log.topics,
+            });
+            if (event.eventName === "NightOpened") {
+              const args = event.args as unknown as {
+                night: Hex;
+                token: Address;
+              };
+              opened.set(args.night, args.token);
+            }
+          } catch {
+            /* Unrelated factory event. */
+          }
+        }
+        snapshots.push({
+          key: "market:paused",
+          snapshot: {
+            value: await client.readContract({
+              address: d.NightHook,
+              abi: d.abis.NightHook ?? [],
+              functionName: "paused",
+              blockNumber: n,
+            }),
+          },
+        });
+        const markets: { night: Hex; value: Pool }[] = [];
+        for (const [night, token] of opened)
+          markets.push({
+            night,
+            value: await readPoolAt(d, client, night, token, block),
+          });
         if ((await blockAt(n)).hash !== block.hash)
           throw new Error("Block changed during reconciliation.");
         db.transaction(() => {
           reduce(filtered);
+          for (const market of markets) saveMarket(market.night, market.value);
           for (const { key, snapshot } of snapshots)
             db.query(
               "INSERT OR REPLACE INTO chain_snapshots VALUES (?, ?, ?, ?, ?)",
