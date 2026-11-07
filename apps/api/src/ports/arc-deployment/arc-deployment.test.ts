@@ -83,14 +83,17 @@ test("network deployment selection loads the committed testnet and mainnet files
   expect(testnet?.chainId).toBe(5042002);
   expect(testnet?.block).toBeGreaterThan(0);
   expect(testnet?.x402Available).toBe(true);
-  // Mainnet (dc30c82) has the x402 set and no demo night.
+  // Mainnet carries the x402 set. Its demo night comes from the smoke run
+  // (db89e67) and expires, so only its shape is asserted here.
   const mainnet = loadDeployment("mainnet");
   expect(mainnet?.chainId).toBe(5042);
   expect(mainnet?.x402Available).toBe(true);
-  expect(mainnet?.demoNight).toBeUndefined();
-  expect(mainnet?.NightToken).toBe(
-    "0x0000000000000000000000000000000000000000",
-  );
+  if (mainnet?.demoNight !== undefined) {
+    expect(mainnet.demoNight).toMatch(/^0x[0-9a-f]{64}$/);
+    expect(mainnet.NightToken).not.toBe(
+      "0x0000000000000000000000000000000000000000",
+    );
+  }
 });
 
 test("mainnet deployment requires neither NightToken nor demoNight", () => {
