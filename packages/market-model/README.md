@@ -1,6 +1,6 @@
 # @night-shares/market-model
 
-Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `53a8f129bd65`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
+Pure TypeScript pricing, order book, deterministic night state and payout math for Night Shares. This ports `../mock/v2/assets/model.js`, SHA256 prefix `5ed0433226df`, and the required helpers from `shared.js`. Runtime code imports no catalog, browser state or wall clock. The source entry point is `src/index.ts`; no build is required.
 
 ## Public API
 
