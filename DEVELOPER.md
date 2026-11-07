@@ -399,6 +399,50 @@ acceptance. Running `bun test` at the repository root also currently fails the
 market-model fingerprint assertion (`53a8f129bd65` versus `5ed0433226df`); the API
 suite and the fork acceptance suite are run from `apps/api`.
 
+## Testnet trading rehearsal
+
+Use the existing reviewed testnet deployment and runtime credentials. From the repository root, export the following in the shell (do not commit secrets):
+
+```sh
+export ARC_NETWORK=testnet CHAIN_EXECUTION=on CHAIN_STATUS=onchain
+export WALLET_CUSTODY=privy FORK_FAUCET=false
+export ARC_RPC_URLS='https://rpc.testnet.arc.network,https://rpc.testnet.arc.io'
+export ARC_DEPLOYMENT_FILE="$PWD/packages/contracts/deployments/5042002.json"
+export DB_PATH="$PWD/apps/api/data/testnet-rehearsal.db"
+export PRIVY_APP_ID='<app id>' PRIVY_APP_SECRET='<app secret>'
+# Set PRIVY_AUTHORIZATION_KEY too if required by the wallet policy.
+export ATTESTER_KEYSTORE='/absolute/path/to/attester.json'
+export ATTESTER_KEYSTORE_PASSWORD_FILE='/absolute/path/to/attester-password'
+export OPS_KEYSTORE='/absolute/path/to/ops.json'
+export OPS_KEYSTORE_PASSWORD_FILE='/absolute/path/to/ops-password'
+export CHAIN_GAS_FLOAT=0.05 CHAIN_GAS_LOW_WATER=0.01
+export CHAIN_GAS_DAILY_CAP_PER_WALLET=0.2 CHAIN_OPS_MIN_BALANCE=0.1
+export SEED_TRADER_USDC=2
+pnpm --filter api seed:testnet
+```
+
+Use exactly one key source per role; existing raw `ATTESTER_KEY`/`OPS_KEY` or Keychain sources work instead of the keystore/password-file pairs above. The seed does not load `.env` files. It forces `WORLD_ID_MODE=mock` only in its own configuration; the parent shell and subsequent API process are unchanged. Mainnet and `CHAIN_EXECUTION=off` are refused. Testnet uses Privy custody and never a faucet.
+
+The seed signs in mock Orb host `testnet-rehearsal-host` and trader `testnet-rehearsal-trader`, binds an available catalog property to the host's payout wallet, and opens two nights three and four days after chain time, with F=0.5 USDC and the minimum 10% allotment (at most ten rooms). Identity, binding, opening and funding use the normal API use cases and transaction journal. Output includes night keys, both wallet addresses, transaction hashes, a budget estimate, and the login hint.
+
+Before any transaction, the seed checks ops funds against the required host, trader and attester gas floats plus trader funding and the minimum balance. With three empty wallets, defaults allocate 0.15 native USDC plus 2 ERC-20 USDC and require 2.25 native USDC including the 0.1 reserve, plus an estimated ops fee allowance. The allowance reserves 100,000 gas per ops transfer at the RPC maximum fee estimate and is printed in the budget output. Arc native USDC uses 18 decimals and ERC-20 USDC uses 6 decimals. Already-funded wallets reduce the float requirement; completed trader funding is skipped. The guard prints the shortfall on refusal. Keep the same database and deployment on reruns: users, wallets, property, dates and journaled transfers are reused. Changing `SEED_TRADER_USDC` after completed funding does not top up the trader. Expired rehearsal nights remain the original nights; use a deliberately separate rehearsal database and available catalog property for a new rehearsal.
+
+Then start the API using the same exported environment and database:
+
+```sh
+WORLD_ID_MODE=mock JOB_INTERVAL_MS=5000 pnpm --filter api exec bun --no-env-file --watch src/main.ts
+```
+
+For real World ID instead, supply the cloud World ID credentials described above and start with `WORLD_ID_MODE=cloud`. Real World ID creates a different identity and wallet; the printed mock trader login and its funding apply only to mock-auth rehearsal. Fund the real user's wallet separately before trading.
+
+In another terminal, from the repository root:
+
+```sh
+pnpm --filter web dev
+```
+
+Open http://localhost:3000/trade. For mock-auth rehearsal, choose Orb and enter `testnet-rehearsal-trader` (Switch account first if needed). Open a printed catalog night, buy 0.1 room-night, wait for Confirmed, and inspect the transaction hash and portfolio holding. Allow the API chain reader to catch up before expecting Discover results. Do not expose a mock-auth rehearsal API publicly.
+
 ## Click a trade on the fork
 
 Use the existing deployed fork and its matching deployment artifact. The seed

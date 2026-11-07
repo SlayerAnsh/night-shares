@@ -5,6 +5,8 @@ All notable changes to this monorepo. Newest first.
 
 ## Unreleased
 
+- Add an idempotent Arc testnet catalog seed with Privy custody, journaled trader funding, an ops budget guard, and rehearsal instructions.
+
 - Enable Arc mainnet execution and recovery behind an explicit execution switch, with read-only mainnet defaults and startup limit validation.
 
 - Document chain mode deployment in `.env.example` and the Dokploy guide: `ARC_RPC_URLS` as a secret, `ATTESTER`/`OPS` signing sources, ops wallet funding for readiness, and a single `api` replica with a private SQLite volume.
