@@ -27,6 +27,11 @@ const addressKeys = [
 ] as const;
 export type ArcDeployment = Record<(typeof addressKeys)[number], Address> & {
   chainId: number;
+  block?: number;
+  forkBlock?: number;
+  constructorConfig?: Record<string, unknown>;
+  demoNight?: `0x${string}`;
+  demoPoolCost?: bigint;
   EIP712Domain: OrderDomain & { name: string; version: string };
   abis: Record<string, Abi>;
 };
@@ -92,6 +97,14 @@ export function parseDeployment(value: unknown, chainId = 5042): ArcDeployment {
   return {
     ...addresses,
     chainId,
+    block: data.block,
+    forkBlock: data.forkBlock,
+    constructorConfig: data.constructorConfig,
+    demoNight: data.demoNight,
+    demoPoolCost:
+      data.demoPoolCost === undefined
+        ? undefined
+        : BigInt(String(data.demoPoolCost)),
     abis: data.abis,
     EIP712Domain: normalized,
   } as ArcDeployment;

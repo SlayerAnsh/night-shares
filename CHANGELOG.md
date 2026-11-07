@@ -5,6 +5,8 @@ All notable changes to this monorepo. Newest first.
 
 ## Unreleased
 
+- Add fork execution ports, deployment preflight, durable transaction recovery, native/cash provisioning and block reconciliation; reject legacy ledger settlement in fork mode.
+
 - Match walk refunds to per-night unswept earnings and available cover funds; persist unpaid guest claims, repay them FIFO before host payouts, expose trip balances, and retain guest-ID bans.
 
 - Add Arc fork configuration, validated deployment loading and EIP-712 domain checks, cached on-chain pause reads, persisted Anvil custody and optional mock-USDC faucet. Trade settlement remains unchanged.

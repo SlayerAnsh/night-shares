@@ -20,6 +20,7 @@ import { createSqliteActivityLog } from "../ports/activity/activity-log.sqlite";
 import { assertMockSecurity } from "../ports/agent-pass/mock-security";
 import { configureAgentPass } from "../ports/agent-pass/settings";
 import { bookingReportFor } from "../ports/booking-report/booking-report.mock";
+import { createMockChainExecutor } from "../ports/chain-executor/chain-executor.mock";
 import { configureChainStatus } from "../ports/chain-status/chain-status";
 import { createMockChainStatus } from "../ports/chain-status/chain-status.mock";
 import { createOnchainChainStatus } from "../ports/chain-status/chain-status.onchain";
@@ -43,6 +44,7 @@ import { createPrivyWalletCustody } from "../ports/wallet-custody/wallet-custody
 import { persistWalletCustody } from "../ports/wallet-custody/wallet-custody.sqlite";
 import { createSqliteWalletProvider } from "../ports/wallet-provider/wallet-provider.sqlite";
 import { parseDate } from "../shared/dates";
+import { createForkFoundation } from "./fork-foundation";
 import type { Ports } from "./ports";
 export function buildContainer(config: Config) {
   if (config.devTagIssuer && config.adapters !== "mock")
@@ -103,8 +105,11 @@ export function buildContainer(config: Config) {
     db,
   );
   const catalog = createMemoryCatalogRepo();
+  const fork =
+    config.arcNetwork === "fork" ? createForkFoundation(config, db) : undefined;
   const custody =
-    config.walletCustody === "anvil"
+    fork?.custody ??
+    (config.walletCustody === "anvil"
       ? createAnvilWalletCustody({
           db,
           network: config.arcNetwork ?? "mainnet",
@@ -116,22 +121,29 @@ export function buildContainer(config: Config) {
           db,
           config.walletCustody ?? "mock",
           custodyAdapter,
-        );
-  const walletProvider = createSqliteWalletProvider({
-    db,
-    ids,
-    clock,
-    custody,
-  });
+        ));
+  const walletProvider =
+    fork?.walletProvider ??
+    createSqliteWalletProvider({
+      db,
+      ids,
+      clock,
+      custody,
+    });
   const network = config.arcNetwork ?? "mainnet";
   walletProvider.explorerUrl = ARC_NETWORKS[network].explorerUrl;
-  walletProvider.onchainUsdcBalance = createOnchainUsdcBalance(
-    network,
-    config.arcRpcUrl,
-    { usdc: config.arcDeployment?.USDC },
-  );
+  if (!fork)
+    walletProvider.onchainUsdcBalance = createOnchainUsdcBalance(
+      network,
+      config.arcRpcUrl,
+      { usdc: config.arcDeployment?.USDC },
+    );
   const ports: Ports & { bookingReport: ReturnType<typeof bookingReportFor> } =
     {
+      chainExecutor: fork?.chainExecutor ?? createMockChainExecutor(),
+      chainReader: fork?.chainReader,
+      chainAttester: fork?.chainAttester,
+      provisionWallet: fork?.provisionWallet,
       receptionTag,
       issueReceptionTag:
         config.devTagIssuer === true ? receptionTag.issueTagPayload : undefined,
@@ -179,7 +191,7 @@ export function buildContainer(config: Config) {
     );
   configureChainStatus(
     ports,
-    config.chainStatus === "onchain"
+    fork || config.chainStatus === "onchain"
       ? createOnchainChainStatus(
           requireDeployment(),
           config.arcRpcUrl ??

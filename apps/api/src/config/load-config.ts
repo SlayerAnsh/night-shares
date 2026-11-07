@@ -8,6 +8,7 @@ import {
   type ArcDeployment,
   loadDeployment,
 } from "../ports/arc-deployment/arc-deployment";
+import { assertLocalForkRpc } from "../ports/arc-deployment/local-fork";
 import { chainConfig } from "../ports/chain-status/config";
 import { parseDate } from "../shared/dates";
 import { ARC_NETWORKS } from "./arc-networks";
@@ -25,6 +26,7 @@ export type Config = Partial<ServerConfig> &
     arcDeployment?: ArcDeployment;
     chainStatus?: "mock" | "onchain";
     forkFaucet?: boolean;
+    forkGasHeadroomBps?: number;
     forkAttesterKey?: () => `0x${string}`;
     arcRpcUrl?: string;
     orderChainId?: number;
@@ -52,7 +54,8 @@ export type Config = Partial<ServerConfig> &
 export function loadConfig(
   env: Record<string, string | undefined> = process.env,
 ): Config {
-  const walletCustody = env.WALLET_CUSTODY ?? "mock";
+  const walletCustody =
+    env.WALLET_CUSTODY ?? (env.ARC_NETWORK === "fork" ? "anvil" : "mock");
   if (
     walletCustody !== "mock" &&
     walletCustody !== "privy" &&
@@ -105,6 +108,20 @@ export function loadConfig(
   } catch {
     throw new Error("ARC_RPC_URL must be an HTTP(S) URL without credentials.");
   }
+  if (arcNetwork === "fork") {
+    assertLocalForkRpc(arcRpcUrl);
+    if (walletCustody !== "anvil")
+      throw new Error("Fork execution requires WALLET_CUSTODY=anvil.");
+    if (chainStatus !== "onchain")
+      throw new Error("Fork execution requires CHAIN_STATUS=onchain.");
+  }
+  const forkGasHeadroomBps = Number(env.FORK_GAS_HEADROOM_BPS ?? "12000");
+  if (
+    !Number.isInteger(forkGasHeadroomBps) ||
+    forkGasHeadroomBps < 10000 ||
+    forkGasHeadroomBps > 50000
+  )
+    throw new Error("FORK_GAS_HEADROOM_BPS must be 10000..50000.");
   const orderChainId = Number(
     env.ORDER_CHAIN_ID ?? ARC_NETWORKS[arcNetwork].chainId,
   );
@@ -235,6 +252,7 @@ export function loadConfig(
     arcDeployment,
     chainStatus,
     forkFaucet: faucet === "true",
+    forkGasHeadroomBps,
     forkAttesterKey,
     arcRpcUrl,
     orderChainId,
