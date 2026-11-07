@@ -101,10 +101,28 @@ test("unexpected errors produce one sanitized stack and a generic client error",
   expect(logged.message).toStartWith(
     "RPC failed: https://rpc.invalid/<redacted>",
   );
-  expect(logged.stack.split("\n")[0]).toBe(`Error: ${logged.message}`);
-  expect(logged.stack).toContain("at ");
+  expect(logged.name).toBe("Error");
+  expect(logged.stack.trimStart()).toStartWith("at ");
+  expect(logged.stack).not.toContain("RPC failed");
   expect(f.lines.join("")).not.toContain("private-token");
   expect(f.lines.join("")).not.toContain("private@example.test");
+});
+
+test("unexpected error messages mask signatures, tokens and long values", () => {
+  const lines: string[] = [];
+  const logger = createLogger("info", (line) => lines.push(line));
+  const signature = `0x${"ab".repeat(65)}`;
+  const jwt = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIn0.c2lnbmF0dXJlLXZhbHVl";
+  const token = "sk_live_0123456789abcdefghijklmnopqrstuvwxyz";
+  logger.unexpected(
+    new Error(`failed ${signature} ${jwt} ${token} ${"x".repeat(400)}`),
+  );
+  const logged = JSON.parse(lines[0] ?? "{}");
+  expect(logged.message).not.toContain(signature);
+  expect(logged.message).not.toContain(jwt);
+  expect(logged.message).not.toContain(token);
+  expect(logged.message.length).toBeLessThanOrEqual(300);
+  expect(logged.message).toStartWith("failed 0x<redacted>");
 });
 
 test("domain and Connect errors remain expected and do not emit stacks", async () => {
