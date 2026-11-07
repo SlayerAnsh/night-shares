@@ -44,6 +44,8 @@ The model is called through an OpenAI compatible client. The prototype uses Clau
 
 8. Chain: real transactions on an anvil fork of Arc mainnet (real `PoolManager` and Permit2, etched USDC with EIP-3009) until everything works end to end, then move to Arc mainnet. No mock ledger for agent trades. This brings the chain adapter, contract deploys and settlement reconciliation (SPECS notes an outbox is needed before the atomic mock path can be replaced) into scope.
 
+9. No simulated human trading (2026-11-07). Human trades also execute on chain from the user's Privy wallet. Every agent wallet is linked to its owner's World ID `humanId`, so the owner's total holdings (own wallet plus all agents) count toward one 30% cap, read from `NightToken.humanBalance(humanId)`.
+
 ## 6. How it works
 
 ### 6.1 Agent lifecycle
