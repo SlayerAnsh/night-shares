@@ -1,57 +1,65 @@
 {
   "ATTESTER": "0x485814367d4D7aB3330cc33398474993834441ec",
-  "BookingRouter": "0x38501e047c83929a18B3D1E6ed5E61Df5c6366fC",
-  "CoverFund": "0xD217aCdd3Ca9A185e849E7d0F13d0a5F7F14acDF",
-  "HookDeployer": "0x508C4079f57AA14c594CA33220B0f763E327a4fa",
-  "HumanRegistry": "0x364e22DA4e82c7B98F8eFF9e545800055B012bC6",
+  "BookingRouter": "0x3552db63FDAeEe4EeBFbC0E6D64bA7455b299Fc4",
+  "CoverFund": "0xC66FF3f1F8c3284E3B5F123777b84c130B8A2314",
+  "HookDeployer": "0xD501b460567E57B30FcF11ad35B85Ad6259aC964",
+  "HumanRegistry": "0x19540Bb5A6B9A259e67816af1A200c920A69eC0F",
   "MAX_F": 1000000,
   "MAX_OPEN_NIGHTS": 20,
   "MAX_POOL": 50000000,
   "MAX_S": 100,
-  "NightFactory": "0x571A92D4Aa761C98De25a7319fF40B08354801e0",
-  "NightHook": "0x065b256B4AfAa7638f6647bD5125417974B02AEC",
-  "NightVault": "0x4340425dd550bf4Bd168f16C27212e5C20b3eB19",
+  "NightFactory": "0x9D7ecCe48bFd60c1Aae7DB831EBd6A1e6eaA3FdC",
+  "NightHook": "0xf36A6AD3ef9B5081a9cC4F167a662D7D88D1eaEc",
+  "NightTokenDeployer": "0x9bDdECE2d9A00423055687E8699d303514014a76",
+  "NightVault": "0x4dE0DB0Dd4D1D03142a032CdabF0Dda96D111546",
   "OWNER": "0xbaedDFc6122C5b873ebcE221a91E94789Ab82Ca3",
   "PERMIT2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
   "PLATFORM": "0xbaedDFc6122C5b873ebcE221a91E94789Ab82Ca3",
-  "POOL_MANAGER": "0x09586E643989B9C7273F8A4bA1D47163F0B17C69",
-  "RebatePool": "0xb03146d8ED3038B1044568D4bE62990933Db6030",
-  "Settlement": "0xEd2d5D23cEEF3202a98fB03240254955f6373a16",
-  "TradeRouter": "0xCc0494037065fF7Aee73a65302b25251AB6907f8",
+  "POOL_MANAGER": "0x8366a39CC670B4001A1121B8F6A443A643e40951",
+  "RebatePool": "0xFcF9b1a7f99e00e583d43d7dA0DAf16D61320935",
+  "Settlement": "0xD3dEDdFeb6EE6DDE4c739f70b6216f0Eca0E29d4",
+  "TradeRouter": "0x6CF1B089539Fba9E165d335F2E124C924e834a77",
   "USDC": "0x3600000000000000000000000000000000000000",
-  "block": 71115581,
+  "X402Settler": "0x7a4FDea6E1A10312fb8D88c49d9DCaFE82F795fC",
+  "block": 71125353,
   "chainId": 5042002,
   "deployer": "0x60C8e3847Da87F37536ccD07D91c2289693d2F1b",
   "constructorConfig": {
     "ATTESTER": "0x485814367d4D7aB3330cc33398474993834441ec",
-    "BookingRouter": "0x38501e047c83929a18B3D1E6ed5E61Df5c6366fC",
-    "CoverFund": "0xD217aCdd3Ca9A185e849E7d0F13d0a5F7F14acDF",
-    "HookDeployer": "0x508C4079f57AA14c594CA33220B0f763E327a4fa",
-    "HumanRegistry": "0x364e22DA4e82c7B98F8eFF9e545800055B012bC6",
+    "BookingRouter": "0x3552db63FDAeEe4EeBFbC0E6D64bA7455b299Fc4",
+    "CoverFund": "0xC66FF3f1F8c3284E3B5F123777b84c130B8A2314",
+    "HookDeployer": "0xD501b460567E57B30FcF11ad35B85Ad6259aC964",
+    "HumanRegistry": "0x19540Bb5A6B9A259e67816af1A200c920A69eC0F",
     "MAX_F": 1000000,
     "MAX_OPEN_NIGHTS": 20,
     "MAX_POOL": 50000000,
     "MAX_S": 100,
-    "NightFactory": "0x571A92D4Aa761C98De25a7319fF40B08354801e0",
-    "NightHook": "0x065b256B4AfAa7638f6647bD5125417974B02AEC",
-    "NightVault": "0x4340425dd550bf4Bd168f16C27212e5C20b3eB19",
+    "NightFactory": "0x9D7ecCe48bFd60c1Aae7DB831EBd6A1e6eaA3FdC",
+    "NightHook": "0xf36A6AD3ef9B5081a9cC4F167a662D7D88D1eaEc",
+    "NightTokenDeployer": "0x9bDdECE2d9A00423055687E8699d303514014a76",
+    "NightVault": "0x4dE0DB0Dd4D1D03142a032CdabF0Dda96D111546",
     "OWNER": "0xbaedDFc6122C5b873ebcE221a91E94789Ab82Ca3",
     "PERMIT2": "0x000000000022D473030F116dDEE9F6B43aC78BA3",
     "PLATFORM": "0xbaedDFc6122C5b873ebcE221a91E94789Ab82Ca3",
-    "POOL_MANAGER": "0x09586E643989B9C7273F8A4bA1D47163F0B17C69",
-    "RebatePool": "0xb03146d8ED3038B1044568D4bE62990933Db6030",
-    "Settlement": "0xEd2d5D23cEEF3202a98fB03240254955f6373a16",
-    "TradeRouter": "0xCc0494037065fF7Aee73a65302b25251AB6907f8",
+    "POOL_MANAGER": "0x8366a39CC670B4001A1121B8F6A443A643e40951",
+    "RebatePool": "0xFcF9b1a7f99e00e583d43d7dA0DAf16D61320935",
+    "Settlement": "0xD3dEDdFeb6EE6DDE4c739f70b6216f0Eca0E29d4",
+    "TradeRouter": "0x6CF1B089539Fba9E165d335F2E124C924e834a77",
     "USDC": "0x3600000000000000000000000000000000000000",
-    "block": 71115581,
+    "X402Settler": "0x7a4FDea6E1A10312fb8D88c49d9DCaFE82F795fC",
+    "block": 71125353,
     "chainId": 5042002,
     "deployer": "0x60C8e3847Da87F37536ccD07D91c2289693d2F1b"
   },
   "EIP712Domain": {
     "chainId": 5042002,
     "name": "NightShares",
-    "verifyingContract": "0xCc0494037065fF7Aee73a65302b25251AB6907f8",
+    "verifyingContract": "0x6CF1B089539Fba9E165d335F2E124C924e834a77",
     "version": "1"
+  },
+  "USDC_EIP712": {
+    "name": "USDC",
+    "version": "2"
   },
   "abis": {
     "NightFactory": [
@@ -122,8 +130,18 @@
                 "name": "platform",
                 "type": "address",
                 "internalType": "address"
+              },
+              {
+                "name": "settler",
+                "type": "address",
+                "internalType": "address"
               }
             ]
+          },
+          {
+            "name": "tokenDeployer_",
+            "type": "address",
+            "internalType": "address"
           },
           {
             "name": "maxF",
@@ -440,6 +458,11 @@
               },
               {
                 "name": "platform",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "settler",
                 "type": "address",
                 "internalType": "address"
               }
@@ -939,6 +962,19 @@
           }
         ],
         "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "tokenDeployer",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "address",
+            "internalType": "address"
+          }
+        ],
+        "stateMutability": "view"
       },
       {
         "type": "function",
@@ -2604,6 +2640,11 @@
               },
               {
                 "name": "platform",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "settler",
                 "type": "address",
                 "internalType": "address"
               }
@@ -4352,6 +4393,11 @@
                 "name": "platform",
                 "type": "address",
                 "internalType": "address"
+              },
+              {
+                "name": "settler",
+                "type": "address",
+                "internalType": "address"
               }
             ]
           }
@@ -4388,6 +4434,121 @@
         "type": "function",
         "name": "buy",
         "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "qty",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "maxPaid",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "asks",
+            "type": "tuple[]",
+            "internalType": "struct INightTypes.Ask[]",
+            "components": [
+              {
+                "name": "order",
+                "type": "tuple",
+                "internalType": "struct INightTypes.Order",
+                "components": [
+                  {
+                    "name": "night",
+                    "type": "bytes32",
+                    "internalType": "bytes32"
+                  },
+                  {
+                    "name": "size",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "price",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "expiry",
+                    "type": "uint64",
+                    "internalType": "uint64"
+                  },
+                  {
+                    "name": "nonce",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "maker",
+                    "type": "address",
+                    "internalType": "address"
+                  }
+                ]
+              },
+              {
+                "name": "signature",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "qty",
+                "type": "uint256",
+                "internalType": "uint256"
+              }
+            ]
+          },
+          {
+            "name": "hints",
+            "type": "tuple[]",
+            "internalType": "struct INightTypes.Hint[]",
+            "components": [
+              {
+                "name": "account",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "prev",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "next",
+                "type": "address",
+                "internalType": "address"
+              }
+            ]
+          },
+          {
+            "name": "deadline",
+            "type": "uint64",
+            "internalType": "uint64"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "paid",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "buyFor",
+        "inputs": [
+          {
+            "name": "recipient",
+            "type": "address",
+            "internalType": "address"
+          },
           {
             "name": "night",
             "type": "bytes32",
@@ -4792,6 +4953,80 @@
           }
         ],
         "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "sellFor",
+        "inputs": [
+          {
+            "name": "owner",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "night",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "qty",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "minReceived",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "hints",
+            "type": "tuple[]",
+            "internalType": "struct INightTypes.Hint[]",
+            "components": [
+              {
+                "name": "account",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "prev",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "next",
+                "type": "address",
+                "internalType": "address"
+              }
+            ]
+          },
+          {
+            "name": "deadline",
+            "type": "uint64",
+            "internalType": "uint64"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "received",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "settler",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "address",
+            "internalType": "address"
+          }
+        ],
+        "stateMutability": "view"
       },
       {
         "type": "function",
@@ -5320,6 +5555,11 @@
               },
               {
                 "name": "platform",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "settler",
                 "type": "address",
                 "internalType": "address"
               }
@@ -6245,6 +6485,11 @@
               },
               {
                 "name": "platform",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "settler",
                 "type": "address",
                 "internalType": "address"
               }
@@ -9316,6 +9561,19 @@
       },
       {
         "type": "function",
+        "name": "DOMAIN_SEPARATOR",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "function",
         "name": "S",
         "inputs": [],
         "outputs": [
@@ -9323,6 +9581,19 @@
             "name": "",
             "type": "uint256",
             "internalType": "uint256"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "TRANSFER_WITH_AUTHORIZATION_TYPEHASH",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "bytes32",
+            "internalType": "bytes32"
           }
         ],
         "stateMutability": "view"
@@ -9387,6 +9658,30 @@
           }
         ],
         "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "authorizationState",
+        "inputs": [
+          {
+            "name": "",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool",
+            "internalType": "bool"
+          }
+        ],
+        "stateMutability": "view"
       },
       {
         "type": "function",
@@ -9982,6 +10277,36 @@
       },
       {
         "type": "function",
+        "name": "setSettlerHints",
+        "inputs": [
+          {
+            "name": "hints",
+            "type": "tuple[]",
+            "internalType": "struct INightTypes.Hint[]",
+            "components": [
+              {
+                "name": "account",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "prev",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "next",
+                "type": "address",
+                "internalType": "address"
+              }
+            ]
+          }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
         "name": "snapshotAtCutoff",
         "inputs": [],
         "outputs": [
@@ -10098,6 +10423,102 @@
       },
       {
         "type": "function",
+        "name": "transferWithAuthorization",
+        "inputs": [
+          {
+            "name": "from",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "to",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "value",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "validAfter",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "validBefore",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "nonce",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "signature",
+            "type": "bytes",
+            "internalType": "bytes"
+          }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "transferWithAuthorization",
+        "inputs": [
+          {
+            "name": "from",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "to",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "value",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "validAfter",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "validBefore",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "nonce",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "v",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "r",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "s",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
         "name": "withdrawCredit",
         "inputs": [
           {
@@ -10136,6 +10557,25 @@
             "type": "uint256",
             "indexed": false,
             "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "AuthorizationUsed",
+        "inputs": [
+          {
+            "name": "authorizer",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "nonce",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
           }
         ],
         "anonymous": false
@@ -10467,6 +10907,21 @@
       },
       {
         "type": "error",
+        "name": "AuthorizationExpired",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "AuthorizationNotYetValid",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "AuthorizationReused",
+        "inputs": []
+      },
+      {
+        "type": "error",
         "name": "BeforeCutoff",
         "inputs": []
       },
@@ -10525,6 +10980,11 @@
       {
         "type": "error",
         "name": "InsufficientBalance",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "InvalidAuthorization",
         "inputs": []
       },
       {
@@ -10618,6 +11078,1399 @@
         "type": "error",
         "name": "ZeroAddress",
         "inputs": []
+      }
+    ],
+    "X402Settler": [
+      {
+        "type": "constructor",
+        "inputs": [
+          {
+            "name": "factory_",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "d",
+            "type": "tuple",
+            "internalType": "struct INightTypes.Deployment",
+            "components": [
+              {
+                "name": "poolManager",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "usdc",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "permit2",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "vault",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "hook",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "bookingRouter",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "tradeRouter",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "settlement",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "coverFund",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "rebatePool",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "registry",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "platform",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "settler",
+                "type": "address",
+                "internalType": "address"
+              }
+            ]
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "buy",
+        "inputs": [
+          {
+            "name": "auth",
+            "type": "tuple",
+            "internalType": "struct IX402Settler.Authorization",
+            "components": [
+              {
+                "name": "from",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "value",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "validAfter",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "validBefore",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "nonce",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              }
+            ]
+          },
+          {
+            "name": "signature",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "night",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "qty",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "asks",
+            "type": "tuple[]",
+            "internalType": "struct INightTypes.Ask[]",
+            "components": [
+              {
+                "name": "order",
+                "type": "tuple",
+                "internalType": "struct INightTypes.Order",
+                "components": [
+                  {
+                    "name": "night",
+                    "type": "bytes32",
+                    "internalType": "bytes32"
+                  },
+                  {
+                    "name": "size",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "price",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "expiry",
+                    "type": "uint64",
+                    "internalType": "uint64"
+                  },
+                  {
+                    "name": "nonce",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "maker",
+                    "type": "address",
+                    "internalType": "address"
+                  }
+                ]
+              },
+              {
+                "name": "signature",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "qty",
+                "type": "uint256",
+                "internalType": "uint256"
+              }
+            ]
+          },
+          {
+            "name": "hints",
+            "type": "tuple[]",
+            "internalType": "struct INightTypes.Hint[]",
+            "components": [
+              {
+                "name": "account",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "prev",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "next",
+                "type": "address",
+                "internalType": "address"
+              }
+            ]
+          },
+          {
+            "name": "deadline",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "salt",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "paid",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "buyNonce",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "qty",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "deadline",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "salt",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "stateMutability": "pure"
+      },
+      {
+        "type": "function",
+        "name": "factory",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "address",
+            "internalType": "contract INightFactory"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "processed",
+        "inputs": [
+          {
+            "name": "",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "",
+            "type": "bool",
+            "internalType": "bool"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "sell",
+        "inputs": [
+          {
+            "name": "auth",
+            "type": "tuple",
+            "internalType": "struct IX402Settler.Authorization",
+            "components": [
+              {
+                "name": "from",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "value",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "validAfter",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "validBefore",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "nonce",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              }
+            ]
+          },
+          {
+            "name": "signature",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "night",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "minReceived",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "hints",
+            "type": "tuple[]",
+            "internalType": "struct INightTypes.Hint[]",
+            "components": [
+              {
+                "name": "account",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "prev",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "next",
+                "type": "address",
+                "internalType": "address"
+              }
+            ]
+          },
+          {
+            "name": "deadline",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "salt",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "received",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "sellNonce",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "minReceived",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "deadline",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "salt",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "stateMutability": "pure"
+      },
+      {
+        "type": "function",
+        "name": "tradeRouter",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "address",
+            "internalType": "contract ITradeRouter"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "usdc",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "address",
+            "internalType": "address"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "event",
+        "name": "Booked",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "guest",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "bookingId",
+            "type": "bytes32",
+            "indexed": false,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "qty",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "paid",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "CutoffClaimed",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "holder",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "CutoffReleased",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "roomsReturned",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "refundPerNight",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "OrderCancelledAll",
+        "inputs": [
+          {
+            "name": "maker",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "newNonce",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "Recalled",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "holder",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "guest",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "qty",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "paidToHolder",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "Swept",
+        "inputs": [
+          {
+            "name": "property",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "owner",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "hostDebtNetted",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "Trade",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "taker",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "maker",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "side",
+            "type": "uint8",
+            "indexed": false,
+            "internalType": "uint8"
+          },
+          {
+            "name": "qty",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "notional",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "fee",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "makerRebate",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "coverFund",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "WalkPaid",
+        "inputs": [
+          {
+            "name": "reportId",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "bookingId",
+            "type": "bytes32",
+            "indexed": false,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "guest",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "fromPending",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "fromFund",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "hostDebt",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "evidenceHash",
+            "type": "bytes32",
+            "indexed": false,
+            "internalType": "bytes32"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "X402Bought",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "payer",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "nonce",
+            "type": "bytes32",
+            "indexed": false,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "qty",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "paid",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "refunded",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "X402Sold",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "payer",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "nonce",
+            "type": "bytes32",
+            "indexed": false,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "qty",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "received",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "error",
+        "name": "AlreadyOpened",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ]
+      },
+      {
+        "type": "error",
+        "name": "AlreadyProcessed",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "BeforeCutoff",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "CutoffReached",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "DeltaMismatch",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "Expired",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "HostSuspended",
+        "inputs": [
+          {
+            "name": "host",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      },
+      {
+        "type": "error",
+        "name": "InvalidChunk",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "InvalidConfig",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "InvalidQuantity",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "InvalidSignature",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "LadderIncomplete",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "NotSettlerPayment",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "Paused",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "Reentrancy",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "Slippage",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "SoldOut",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "TermsMismatch",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "Unauthorized",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "UnknownNight",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ]
+      }
+    ],
+    "NightTokenDeployer": [
+      {
+        "type": "constructor",
+        "inputs": [
+          {
+            "name": "factory_",
+            "type": "address",
+            "internalType": "address"
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "codeHash",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "deploy",
+        "inputs": [
+          {
+            "name": "salt",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ],
+        "outputs": [
+          {
+            "name": "token",
+            "type": "address",
+            "internalType": "address"
+          }
+        ],
+        "stateMutability": "nonpayable"
+      },
+      {
+        "type": "function",
+        "name": "factory",
+        "inputs": [],
+        "outputs": [
+          {
+            "name": "",
+            "type": "address",
+            "internalType": "address"
+          }
+        ],
+        "stateMutability": "view"
+      },
+      {
+        "type": "event",
+        "name": "Booked",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "guest",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "bookingId",
+            "type": "bytes32",
+            "indexed": false,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "qty",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "paid",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "CutoffClaimed",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "holder",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "CutoffReleased",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "roomsReturned",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "refundPerNight",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "OrderCancelledAll",
+        "inputs": [
+          {
+            "name": "maker",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "newNonce",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "Recalled",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "holder",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "guest",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "qty",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "paidToHolder",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "Swept",
+        "inputs": [
+          {
+            "name": "property",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "owner",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "amount",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "hostDebtNetted",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "Trade",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "taker",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "maker",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "side",
+            "type": "uint8",
+            "indexed": false,
+            "internalType": "uint8"
+          },
+          {
+            "name": "qty",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "notional",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "fee",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "makerRebate",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "coverFund",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "event",
+        "name": "WalkPaid",
+        "inputs": [
+          {
+            "name": "reportId",
+            "type": "bytes32",
+            "indexed": true,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "bookingId",
+            "type": "bytes32",
+            "indexed": false,
+            "internalType": "bytes32"
+          },
+          {
+            "name": "guest",
+            "type": "address",
+            "indexed": true,
+            "internalType": "address"
+          },
+          {
+            "name": "fromPending",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "fromFund",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "hostDebt",
+            "type": "uint256",
+            "indexed": false,
+            "internalType": "uint256"
+          },
+          {
+            "name": "evidenceHash",
+            "type": "bytes32",
+            "indexed": false,
+            "internalType": "bytes32"
+          }
+        ],
+        "anonymous": false
+      },
+      {
+        "type": "error",
+        "name": "AlreadyOpened",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ]
+      },
+      {
+        "type": "error",
+        "name": "BeforeCutoff",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "CutoffReached",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "Expired",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "HostSuspended",
+        "inputs": [
+          {
+            "name": "host",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      },
+      {
+        "type": "error",
+        "name": "InvalidChunk",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "InvalidConfig",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "InvalidQuantity",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "InvalidSignature",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "LadderIncomplete",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "Paused",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "Reentrancy",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "Slippage",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "SoldOut",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "Unauthorized",
+        "inputs": []
+      },
+      {
+        "type": "error",
+        "name": "UnknownNight",
+        "inputs": [
+          {
+            "name": "night",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ]
       }
     ],
     "HookDeployer": [
