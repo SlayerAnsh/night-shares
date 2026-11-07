@@ -5,6 +5,7 @@ import type { createGetProperty } from "./use-cases/get-property";
 import type { createListDestinations } from "./use-cases/list-destinations";
 import type { createSearchStays } from "./use-cases/search-stays";
 export function createCatalogHandler(cases: {
+  refreshNights?: () => Promise<void>;
   onChain?: boolean;
   walkIncidents: (
     propertyId: string,
@@ -22,6 +23,9 @@ export function createCatalogHandler(cases: {
     listDestinations: (req) => ({
       destinations: cases.listDestinations(req.text),
     }),
-    searchStays: (req) => ({ stays: cases.searchStays(req) }),
+    searchStays: async (req) => {
+      await cases.refreshNights?.();
+      return { stays: cases.searchStays(req) };
+    },
   };
 }

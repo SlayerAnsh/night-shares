@@ -16,7 +16,9 @@ import {
   toHex,
 } from "viem";
 import { buildContainer } from "../../src/container/build-container";
+import type { Ports } from "../../src/container/ports";
 import { runChainJobs } from "../../src/jobs/chain";
+
 import { bindProperty } from "../../src/modules/host/chain/bind";
 import { openChainNights } from "../../src/modules/host/chain/open";
 import { createSqliteHostRepo } from "../../src/modules/host/repo/host-repo.sqlite";
@@ -50,6 +52,14 @@ import {
 import { createForkWalletProvider } from "../../src/ports/wallet-provider/wallet-provider.fork";
 import { toProto } from "../../src/shared/night-key";
 import { createHarness } from "../e2e/harness";
+
+async function caughtUpJobs(ports: Ports) {
+  const reader = ports.chainReader;
+  if (!reader) throw new Error("Missing chain reader.");
+  const target = (await reader.head()).number;
+  while ((await reader.poll(1000)).number < target) {}
+  await runChainJobs(ports);
+}
 
 const forkTest = process.env.FORK_IT === "1" ? test : test.skip;
 forkTest(
@@ -411,7 +421,7 @@ forkTest(
       expect(repo.trips.size).toBe(0);
       expect(repo.locks.get(lock.id)?.busy).toBe(true);
       ports.chainExecutor = executor;
-      await expect(runChainJobs(ports)).rejects.toThrow(
+      await expect(caughtUpJobs(ports)).rejects.toThrow(
         "Chain jobs require reconciliation",
       );
       const recallCredits = await Promise.all(
@@ -479,14 +489,22 @@ forkTest(
         functionName: "sweep",
         args: [night],
       });
-      await client.waitForTransactionReceipt({ hash: externalHash });
-      await runChainJobs(ports);
+      const externalReceipt = await client.waitForTransactionReceipt({
+        hash: externalHash,
+      });
+      expect(externalReceipt.status).toBe("success");
+      await caughtUpJobs(ports);
+      // Recovery already swept earnings, so this empty sweep need not emit Swept.
       expect(
         ports.db
           .query(
-            "SELECT 1 FROM chain_events WHERE tx_hash = ? AND event = 'Swept'",
+            "SELECT 1 FROM chain_blocks WHERE fingerprint = ? AND number = ? AND hash = ?",
           )
-          .get(externalHash),
+          .get(
+            reader.fingerprint,
+            externalReceipt.blockNumber,
+            externalReceipt.blockHash,
+          ),
       ).not.toBeNull();
       // Empty cover explicitly on this child fork so the entire refund becomes a FIFO claim.
       const coverBalance = (await reader.cash(d.CoverFund)).value.usdc;
@@ -553,7 +571,7 @@ forkTest(
       // A failed push advances the cursor but preserves the wallet's claim fallback.
       const blocked = required(users[3]);
       await blacklist(blocked.wallet.address, true);
-      await runChainJobs(ports);
+      await caughtUpJobs(ports);
       expect(
         (
           await reader.read<boolean>({
@@ -613,7 +631,7 @@ forkTest(
           ).value,
         ).toBe(0n);
       const finalCash = (await reader.cash(blocked.wallet.address)).value.usdc;
-      await runChainJobs(ports);
+      await caughtUpJobs(ports);
       expect((await reader.cash(blocked.wallet.address)).value.usdc).toBe(
         finalCash,
       );

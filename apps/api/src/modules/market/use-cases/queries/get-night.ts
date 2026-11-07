@@ -39,7 +39,7 @@ export function getNight({ ports }: Deps, key: string) {
       at: timestampFromMs(
         parseDate(ports.clock.today()) + (index - 30) * 86_400_000,
       ),
-      price: { micros: toMicros(price) },
+      price: { micros: toMicros(Number.isFinite(price) ? price : 0) },
     })),
     hostTrackRecord: track(data.property),
     monthCalendar,

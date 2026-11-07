@@ -1,4 +1,5 @@
 import type { Ports } from "../../../container/ports";
+import { openedNights } from "../../market/chain/nights";
 import { refreshChainWalkClaims } from "../chain/claims";
 import type { StayRepo } from "../repo/stay-repo";
 import { createCreateBooking } from "./booking/create-booking";
@@ -15,6 +16,9 @@ import { createReportWalk } from "./trips/report-walk";
 import { createTapReception } from "./trips/tap-reception";
 export function createStayCases(ports: Ports, repo: StayRepo) {
   return {
+    refreshNights: async () => {
+      if (ports.chainExecutor?.mode === "fork") await openedNights(ports);
+    },
     onChain: ports.chainExecutor?.mode === "fork",
     getPriceCalendar: createGetPriceCalendar(ports),
     quoteStay: createQuoteStay(ports, repo),

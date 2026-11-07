@@ -8,7 +8,23 @@ export function createGetPriceCalendar(ports: Ports) {
     const count = diffDays(input.startDate, input.endDate);
     if (count < 1 || count > 365)
       throw new DomainError("INVALID_ARGUMENT", "Choose 1 to 365 nights.");
-    return range(input.startDate, input.endDate).map((date) =>
+    const dates =
+      ports.chainExecutor?.mode === "fork"
+        ? ports.inventory
+            .list({
+              propertyId: input.propertyId,
+              roomTypeId: input.roomTypeId,
+            })
+            .filter(
+              (r) =>
+                r.openedAt > 0 &&
+                r.chainFingerprint === ports.chainReader?.fingerprint &&
+                r.date >= input.startDate &&
+                r.date < input.endDate,
+            )
+            .map((r) => r.date)
+        : range(input.startDate, input.endDate);
+    return dates.map((date) =>
       calendarNight(ports, input.propertyId, input.roomTypeId, date),
     );
   };

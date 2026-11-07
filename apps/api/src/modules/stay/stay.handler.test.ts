@@ -38,7 +38,7 @@ test("property detail and calendar expose chain mode before the first quote", as
     );
     expect(property.onChain).toBe(chain);
     const stay = createStayModule(ports).handler;
-    const calendar = await stay.getPriceCalendar(
+    const pending = stay.getPriceCalendar(
       create(GetPriceCalendarRequestSchema, {
         propertyId: "prop_velana",
         roomTypeId: "rt_velana_0",
@@ -53,7 +53,11 @@ test("property detail and calendar expose chain mode before the first quote", as
         url: "http://localhost",
       }),
     );
-    expect(calendar.onChain).toBe(chain);
+    if (chain)
+      await expect(Promise.resolve(pending)).rejects.toThrow(
+        "Chain market custody and deployment must be configured.",
+      );
+    else expect((await pending).onChain).toBe(false);
     ports.db.close();
   }
 });

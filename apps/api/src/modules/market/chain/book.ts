@@ -4,8 +4,10 @@ import { type Address, zeroAddress } from "viem";
 import type { NightConfig } from "../../../ports/chain-executor/chain-executor";
 import type { Deps } from "../use-cases/context";
 import { liveAsks } from "./asks";
+import { openedNight } from "./nights";
 import { chainMarket, nightHash } from "./runtime";
 export async function chainBook(deps: Deps, key: string) {
+  await openedNight(deps.ports, key);
   const { reader } = chainMarket(deps.ports);
   const night = nightHash(key),
     head = await reader.head();

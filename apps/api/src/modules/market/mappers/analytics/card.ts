@@ -23,7 +23,7 @@ export function card(ports: Ports, record: NightRecord) {
     bk = bookOf(ports, record),
     ps = state.pstar;
   const hist = history(property, record);
-  const analytics = nightAnalytics(
+  const raw = nightAnalytics(
     state,
     bk,
     hist,
@@ -32,6 +32,12 @@ export function card(ports: Ports, record: NightRecord) {
     hoursLeft(ports, record),
     hostTrackRecord(property).bookedBps,
   );
+  const analytics = Object.fromEntries(
+    Object.entries(raw).map(([key, value]) => [
+      key,
+      typeof value === "number" && !Number.isFinite(value) ? 0 : value,
+    ]),
+  ) as typeof raw;
   return {
     card: create(NightCardSchema, {
       night: toProto(record.key),
@@ -40,7 +46,7 @@ export function card(ports: Ports, record: NightRecord) {
         ?.name,
       city: property.city,
       price: { micros: toMicros(analytics.current) },
-      fairPrice: { micros: toMicros(ps) },
+      fairPrice: { micros: toMicros(Number.isFinite(ps) ? ps : 0) },
       estimatedReturnBps: analytics.estimatedReturnBps,
       risk: { low: Risk.LOW, medium: Risk.MEDIUM, high: Risk.HIGH }[
         analytics.risk

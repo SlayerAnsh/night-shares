@@ -8,11 +8,17 @@ export function createStayHandler(
   cases: ReturnType<typeof createStayCases>,
 ): ServiceImpl<typeof StayService> {
   return {
-    getPriceCalendar: (req) => ({
-      nights: cases.getPriceCalendar(req),
-      onChain: cases.onChain,
-    }),
-    quoteStay: (req) => ({ quote: cases.quoteStay(req.selection) }),
+    getPriceCalendar: async (req) => {
+      await cases.refreshNights();
+      return {
+        nights: cases.getPriceCalendar(req),
+        onChain: cases.onChain,
+      };
+    },
+    quoteStay: async (req) => {
+      await cases.refreshNights();
+      return { quote: cases.quoteStay(req.selection) };
+    },
     lockQuote: (req, ctx) =>
       lockToProto(cases.lockQuote(req.quoteId, requireUser(ctx).id)),
     createBooking: async (req, ctx) => ({

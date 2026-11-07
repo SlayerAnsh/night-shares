@@ -25,7 +25,19 @@ export function quoteNight(
   date: string,
   rooms = 1,
 ) {
-  const record = ports.inventory.seedNight({ propertyId, roomTypeId, date });
+  const record =
+    ports.chainExecutor?.mode === "fork"
+      ? ports.inventory
+          .list({ propertyId, roomTypeId })
+          .find(
+            (r) =>
+              r.date === date &&
+              r.openedAt > 0 &&
+              r.chainFingerprint === ports.chainReader?.fingerprint,
+          )
+      : ports.inventory.seedNight({ propertyId, roomTypeId, date });
+  if (!record)
+    throw new DomainError("FAILED_PRECONDITION", "Night is not open on chain.");
   const route = routeNight(record, rooms);
   const cheapest = route.fills.reduce<(typeof route.fills)[number] | undefined>(
     (a, b) => (!a || b.price < a.price ? b : a),

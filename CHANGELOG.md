@@ -5,6 +5,8 @@ All notable changes to this monorepo. Newest first.
 
 ## Unreleased
 
+- Serve factory-opened fork nights, guard draft analytics, and add an idempotent fork click-trade seed with HTTP receipt/portfolio coverage.
+
 - Web: transaction states for trades, listings and bookings. The order box shows sending, confirmed (figures from the API result), still confirming with a safe "Check again", and failed in plain words; buy and sell send one `idempotency-key` per click and a 0.5% price limit. Bookings and trips show the shortened transaction hash with copy and a pending hotel sync. Stay pages state the 1 room x 1 night on-chain limit once the API reports it.
 
 - Add fork-only scheduled recovery, permissionless cutoff/sweep workers, credit retries, disposable API acceptance, and guarded dev:fork startup.

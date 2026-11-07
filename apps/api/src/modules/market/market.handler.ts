@@ -5,6 +5,7 @@ import { DomainError } from "../../shared/errors/domain-error";
 import { prepareChainAsk } from "./chain/asks";
 import { chainBook } from "./chain/book";
 import { chainPortfolio } from "./chain/positions";
+import { chainDiscover, chainNight } from "./chain/queries";
 import { chainMarket, isChain } from "./chain/runtime";
 import { quoteChainTrade } from "./chain/trading";
 import { cancelAllAsks } from "./orders/cancel-all";
@@ -69,8 +70,14 @@ export function createMarketHandler(
         r.expiry,
       ),
     cancelAllAsks: (_, ctx) => cancelAllAsks(deps, requireUser(ctx)),
-    discover: (r, ctx) => discover(deps, r, optionalUser(ctx)),
-    getNight: (r) => getNight(deps, nightKey(r.night)),
+    discover: (r, ctx) =>
+      (isChain(deps.ports) ? chainDiscover : discover)(
+        deps,
+        r,
+        optionalUser(ctx),
+      ),
+    getNight: (r) =>
+      (isChain(deps.ports) ? chainNight : getNight)(deps, nightKey(r.night)),
     getBook: (r) =>
       isChain(deps.ports)
         ? chainBook(deps, nightKey(r.night))

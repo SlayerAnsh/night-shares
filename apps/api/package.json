@@ -8,7 +8,8 @@
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "e2e": "bun test test/e2e",
-    "dev:fork": "ARC_NETWORK=fork CHAIN_STATUS=onchain WALLET_CUSTODY=anvil bun src/jobs/dev-fork.ts"
+    "dev:fork": "ARC_NETWORK=fork CHAIN_STATUS=onchain WALLET_CUSTODY=anvil bun src/jobs/dev-fork.ts",
+    "seed:fork": "bun src/dev/seed-fork.ts"
   },
   "dependencies": {
     "@bufbuild/protobuf": "2.17.0",

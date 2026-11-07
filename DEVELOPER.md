@@ -306,3 +306,49 @@ Resolve that deployment/source mismatch before claiming full reference-flow
 acceptance. Running `bun test` at the repository root also currently fails the
 market-model fingerprint assertion (`53a8f129bd65` versus `5ed0433226df`); the API
 suite and the fork acceptance suite are run from `apps/api`.
+
+## Click a trade on the fork
+
+Use the existing deployed fork and its matching deployment artifact. The seed
+uses the API's mock Orb sign-in and host connection/opening use cases, funds
+custody wallets 80001 and 80002, and opens three nights starting three days after
+chain time. It never deploys or resets the chain. Repeating it reuses the same
+wallets and nights. Explicit non-fork networks and non-local RPC URLs are refused.
+
+From the repository root:
+
+```sh
+docker compose -f docker-compose.chain.yml up -d
+cd apps/api && pnpm seed:fork
+WORLD_ID_MODE=mock DB_PATH=./data/fork-clicktest.db FORK_FAUCET=true FORK_ATTESTER_KEY='<anvil 9 private key>' JOB_INTERVAL_MS=5000 pnpm dev:fork
+```
+
+In another terminal, from the repository root:
+
+```sh
+cd apps/web && pnpm dev
+```
+
+Open http://localhost:3000/trade. Sign in with Orb and the printed mock seed
+`fork-click-trader`. If another account is signed in, use Switch account first.
+Open one of the printed night keys, buy 0.1 room-night, and wait for Confirmed
+with the transaction hash. Portfolio shows the purchased holding. The seed and
+API must use the same `DB_PATH`; the seed defaults to `./data/fork-clicktest.db`
+when run from `apps/api`. The seed uses the local public Anvil account 9 fixture
+key unless `FORK_ATTESTER_KEY` is supplied. Never use these wallets outside a
+local fork.
+
+From the repository root, `pnpm --filter api seed:fork` is the equivalent seed
+command. Verify the HTTP flow on disposable child forks:
+
+```sh
+cd apps/api
+pnpm typecheck
+bun test
+FORK_IT=1 bun test test/fork
+```
+
+The HTTP test signs in through StartSignIn/CompleteSignIn, discovers only
+factory-opened nights, quotes and buys with an idempotency key, checks the mined
+Trade event and verifies the portfolio against its quantity. Test servers use
+random ports; the existing API on :8787 and fork on :8545 remain running.
