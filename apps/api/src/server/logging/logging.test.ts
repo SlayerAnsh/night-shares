@@ -125,6 +125,17 @@ test("unexpected error messages mask signatures, tokens and long values", () => 
   expect(logged.message).toStartWith("failed 0x<redacted>");
 });
 
+test("a secret cut at the scrub bound is not logged as a short fragment", () => {
+  const lines: string[] = [];
+  const logger = createLogger("info", (line) => lines.push(line));
+  // The long run collapses to "<redacted>", pulling the cut point forward;
+  // the 2,048 bound then splits the second value into a short fragment.
+  logger.unexpected(
+    new Error(`${"a".repeat(2030)} SECRETFRAGMENT1234567890ABCDEFGHIJKL`),
+  );
+  expect(lines.join("")).not.toContain("SECRETFRAG");
+});
+
 test("domain and Connect errors remain expected and do not emit stacks", async () => {
   for (const error of [
     new DomainError("NOT_FOUND", "Not found."),

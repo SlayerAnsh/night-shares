@@ -46,10 +46,14 @@ export function createLogger(
 export function scrubMessage(message: string): string {
   // Bound the input first so the patterns below stay linear-ish on hostile
   // or huge messages; the output is capped again after masking.
-  return message
-    .slice(0, 2048)
-    .replace(/0x[0-9a-fA-F]{64,}/g, "0x<redacted>")
-    .replace(/eyJ[\w-]+\.[\w-]+\.[\w-]*/g, "<redacted-jwt>")
-    .replace(/[A-Za-z0-9+/_=-]{32,}/g, "<redacted>")
-    .slice(0, 300);
+  return (
+    message
+      .slice(0, 2048)
+      // A value cut at the bound would be too short to match below; drop it.
+      .replace(/[A-Za-z0-9+/_=-]+$/, "<truncated>")
+      .replace(/0x[0-9a-fA-F]{64,}/g, "0x<redacted>")
+      .replace(/eyJ[\w-]+\.[\w-]+\.[\w-]*/g, "<redacted-jwt>")
+      .replace(/[A-Za-z0-9+/_=-]{32,}/g, "<redacted>")
+      .slice(0, 300)
+  );
 }
