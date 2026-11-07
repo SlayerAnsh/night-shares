@@ -294,6 +294,10 @@ export async function executeChainTrade(
     const bounds = slippageBounds(simulated.value, slippageBps);
     if (command.kind === "sell")
       command.minReceived = bounds.min > limit ? bounds.min : limit;
+    // The approval may cover the caller's cap, but the router command never
+    // pays more than the simulated price plus the slippage allowance.
+    if (command.kind === "buy" && bounds.max < command.maxPaid)
+      command.maxPaid = bounds.max;
     const reserved = command.kind === "buy" ? command.maxPaid : 0n;
     intent = {
       id,

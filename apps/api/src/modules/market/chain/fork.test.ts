@@ -282,6 +282,17 @@ forkTest(
       expect((await reader.cash(maker.wallet.address)).value.usdc).toBe(
         before - (execution.quote?.total?.micros ?? 0n),
       );
+      const paid = execution.quote?.total?.micros ?? 0n;
+      for (const row of db
+        .query<{ command: string }, []>("SELECT command FROM chain_operations")
+        .all()) {
+        const command = deserialize<ChainCommand>(row.command);
+        // The router call is bounded by the quote plus 0.5%, not the caller cap.
+        if (command.kind === "buy" && command.maxPaid !== 0n)
+          expect(command.maxPaid).toBeLessThanOrEqual(
+            paid + (paid * 50n + 9999n) / 10000n + 1n,
+          );
+      }
       for (const row of db
         .query<{ command: string }, []>(
           "SELECT command FROM chain_operations WHERE id LIKE '%approve%'",
