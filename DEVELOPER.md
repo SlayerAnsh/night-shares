@@ -192,6 +192,10 @@ The Arc fork chain (`docker-compose.chain.yml`) is a local development tool and 
 3. Add a domain routed to service `web`, container port 3000, with HTTPS. Only `web` needs a domain, because it proxies all API calls server-side. HTTPS matters because the production web build sets the session cookie `Secure`.
 4. Set `WEB_ORIGIN` and `CORS_ORIGINS` to that domain's HTTPS origin and replace `ORDER_MOCK_SECRET`.
 5. `AGENT_PASS_MODE=oidc` redirects the browser to the API callback, so it additionally needs a domain routed to service `api`, port 8787, and a matching `AGENT_PASS_REDIRECT_URI`. Mock Agent Pass needs neither.
+6. Chain mode (`ARC_NETWORK=testnet` or `mainnet`) needs `WALLET_CUSTODY=privy`, Privy credentials, and one signing source each for `ATTESTER` and `OPS` (see Chain mode below). Keychain sources are macOS only; in Dokploy use a raw `<ROLE>_KEY` secret, or mount the keystore read-only and supply `<ROLE>_KEYSTORE_PASSWORD` or `<ROLE>_KEYSTORE_PASSWORD_FILE`. Leave unused keys out entirely: an empty value counts as set and conflicts with other sources, and an empty `ARC_RPC_URLS` fails startup.
+7. A dedicated RPC whose URL contains an API key goes in `ARC_RPC_URLS` as a secret. The API redacts RPC URLs from logs, errors and readiness reasons.
+8. Fund the ops wallet with native USDC before deploying. `/readyz` fails below `CHAIN_OPS_MIN_BALANCE` (default 0.1), and `web` waits for a healthy `api`, so an unfunded ops wallet keeps the web container from starting.
+9. Run exactly one `api` replica. The SQLite volume holds the transaction journal and nonces, so a second replica would reuse nonces. Keep the volume private and out of shared backups, because the journal holds signed transactions.
 
 Container execution and network e2e checks require a host with Docker and permission to bind ports. The operations unit suite runs without listening sockets: `cd apps/api && bun test src/server`.
 
