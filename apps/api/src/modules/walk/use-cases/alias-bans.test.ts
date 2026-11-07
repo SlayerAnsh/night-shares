@@ -63,7 +63,9 @@ for (const banned of [["guest"], ["orb"], ["guest", "orb"], ["older"]]) {
         .run();
       for (const id of banned) {
         f.ports.db
-          .query("INSERT INTO walk_bans VALUES (?, ?, 1)")
+          .query(
+            "INSERT INTO walk_bans (human_id, report_id, banned_at) VALUES (?, ?, 1)",
+          )
           .run(id, f.report.id);
       }
       linkEnrollment(f.ports.db, "orb", "orb", f.user.id);
@@ -92,7 +94,9 @@ test("fresh enrollment and session recovery retain a preexisting nullifier ban",
   const f = await fixture();
   try {
     f.ports.db
-      .query("INSERT INTO walk_bans VALUES ('returning', 'old_report', 1)")
+      .query(
+        "INSERT INTO walk_bans (human_id, report_id, banned_at) VALUES ('returning', 'old_report', 1)",
+      )
       .run();
     const state = createWorldIdState(f.ports.db);
     for (const level of ["device", "orb"] as const) {
@@ -102,6 +106,24 @@ test("fresh enrollment and session recovery retain a preexisting nullifier ban",
         handleReport(f.ports, { ...f.report, humanId }),
       ).rejects.toThrow("banned for this World ID");
     }
+  } finally {
+    f.ports.db.close();
+  }
+});
+
+test("legacy ban writes expose the enrollment nullifier in the guest namespace", async () => {
+  const f = await fixture();
+  try {
+    f.ports.db
+      .query("INSERT INTO walk_bans VALUES (?, 'old', 1)")
+      .run(f.user.humanId);
+    expect(f.ports.db.query("SELECT guest_id FROM walk_bans").get()).toEqual({
+      guest_id: f.user.humanId,
+    });
+    expect(isWalkBanned(f.ports.db, f.user.humanId)).toBe(true);
+    await expect(handleReport(f.ports, f.report)).rejects.toThrow(
+      "banned for this World ID",
+    );
   } finally {
     f.ports.db.close();
   }

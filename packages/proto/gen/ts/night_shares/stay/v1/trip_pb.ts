@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file night_shares/stay/v1/trip.proto.
  */
 export const file_night_shares_stay_v1_trip: GenFile = /*@__PURE__*/
-  fileDesc("Ch9uaWdodF9zaGFyZXMvc3RheS92MS90cmlwLnByb3RvEhRuaWdodF9zaGFyZXMuc3RheS52MSKMAQoNU3RheVNlbGVjdGlvbhITCgtwcm9wZXJ0eV9pZBgBIAEoCRIUCgxyb29tX3R5cGVfaWQYAiABKAkSEAoIY2hlY2tfaW4YAyABKAkSEQoJY2hlY2tfb3V0GAQgASgJEg4KBmFkdWx0cxgFIAEoBRIMCgRraWRzGAYgASgFEg0KBXJvb21zGAcgASgFIq0CCgRUcmlwEgoKAmlkGAEgASgJEgsKA3JlZhgCIAEoCRIRCglob3RlbF9yZWYYAyABKAkSEwoLcHJvcGVydHlfaWQYBCABKAkSFAoMcm9vbV90eXBlX2lkGAUgASgJEhAKCGNoZWNrX2luGAYgASgJEhEKCWNoZWNrX291dBgHIAEoCRIOCgZhZHVsdHMYCCABKAUSDAoEa2lkcxgJIAEoBRINCgVyb29tcxgKIAEoBRIrCgV0b3RhbBgLIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIpCgNmZWUYDCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSEgoKY2hlY2tlZF9pbhgOIAEoCEoECA0QDlIKcGF5X21ldGhvZCLBAQoKTmlnaHRQcmljZRIMCgRkYXRlGAEgASgJEisKBXByaWNlGAIgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEjEKBnNvdXJjZRgDIAEoDjIhLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlByaWNlU291cmNlEjAKCnVzdWFsX3JhdGUYBCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSEwoLaXNfc29sZF9vdXQYBSABKAgiowIKCVN0YXlRdW90ZRIWCg50cmFkaW5nX3BhdXNlZBgHIAEoCBIKCgJpZBgBIAEoCRI2CglzZWxlY3Rpb24YAiABKAsyIy5uaWdodF9zaGFyZXMuc3RheS52MS5TdGF5U2VsZWN0aW9uEisKBXRvdGFsGAMgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEikKA2ZlZRgEIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIwCgZuaWdodHMYBSADKAsyIC5uaWdodF9zaGFyZXMuc3RheS52MS5OaWdodFByaWNlEjAKCnVzdWFsX3JhdGUYBiABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMiqAEKB1JlY2VpcHQSKAoEdHJpcBgBIAEoCzIaLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlRyaXASLgoIc3VidG90YWwYAiABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFgoOd2FsbGV0X2FkZHJlc3MYAyABKAkSKwoHcGFpZF9hdBgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAqeQoLUHJpY2VTb3VyY2USHAoYUFJJQ0VfU09VUkNFX1VOU1BFQ0lGSUVEEAASFgoSUFJJQ0VfU09VUkNFX0hPVEVMEAESFwoTUFJJQ0VfU09VUkNFX1RSQURFUhACEhsKF1BSSUNFX1NPVVJDRV9SRUNBTExfQ0FQEANiBnByb3RvMw", [file_google_protobuf_timestamp, file_night_shares_common_v1_money]);
+  fileDesc("Ch9uaWdodF9zaGFyZXMvc3RheS92MS90cmlwLnByb3RvEhRuaWdodF9zaGFyZXMuc3RheS52MSKMAQoNU3RheVNlbGVjdGlvbhITCgtwcm9wZXJ0eV9pZBgBIAEoCRIUCgxyb29tX3R5cGVfaWQYAiABKAkSEAoIY2hlY2tfaW4YAyABKAkSEQoJY2hlY2tfb3V0GAQgASgJEg4KBmFkdWx0cxgFIAEoBRIMCgRraWRzGAYgASgFEg0KBXJvb21zGAcgASgFIt0CCgRUcmlwEgoKAmlkGAEgASgJEgsKA3JlZhgCIAEoCRIRCglob3RlbF9yZWYYAyABKAkSEwoLcHJvcGVydHlfaWQYBCABKAkSFAoMcm9vbV90eXBlX2lkGAUgASgJEhAKCGNoZWNrX2luGAYgASgJEhEKCWNoZWNrX291dBgHIAEoCRIOCgZhZHVsdHMYCCABKAUSDAoEa2lkcxgJIAEoBRINCgVyb29tcxgKIAEoBRIrCgV0b3RhbBgLIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIpCgNmZWUYDCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSEgoKY2hlY2tlZF9pbhgOIAEoCBIuCgR3YWxrGA8gASgLMiAubmlnaHRfc2hhcmVzLnN0YXkudjEuV2Fsa1JlZnVuZEoECA0QDlIKcGF5X21ldGhvZCLBAQoKTmlnaHRQcmljZRIMCgRkYXRlGAEgASgJEisKBXByaWNlGAIgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEjEKBnNvdXJjZRgDIAEoDjIhLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlByaWNlU291cmNlEjAKCnVzdWFsX3JhdGUYBCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSEwoLaXNfc29sZF9vdXQYBSABKAgiowIKCVN0YXlRdW90ZRIWCg50cmFkaW5nX3BhdXNlZBgHIAEoCBIKCgJpZBgBIAEoCRI2CglzZWxlY3Rpb24YAiABKAsyIy5uaWdodF9zaGFyZXMuc3RheS52MS5TdGF5U2VsZWN0aW9uEisKBXRvdGFsGAMgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEikKA2ZlZRgEIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxIwCgZuaWdodHMYBSADKAsyIC5uaWdodF9zaGFyZXMuc3RheS52MS5OaWdodFByaWNlEjAKCnVzdWFsX3JhdGUYBiABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMiqAEKB1JlY2VpcHQSKAoEdHJpcBgBIAEoCzIaLm5pZ2h0X3NoYXJlcy5zdGF5LnYxLlRyaXASLgoIc3VidG90YWwYAiABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFgoOd2FsbGV0X2FkZHJlc3MYAyABKAkSKwoHcGFpZF9hdBgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiyAIKCldhbGtSZWZ1bmQSEQoJcmVwb3J0X2lkGAEgASgJEjMKDXBhaWRfdG9fZ3Vlc3QYAiABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFQoNZXZpZGVuY2VfaGFzaBgDIAEoCRIyCgxmcm9tX3BlbmRpbmcYBCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSLwoJZnJvbV9mdW5kGAUgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEjMKDW93ZWRfdG9fZ3Vlc3QYBiABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSLwoJb3dlZF9wYWlkGAcgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEhAKCGd1ZXN0X2lkGAggASgJKnkKC1ByaWNlU291cmNlEhwKGFBSSUNFX1NPVVJDRV9VTlNQRUNJRklFRBAAEhYKElBSSUNFX1NPVVJDRV9IT1RFTBABEhcKE1BSSUNFX1NPVVJDRV9UUkFERVIQAhIbChdQUklDRV9TT1VSQ0VfUkVDQUxMX0NBUBADYgZwcm90bzM", [file_google_protobuf_timestamp, file_night_shares_common_v1_money]);
 
 /**
  * @generated from message night_shares.stay.v1.StaySelection
@@ -131,6 +131,11 @@ export type Trip = Message<"night_shares.stay.v1.Trip"> & {
    * @generated from field: bool checked_in = 14;
    */
   checkedIn: boolean;
+
+  /**
+   * @generated from field: night_shares.stay.v1.WalkRefund walk = 15;
+   */
+  walk?: WalkRefund | undefined;
 };
 
 /**
@@ -255,6 +260,58 @@ export type Receipt = Message<"night_shares.stay.v1.Receipt"> & {
  */
 export const ReceiptSchema: GenMessage<Receipt> = /*@__PURE__*/
   messageDesc(file_night_shares_stay_v1_trip, 4);
+
+/**
+ * @generated from message night_shares.stay.v1.WalkRefund
+ */
+export type WalkRefund = Message<"night_shares.stay.v1.WalkRefund"> & {
+  /**
+   * @generated from field: string report_id = 1;
+   */
+  reportId: string;
+
+  /**
+   * @generated from field: night_shares.common.v1.Usdc paid_to_guest = 2;
+   */
+  paidToGuest?: Usdc | undefined;
+
+  /**
+   * @generated from field: string evidence_hash = 3;
+   */
+  evidenceHash: string;
+
+  /**
+   * @generated from field: night_shares.common.v1.Usdc from_pending = 4;
+   */
+  fromPending?: Usdc | undefined;
+
+  /**
+   * @generated from field: night_shares.common.v1.Usdc from_fund = 5;
+   */
+  fromFund?: Usdc | undefined;
+
+  /**
+   * @generated from field: night_shares.common.v1.Usdc owed_to_guest = 6;
+   */
+  owedToGuest?: Usdc | undefined;
+
+  /**
+   * @generated from field: night_shares.common.v1.Usdc owed_paid = 7;
+   */
+  owedPaid?: Usdc | undefined;
+
+  /**
+   * @generated from field: string guest_id = 8;
+   */
+  guestId: string;
+};
+
+/**
+ * Describes the message night_shares.stay.v1.WalkRefund.
+ * Use `create(WalkRefundSchema)` to create a new message.
+ */
+export const WalkRefundSchema: GenMessage<WalkRefund> = /*@__PURE__*/
+  messageDesc(file_night_shares_stay_v1_trip, 5);
 
 /**
  * @generated from enum night_shares.stay.v1.PriceSource

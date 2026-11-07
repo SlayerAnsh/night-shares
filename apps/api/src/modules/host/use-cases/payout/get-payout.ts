@@ -1,5 +1,6 @@
 import { timestampFromMs } from "@bufbuild/protobuf/wkt";
 import { coverAccount } from "../../../walk/repo/cover-accounts";
+import { outstandingGuest } from "../../../walk/repo/owed";
 import { payoutOf } from "../../mappers/payout";
 import type { HostDeps } from "../deps";
 import { recordsFor } from "../reporting/records";
@@ -10,7 +11,10 @@ export function createGetPayout(deps: HostDeps, includeDebt = true) {
       deps.ports.inventory.list({ propertyId }),
       deps.repo.withdrawn(propertyId) +
         coverAccount(deps.ports.db, propertyId).spent +
-        (includeDebt ? coverAccount(deps.ports.db, propertyId).debt : 0n),
+        (includeDebt
+          ? coverAccount(deps.ports.db, propertyId).debt +
+            outstandingGuest(deps.ports.db, propertyId)
+          : 0n),
     );
     const last = deps.ports.db
       .query<{ amount: bigint; at: bigint; transaction_id: string }, [string]>(

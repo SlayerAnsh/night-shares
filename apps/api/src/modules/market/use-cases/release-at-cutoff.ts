@@ -6,6 +6,9 @@ import {
 } from "../../../ports/wallet-provider/wallet-provider";
 import { mulTenths } from "../../../shared/money";
 import { toWholeTenths } from "../../../shared/tenths";
+import { adjustCoverAccount } from "../../walk/repo/cover-accounts";
+import { nightPending } from "../../walk/repo/night-pending";
+import { finishOwed, reserveOwed } from "../../walk/repo/owed";
 import { cutoffAt } from "../cutoff";
 import { type Deps, syncPosition } from "./context";
 
@@ -44,6 +47,22 @@ async function releaseNight(deps: Deps, key: string) {
       return;
     const before = ports.inventory.get(key);
     if (before.released || cutoffAt(ports, before) > ports.clock.now()) return;
+    if (
+      ports.db
+        .query("SELECT 1 FROM walk_claim_locks WHERE property_id = ?")
+        .get(before.propertyId) ||
+      ports.db
+        .query(
+          "SELECT 1 FROM walk_reports WHERE property_id = ? AND status = 'pending'",
+        )
+        .get(before.propertyId) ||
+      ports.db
+        .query(
+          "SELECT 1 FROM host_sweeps WHERE property_id = ? AND status = 'pending'",
+        )
+        .get(before.propertyId)
+    )
+      return;
     const perNight = toMicros(cutoffRefund(before.state).perNight);
     const holders = repo.holders(key).map((user) => {
       const position = repo.position(user.humanId, key);
@@ -103,7 +122,19 @@ async function releaseNight(deps: Deps, key: string) {
         hoursLeft: 0,
       },
     }));
+    const unlocked = nightPending(ports, ports.inventory.get(key));
+    const owed = reserveOwed(
+      ports.db,
+      before.propertyId,
+      unlocked > 0n ? unlocked : 0n,
+    );
+    adjustCoverAccount(ports.db, before.propertyId, owed.amount, 0n);
+    ports.db
+      .query("INSERT INTO walk_cutoff_spent VALUES (?, ?)")
+      .run(key, owed.amount);
+    legs.push(...owed.legs);
     return {
+      owed,
       before,
       holders,
       legs: legs.filter((leg) => leg.amount > 0n),
@@ -116,6 +147,16 @@ async function releaseNight(deps: Deps, key: string) {
     await ports.walletProvider.settle(reservation.legs);
   } catch (error) {
     transaction(ports.db, () => {
+      finishOwed(ports.db, reservation.owed, true);
+      adjustCoverAccount(
+        ports.db,
+        reservation.before.propertyId,
+        -reservation.owed.amount,
+        0n,
+      );
+      ports.db
+        .query("DELETE FROM walk_cutoff_spent WHERE night_key = ?")
+        .run(key);
       ports.db
         .query("DELETE FROM market_cutoff_claims WHERE night_key = ?")
         .run(key);
@@ -126,6 +167,7 @@ async function releaseNight(deps: Deps, key: string) {
     throw error;
   }
   transaction(ports.db, () => {
+    finishOwed(ports.db, reservation.owed);
     ports.db
       .query("UPDATE market_cutoff_claims SET ready = 1 WHERE night_key = ?")
       .run(key);

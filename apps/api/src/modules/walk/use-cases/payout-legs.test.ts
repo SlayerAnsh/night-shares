@@ -17,9 +17,16 @@ test("pending alone pays without debt and empty pending uses fund only", () => {
   expect(payoutLegs(100n, 500n, "guest").legs).toHaveLength(1);
   expect(payoutLegs(100n, 0n, "guest").fromFund).toBe(100n);
 });
-test("unsafe and negative paid amounts reject before conversion", () => {
-  expect(() =>
-    payoutLegs(BigInt(Number.MAX_SAFE_INTEGER) + 1n, 0n, "guest"),
-  ).toThrow(RangeError);
+test("large micros stay exact and negative amounts reject", () => {
+  expect(payoutLegs(9007199254740993n, 0n, "guest").toGuest).toBe(
+    9007199254740993n,
+  );
   expect(() => payoutLegs(-1n, 0n, "guest")).toThrow(RangeError);
+});
+
+test("empty cover fund leaves an unpaid guest claim", () => {
+  const payout = payoutLegs(10000n, 6000n, "guest", 0n);
+  expect(payout.fromFund).toBe(0n);
+  expect(payout.owedToGuest).toBe(4000n);
+  expect(payout.legs.reduce((sum, leg) => sum + leg.amount, 0n)).toBe(6000n);
 });

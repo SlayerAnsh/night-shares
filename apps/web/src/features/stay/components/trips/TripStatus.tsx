@@ -24,7 +24,9 @@ export function TripStatus({
   hotel: string;
 }) {
   const [confirming, setConfirming] = useState(false);
-  const walked = action.walk.data;
+  const walked = trip.walk ?? action.walk.data;
+  const owed =
+    (walked?.owedToGuest?.micros ?? 0n) - (walked?.owedPaid?.micros ?? 0n);
   const tapped = action.tap.isSuccess;
   const tapping = action.issue.isPending || action.tap.isPending;
   return (
@@ -97,10 +99,13 @@ export function TripStatus({
               {formatUsdc(walked.paidToGuest?.micros ?? 0n)}
             </span>
           </b>
-          <span>
-            Full refund of what you paid, from the hotel. This is now a public
-            incident on the hotel's record.
-          </span>
+          {owed > 0n && (
+            <span>
+              Hotel still owes you {formatUsdc(owed, { decimals: 6 })}; paid
+              from its next payouts.
+            </span>
+          )}
+          <span>This is now a public incident on the hotel's record.</span>
         </div>
       )}
       <WalkDialog

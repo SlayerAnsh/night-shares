@@ -902,6 +902,21 @@ components:
         evidenceHash:
           type: string
           title: evidence_hash
+        fromPending:
+          title: from_pending
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        fromFund:
+          title: from_fund
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        owedToGuest:
+          title: owed_to_guest
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        owedPaid:
+          title: owed_paid
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        guestId:
+          type: string
+          title: guest_id
       title: ReportWalkResponse
       additionalProperties: false
     night_shares.stay.v1.StayQuote:
@@ -1041,7 +1056,39 @@ components:
         checkedIn:
           type: boolean
           title: checked_in
+        walk:
+          title: walk
+          $ref: '#/components/schemas/night_shares.stay.v1.WalkRefund'
       title: Trip
+      additionalProperties: false
+    night_shares.stay.v1.WalkRefund:
+      type: object
+      properties:
+        reportId:
+          type: string
+          title: report_id
+        paidToGuest:
+          title: paid_to_guest
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        evidenceHash:
+          type: string
+          title: evidence_hash
+        fromPending:
+          title: from_pending
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        fromFund:
+          title: from_fund
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        owedToGuest:
+          title: owed_to_guest
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        owedPaid:
+          title: owed_paid
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        guestId:
+          type: string
+          title: guest_id
+      title: WalkRefund
       additionalProperties: false
 security: []
 tags:

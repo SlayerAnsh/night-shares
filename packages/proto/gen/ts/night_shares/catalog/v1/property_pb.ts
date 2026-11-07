@@ -14,7 +14,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file night_shares/catalog/v1/property.proto.
  */
 export const file_night_shares_catalog_v1_property: GenFile = /*@__PURE__*/
-  fileDesc("CiZuaWdodF9zaGFyZXMvY2F0YWxvZy92MS9wcm9wZXJ0eS5wcm90bxIXbmlnaHRfc2hhcmVzLmNhdGFsb2cudjEiSwoIUm9vbVR5cGUSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIMCgRzcGVjGAMgASgJEhcKD3JhdGVfbXVsdGlwbGllchgEIAEoASL6AQoIUHJvcGVydHkSCgoCaWQYASABKAkSDAoEY29kZRgCIAEoCRIMCgRuYW1lGAMgASgJEgwKBGNpdHkYBCABKAkSDwoHY291bnRyeRgFIAEoCRIMCgR0eXBlGAYgASgJEg4KBnJhdGluZxgHIAEoARIPCgdyZXZpZXdzGAggASgFEg8KB3BvcHVsYXIYCSABKAgSDgoGcGhvdG9zGAogAygJEg0KBWJsdXJiGAsgASgJEhEKCWFtZW5pdGllcxgMIAMoCRI1Cgpyb29tX3R5cGVzGA0gAygLMiEubmlnaHRfc2hhcmVzLmNhdGFsb2cudjEuUm9vbVR5cGUicgoLRGVzdGluYXRpb24SDAoEY2l0eRgBIAEoCRIPCgdjb3VudHJ5GAIgASgJEhIKCnN0YXlfY291bnQYAyABKAUSMAoKZnJvbV9wcmljZRgEIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyKsAQoIU3RheUNhcmQSMwoIcHJvcGVydHkYASABKAsyIS5uaWdodF9zaGFyZXMuY2F0YWxvZy52MS5Qcm9wZXJ0eRIrCgV0b3RhbBgCIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxItCgdhdmVyYWdlGAMgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEg8KB2lzX2RlYWwYBCABKAgidAoMV2Fsa0luY2lkZW50EgoKAmlkGAEgASgJEi8KC3JlcG9ydGVkX2F0GAIgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIQCghpc19mYWxzZRgDIAEoCBIVCg1ldmlkZW5jZV9oYXNoGAQgASgJYgZwcm90bzM", [file_night_shares_common_v1_money, file_google_protobuf_timestamp]);
+  fileDesc("CiZuaWdodF9zaGFyZXMvY2F0YWxvZy92MS9wcm9wZXJ0eS5wcm90bxIXbmlnaHRfc2hhcmVzLmNhdGFsb2cudjEiSwoIUm9vbVR5cGUSCgoCaWQYASABKAkSDAoEbmFtZRgCIAEoCRIMCgRzcGVjGAMgASgJEhcKD3JhdGVfbXVsdGlwbGllchgEIAEoASL6AQoIUHJvcGVydHkSCgoCaWQYASABKAkSDAoEY29kZRgCIAEoCRIMCgRuYW1lGAMgASgJEgwKBGNpdHkYBCABKAkSDwoHY291bnRyeRgFIAEoCRIMCgR0eXBlGAYgASgJEg4KBnJhdGluZxgHIAEoARIPCgdyZXZpZXdzGAggASgFEg8KB3BvcHVsYXIYCSABKAgSDgoGcGhvdG9zGAogAygJEg0KBWJsdXJiGAsgASgJEhEKCWFtZW5pdGllcxgMIAMoCRI1Cgpyb29tX3R5cGVzGA0gAygLMiEubmlnaHRfc2hhcmVzLmNhdGFsb2cudjEuUm9vbVR5cGUicgoLRGVzdGluYXRpb24SDAoEY2l0eRgBIAEoCRIPCgdjb3VudHJ5GAIgASgJEhIKCnN0YXlfY291bnQYAyABKAUSMAoKZnJvbV9wcmljZRgEIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYyKsAQoIU3RheUNhcmQSMwoIcHJvcGVydHkYASABKAsyIS5uaWdodF9zaGFyZXMuY2F0YWxvZy52MS5Qcm9wZXJ0eRIrCgV0b3RhbBgCIAEoCzIcLm5pZ2h0X3NoYXJlcy5jb21tb24udjEuVXNkYxItCgdhdmVyYWdlGAMgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEg8KB2lzX2RlYWwYBCABKAgi0QIKDFdhbGtJbmNpZGVudBIKCgJpZBgBIAEoCRIvCgtyZXBvcnRlZF9hdBgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASEAoIaXNfZmFsc2UYAyABKAgSFQoNZXZpZGVuY2VfaGFzaBgEIAEoCRIQCghndWVzdF9pZBgFIAEoCRIyCgxmcm9tX3BlbmRpbmcYBiABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSLwoJZnJvbV9mdW5kGAcgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjEjMKDW93ZWRfdG9fZ3Vlc3QYCCABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSLwoJb3dlZF9wYWlkGAkgASgLMhwubmlnaHRfc2hhcmVzLmNvbW1vbi52MS5Vc2RjYgZwcm90bzM", [file_night_shares_common_v1_money, file_google_protobuf_timestamp]);
 
 /**
  * @generated from message night_shares.catalog.v1.RoomType
@@ -212,6 +212,31 @@ export type WalkIncident = Message<"night_shares.catalog.v1.WalkIncident"> & {
    * @generated from field: string evidence_hash = 4;
    */
   evidenceHash: string;
+
+  /**
+   * @generated from field: string guest_id = 5;
+   */
+  guestId: string;
+
+  /**
+   * @generated from field: night_shares.common.v1.Usdc from_pending = 6;
+   */
+  fromPending?: Usdc | undefined;
+
+  /**
+   * @generated from field: night_shares.common.v1.Usdc from_fund = 7;
+   */
+  fromFund?: Usdc | undefined;
+
+  /**
+   * @generated from field: night_shares.common.v1.Usdc owed_to_guest = 8;
+   */
+  owedToGuest?: Usdc | undefined;
+
+  /**
+   * @generated from field: night_shares.common.v1.Usdc owed_paid = 9;
+   */
+  owedPaid?: Usdc | undefined;
 };
 
 /**

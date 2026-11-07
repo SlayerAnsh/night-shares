@@ -45,6 +45,17 @@ export async function fixture(pending = 6000n) {
   const gross = payoutOf(ports.inventory.list({ propertyId: trip.propertyId }))
     .availableNow.micros;
   adjustCoverAccount(ports.db, trip.propertyId, gross - pending, 0n);
+  ports.db
+    .query(
+      "INSERT INTO host_sweeps (id, property_id, amount, debt, at, status) VALUES ('fixture', ?, 0, 0, 0, 'settled')",
+    )
+    .run(trip.propertyId);
+  ports.db
+    .query("INSERT INTO host_sweep_nights VALUES ('fixture', ?, ?, 0)")
+    .run(
+      key,
+      payoutOf([ports.inventory.get(key)]).availableNow.micros - pending,
+    );
   const cases = createStayCases(ports, repo);
   const report = {
     id: "walk_test",

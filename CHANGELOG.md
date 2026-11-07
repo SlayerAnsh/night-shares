@@ -5,6 +5,8 @@ All notable changes to this monorepo. Newest first.
 
 ## Unreleased
 
+- Match walk refunds to per-night unswept earnings and available cover funds; persist unpaid guest claims, repay them FIFO before host payouts, expose trip balances, and retain guest-ID bans.
+
 - Add Arc fork configuration, validated deployment loading and EIP-712 domain checks, cached on-chain pause reads, persisted Anvil custody and optional mock-USDC faucet. Trade settlement remains unchanged.
 
 - Mirror mainnet factory limits and trading pause, configure agent approval thresholds, require separate canonical Agent Pass enrollment, reject mock security with real adapters, and push cutoff payouts in batches with claim fallback.

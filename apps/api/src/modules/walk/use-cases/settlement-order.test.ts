@@ -28,14 +28,20 @@ test("sweep and moderation wait for pending walk, then sweep nets the fund advan
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
+  let started = () => {};
+  const start = new Promise<void>((resolve) => {
+    started = resolve;
+  });
   let calls = 0;
   f.ports.walletProvider.settle = async (legs) => {
     calls++;
+    started();
     expect(coverAccount(f.ports.db, f.trip.propertyId).debt).toBe(4000n);
     await gate;
     return settle(legs);
   };
   const reporting = handleReport(f.ports, f.report);
+  await start;
   expect(
     await sweep(host.id, f.trip.propertyId, host.walletAddress),
   ).toBeUndefined();

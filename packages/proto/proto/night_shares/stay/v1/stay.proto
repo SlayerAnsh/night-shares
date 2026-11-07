@@ -139,6 +139,11 @@ message ReportWalkResponse {
   string report_id = 1;
   night_shares.common.v1.Usdc paid_to_guest = 2;
   string evidence_hash = 3;
+  night_shares.common.v1.Usdc from_pending = 4;
+  night_shares.common.v1.Usdc from_fund = 5;
+  night_shares.common.v1.Usdc owed_to_guest = 6;
+  night_shares.common.v1.Usdc owed_paid = 7;
+  string guest_id = 8;
 }
 
 message IssueReceptionTagRequest {
