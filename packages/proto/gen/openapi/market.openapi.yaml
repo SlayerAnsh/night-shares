@@ -1477,6 +1477,10 @@ components:
         claimedAt:
           title: claimed_at
           $ref: '#/components/schemas/google.protobuf.Timestamp'
+        holderWallet:
+          type: string
+          title: holder_wallet
+          description: Each on-chain entitlement belongs to this custody wallet.
       title: CutoffClaim
       additionalProperties: false
       description: Entitlements are fixed at release, pushed in batches, and claimable as fallback.

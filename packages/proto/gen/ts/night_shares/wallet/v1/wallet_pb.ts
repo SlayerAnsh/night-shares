@@ -15,7 +15,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file night_shares/wallet/v1/wallet.proto.
  */
 export const file_night_shares_wallet_v1_wallet: GenFile = /*@__PURE__*/
-  fileDesc("CiNuaWdodF9zaGFyZXMvd2FsbGV0L3YxL3dhbGxldC5wcm90bxIWbmlnaHRfc2hhcmVzLndhbGxldC52MSITChFHZXRCYWxhbmNlUmVxdWVzdCLrAQoSR2V0QmFsYW5jZVJlc3BvbnNlEi0KB2JhbGFuY2UYASABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFgoOd2FsbGV0X2FkZHJlc3MYAiABKAkSOgoUb25jaGFpbl91c2RjX2JhbGFuY2UYAyABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFAoMZXhwbG9yZXJfdXJsGAQgASgJEjwKDnN5c3RlbV93YWxsZXRzGAUgAygLMiQubmlnaHRfc2hhcmVzLndhbGxldC52MS5TeXN0ZW1XYWxsZXQiSgoMU3lzdGVtV2FsbGV0EgwKBG5hbWUYASABKAkSFgoOd2FsbGV0X2FkZHJlc3MYAiABKAkSFAoMZXhwbG9yZXJfdXJsGAMgASgJIhkKF0xpc3RUcmFuc2FjdGlvbnNSZXF1ZXN0IlUKGExpc3RUcmFuc2FjdGlvbnNSZXNwb25zZRI5Cgx0cmFuc2FjdGlvbnMYASADKAsyIy5uaWdodF9zaGFyZXMud2FsbGV0LnYxLlRyYW5zYWN0aW9uMvcBCg1XYWxsZXRTZXJ2aWNlEmkKCkdldEJhbGFuY2USKS5uaWdodF9zaGFyZXMud2FsbGV0LnYxLkdldEJhbGFuY2VSZXF1ZXN0GioubmlnaHRfc2hhcmVzLndhbGxldC52MS5HZXRCYWxhbmNlUmVzcG9uc2UiBIi1GAISewoQTGlzdFRyYW5zYWN0aW9ucxIvLm5pZ2h0X3NoYXJlcy53YWxsZXQudjEuTGlzdFRyYW5zYWN0aW9uc1JlcXVlc3QaMC5uaWdodF9zaGFyZXMud2FsbGV0LnYxLkxpc3RUcmFuc2FjdGlvbnNSZXNwb25zZSIEiLUYAmIGcHJvdG8z", [file_night_shares_auth_v1_access, file_night_shares_common_v1_money, file_night_shares_wallet_v1_transaction]);
+  fileDesc("CiNuaWdodF9zaGFyZXMvd2FsbGV0L3YxL3dhbGxldC5wcm90bxIWbmlnaHRfc2hhcmVzLndhbGxldC52MSITChFHZXRCYWxhbmNlUmVxdWVzdCKiAgoSR2V0QmFsYW5jZVJlc3BvbnNlEi0KB2JhbGFuY2UYASABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFgoOd2FsbGV0X2FkZHJlc3MYAiABKAkSOgoUb25jaGFpbl91c2RjX2JhbGFuY2UYAyABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMSFAoMZXhwbG9yZXJfdXJsGAQgASgJEjwKDnN5c3RlbV93YWxsZXRzGAUgAygLMiQubmlnaHRfc2hhcmVzLndhbGxldC52MS5TeXN0ZW1XYWxsZXQSNQoHY3JlZGl0cxgGIAMoCzIkLm5pZ2h0X3NoYXJlcy53YWxsZXQudjEuQmFja2VkQ3JlZGl0ImkKDEJhY2tlZENyZWRpdBIYChBjb250cmFjdF9hZGRyZXNzGAEgASgJEhEKCXJlY2lwaWVudBgCIAEoCRIsCgZhbW91bnQYAyABKAsyHC5uaWdodF9zaGFyZXMuY29tbW9uLnYxLlVzZGMiSgoMU3lzdGVtV2FsbGV0EgwKBG5hbWUYASABKAkSFgoOd2FsbGV0X2FkZHJlc3MYAiABKAkSFAoMZXhwbG9yZXJfdXJsGAMgASgJIhkKF0xpc3RUcmFuc2FjdGlvbnNSZXF1ZXN0IlUKGExpc3RUcmFuc2FjdGlvbnNSZXNwb25zZRI5Cgx0cmFuc2FjdGlvbnMYASADKAsyIy5uaWdodF9zaGFyZXMud2FsbGV0LnYxLlRyYW5zYWN0aW9uMvcBCg1XYWxsZXRTZXJ2aWNlEmkKCkdldEJhbGFuY2USKS5uaWdodF9zaGFyZXMud2FsbGV0LnYxLkdldEJhbGFuY2VSZXF1ZXN0GioubmlnaHRfc2hhcmVzLndhbGxldC52MS5HZXRCYWxhbmNlUmVzcG9uc2UiBIi1GAISewoQTGlzdFRyYW5zYWN0aW9ucxIvLm5pZ2h0X3NoYXJlcy53YWxsZXQudjEuTGlzdFRyYW5zYWN0aW9uc1JlcXVlc3QaMC5uaWdodF9zaGFyZXMud2FsbGV0LnYxLkxpc3RUcmFuc2FjdGlvbnNSZXNwb25zZSIEiLUYAmIGcHJvdG8z", [file_night_shares_auth_v1_access, file_night_shares_common_v1_money, file_night_shares_wallet_v1_transaction]);
 
 /**
  * @generated from message night_shares.wallet.v1.GetBalanceRequest
@@ -60,6 +60,13 @@ export type GetBalanceResponse = Message<"night_shares.wallet.v1.GetBalanceRespo
    * @generated from field: repeated night_shares.wallet.v1.SystemWallet system_wallets = 5;
    */
   systemWallets: SystemWallet[];
+
+  /**
+   * Backed payouts awaiting transfer; these are not spendable cash.
+   *
+   * @generated from field: repeated night_shares.wallet.v1.BackedCredit credits = 6;
+   */
+  credits: BackedCredit[];
 };
 
 /**
@@ -68,6 +75,33 @@ export type GetBalanceResponse = Message<"night_shares.wallet.v1.GetBalanceRespo
  */
 export const GetBalanceResponseSchema: GenMessage<GetBalanceResponse> = /*@__PURE__*/
   messageDesc(file_night_shares_wallet_v1_wallet, 1);
+
+/**
+ * @generated from message night_shares.wallet.v1.BackedCredit
+ */
+export type BackedCredit = Message<"night_shares.wallet.v1.BackedCredit"> & {
+  /**
+   * @generated from field: string contract_address = 1;
+   */
+  contractAddress: string;
+
+  /**
+   * @generated from field: string recipient = 2;
+   */
+  recipient: string;
+
+  /**
+   * @generated from field: night_shares.common.v1.Usdc amount = 3;
+   */
+  amount?: Usdc | undefined;
+};
+
+/**
+ * Describes the message night_shares.wallet.v1.BackedCredit.
+ * Use `create(BackedCreditSchema)` to create a new message.
+ */
+export const BackedCreditSchema: GenMessage<BackedCredit> = /*@__PURE__*/
+  messageDesc(file_night_shares_wallet_v1_wallet, 2);
 
 /**
  * @generated from message night_shares.wallet.v1.SystemWallet
@@ -94,7 +128,7 @@ export type SystemWallet = Message<"night_shares.wallet.v1.SystemWallet"> & {
  * Use `create(SystemWalletSchema)` to create a new message.
  */
 export const SystemWalletSchema: GenMessage<SystemWallet> = /*@__PURE__*/
-  messageDesc(file_night_shares_wallet_v1_wallet, 2);
+  messageDesc(file_night_shares_wallet_v1_wallet, 3);
 
 /**
  * @generated from message night_shares.wallet.v1.ListTransactionsRequest
@@ -107,7 +141,7 @@ export type ListTransactionsRequest = Message<"night_shares.wallet.v1.ListTransa
  * Use `create(ListTransactionsRequestSchema)` to create a new message.
  */
 export const ListTransactionsRequestSchema: GenMessage<ListTransactionsRequest> = /*@__PURE__*/
-  messageDesc(file_night_shares_wallet_v1_wallet, 3);
+  messageDesc(file_night_shares_wallet_v1_wallet, 4);
 
 /**
  * @generated from message night_shares.wallet.v1.ListTransactionsResponse
@@ -124,7 +158,7 @@ export type ListTransactionsResponse = Message<"night_shares.wallet.v1.ListTrans
  * Use `create(ListTransactionsResponseSchema)` to create a new message.
  */
 export const ListTransactionsResponseSchema: GenMessage<ListTransactionsResponse> = /*@__PURE__*/
-  messageDesc(file_night_shares_wallet_v1_wallet, 4);
+  messageDesc(file_night_shares_wallet_v1_wallet, 5);
 
 /**
  * @generated from service night_shares.wallet.v1.WalletService

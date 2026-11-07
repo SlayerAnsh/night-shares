@@ -84,6 +84,12 @@ export function TicketTrade({
         </p>
       )}
       {t.quote && <QuotePreview quote={t.quote} mode={t.mode} />}
+      {t.quote && (
+        <p className={styles.updating}>
+          Trades respect your submitted price limit. On-chain slippage defaults
+          to 0.5%.
+        </p>
+      )}
       {t.preview.isFetching && (
         <p className={styles.updating} role="status">
           Updating quote…

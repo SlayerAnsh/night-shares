@@ -11,11 +11,13 @@ import { agentPassSettings } from "../../../../ports/agent-pass/settings";
 import type { User } from "../../../../ports/sessions/session-store";
 import { SYSTEM_ADDRESSES } from "../../../../ports/wallet-provider/wallet-provider";
 import { fromProto } from "../../../../shared/night-key";
+import { resumeChainCheckpoint } from "../../chain/checkpoint";
+import { isChain } from "../../chain/runtime";
 import type { Deps } from "../context";
 import { reserveAgentBuy } from "./reserve-buy";
 import { settleAgentBuy } from "./settle-buy";
 import { checkpointSnapshot } from "./snapshot";
-export function executeCheckpoint(
+export async function executeCheckpoint(
   deps: Deps,
   user: User,
   attempt: Attempt,
@@ -23,7 +25,7 @@ export function executeCheckpoint(
 ) {
   const { ports } = deps;
   const { store } = agentPassSettings(ports);
-  return transaction(ports.db, () => {
+  const outcome = transaction(ports.db, () => {
     const a = store.get(attempt.id);
     if (a?.status === "expired") throw new CheckpointFailure("expired");
     if (a?.status !== "pending" || !a.claimed || result.attemptId !== a.id)
@@ -69,6 +71,7 @@ export function executeCheckpoint(
       throw new CheckpointFailure("access_denied");
     a.status = "approved";
     store.save(a);
+    if (isChain(ports)) return "chain";
     const r = reserveAgentBuy(
       deps,
       user,
@@ -106,4 +109,7 @@ export function executeCheckpoint(
     store.save(a);
     return "approved";
   });
+  return outcome === "chain"
+    ? resumeChainCheckpoint(deps, user, attempt.id)
+    : outcome;
 }

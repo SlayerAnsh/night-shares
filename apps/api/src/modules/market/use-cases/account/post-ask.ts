@@ -4,6 +4,8 @@ import { transaction } from "../../../../db/transaction";
 import { custodialSigner } from "../../../../ports/order-signer/order-signer";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
+import { postChainAsk } from "../../chain/asks";
+import { isChain } from "../../chain/runtime";
 import { prepareAsk } from "../../orders/prepare";
 import { orderSettings } from "../../orders/settings";
 import { assertOpen, type Deps, syncPosition } from "../context";
@@ -12,6 +14,8 @@ import { humanWallets } from "../human-wallets";
 export async function postAskWithCustody(
   ...[deps, user, key, size, price, options = {}]: Parameters<typeof postAsk>
 ) {
+  if (isChain(deps.ports))
+    return postChainAsk(deps, user, key, size, price, options);
   if (options.signature) return postAsk(deps, user, key, size, price, options);
   const prepared = prepareAsk(
     deps,
@@ -48,6 +52,11 @@ export function postAsk(
   price: bigint,
   options: { expiry?: Timestamp; nonce?: bigint; signature?: string } = {},
 ) {
+  if (isChain(deps.ports))
+    throw new DomainError(
+      "FAILED_PRECONDITION",
+      "Chain asks require awaited custody signing.",
+    );
   const preparedSignature = prepareAsk(
     deps,
     user,

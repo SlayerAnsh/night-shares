@@ -15,6 +15,8 @@ import { mulTenths } from "../../../../shared/money";
 import { toWholeTenths } from "../../../../shared/tenths";
 import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyTraderAskFill } from "../../../inventory/mutations/apply-trader-ask-fill";
+import { isChain } from "../../chain/runtime";
+import { executeChainTrade } from "../../chain/trading";
 import { cutoffAt } from "../../cutoff";
 import { buyQuote } from "../../mappers/route";
 import {
@@ -34,8 +36,13 @@ export async function buy(
   key: string,
   size: number,
   max: bigint,
+  operationId?: string,
 ) {
   quantity({ tenths: size });
+  if (isChain(deps.ports))
+    return executeChainTrade(deps, user, key, size, max, "buy", {
+      operationId,
+    });
   return withSettlement(deps, key, () =>
     executeBuy(deps, user, key, size, max),
   );

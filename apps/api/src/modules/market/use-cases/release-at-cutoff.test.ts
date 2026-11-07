@@ -50,7 +50,7 @@ test("cutoff snapshots the same bid per holder, returns inventory and reruns ide
   expect(await d.ports.walletProvider.balance("rebate_pool")).toBe(
     rebateBefore + toMicros(cutoffRefund(d.before.state).haircut),
   );
-  expect(listCutoffClaims(d, d.other).claims[0]?.amount?.micros).toBe(
+  expect((await listCutoffClaims(d, d.other)).claims[0]?.amount?.micros).toBe(
     mulTenths(perNight, 3),
   );
   expect(getPortfolio(d, d.user).unclaimedCutoff?.micros).toBe(perNight);
@@ -95,7 +95,7 @@ test("failed cutoff settlement restores inventory and positions, then retries", 
     throw new Error("settlement unavailable");
   };
   await expect(releaseAtCutoff(d)).rejects.toThrow("settlement unavailable");
-  expect(listCutoffClaims(d, d.user).claims).toEqual([]);
+  expect((await listCutoffClaims(d, d.user)).claims).toEqual([]);
   expect(d.ports.inventory.get(d.key)).toEqual(d.before);
   expect({ ...d.repo.position(d.user.humanId, d.key) }).toEqual(previous);
   expect(
@@ -167,7 +167,9 @@ test("claim failure retries and concurrent claims cannot pay twice", async () =>
     throw new Error("unavailable");
   };
   await expect(claimCutoff(d, d.user, d.key)).rejects.toThrow("unavailable");
-  expect(listCutoffClaims(d, d.user).claims[0]?.claimedAt).toBeUndefined();
+  expect(
+    (await listCutoffClaims(d, d.user)).claims[0]?.claimedAt,
+  ).toBeUndefined();
   let finish = () => {};
   d.ports.walletProvider.settle = async (legs) => {
     await new Promise<void>((resolve) => {
@@ -179,7 +181,9 @@ test("claim failure retries and concurrent claims cannot pay twice", async () =>
   await expect(claimCutoff(d, d.user, d.key)).rejects.toThrow("settling");
   finish();
   await pending;
-  expect(listCutoffClaims(d, d.user).claims[0]?.claimedAt).toBeDefined();
+  expect(
+    (await listCutoffClaims(d, d.user)).claims[0]?.claimedAt,
+  ).toBeDefined();
   d.ports.db.close();
 });
 
@@ -194,7 +198,7 @@ test("claims stay unavailable until escrow settlement succeeds", async () => {
     return settle(legs);
   };
   const pending = releaseAtCutoff(d);
-  expect(listCutoffClaims(d, d.user).claims).toEqual([]);
+  expect((await listCutoffClaims(d, d.user)).claims).toEqual([]);
   await expect(claimCutoff(d, d.user, d.key)).rejects.toThrow(
     "No cutoff claim",
   );
@@ -202,7 +206,7 @@ test("claims stay unavailable until escrow settlement succeeds", async () => {
   await pending;
   d.ports.walletProvider.settle = settle;
   const reopened = { ...d, repo: createSqliteMarketRepo(d.ports.db) };
-  expect(listCutoffClaims(reopened, d.user).claims).toHaveLength(1);
+  expect((await listCutoffClaims(reopened, d.user)).claims).toHaveLength(1);
   await expect(
     claimCutoff(reopened, { ...d.user, humanId: "stranger" }, d.key),
   ).rejects.toThrow("No cutoff claim");

@@ -25,7 +25,7 @@ test("fresh checkpoint commits order against linked identity once, including con
     completeAgentCheckpoint(d, d.callback),
   ]);
   expect(results.sort()).toEqual(["approved", "mismatch"]);
-  expect(getAgentCheckpoint(d, d.user, d.a.id).status).toBe("used");
+  expect((await getAgentCheckpoint(d, d.user, d.a.id)).status).toBe("used");
   expect(d.repo.account(d.user.humanId).orders.get(d.order.id)?.status).toBe(
     AgentOrderStatus.EXECUTED,
   );

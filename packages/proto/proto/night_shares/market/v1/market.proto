@@ -305,6 +305,8 @@ message CutoffClaim {
   night_shares.common.v1.RoomNights size = 2;
   night_shares.common.v1.Usdc amount = 3;
   google.protobuf.Timestamp claimed_at = 4;
+  // Each on-chain entitlement belongs to this custody wallet.
+  string holder_wallet = 5;
 }
 message ClaimCutoffRequest { night_shares.common.v1.NightKey night = 1; }
 message ClaimCutoffResponse {

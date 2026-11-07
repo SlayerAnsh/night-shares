@@ -12,10 +12,12 @@ import {
   RouteQuoteSchema,
 } from "@night-shares/proto/market/v1/book_pb";
 import type { User } from "../../../../ports/sessions/session-store";
+import { DomainError } from "../../../../shared/errors/domain-error";
 import { mulTenths } from "../../../../shared/money";
 import { toProto } from "../../../../shared/night-key";
 import { toWholeTenths } from "../../../../shared/tenths";
 import type { NightRecord } from "../../../inventory/inventory-repo";
+import { isChain } from "../../chain/runtime";
 import { cutoffAt } from "../../cutoff";
 import {
   bookOf,
@@ -31,6 +33,11 @@ export function quoteSell(
   user?: User,
   record: NightRecord = deps.ports.inventory.get(key),
 ) {
+  if (isChain(deps.ports))
+    throw new DomainError(
+      "FAILED_PRECONDITION",
+      "Chain reads require the asynchronous chain market reader.",
+    );
   quantity({ tenths: size });
   let left = size,
     gross = 0n,

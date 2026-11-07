@@ -24,6 +24,14 @@ message GetBalanceResponse {
   night_shares.common.v1.Usdc onchain_usdc_balance = 3;
   string explorer_url = 4;
   repeated SystemWallet system_wallets = 5;
+  // Backed payouts awaiting transfer; these are not spendable cash.
+  repeated BackedCredit credits = 6;
+}
+
+message BackedCredit {
+  string contract_address = 1;
+  string recipient = 2;
+  night_shares.common.v1.Usdc amount = 3;
 }
 
 message SystemWallet {

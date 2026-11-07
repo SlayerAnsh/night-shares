@@ -44,10 +44,11 @@ export async function completeAgentCheckpoint(
       state: a.state,
       code: input.code,
     });
-    return executeCheckpoint(deps, user, a, result);
+    return await executeCheckpoint(deps, user, a, result);
   } catch (error) {
     const reason = checkpointFailure(error);
     const current = store.get(a.id);
+    if (current?.status === "approved") return "approved";
     if (current && current.status !== "used") {
       current.status =
         reason === "expired"

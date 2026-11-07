@@ -2,6 +2,11 @@ import type { ServiceImpl } from "@connectrpc/connect";
 import type { MarketService } from "@night-shares/proto/market/v1/market_pb";
 import { optionalUser, requireUser } from "../../server/auth-context";
 import { DomainError } from "../../shared/errors/domain-error";
+import { prepareChainAsk } from "./chain/asks";
+import { chainBook } from "./chain/book";
+import { chainPortfolio } from "./chain/positions";
+import { chainMarket, isChain } from "./chain/runtime";
+import { quoteChainTrade } from "./chain/trading";
 import { cancelAllAsks } from "./orders/cancel-all";
 import { prepareAsk } from "./orders/prepare";
 import { approveAgentOrder } from "./use-cases/account/approve-agent-order";
@@ -55,7 +60,7 @@ export function createMarketHandler(
       claimCutoff(deps, requireUser(ctx), nightKey(r.night)),
     listCutoffClaims: (_, ctx) => listCutoffClaims(deps, requireUser(ctx)),
     prepareAsk: (r, ctx) =>
-      prepareAsk(
+      (isChain(deps.ports) ? prepareChainAsk : prepareAsk)(
         deps,
         requireUser(ctx),
         nightKey(r.night),
@@ -66,24 +71,43 @@ export function createMarketHandler(
     cancelAllAsks: (_, ctx) => cancelAllAsks(deps, requireUser(ctx)),
     discover: (r, ctx) => discover(deps, r, optionalUser(ctx)),
     getNight: (r) => getNight(deps, nightKey(r.night)),
-    getBook: (r) => getBook(deps, nightKey(r.night)),
+    getBook: (r) =>
+      isChain(deps.ports)
+        ? chainBook(deps, nightKey(r.night))
+        : getBook(deps, nightKey(r.night)),
     listTape: (r, ctx) =>
       listTape(deps, nightKey(r.night), optionalUser(ctx)?.id),
-    quoteBuy: (r, ctx) => ({
-      quote: quoteBuy(
-        deps,
-        nightKey(r.night),
-        quantity(r.size),
-        optionalUser(ctx),
-      ),
+    quoteBuy: async (r, ctx) => ({
+      quote: isChain(deps.ports)
+        ? await quoteChainTrade(
+            deps,
+            nightKey(r.night),
+            quantity(r.size),
+            optionalUser(ctx),
+            "buy",
+          )
+        : quoteBuy(
+            deps,
+            nightKey(r.night),
+            quantity(r.size),
+            optionalUser(ctx),
+          ),
     }),
-    quoteSell: (r, ctx) => ({
-      quote: quoteSell(
-        deps,
-        nightKey(r.night),
-        quantity(r.size),
-        optionalUser(ctx),
-      ),
+    quoteSell: async (r, ctx) => ({
+      quote: isChain(deps.ports)
+        ? await quoteChainTrade(
+            deps,
+            nightKey(r.night),
+            quantity(r.size),
+            optionalUser(ctx),
+            "sell",
+          )
+        : quoteSell(
+            deps,
+            nightKey(r.night),
+            quantity(r.size),
+            optionalUser(ctx),
+          ),
     }),
     buy: (r, ctx) => {
       const user = requireUser(ctx);
@@ -94,6 +118,11 @@ export function createMarketHandler(
           nightKey(r.night),
           quantity(r.size),
           money(r.maxTotal),
+          requestId(
+            deps,
+            user.humanId,
+            ctx.requestHeader.get("idempotency-key"),
+          ),
         ),
       }));
     },
@@ -106,6 +135,11 @@ export function createMarketHandler(
           nightKey(r.night),
           quantity(r.size),
           money(r.minTotal),
+          requestId(
+            deps,
+            user.humanId,
+            ctx.requestHeader.get("idempotency-key"),
+          ),
         ),
       }));
     },
@@ -131,7 +165,9 @@ export function createMarketHandler(
     getPortfolio: async (_, ctx) => {
       const user = requireUser(ctx);
       return {
-        ...getPortfolio(deps, user),
+        ...(isChain(deps.ports)
+          ? await chainPortfolio(deps, user)
+          : getPortfolio(deps, user)),
         agentWallet: (await getAgentWallet(deps, user)).wallet,
       };
     },
@@ -194,4 +230,14 @@ export function createMarketHandler(
       );
     },
   };
+}
+
+function requestId(deps: Deps, humanId: string, value: string | null) {
+  if (!isChain(deps.ports) || value === null) return undefined;
+  if (!/^[a-zA-Z0-9_-]{1,128}$/.test(value))
+    throw new DomainError(
+      "INVALID_ARGUMENT",
+      "Invalid idempotency-key header.",
+    );
+  return `market:${chainMarket(deps.ports).reader.fingerprint}:${humanId}:${value}`;
 }

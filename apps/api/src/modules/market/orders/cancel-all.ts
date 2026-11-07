@@ -1,8 +1,12 @@
 import { transaction } from "../../../db/transaction";
 import type { User } from "../../../ports/sessions/session-store";
+import { cancelChainAsks } from "../chain/asks";
+import { isChain } from "../chain/runtime";
 import type { Deps } from "../use-cases/context";
 import { makerNonce } from "./store";
-export function cancelAllAsks({ ports }: Deps, user: User) {
+export function cancelAllAsks(deps: Deps, user: User) {
+  const { ports } = deps;
+  if (isChain(ports)) return cancelChainAsks(deps, user);
   return transaction(ports.db, () => {
     const nonce = makerNonce(ports.db, user.walletAddress) + 1n;
     ports.db

@@ -7,6 +7,9 @@ import { approvalThreshold } from "../../../../ports/chain-status/chain-status";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { toProto } from "../../../../shared/night-key";
+import { chainAgentWallet } from "../../chain/agent";
+import { isChain } from "../../chain/runtime";
+import { quoteChainTrade } from "../../chain/trading";
 import { agentWallets } from "../../repo/agent-wallets.sqlite";
 import { buyAgent } from "../agent/buy";
 import type { Deps } from "../context";
@@ -20,7 +23,16 @@ export async function createAgentOrder(
 ) {
   if (budget <= 0n)
     throw new DomainError("INVALID_ARGUMENT", "Budget must be positive.");
-  const quote = quoteBuy(deps, key, size, user);
+  const quote = isChain(deps.ports)
+    ? await quoteChainTrade(
+        deps,
+        key,
+        size,
+        user,
+        "buy",
+        await chainAgentWallet(deps, user),
+      )
+    : quoteBuy(deps, key, size, user);
   if (quote.filled?.tenths !== size)
     throw new DomainError(
       "FAILED_PRECONDITION",
@@ -41,6 +53,8 @@ export async function createAgentOrder(
     status: AgentOrderStatus.PENDING,
     requiresVerification: total > threshold,
   });
+  if (isChain(deps.ports))
+    deps.repo.account(user.humanId).orders.set(order.id, order);
   if (!order.requiresVerification) {
     // Agent purchases share the human position and per-night cap.
     const execution = await buyAgent(
@@ -49,6 +63,8 @@ export async function createAgentOrder(
       key,
       size,
       budget < threshold ? budget : threshold,
+      isChain(deps.ports) ? `agent-order:${order.id}` : undefined,
+      isChain(deps.ports) ? order.walletAddress : undefined,
     );
     order.status = AgentOrderStatus.EXECUTED;
     order.spent = execution.quote?.total;

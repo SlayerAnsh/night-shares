@@ -3,15 +3,22 @@ import { timestampFromMs } from "@bufbuild/protobuf/wkt";
 import { cutoffRefund, toMicros } from "@night-shares/market-model";
 import { GetPortfolioResponseSchema } from "@night-shares/proto/market/v1/market_pb";
 import type { User } from "../../../../ports/sessions/session-store";
+import { DomainError } from "../../../../shared/errors/domain-error";
 import { mulTenths } from "../../../../shared/money";
 import { toProto } from "../../../../shared/night-key";
 import { toWholeTenths } from "../../../../shared/tenths";
+import { isChain } from "../../chain/runtime";
 import { signedAsks } from "../../orders/store";
 import { cutoffClaims } from "../../repo/cutoff-claims";
 import { type Deps, syncPosition } from "../context";
 import { humanWallets } from "../human-wallets";
 import { isHost } from "../trading/host-fees";
 export function getPortfolio(deps: Deps, user: User) {
+  if (isChain(deps.ports))
+    throw new DomainError(
+      "FAILED_PRECONDITION",
+      "Chain reads require the asynchronous chain market reader.",
+    );
   const response = create(GetPortfolioResponseSchema);
   const unclaimed = cutoffClaims(deps.ports.db, user.humanId).filter(
     (claim) => claim.claimed_at === null,

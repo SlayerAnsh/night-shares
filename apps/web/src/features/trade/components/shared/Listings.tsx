@@ -64,6 +64,7 @@ export function Listings({
                 )}
                 <Button
                   size="sm"
+                  title="On-chain cancellation revokes old signatures and automatically re-signs your other open listings."
                   disabled={account.actions.pending}
                   onClick={() => void account.cancel(ask.id)}
                 >

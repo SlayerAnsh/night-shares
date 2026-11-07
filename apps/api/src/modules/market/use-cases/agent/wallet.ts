@@ -5,11 +5,15 @@ import { agentPassSettings } from "../../../../ports/agent-pass/settings";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { fromProto, toProto } from "../../../../shared/night-key";
+import { chainAgentTransfer, chainAgentWallet } from "../../chain/agent";
+import { chainAgentHoldings } from "../../chain/positions";
+import { isChain } from "../../chain/runtime";
 import { agentWallets } from "../../repo/agent-wallets.sqlite";
 import { getPortfolio } from "../account/get-portfolio";
 import type { Deps } from "../context";
 
 export async function getAgentWallet(deps: Deps, user: User) {
+  if (isChain(deps.ports)) await chainAgentWallet(deps, user);
   const b = agentWallets(deps.ports.db).get(user);
   const purchased = new Map<string, number>();
   for (const o of deps.repo.account(user.humanId).orders.values()) {
@@ -17,14 +21,16 @@ export async function getAgentWallet(deps: Deps, user: User) {
     const key = fromProto(o.night);
     purchased.set(key, (purchased.get(key) ?? 0) + (o.size?.tenths ?? 0));
   }
-  const holdings = getPortfolio(deps, user).holdings.flatMap((h) => {
-    if (!h.night) return [];
-    const size = Math.min(
-      h.size?.tenths ?? 0,
-      purchased.get(fromProto(h.night)) ?? 0,
-    );
-    return size ? [{ night: h.night, size: { tenths: size } }] : [];
-  });
+  const holdings = isChain(deps.ports)
+    ? await chainAgentHoldings(deps, user)
+    : getPortfolio(deps, user).holdings.flatMap((h) => {
+        if (!h.night) return [];
+        const size = Math.min(
+          h.size?.tenths ?? 0,
+          purchased.get(fromProto(h.night)) ?? 0,
+        );
+        return size ? [{ night: h.night, size: { tenths: size } }] : [];
+      });
   return {
     wallet: create(AgentWalletSchema, {
       agentPassLinked: !!agentPassSettings(deps.ports).store.link(user.id),
@@ -50,6 +56,10 @@ export async function transferAgentWallet(
       "INVALID_ARGUMENT",
       "Amount must be positive micro USDC.",
     );
+  if (isChain(deps.ports)) {
+    await chainAgentTransfer(deps, user, amount, withdraw);
+    return getAgentWallet(deps, user);
+  }
   const { address } = agentWallets(deps.ports.db).get(user);
   await deps.ports.walletProvider.settle([
     {

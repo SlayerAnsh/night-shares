@@ -12,6 +12,7 @@ export function createWalletHandler(cases: {
     async getBalance(_req, ctx) {
       const result = await cases.getBalance(requireUser(ctx));
       return {
+        credits: result.credits,
         balance: { micros: result.balance },
         walletAddress: result.walletAddress,
         onchainUsdcBalance:

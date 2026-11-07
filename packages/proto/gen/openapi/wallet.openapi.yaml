@@ -249,6 +249,20 @@ components:
           format: int64
       title: Usdc
       additionalProperties: false
+    night_shares.wallet.v1.BackedCredit:
+      type: object
+      properties:
+        contractAddress:
+          type: string
+          title: contract_address
+        recipient:
+          type: string
+          title: recipient
+        amount:
+          title: amount
+          $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+      title: BackedCredit
+      additionalProperties: false
     night_shares.wallet.v1.GetBalanceRequest:
       type: object
       title: GetBalanceRequest
@@ -274,6 +288,12 @@ components:
           items:
             $ref: '#/components/schemas/night_shares.wallet.v1.SystemWallet'
           title: system_wallets
+        credits:
+          type: array
+          items:
+            $ref: '#/components/schemas/night_shares.wallet.v1.BackedCredit'
+          title: credits
+          description: Backed payouts awaiting transfer; these are not spendable cash.
       title: GetBalanceResponse
       additionalProperties: false
     night_shares.wallet.v1.ListTransactionsRequest:

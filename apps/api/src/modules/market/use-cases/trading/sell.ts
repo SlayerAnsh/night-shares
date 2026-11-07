@@ -10,6 +10,8 @@ import { DomainError } from "../../../../shared/errors/domain-error";
 import { toWholeTenths } from "../../../../shared/tenths";
 import { applyPoolBuy } from "../../../inventory/mutations/apply-pool-buy";
 import { applyPoolSell } from "../../../inventory/mutations/apply-pool-sell";
+import { isChain } from "../../chain/runtime";
+import { executeChainTrade } from "../../chain/trading";
 import { signedAsks } from "../../orders/store";
 import {
   assertOpen,
@@ -27,8 +29,13 @@ export async function sell(
   key: string,
   size: number,
   min: bigint,
+  operationId?: string,
 ) {
   quantity({ tenths: size });
+  if (isChain(deps.ports))
+    return executeChainTrade(deps, user, key, size, min, "sell", {
+      operationId,
+    });
   return withSettlement(deps, key, () =>
     executeSell(deps, user, key, size, min),
   );

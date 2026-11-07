@@ -5,7 +5,11 @@ import { ExecutionSchema } from "@night-shares/proto/market/v1/book_pb";
 import { transaction } from "../../../../db/transaction";
 import type { User } from "../../../../ports/sessions/session-store";
 import { SYSTEM_ADDRESSES } from "../../../../ports/wallet-provider/wallet-provider";
+import { DomainError } from "../../../../shared/errors/domain-error";
 import { mulTenths } from "../../../../shared/money";
+import { chainAgentWallet } from "../../chain/agent";
+import { isChain } from "../../chain/runtime";
+import { executeChainTrade } from "../../chain/trading";
 import { agentWallets } from "../../repo/agent-wallets.sqlite";
 import { type Deps, quantity } from "../context";
 import { revertFills } from "../trading/revert-fills";
@@ -18,8 +22,26 @@ export async function buyAgent(
   key: string,
   size: number,
   max: bigint,
+  operationId?: string,
+  expectedAddress?: string,
 ) {
   quantity({ tenths: size });
+  if (isChain(deps.ports)) {
+    const wallet = await chainAgentWallet(deps, user);
+    if (
+      expectedAddress &&
+      wallet.address.toLowerCase() !== expectedAddress.toLowerCase()
+    )
+      throw new DomainError(
+        "FAILED_PRECONDITION",
+        "The approved agent custody wallet changed.",
+      );
+    return executeChainTrade(deps, user, key, size, max, "buy", {
+      agent: true,
+      wallet,
+      operationId,
+    });
+  }
   return withSettlement(deps, key, () =>
     executeBuy(deps, user, key, size, max),
   );

@@ -2,14 +2,19 @@ import { transaction } from "../../../../db/transaction";
 import type { User } from "../../../../ports/sessions/session-store";
 import { SYSTEM_ADDRESSES } from "../../../../ports/wallet-provider/wallet-provider";
 import { DomainError } from "../../../../shared/errors/domain-error";
+import { claimChainCutoff } from "../../chain/cutoff";
+import { chainClaims } from "../../chain/positions";
+import { isChain } from "../../chain/runtime";
 import { claimProto, cutoffClaims } from "../../repo/cutoff-claims";
 import { type Deps, realise } from "../context";
 
 export function listCutoffClaims(deps: Deps, user: User) {
+  if (isChain(deps.ports)) return chainClaims(deps, user);
   return { claims: cutoffClaims(deps.ports.db, user.humanId).map(claimProto) };
 }
 
 export async function claimCutoff(deps: Deps, user: User, key: string) {
+  if (isChain(deps.ports)) return claimChainCutoff(deps, user, key);
   const { ports, repo } = deps;
   const row = transaction(ports.db, () => {
     const row = cutoffClaims(ports.db, user.humanId).find(

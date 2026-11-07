@@ -9,10 +9,13 @@ import { toWholeTenths } from "../../../shared/tenths";
 import { adjustCoverAccount } from "../../walk/repo/cover-accounts";
 import { nightPending } from "../../walk/repo/night-pending";
 import { finishOwed, reserveOwed } from "../../walk/repo/owed";
+import { releaseChainCutoff } from "../chain/cutoff";
+import { isChain } from "../chain/runtime";
 import { cutoffAt } from "../cutoff";
 import { type Deps, syncPosition } from "./context";
 
 export async function releaseAtCutoff(deps: Deps) {
+  if (isChain(deps.ports)) return releaseChainCutoff(deps);
   const errors: unknown[] = [];
   for (const night of deps.ports.inventory.list()) {
     if (night.released || cutoffAt(deps.ports, night) > deps.ports.clock.now())

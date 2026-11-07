@@ -2,9 +2,13 @@ import { transaction } from "../../../../db/transaction";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
 import { toWholeTenths } from "../../../../shared/tenths";
+import { cancelChainAsks } from "../../chain/asks";
+import { isChain } from "../../chain/runtime";
 import { type Deps, syncPosition } from "../context";
 import { humanWallets } from "../human-wallets";
 export function cancelAsk(deps: Deps, user: User, askId: string) {
+  if (isChain(deps.ports))
+    return cancelChainAsks(deps, user, askId).then(() => ({}));
   return transaction(deps.ports.db, () => {
     const [key, owner, extra] = askId.split("|");
     if (!key || !owner || extra !== undefined)
