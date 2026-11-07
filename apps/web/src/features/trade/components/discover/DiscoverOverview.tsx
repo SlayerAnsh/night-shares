@@ -1,6 +1,4 @@
-import { forecastReturn } from "../../model/display";
-
-("use client");
+"use client";
 
 import { Kpis, Segmented } from "@night-shares/design-system";
 import type { NightCard } from "@night-shares/proto/market/v1/analytics_pb";
@@ -8,6 +6,7 @@ import { useState } from "react";
 import {
   fairDelta,
   fairText,
+  forecastReturn,
   hoursUntil,
   median,
   signedPercent,

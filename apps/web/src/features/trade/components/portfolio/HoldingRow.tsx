@@ -1,6 +1,4 @@
-import { forecastReturn } from "../../model/display";
-
-("use client");
+"use client";
 
 import type { Ask } from "@night-shares/proto/market/v1/book_pb";
 import type { Holding } from "@night-shares/proto/market/v1/portfolio_pb";
@@ -8,6 +6,7 @@ import Link from "next/link";
 import { formatRoomNights } from "../../../../shared/format";
 import { useHolding } from "../../hooks/use-holding";
 import {
+  forecastReturn,
   shortDate,
   signedPercent,
   signedUsd,
