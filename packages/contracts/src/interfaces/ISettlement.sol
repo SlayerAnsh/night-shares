@@ -10,6 +10,12 @@ import {INightTypes} from "./INightTypes.sol";
 
 /// @notice Immutable dependencies and platform; attester; consumed report and booking IDs; evidence hashes; host debt and incidents keyed by bound host payout identity; cutoff state, remaining claims and refund rate. No discretionary settlement owner.
 interface ISettlement is INightTypes {
+    event GuestClaimCreated(address indexed host, address indexed guest, bytes32 indexed reportId, uint256 amount);
+    event GuestClaimPaid(address indexed host, address indexed guest, bytes32 indexed reportId, uint256 amount);
+    function guestClaims(address host, uint256 index) external view returns (address guest, uint256 amount, bytes32 reportId);
+    function guestClaimHead(address host) external view returns (uint256);
+    function guestClaimTotal(address host) external view returns (uint256);
+
     function credits(address recipient) external view returns (uint256);
     function withdrawCredit(address recipient) external returns (uint256);
 
@@ -25,7 +31,7 @@ interface ISettlement is INightTypes {
     function attester() external view returns (address);
     /// @notice Anyone relays a valid attester signature. Validates stored booking owner/property/paid, report within 24h of 15:00 UTC check-in, deadline and replay protection.
     /// @dev Attester certifies NFC presence and absence of desk check-in. Stores evidenceHash, pays pending then fund atomically, records only the fund advance as host debt and one payout-identity incident.
-    /// Reverts atomically with InsufficientCover if pending plus fund cannot pay 1x recorded paid.
+    /// Unfunded refunds become FIFO guest claims with priority over fund debt and host proceeds.
     function reportWalk(WalkAttestation calldata report, bytes calldata signature) external;
     /// @notice Anyone at or after cutoff, once. Collects all holders, redeems their combined reserve without a trading hook fee, applies one 30% haircut, and releases positions via vault.
     /// @dev Stores pro-rata claims before burning; transfers haircut to RebatePool. Pool is frozen by timestamp even if nobody calls this function.
@@ -33,7 +39,7 @@ interface ISettlement is INightTypes {
     /// @notice Holder pulls its own snapshot entitlement. Consume before transfer and emit CutoffClaimed.
     /// @dev Residual USDC after the final claim goes to RebatePool; settlement never pushes holder payouts.
     function claim(bytes32 night) external returns (uint256 paid);
-    /// @notice Vault only. Pulls up to available USDC to repay CoverFund and reduce host debt. Returns amount netted.
+    /// @notice Vault only. Pulls up to available USDC to pay FIFO guest claims, then repay CoverFund debt. Returns amount netted.
     function netDebt(address host, uint256 available) external returns (uint256 netted);
     /// @notice Public debt shared across properties bound to the supplied host payout identity.
     function hostDebt(address host) external view returns (uint256);

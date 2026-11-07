@@ -136,6 +136,11 @@ contract FullFlowTest is Test, INightTypes {
         );
         vm.prank(vm.addr(ATTESTER_KEY));
         registry.setOrb(human, orb);
+        if (!orb) {
+            registry.linkGuest(human, a, deadline, _sig(ATTESTER_KEY,
+                OrderLib.digest(registry.DOMAIN_SEPARATOR(), keccak256(abi.encode(
+                    keccak256("LinkGuest(uint256 guestId,address wallet,uint64 deadline)"), human, a, deadline)))));
+        }
     }
 
     function _fund(address a) internal {
@@ -343,8 +348,9 @@ contract FullFlowTest is Test, INightTypes {
             uint64(block.timestamp + 1 days)
         );
         uint256 guestBefore = cash.balanceOf(GUEST);
+        uint256 claimsBefore = settlement.guestClaimTotal(HOST);
         settlement.reportWalk(r, _sig(ATTESTER_KEY, OrderLib.digest(settlement.DOMAIN_SEPARATOR(), OrderLib.hash(r))));
-        assertEq(cash.balanceOf(GUEST) - guestBefore, b.paid);
+        assertEq(cash.balanceOf(GUEST) - guestBefore + settlement.guestClaimTotal(HOST) - claimsBefore, b.paid);
         assertTrue(settlement.reported(id));
         assertEq(settlement.evidenceHash(bytes32(number)), r.evidenceHash);
         _conserved();
@@ -447,6 +453,27 @@ contract FullFlowTest is Test, INightTypes {
         assertFalse(vault.removed(night, 2));
         _conserved();
         _cutoff();
+    }
+
+    function test_D2_E2EEmptyCoverFund() public {
+        vm.prank(GUEST);
+        (bytes32 id, uint256 paid) = booking.buyAndRedeem(night, c.X);
+        uint256 fundBalance = cash.balanceOf(d.coverFund);
+        vm.prank(d.coverFund);
+        cash.transfer(address(this), fundBalance);
+        uint256 beforeBalance = cash.balanceOf(GUEST);
+        vm.warp(c.checkIn);
+        _walk(id, 777);
+        assertGt(settlement.guestClaimTotal(HOST), 0);
+        assertEq(cash.balanceOf(GUEST) - beforeBalance + settlement.guestClaimTotal(HOST), paid);
+        assertEq(settlement.hostDebt(HOST), 0);
+        _conserved();
+        cash.approve(d.vault, paid);
+        vault.creditPending(c.property, paid);
+        vault.sweep(night);
+        assertEq(settlement.guestClaimTotal(HOST), 0);
+        assertEq(cash.balanceOf(GUEST) - beforeBalance, paid);
+        _conserved();
     }
 
     function _cutoff() private {

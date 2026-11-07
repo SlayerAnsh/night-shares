@@ -30,6 +30,11 @@ contract Seed is Script, INightTypes {
             registry.linkWallet(i, wallet, deadline, _sig(attesterKey,
                 OrderLib.digest(registry.DOMAIN_SEPARATOR(), OrderLib.hashWallet(i, wallet, deadline, false))));
         }
+        address guest = vm.addr(vm.deriveKey(MNEMONIC, 6));
+        cash.mint(guest, 1000e6);
+        registry.linkGuest(6, guest, deadline, _sig(attesterKey, OrderLib.digest(registry.DOMAIN_SEPARATOR(),
+            keccak256(abi.encode(keccak256("LinkGuest(uint256 guestId,address wallet,uint64 deadline)"),
+                uint256(6), guest, deadline)))));
         address host = vm.addr(vm.deriveKey(MNEMONIC, 1));
         bytes32 property = keccak256("demo");
         factory.bindProperty(property, host, deadline, _sig(attesterKey,

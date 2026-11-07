@@ -9,6 +9,59 @@ contract HumanRegistry is IHumanRegistry {
     address public immutable owner;
     address public attester;
     mapping(address => uint256) public humanIdOf;
+    mapping(address => uint256) public guestIdOf;
+    mapping(uint256 => bool) public guestWalkBanned;
+    mapping(address => uint256[]) private guestHistory;
+    mapping(uint256 => address[]) private humanWallets;
+    mapping(uint256 => address[]) private guestWallets;
+
+
+    function linkGuest(uint256 id, address wallet, uint64 deadline, bytes calldata sig) external {
+        if (guestIdOf[wallet] != 0) revert IdentityAlreadyBound();
+        _linkGuest(id, wallet, deadline, sig, false);
+    }
+
+    function relinkGuest(uint256 id, address wallet, uint64 deadline, bytes calldata sig) external {
+        uint256 previous = guestIdOf[wallet];
+        if (previous == 0 || previous == id || _banned(wallet)) revert UnsafeRelink();
+        _linkGuest(id, wallet, deadline, sig, true);
+        emit GuestRelinked(wallet, previous, id);
+    }
+
+    function _linkGuest(uint256 id, address wallet, uint64 deadline, bytes calldata sig, bool relink) private {
+        if (id == 0 || wallet == address(0)) revert InvalidConfig();
+        if (block.timestamp > deadline) revert Expired();
+        bytes32 typeHash = relink
+            ? keccak256("RelinkGuest(uint256 guestId,address wallet,uint64 deadline)")
+            : keccak256("LinkGuest(uint256 guestId,address wallet,uint64 deadline)");
+        bytes32 digest = OrderLib.digest(DOMAIN_SEPARATOR(), keccak256(abi.encode(typeHash, id, wallet, deadline)));
+        if (consumed[digest] || !SignatureCheckerLib.isValidSignatureNow(attester, digest, sig)) revert InvalidSignature();
+        consumed[digest] = true;
+        if (_banned(wallet)) guestWalkBanned[id] = true;
+        guestIdOf[wallet] = id;
+        guestWallets[id].push(wallet);
+        guestHistory[wallet].push(id);
+        if (_banned(wallet)) _banWallet(wallet);
+        if (!relink) emit GuestLinked(wallet, id);
+    }
+
+    function banGuestReporter(uint256 id) external {
+        if (msg.sender != owner) revert Unauthorized();
+        if (id == 0) revert InvalidConfig();
+        guestWalkBanned[id] = true;
+        for (uint256 i; i < guestWallets[id].length; ++i) _banWallet(guestWallets[id][i]);
+    }
+
+    function banWalkWallet(address wallet) external {
+        if (msg.sender != owner) revert Unauthorized();
+        _banWallet(wallet);
+    }
+
+    function _banWallet(address wallet) private {
+        for (uint256 i; i < identityHistory[wallet].length; ++i) walkBanned[identityHistory[wallet][i]] = true;
+        for (uint256 i; i < guestHistory[wallet].length; ++i) guestWalkBanned[guestHistory[wallet][i]] = true;
+    }
+
     mapping(uint256 => bool) public walkBanned;
     mapping(uint256 => bool) private verified;
     mapping(uint256 => bool) private orb;
@@ -35,8 +88,11 @@ contract HumanRegistry is IHumanRegistry {
     function linkWallet(uint256 id, address wallet, uint64 deadline, bytes calldata sig) external {
         if (humanIdOf[wallet] != 0) revert IdentityAlreadyBound();
         _authorize(id, wallet, deadline, sig, false);
+        if (_banned(wallet)) walkBanned[id] = true;
         humanIdOf[wallet] = id;
+        humanWallets[id].push(wallet);
         identityHistory[wallet].push(id);
+        if (_banned(wallet)) _banWallet(wallet);
         emit WalletLinked(wallet, id);
     }
 
@@ -48,8 +104,11 @@ contract HumanRegistry is IHumanRegistry {
             revert UnsafeRelink();
         }
         _authorize(id, wallet, deadline, sig, true);
+        if (_banned(wallet)) walkBanned[id] = true;
         humanIdOf[wallet] = id;
+        humanWallets[id].push(wallet);
         identityHistory[wallet].push(id);
+        if (_banned(wallet)) _banWallet(wallet);
         emit WalletRelinked(wallet, previous, id);
     }
 
@@ -74,10 +133,14 @@ contract HumanRegistry is IHumanRegistry {
         if (msg.sender != owner) revert Unauthorized();
         if (id == 0) revert InvalidConfig();
         walkBanned[id] = true;
+        for (uint256 i; i < humanWallets[id].length; ++i) _banWallet(humanWallets[id][i]);
     }
 
     // A later ban on an earlier identity also follows every wallet that used it.
     function _banned(address wallet) private view returns (bool) {
+        for (uint256 i; i < guestHistory[wallet].length; ++i) {
+            if (guestWalkBanned[guestHistory[wallet][i]]) return true;
+        }
         uint256[] storage history = identityHistory[wallet];
         for (uint256 i; i < history.length; ++i) {
             if (walkBanned[history[i]]) return true;
@@ -87,7 +150,7 @@ contract HumanRegistry is IHumanRegistry {
 
     function isVerified(address wallet) external view returns (bool) {
         uint256 id = humanIdOf[wallet];
-        return verified[id] && !_banned(wallet);
+        return (orb[id] || guestIdOf[wallet] != 0) && !_banned(wallet);
     }
 
     function isOrb(address wallet) external view returns (bool) {

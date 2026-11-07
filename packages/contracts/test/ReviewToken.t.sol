@@ -72,6 +72,32 @@ contract ReviewTokenTest is NightTest {
         }
     }
 
+    function test_L1_AdjacentReceiverHintBeyond64() public {
+        _open();
+        address[] memory holders = new address[](68);
+        for (uint256 i; i < 66; ++i) {
+            address who = address(uint160(0x1000 + i));
+            holders[i] = who;
+            registry.set(who, 100 + i, true);
+            if (i != 0) _hint(who, holders[i - 1], address(0));
+            _give(who, 2e17);
+        }
+        address from = address(0x2000);
+        address to = address(0x3000);
+        holders[66] = from; holders[67] = to;
+        registry.set(from, 200, true); registry.set(to, 201, true);
+        _give(from, 3e17);
+        _hint(from, holders[65], address(0));
+        _hint(to, from, address(0));
+        vm.prank(from); t.transfer(to, 1e17);
+        assertEq(t.prev(to), from);
+        _integrity(holders);
+    }
+
+    function test_L1_F2AttackStillCannotCorruptList() public {
+        test_F2_CounterpartyHint();
+    }
+
     function test_F2_CounterpartyHint() public {
         _open();
         HintAttacker attacker = new HintAttacker();

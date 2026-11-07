@@ -98,6 +98,8 @@ contract G4Test is Test, INightTypes {
         registry.linkWallet(1, GUEST, 200000, walletSig(1, GUEST, 200000, false));
         vm.prank(vm.addr(PK));
         registry.setOrb(1, false);
+        registry.linkGuest(1, GUEST, 200000, sign(OrderLib.digest(registryDomain, keccak256(abi.encode(
+            keccak256("LinkGuest(uint256 guestId,address wallet,uint64 deadline)"), uint256(1), GUEST, uint64(200000))))));
         bookings.set(bytes32(uint256(1)), Booking(NIGHT, GUEST, 1e18, 100e6, 120000));
     }
 
@@ -224,17 +226,16 @@ contract G4Test is Test, INightTypes {
         assertEq(settlement.hostDebt(HOST), 0);
     }
 
-    function testWalkInsufficientCoverRollsBackAndRetries() public {
+    function test_D2_EmptyCoverCreatesClaim() public {
         vm.warp(120000);
         vault.creditPending(PROPERTY, 40e6);
-        vm.expectRevert(ISettlement.InsufficientCover.selector);
         submit(report(1));
-        assertEq(vault.pending(PROPERTY), 40e6);
-        assertFalse(settlement.reported(bytes32(uint256(1))));
-        assertEq(settlement.incidents(HOST), 0);
-        fund.deposit(60e6);
-        submit(report(1));
-        assertEq(usdc.balanceOf(GUEST), 100e6);
+        assertEq(vault.pending(PROPERTY), 0);
+        assertTrue(settlement.reported(bytes32(uint256(1))));
+        assertEq(settlement.incidents(HOST), 1);
+        assertEq(usdc.balanceOf(GUEST), 40e6);
+        assertEq(settlement.guestClaimTotal(HOST), 60e6);
+        assertEq(settlement.hostDebt(HOST), 0);
     }
 
     function testWalkValidationAndAccess() public {
@@ -399,16 +400,16 @@ contract G4Test is Test, INightTypes {
         registry.relinkWallet(1, OTHER, 100000, signature);
     }
 
-    function testWalkPendingOnlyAndFailedGuestPaymentRollback() public {
+    function testWalkPendingOnlyAndFailedGuestPaymentCredit() public {
         vm.warp(120000);
         vault.creditPending(PROPERTY, 100e6);
         BlacklistUSDC(address(usdc)).setBlocked(GUEST, true);
-        vm.expectRevert();
         submit(report(1));
-        assertEq(vault.pending(PROPERTY), 100e6);
-        assertFalse(settlement.consumedReport(bytes32(uint256(1))));
+        assertEq(vault.pending(PROPERTY), 0);
+        assertTrue(settlement.consumedReport(bytes32(uint256(1))));
+        assertEq(settlement.credits(GUEST), 100e6);
         BlacklistUSDC(address(usdc)).setBlocked(GUEST, false);
-        submit(report(1));
+        settlement.withdrawCredit(GUEST);
         assertEq(settlement.hostDebt(HOST), 0);
         assertEq(usdc.balanceOf(GUEST), 100e6);
     }

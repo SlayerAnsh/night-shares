@@ -234,7 +234,7 @@ contract NightToken is INightToken {
             if (balances[from] == 0) delete cachedHuman[from];
             else _insert(from, to);
         }
-        if (!excluded[to]) _insert(to, from);
+        if (!excluded[to]) _insert(to, address(0));
         emit Transfer(from, to, amount);
     }
 

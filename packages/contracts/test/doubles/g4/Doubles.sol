@@ -158,6 +158,10 @@ contract VaultDouble {
         manager.unlock(abi.encode(l));
     }
 
+    function pendingForNight(bytes32) external view returns (uint256) { return pending[keccak256("property")]; }
+    function payNightPending(bytes32, address guest, uint256 n) external returns (uint256) {
+        return payPending(keccak256("property"), guest, n);
+    }
     function collectEarned(bytes32) external pure returns (uint256) { return 0; }
 
     function creditPending(bytes32 p, uint256 n) external {
@@ -165,7 +169,7 @@ contract VaultDouble {
         pending[p] += n;
     }
 
-    function payPending(bytes32 p, address guest, uint256 n) external returns (uint256) {
+    function payPending(bytes32 p, address guest, uint256 n) public returns (uint256) {
         require(msg.sender == settlement);
         uint256 paid = n < pending[p] ? n : pending[p];
         pending[p] -= paid;

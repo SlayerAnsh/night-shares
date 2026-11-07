@@ -5,6 +5,15 @@ import {INightTypes} from "./INightTypes.sol";
 /// @notice World ID human IDs are uint256 uniqueness nullifiers for night-shares-enroll.
 /// @dev Attester-signed wallet links aggregate caps across every linked wallet, including agents.
 interface IHumanRegistry is INightTypes {
+    event GuestLinked(address indexed wallet, uint256 indexed guestId);
+    event GuestRelinked(address indexed wallet, uint256 indexed previousGuestId, uint256 indexed guestId);
+    function linkGuest(uint256 guestId, address wallet, uint64 deadline, bytes calldata sig) external;
+    function relinkGuest(uint256 guestId, address wallet, uint64 deadline, bytes calldata sig) external;
+    function guestIdOf(address wallet) external view returns (uint256);
+    function guestWalkBanned(uint256 guestId) external view returns (bool);
+    function banGuestReporter(uint256 guestId) external;
+    function banWalkWallet(address wallet) external;
+
     error IdentityAlreadyBound();
     error UnsafeRelink();
     event WalletLinked(address indexed wallet, uint256 indexed humanId);

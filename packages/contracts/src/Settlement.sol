@@ -44,6 +44,26 @@ contract Settlement is ISettlement {
     IPoolManager public immutable manager;
     address public attester;
     mapping(address => uint256) public hostDebt;
+    struct GuestClaim { address guest; uint256 amount; bytes32 reportId; }
+    mapping(address => GuestClaim[]) public guestClaims;
+    mapping(address => uint256) public guestClaimHead;
+    mapping(address => uint256) public guestClaimTotal;
+
+    function _payGuestClaims(address host, uint256 available) private returns (uint256 paid) {
+        uint256 head = guestClaimHead[host];
+        while (available != 0 && head < guestClaims[host].length) {
+            GuestClaim storage c = guestClaims[host][head];
+            uint256 amount = available < c.amount ? available : c.amount;
+            c.amount -= amount;
+            guestClaimTotal[host] -= amount;
+            available -= amount;
+            paid += amount;
+            CreditLib.pay(credits, usdc, c.guest, amount);
+            emit GuestClaimPaid(host, c.guest, c.reportId, amount);
+            if (c.amount == 0) ++head;
+        }
+        guestClaimHead[host] = head;
+    }
     mapping(address => uint256) public incidents;
     mapping(bytes32 => bytes32) public evidenceHash;
     mapping(bytes32 => bool) public reported;
@@ -104,25 +124,37 @@ contract Settlement is ISettlement {
         address host = factory.ownerOf(r.property);
         if (host == address(0) || host != c.host) revert InvalidBooking();
         vault.collectEarned(b.night);
-        (uint256 pendingPaid, uint256 advance,) = FeeMath.walkPayout(r.paid, vault.pending(r.property));
-        if (coverFund.balance() < advance) revert InsufficientCover();
+        (uint256 pendingPaid, uint256 advance,) = FeeMath.walkPayout(r.paid, vault.pendingForNight(b.night));
+        uint256 shortfall;
+        if (advance > coverFund.balance()) {
+            shortfall = advance - coverFund.balance();
+            advance -= shortfall;
+        }
         consumedReport[r.reportId] = true;
         reported[r.bookingId] = true;
         evidenceHash[r.reportId] = r.evidenceHash;
         hostDebt[host] += advance;
         incidents[host]++;
-        if (pendingPaid != 0 && vault.payPending(r.property, r.guest, pendingPaid) != pendingPaid) {
-            revert InsufficientCover();
+        if (pendingPaid != 0) pendingPaid = vault.payNightPending(b.night, address(this), pendingPaid);
+        if (advance != 0) coverFund.pay(address(this), advance);
+        CreditLib.pay(credits, usdc, r.guest, pendingPaid + advance);
+        if (shortfall != 0) {
+            guestClaims[host].push(GuestClaim(r.guest, shortfall, r.reportId));
+            guestClaimTotal[host] += shortfall;
+            emit GuestClaimCreated(host, r.guest, r.reportId, shortfall);
         }
-        if (advance != 0) coverFund.pay(r.guest, advance);
-        emit WalkPaid(r.reportId, r.bookingId, r.guest, pendingPaid, advance, hostDebt[host], r.evidenceHash);
+        emit WalkPaid(r.reportId, r.bookingId, r.guest, pendingPaid, advance,
+            hostDebt[host] + guestClaimTotal[host], r.evidenceHash);
     }
 
     function netDebt(address host, uint256 available) external nonReentrant returns (uint256 netted) {
         if (msg.sender != address(vault)) revert Unauthorized();
-        netted = available < hostDebt[host] ? available : hostDebt[host];
-        hostDebt[host] -= netted;
-        if (netted != 0) SafeTransferLib.safeTransferFrom(usdc, msg.sender, address(coverFund), netted);
+        uint256 owed = hostDebt[host] + guestClaimTotal[host];
+        netted = available < owed ? available : owed;
+        if (netted != 0) SafeTransferLib.safeTransferFrom(usdc, msg.sender, address(this), netted);
+        uint256 debtPaid = netted - _payGuestClaims(host, netted);
+        hostDebt[host] -= debtPaid;
+        CreditLib.pay(credits, usdc, address(coverFund), debtPaid);
     }
 
     function settleCutoff(bytes32 night) external nonReentrant {
@@ -152,6 +184,7 @@ contract Settlement is ISettlement {
         (uint256 hostProceeds,) = vault.releaseAtCutoff(night);
         token.burnVaultDust();
         token.burnCutoffInventory();
+        hostProceeds -= _payGuestClaims(c.host, hostProceeds);
         uint256 debtPaid = hostProceeds < hostDebt[c.host] ? hostProceeds : hostDebt[c.host];
         hostDebt[c.host] -= debtPaid;
         if (debtPaid != 0) CreditLib.pay(credits, usdc, address(coverFund), debtPaid);

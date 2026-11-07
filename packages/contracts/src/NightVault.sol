@@ -16,10 +16,16 @@ import {SqrtPriceMath} from "v4-core/src/libraries/SqrtPriceMath.sol";
 import {FullMath} from "v4-core/src/libraries/FullMath.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
+import {CreditLib} from "./libraries/CreditLib.sol";
+
 import {FeeMath} from "./libraries/FeeMath.sol";
 import {NightPosition} from "./libraries/NightPosition.sol";
 
 contract NightVault is INightVault {
+    mapping(address => uint256) public credits;
+    function withdrawCredit(address recipient) external guard returns (uint256) {
+        return CreditLib.withdraw(credits, usdc, recipient);
+    }
     function openingValues(NightConfig calldata c) external pure returns (uint256 cost, uint160 initialPrice, uint256 strike) {
         cost = NightPosition.poolCost(c.F, c.k, c.S);
         initialPrice = TickMath.getSqrtPriceAtTick(LadderMath.boundaryTick(c.F, c.k, c.S, 0));
@@ -36,6 +42,28 @@ contract NightVault is INightVault {
     mapping(bytes32 => uint256) public nextRoom;
     mapping(bytes32 => bool) public ladderComplete;
     mapping(bytes32 => uint256) public pending;
+    mapping(bytes32 => uint256) public pendingEarned;
+    mapping(bytes32 => uint256) private propertyEarned;
+
+    function pendingForNight(bytes32 night) public view returns (uint256) {
+        bytes32 property = factory.config(night).property;
+        return pendingEarned[night] + pending[property] - propertyEarned[property];
+    }
+
+    function payNightPending(bytes32 night, address recipient, uint256 requested) external guard returns (uint256 paid) {
+        if (msg.sender != settlement) revert Unauthorized();
+        paid = requested < pendingForNight(night) ? requested : pendingForNight(night);
+        _debitPending(night, paid);
+        if (paid != 0) usdc.safeTransfer(recipient, paid);
+    }
+
+    function _debitPending(bytes32 night, uint256 amount) private {
+        bytes32 property = factory.config(night).property;
+        uint256 earned = amount < pendingEarned[night] ? amount : pendingEarned[night];
+        pendingEarned[night] -= earned;
+        propertyEarned[property] -= earned;
+        pending[property] -= amount;
+    }
     mapping(bytes32 => bool) public closing;
     mapping(bytes32 => bool) public opened;
     mapping(bytes32 => bool) public closed;
@@ -103,14 +131,16 @@ contract NightVault is INightVault {
         if (end > nextRoom[night]) end = nextRoom[night];
         (amount,) = abi.decode(_unlock(night, 0, end, 1), (uint256, uint256));
         pending[c.property] += amount;
-        uint256 available = pending[c.property];
-        pending[c.property] = 0;
+        pendingEarned[night] += amount;
+        propertyEarned[c.property] += amount;
+        uint256 available = pendingForNight(night);
+        _debitPending(night, available);
         if (available != 0) {
             usdc.safeApprove(settlement, available);
             hostDebtNetted = ISettlement(settlement).netDebt(c.host, available);
             usdc.safeApprove(settlement, 0);
             if (hostDebtNetted > available) revert InvalidQuantity();
-            usdc.safeTransfer(c.host, available - hostDebtNetted);
+            CreditLib.pay(credits, usdc, c.host, available - hostDebtNetted);
         }
         emit Swept(c.property, c.host, available, hostDebtNetted);
     }
@@ -125,6 +155,8 @@ contract NightVault is INightVault {
         if (end > nextRoom[night]) end = nextRoom[night];
         (amount,) = abi.decode(_unlock(night, 0, end, 1), (uint256, uint256));
         pending[c.property] += amount;
+        pendingEarned[night] += amount;
+        propertyEarned[c.property] += amount;
     }
 
     function creditPending(bytes32 property, uint256 amount) external guard {
@@ -136,7 +168,8 @@ contract NightVault is INightVault {
     function payPending(bytes32 property, address guest, uint256 requested) external guard returns (uint256 paid) {
         if (msg.sender != settlement) revert Unauthorized();
         if (guest == address(0)) revert InvalidConfig();
-        paid = requested < pending[property] ? requested : pending[property];
+        uint256 available = pending[property] - propertyEarned[property];
+        paid = requested < available ? requested : available;
         pending[property] -= paid;
         if (paid != 0) usdc.safeTransfer(guest, paid);
     }
@@ -150,6 +183,9 @@ contract NightVault is INightVault {
         closing[night] = true;
         (usdcAmount,) = abi.decode(_unlock(night, 0, nextRoom[night], 2), (uint256, uint256));
         closing[night] = false;
+        uint256 pendingAmount = pendingForNight(night);
+        _debitPending(night, pendingAmount);
+        usdcAmount += pendingAmount;
         address token = factory.tokenOf(night);
         uint256 balance = INightToken(token).balanceOf(address(this));
         // Settlement burns this excluded remainder through NightToken.burnVaultDust
