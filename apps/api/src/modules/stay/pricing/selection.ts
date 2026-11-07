@@ -3,6 +3,7 @@ import {
   type StaySelection,
   StaySelectionSchema,
 } from "@night-shares/proto/stay/v1/trip_pb";
+import { envValue } from "../../../config/env";
 import type { Ports } from "../../../container/ports";
 import { diffDays, range } from "../../../shared/dates";
 import { DomainError } from "../../../shared/errors/domain-error";
@@ -35,7 +36,7 @@ export function selection(ports: Ports, input: StaySelection | undefined) {
     );
   if (
     (ports.chainExecutor?.mode === "chain" ||
-      process.env.ARC_NETWORK === "mainnet") &&
+      envValue("ARC_NETWORK") === "mainnet") &&
     (value.rooms !== 1 || count !== 1)
   )
     throw new DomainError(

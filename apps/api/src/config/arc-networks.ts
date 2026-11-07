@@ -1,3 +1,5 @@
+import { envValue } from "./env";
+
 const shared = {
   usdc: "0x3600000000000000000000000000000000000000",
   usdcDecimals: 6,
@@ -40,7 +42,7 @@ export const ARC_NETWORKS = {
 
 export function transactionExplorerUrl(
   hash: string,
-  network = process.env.ARC_NETWORK ?? "fork",
+  network = envValue("ARC_NETWORK") ?? "fork",
 ) {
   const base =
     ARC_NETWORKS[network as keyof typeof ARC_NETWORKS]?.txExplorerBase;

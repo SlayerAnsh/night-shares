@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { envValue } from "../../config/env";
 import { createChainFoundation } from "../../container/chain-foundation";
 import { openDatabase } from "../../db/open-database";
 import { loadDeployment } from "../arc-deployment/arc-deployment";
@@ -18,13 +19,13 @@ import type { CustodyWallet } from "../wallet-custody/wallet-custody";
 import { createAnvilWalletCustody } from "../wallet-custody/wallet-custody.anvil";
 import { createChainExecutor } from "./chain-executor.viem";
 
-const forkTest = process.env.FORK_IT === "1" ? test : test.skip;
+const forkTest = envValue("FORK_IT") === "1" ? test : test.skip;
 forkTest(
   "fork: durable provisioning, bounded approval, crash after broadcast, restart, external reconciliation and reset quarantine",
   async () => {
-    const upstream = process.env.ARC_RPC_URL ?? "http://127.0.0.1:8545";
+    const upstream = envValue("ARC_RPC_URL") ?? "http://127.0.0.1:8545";
     assertLocalForkRpc(upstream);
-    const d = loadDeployment("fork", process.env.ARC_DEPLOYMENT_FILE);
+    const d = loadDeployment("fork", envValue("ARC_DEPLOYMENT_FILE"));
     if (!d) throw new Error("Deployment required.");
     const upstreamClient = forkClient(upstream);
     await validateDeployment(d, upstreamClient);

@@ -15,8 +15,8 @@ test("boot defaults use SQLite, system time and random ids", () => {
 test("invalid environment values fail with their config key", () => {
   for (const [key, value] of Object.entries({
     JOB_INTERVAL_MS: "0",
-    PORT: "",
-    DB_PATH: " ",
+    PORT: "invalid",
+    DB_PATH: "\0",
     TODAY: "2026-02-30",
     CLOCK: "fixed",
     IDS: "counter",
@@ -60,4 +60,54 @@ test("custody credentials fail closed and Arc order defaults follow network", ()
       PRIVY_APP_SECRET: "secret",
     }).walletCustody,
   ).toBe("privy");
+});
+
+test("blank env values use defaults while false and zero remain explicit", () => {
+  for (const blank of ["", " \t\n "]) {
+    expect(
+      loadConfig({
+        ARC_RPC_URLS: blank,
+        ARC_NETWORK: blank,
+        WORLD_ID_MODE: blank,
+        PORT: blank,
+        DB_PATH: blank,
+        JOB_INTERVAL_MS: blank,
+        AGENT_PASS_ISSUER: blank,
+        AGENT_PASS_ACR: blank,
+      }),
+    ).toMatchObject({
+      arcRpcUrls: ["https://rpc.mainnet.arc.io"],
+      worldIdMode: "mock",
+      port: 8787,
+      dbPath: "./data/night-shares.db",
+      jobIntervalMs: 60000,
+      agentPassIssuer: "https://auth.world.org",
+      agentPassAcr: "https://world.org/oidc/acr/orb",
+    });
+  }
+  expect(
+    loadConfig({ PORT: " 0 ", RATE_LIMIT_ENABLED: " false " }),
+  ).toMatchObject({
+    port: 0,
+    rateLimitEnabled: false,
+  });
+  expect(
+    loadConfig({ ARC_RPC_URLS: "", ARC_RPC_URL: " https://rpc.example " })
+      .arcRpcUrl,
+  ).toBe("https://rpc.example");
+});
+
+test("comma lists discard empty entries", () => {
+  expect(
+    loadConfig({
+      ARC_RPC_URLS: "https://a.example,, https://b.example,",
+      CORS_ORIGINS: "https://a.example,,https://b.example,",
+      TRUSTED_PROXIES: "127.0.0.1,,::1,",
+    }),
+  ).toMatchObject({
+    arcRpcUrls: ["https://a.example", "https://b.example"],
+    corsOrigins: ["https://a.example", "https://b.example"],
+    trustedProxies: ["127.0.0.1", "::1"],
+  });
+  expect(() => loadConfig({ ARC_RPC_URLS: ", ," })).toThrow("ARC_RPC_URLS");
 });

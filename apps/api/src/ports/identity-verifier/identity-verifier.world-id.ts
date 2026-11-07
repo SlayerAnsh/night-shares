@@ -36,7 +36,7 @@ export function createWorldIdIdentityVerifier(deps: {
     throw new Error("WORLD_ID_SIGNING_KEY is required in cloud mode.");
   const rpId = deps.rpId,
     signingKey = deps.signingKey;
-  const environment = deps.environment ?? "staging";
+  const environment = deps.environment ?? "production";
   const endpoint = (
     deps.verifyUrl ?? "https://developer.world.org/api/v4/verify/{rp_id}"
   ).replace("{rp_id}", encodeURIComponent(rpId));

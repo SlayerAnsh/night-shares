@@ -1,5 +1,6 @@
 import type { Address } from "viem";
 import { keccak256, stringToHex } from "viem";
+import { envValue } from "../../../config/env";
 import type { Ports } from "../../../container/ports";
 import type { ArcDeployment } from "../../../ports/arc-deployment/arc-deployment";
 import {
@@ -42,7 +43,7 @@ export function chainMarket(ports: Ports) {
       )
       .get(ports.chainReader.fingerprint);
     if (row) {
-      const raw = process.env.MARKET_SLIPPAGE_BPS;
+      const raw = envValue("MARKET_SLIPPAGE_BPS");
       configured = {
         custody: ports.walletProvider.custody,
         deployment: deserialize<ArcDeployment>(row.deployment),
@@ -60,7 +61,7 @@ export function chainMarket(ports: Ports) {
     ...configured,
     client:
       configured.client ??
-      forkClient(process.env.ARC_RPC_URL ?? "http://127.0.0.1:8545"),
+      forkClient(envValue("ARC_RPC_URL") ?? "http://127.0.0.1:8545"),
     executor: ports.chainExecutor,
     reader: ports.chainReader,
   };

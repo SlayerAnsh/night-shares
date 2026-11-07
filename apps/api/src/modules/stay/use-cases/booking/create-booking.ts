@@ -2,6 +2,7 @@ import { create } from "@bufbuild/protobuf";
 import { toMicros } from "@night-shares/market-model";
 import type { CreateBookingRequest } from "@night-shares/proto/stay/v1/stay_pb";
 import { TripSchema } from "@night-shares/proto/stay/v1/trip_pb";
+import { envValue } from "../../../../config/env";
 import type { Ports } from "../../../../container/ports";
 import { transaction } from "../../../../db/transaction";
 import type { User } from "../../../../ports/sessions/session-store";
@@ -17,7 +18,7 @@ import { settlement } from "./settlement";
 
 export function createCreateBooking(ports: Ports, repo: StayRepo) {
   return async (input: CreateBookingRequest, user: User) => {
-    if (process.env.ARC_NETWORK === "mainnet" && !ports.chainExecutor)
+    if (envValue("ARC_NETWORK") === "mainnet" && !ports.chainExecutor)
       throw new DomainError(
         "FAILED_PRECONDITION",
         "On-chain booking execution is unavailable on this network.",

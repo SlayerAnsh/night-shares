@@ -136,3 +136,34 @@ test("provider errors, malformed responses and environment mismatch cannot authe
     }
   }
 });
+
+test("production requests verify using the configured endpoint and environment", async () => {
+  for (const verifyUrl of [undefined, "https://verify.example/{rp_id}"]) {
+    const s = setupWorldId(async () =>
+      Response.json({ success: true, environment: "production" }),
+    );
+    try {
+      const verifier = createWorldIdIdentityVerifier({
+        ...s,
+        environment: undefined,
+        verifyUrl,
+      });
+      const request = await verifier.startRequest("orb");
+      expect(request.context?.environment).toBe("production");
+      const payload = { ...enrollment(request), environment: "production" };
+      expect(
+        await verifier.verifyProof({
+          requestId: request.requestId,
+          action: "sign_in",
+          proof: jsonProof(payload),
+        }),
+      ).toMatchObject({ level: "orb", subject: "66" });
+      expect(s.fetcher.mock.calls[0]?.[0]).toBe(
+        verifyUrl?.replace("{rp_id}", "rp_test") ??
+          "https://developer.world.org/api/v4/verify/rp_test",
+      );
+    } finally {
+      s.db.close();
+    }
+  }
+});

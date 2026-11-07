@@ -16,6 +16,7 @@ export function setupWorldId(
   );
   const deps = {
     db,
+    environment: "staging" as const,
     clock: createMockClock(0),
     ids: createMockIdGenerator(),
     appId: "app_test",

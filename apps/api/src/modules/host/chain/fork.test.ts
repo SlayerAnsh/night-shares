@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { bytesToHex, keccak256, toBytes } from "viem";
+import { envValue } from "../../../config/env";
 import { loadDeployment } from "../../../ports/arc-deployment/arc-deployment";
 import { assertLocalForkRpc } from "../../../ports/arc-deployment/local-fork";
 import {
@@ -21,13 +22,13 @@ import { bindProperty } from "./bind";
 import { isolatedHostFork } from "./fork-fixture";
 import { openChainNights } from "./open";
 
-const forkTest = process.env.FORK_IT === "1" ? test : test.skip;
+const forkTest = envValue("FORK_IT") === "1" ? test : test.skip;
 forkTest(
   "host fork: identity, permanent bind, 100 rooms, chunk restart and PMS recovery",
   async () => {
-    const upstream = process.env.ARC_RPC_URL ?? "http://127.0.0.1:8545";
+    const upstream = envValue("ARC_RPC_URL") ?? "http://127.0.0.1:8545";
     assertLocalForkRpc(upstream);
-    const deployment = loadDeployment("fork", process.env.ARC_DEPLOYMENT_FILE);
+    const deployment = loadDeployment("fork", envValue("ARC_DEPLOYMENT_FILE"));
     if (!deployment) throw new Error("Deployment required.");
     const isolated = await isolatedHostFork(upstream, deployment.block);
     const rpcUrl = isolated.rpcUrl;

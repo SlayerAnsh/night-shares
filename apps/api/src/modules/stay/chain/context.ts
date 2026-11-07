@@ -1,4 +1,5 @@
 import { decodeEventLog, type Hex } from "viem";
+import { envValue } from "../../../config/env";
 import type { Ports } from "../../../container/ports";
 import type { ArcDeployment } from "../../../ports/arc-deployment/arc-deployment";
 import {
@@ -80,7 +81,7 @@ export type ChainBooking = {
 export function slippageBound(
   paid: bigint,
   cap: bigint,
-  bps = Number(process.env.BOOKING_SLIPPAGE_BPS ?? 50),
+  bps = Number(envValue("BOOKING_SLIPPAGE_BPS") ?? 50),
 ) {
   if (!Number.isSafeInteger(bps) || bps < 0 || bps > 10000)
     throw new DomainError(

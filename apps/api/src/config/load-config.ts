@@ -16,6 +16,7 @@ import { parseDate } from "../shared/dates";
 import { registerRpcUrls, rpcJsonReplacer } from "../shared/redact-url";
 import { ARC_NETWORKS } from "./arc-networks";
 import { loadChainKeys } from "./chain-keys";
+import { normalizeEnv } from "./env";
 import { loadServerConfig, type ServerConfig } from "./server-config";
 export type Config = Partial<ServerConfig> &
   AgentPassConfig & {
@@ -64,6 +65,7 @@ export type Config = Partial<ServerConfig> &
 export function loadConfig(
   env: Record<string, string | undefined> = process.env,
 ): Config {
+  env = normalizeEnv(env);
   const walletCustody =
     env.WALLET_CUSTODY ?? (env.ARC_NETWORK === "fork" ? "anvil" : "mock");
   if (
@@ -118,7 +120,10 @@ export function loadConfig(
       : ARC_NETWORKS[arcNetwork].rpcUrl)
   )
     .split(",")
-    .map((url) => url.trim());
+    .map((url) => url.trim())
+    .filter(Boolean);
+  if (!arcRpcUrls.length)
+    throw new Error("ARC_RPC_URLS must contain an HTTP(S) URL.");
   registerRpcUrls(arcRpcUrls);
   const arcRpcUrl = arcRpcUrls[0] as string;
   for (const rpcUrl of arcRpcUrls) {
@@ -238,7 +243,9 @@ export function loadConfig(
     throw new Error(
       "WORLD_ID_SIGNING_KEY must be a 32-byte private key in cloud mode.",
     );
-  const worldIdEnvironment = env.WORLD_ID_ENVIRONMENT ?? "staging";
+  const worldIdEnvironment =
+    env.WORLD_ID_ENVIRONMENT ??
+    (worldIdMode === "mock" ? "staging" : "production");
   if (worldIdEnvironment !== "staging" && worldIdEnvironment !== "production")
     throw new Error("WORLD_ID_ENVIRONMENT must be staging or production.");
   const legacy = env.WORLD_ID_ALLOW_LEGACY ?? "true";

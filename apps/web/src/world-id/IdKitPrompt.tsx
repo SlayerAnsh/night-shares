@@ -10,6 +10,7 @@ import {
 } from "@worldcoin/idkit";
 import { useRef } from "react";
 import type { AccessLevel } from "../session/access";
+import { idkitEnvironment } from "./environment";
 
 export function IdKitPrompt(props: {
   request: Pick<
@@ -38,10 +39,7 @@ export function IdKitPrompt(props: {
       expires_at: Number(context.expiresAt),
       signature: context.signature,
     },
-    environment:
-      context.environment === "production"
-        ? ("production" as const)
-        : ("staging" as const),
+    environment: idkitEnvironment(context.environment),
     handleVerify: async (proof: IDKitResult) => {
       await props.handleVerify(proof);
       verified.current = true;

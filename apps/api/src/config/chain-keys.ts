@@ -6,6 +6,7 @@ import { decryptKeystoreJsonSync } from "ethers";
 import { type Hex, isHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import type { ArcDeployment } from "../ports/arc-deployment/arc-deployment";
+import { normalizeEnv } from "./env";
 
 type Env = Record<string, string | undefined>;
 type Secret = (() => Hex) & { toJSON(): string };
@@ -35,6 +36,7 @@ export function loadChainKeys(
   deployment?: ArcDeployment,
   passwordReader = readKeychainPassword,
 ): { attesterKey?: Secret; opsKey?: Secret } {
+  env = normalizeEnv(env);
   if (!network) return {};
   function load(role: "ATTESTER" | "OPS"): Secret | undefined {
     const path = env[`${role}_KEYSTORE`];

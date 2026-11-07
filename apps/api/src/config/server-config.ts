@@ -1,8 +1,10 @@
 import { parseProxyRange } from "../server/limits/ip-address";
+import { normalizeEnv } from "./env";
 
 export type ServerConfig = ReturnType<typeof loadServerConfig>;
 
 export function loadServerConfig(env: Record<string, string | undefined> = {}) {
+  env = normalizeEnv(env);
   const integer = (key: string, fallback: number) => {
     const raw = env[key] ?? String(fallback);
     const value = Number(raw);
@@ -46,7 +48,10 @@ export function loadServerConfig(env: Record<string, string | undefined> = {}) {
     }
   }
   const trustedProxies = (env.TRUSTED_PROXIES ?? "").trim()
-    ? (env.TRUSTED_PROXIES ?? "").split(",").map((value) => value.trim())
+    ? (env.TRUSTED_PROXIES ?? "")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean)
     : [];
   if (trustedProxies.some((range) => !parseProxyRange(range)))
     throw new Error(

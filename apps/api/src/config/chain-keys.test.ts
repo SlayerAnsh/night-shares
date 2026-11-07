@@ -23,6 +23,10 @@ test("keystores decrypt in memory, clear password buffers, and redact both keys"
   );
   const buffers: Buffer[] = [];
   const env = {
+    ATTESTER_KEY: "",
+    OPS_KEY: " \t ",
+    ATTESTER_KEYSTORE_PASSWORD: " ",
+    ATTESTER_KEYSTORE_PASSWORD_FILE: "",
     ATTESTER_KEYSTORE: path,
     ATTESTER_KEYCHAIN_SERVICE: "test-only",
     OPS_KEYSTORE: path,

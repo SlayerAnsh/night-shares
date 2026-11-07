@@ -14,6 +14,7 @@ import {
   stringToHex,
   toHex,
 } from "viem";
+import { envValue } from "../../../config/env";
 import { buildContainer } from "../../../container/build-container";
 import { loadDeployment } from "../../../ports/arc-deployment/arc-deployment";
 import { assertLocalForkRpc } from "../../../ports/arc-deployment/local-fork";
@@ -44,13 +45,13 @@ import { createSqliteStayRepo } from "../repo/stay-repo.sqlite";
 import { createStayCases } from "../use-cases/create-stay-cases";
 import { confirmed, receiptEvents } from "./context";
 
-const forkTest = process.env.FORK_IT === "1" ? test : test.skip;
+const forkTest = envValue("FORK_IT") === "1" ? test : test.skip;
 forkTest(
   "fork: custody recall booking, receipt recovery, PMS retry, exact walk and short-cover claim",
   async () => {
-    const upstream = process.env.ARC_RPC_URL ?? "http://127.0.0.1:8545";
+    const upstream = envValue("ARC_RPC_URL") ?? "http://127.0.0.1:8545";
     assertLocalForkRpc(upstream);
-    const d = loadDeployment("fork", process.env.ARC_DEPLOYMENT_FILE);
+    const d = loadDeployment("fork", envValue("ARC_DEPLOYMENT_FILE"));
     if (!d) throw new Error("Deployment required.");
     const upstreamClient = forkClient(upstream);
     await validateDeployment(d, upstreamClient);

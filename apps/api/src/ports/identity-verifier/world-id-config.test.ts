@@ -27,8 +27,8 @@ test("v4 cloud configuration requires RP registration and a server signing key",
   expect(() => loadConfig({ ...env, WORLD_ID_ALLOW_LEGACY: "yes" })).toThrow(
     "WORLD_ID_ALLOW_LEGACY",
   );
-  expect(() => loadConfig({ ...env, WORLD_ID_ENROLL_ACTION: " " })).toThrow(
-    "WORLD_ID_ENROLL_ACTION",
-  );
+  expect(
+    loadConfig({ ...env, WORLD_ID_ENROLL_ACTION: " " }).worldIdAction,
+  ).toBe("night-shares-enroll");
   expect(loadConfig(env).worldIdMode).toBe("cloud");
 });

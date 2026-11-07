@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseEther } from "viem";
+import { envValue } from "../../config/env";
 import { openDatabase } from "../../db/open-database";
 import { isolatedHostFork } from "../../modules/host/chain/fork-fixture";
 import { loadDeployment } from "../arc-deployment/arc-deployment";
@@ -14,12 +15,12 @@ import { anvilAccount } from "../wallet-custody/wallet-custody.anvil";
 import { createPrivyWalletCustody } from "../wallet-custody/wallet-custody.privy";
 import { createChainExecutor } from "./chain-executor.viem";
 
-(process.env.FORK_IT === "1" ? test : test.skip)(
+(envValue("FORK_IT") === "1" ? test : test.skip)(
   "Privy HTTP stub: journaled ops float, lost signing response, crash recovery and identical bytes",
   async () => {
-    const upstream = process.env.ARC_RPC_URL ?? "http://127.0.0.1:8545";
+    const upstream = envValue("ARC_RPC_URL") ?? "http://127.0.0.1:8545";
     assertLocalForkRpc(upstream);
-    const d = loadDeployment("fork", process.env.ARC_DEPLOYMENT_FILE);
+    const d = loadDeployment("fork", envValue("ARC_DEPLOYMENT_FILE"));
     if (!d) throw new Error("Deployment required.");
     const child = await isolatedHostFork(
       upstream,
