@@ -1,15 +1,18 @@
 import { type Abi, type Address, encodeFunctionData, parseAbi } from "viem";
 import type { ArcDeployment } from "../arc-deployment/arc-deployment";
 import type { ChainCommand } from "./chain-executor";
-import { x402Call } from "./x402-codecs";
-export const usdcAbi = parseAbi([
-  "function balanceOf(address) view returns (uint256)",
-  "function allowance(address,address) view returns (uint256)",
-  "function approve(address,uint256) returns (bool)",
-  "function transfer(address,uint256) returns (bool)",
-  "function mint(address,uint256)",
-  "event Transfer(address indexed from,address indexed to,uint256 value)",
-]);
+import { authorizationAbi, x402Call } from "./x402-codecs";
+export const usdcAbi = [
+  ...authorizationAbi,
+  ...parseAbi([
+    "function balanceOf(address) view returns (uint256)",
+    "function allowance(address,address) view returns (uint256)",
+    "function approve(address,uint256) returns (bool)",
+    "function transfer(address,uint256) returns (bool)",
+    "function mint(address,uint256)",
+    "event Transfer(address indexed from,address indexed to,uint256 value)",
+  ]),
+];
 export const permit2Abi = parseAbi([
   "function approve(address token,address spender,uint160 amount,uint48 expiration)",
   "function allowance(address owner,address token,address spender) view returns (uint160 amount,uint48 expiration,uint48 nonce)",

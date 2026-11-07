@@ -1,8 +1,7 @@
 import { expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
 import { hashDomain, zeroAddress } from "viem";
-import { loadDeployment, parseDeployment, repoRoot } from "./arc-deployment";
-import { fixture } from "./fixture";
+import { loadDeployment, parseDeployment } from "./arc-deployment";
+import { executionFixture, fixture } from "./fixture";
 import { requiredAbi } from "./required-abi";
 import {
   type ForkClient,
@@ -22,20 +21,11 @@ test("x402 deployment requires addresses and USDC domain; legacy testnet remains
   );
   expect(legacy?.x402Available).toBe(false);
   expect(legacy?.X402Settler).toBeUndefined();
-  const current = loadDeployment("fork");
+  const current = executionFixture();
   expect(current?.x402Available).toBe(true);
 });
 
-function deployment() {
-  return parseDeployment(
-    JSON.parse(
-      readFileSync(
-        `${repoRoot}/packages/contracts/deployments/5042-fork.json`,
-        "utf8",
-      ),
-    ),
-  );
-}
+const deployment = executionFixture;
 
 const wiring = {
   factory: "NightFactory",
@@ -129,6 +119,7 @@ test("x402 startup fails on settler, deployer wiring and either authorization do
     "dependencies.settler",
     "NightFactory.tokenDeployer",
     "NightTokenDeployer.factory",
+    "NightToken.factory",
     "X402Settler.factory",
     "X402Settler.tradeRouter",
     "X402Settler.usdc",

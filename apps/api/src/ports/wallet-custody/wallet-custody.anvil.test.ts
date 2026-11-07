@@ -53,9 +53,21 @@ test("anvil allocates deterministic persisted user and system indices and signs 
     expect(
       await verifyTypedData({ ...data, address: wallet.address, signature }),
     ).toBe(true);
-    await expect(create().signTypedData("anvil:9", data)).rejects.toThrow(
-      "Unknown",
-    );
+    for (const index of [7, 8, 9]) {
+      await expect(
+        create().signTypedData(`anvil:${index}`, data),
+      ).rejects.toThrow("Unknown");
+      expect(() =>
+        db
+          .query("INSERT INTO anvil_wallets VALUES (?, ?, ?, ?)")
+          .run(
+            `reserved:${index}`,
+            index,
+            `anvil:${index}`,
+            anvilAccount(index).address,
+          ),
+      ).toThrow("CHECK");
+    }
     expect(() =>
       createAnvilWalletCustody({
         db,

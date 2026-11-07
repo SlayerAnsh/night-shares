@@ -1,4 +1,6 @@
-import { getAddress } from "viem";
+import { type Abi, getAddress } from "viem";
+import { parseDeployment } from "./arc-deployment";
+import { requiredAbi } from "./required-abi";
 export function fixture() {
   const address = getAddress(`0x${"ab".repeat(20)}`);
   const keys = [
@@ -33,4 +35,31 @@ export function fixture() {
       verifyingContract: address,
     },
   };
+}
+
+export function executionFixture() {
+  const data = fixture();
+  const addresses = Object.fromEntries(
+    Object.keys(data)
+      .filter((key) => typeof data[key as keyof typeof data] === "string")
+      .map((key, index) => [
+        key,
+        getAddress(`0x${(index + 1).toString(16).padStart(40, "0")}`),
+      ]),
+  );
+  return parseDeployment({
+    ...data,
+    ...addresses,
+    block: 1,
+    EIP712Domain: {
+      ...data.EIP712Domain,
+      verifyingContract: addresses.TradeRouter,
+    },
+    abis: Object.fromEntries(
+      Object.entries(requiredAbi).map(([name, entries]) => [
+        name,
+        entries.map((entry) => JSON.parse(entry)) as Abi,
+      ]),
+    ),
+  });
 }

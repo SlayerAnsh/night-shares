@@ -257,11 +257,14 @@ export function createChainReader(
           const request = deserialize<ReadRequest>(watch.request);
           // A reorg replay can precede the creation of a watched token.
           if (request.contract === "NightToken") {
-            const token = await reader.read<Address>({
-              contract: "NightFactory",
-              functionName: "tokenOf",
-              args: [request.night],
-            }, n);
+            const token = await reader.read<Address>(
+              {
+                contract: "NightFactory",
+                functionName: "tokenOf",
+                args: [request.night],
+              },
+              n,
+            );
             if (token.value === zeroAddress) continue;
           }
           snapshots.push({

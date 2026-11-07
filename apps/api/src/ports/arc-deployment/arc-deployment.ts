@@ -1,7 +1,13 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { type Abi, type Address, getAddress, isAddress } from "viem";
+import {
+  type Abi,
+  type Address,
+  getAddress,
+  isAddress,
+  zeroAddress,
+} from "viem";
 import {
   assertOrderDomain,
   type OrderDomain,
@@ -56,7 +62,13 @@ export function parseDeployment(value: unknown, chainId = 5042): ArcDeployment {
     return getAddress(value);
   };
   const addresses = Object.fromEntries(
-    addressKeys.map((key) => [key, address(data[key], key)]),
+    addressKeys.map((key) => [
+      key,
+      // Older testnet deployments have no demo token instance.
+      key === "NightToken" && chainId === 5042002 && data[key] === undefined
+        ? zeroAddress
+        : address(data[key], key),
+    ]),
   );
   const x402Available = chainId !== 5042002 || data.X402Settler !== undefined;
   const x402 = x402Available

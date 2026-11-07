@@ -45,6 +45,8 @@ export async function validateDeployment(
   client: ForkClient,
 ): Promise<string> {
   validateExecutionAbi(d);
+  if (d.x402Available && !d.USDC_EIP712)
+    throw new Error("Missing USDC_EIP712 domain.");
   if (d.chainId !== 5042 || (await client.getChainId()) !== 5042)
     throw new Error("Fork chainId must equal 5042.");
   if (!Number.isSafeInteger(d.block) || (d.block ?? -1) < 0)
@@ -84,7 +86,7 @@ export async function validateDeployment(
     owner: "OWNER",
   };
   for (const [contract, abi] of Object.entries(d.abis)) {
-    if (!(contract in d) || contract === "NightToken") continue;
+    if (!(contract in d)) continue;
     for (const item of abi) {
       if (
         item.type !== "function" ||
@@ -143,11 +145,11 @@ export async function validateDeployment(
       domain: {
         name:
           name === "USDC"
-            ? d.USDC_EIP712?.name
+            ? (d.USDC_EIP712?.name ?? "USDC")
             : name === "NightToken"
               ? "NightShares Room Night"
               : "NightShares",
-        version: name === "USDC" ? d.USDC_EIP712?.version : "1",
+        version: name === "USDC" ? (d.USDC_EIP712?.version ?? "2") : "1",
         chainId: 5042n,
         verifyingContract: d[name],
       },

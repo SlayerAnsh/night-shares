@@ -1,11 +1,10 @@
 import { expect, test } from "bun:test";
 import { decodeFunctionData, type Hex } from "viem";
-import { loadDeployment } from "../arc-deployment/arc-deployment";
+import { executionFixture } from "../arc-deployment/fixture";
 import type { Authorization, ChainCommand } from "./chain-executor";
 import { calldata, commandCall } from "./codecs";
 
-const d = loadDeployment("fork");
-if (!d) throw new Error("Missing deployment.");
+const d = executionFixture();
 const night = `0x${"11".repeat(32)}` as Hex;
 const salt = `0x${"22".repeat(32)}` as Hex;
 const signature = `0x${"33".repeat(32)}${"44".repeat(32)}1b` as Hex;
@@ -25,7 +24,7 @@ test("x402 buy and sell target settler with authorization, trade terms and salt 
     { ...base, kind: "x402Sell", minReceived: 9n },
   ] satisfies ChainCommand[]) {
     const call = await commandCall(d, command, async () => d.NightToken);
-    expect(call.address).toEqual(d.X402Settler);
+    expect(call.address === d.X402Settler).toBe(true);
     const decoded = decodeFunctionData({ abi: call.abi, data: calldata(call) });
     expect(decoded.functionName).toBe(
       command.kind === "x402Buy" ? "buy" : "sell",
