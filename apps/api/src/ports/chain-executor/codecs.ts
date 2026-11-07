@@ -1,6 +1,7 @@
 import { type Abi, type Address, encodeFunctionData, parseAbi } from "viem";
 import type { ArcDeployment } from "../arc-deployment/arc-deployment";
 import type { ChainCommand } from "./chain-executor";
+import { x402Call } from "./x402-codecs";
 export const usdcAbi = parseAbi([
   "function balanceOf(address) view returns (uint256)",
   "function allowance(address,address) view returns (uint256)",
@@ -41,6 +42,10 @@ export async function commandCall(
     args,
   });
   switch (c.kind) {
+    case "x402Buy":
+    case "x402Sell":
+    case "authorizedTransfer":
+      return x402Call(d, c);
     case "buy":
       return call("TradeRouter", "buy", [
         c.night,

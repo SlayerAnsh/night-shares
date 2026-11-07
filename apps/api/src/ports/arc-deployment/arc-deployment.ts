@@ -26,6 +26,10 @@ const addressKeys = [
   "PLATFORM",
 ] as const;
 export type ArcDeployment = Record<(typeof addressKeys)[number], Address> & {
+  X402Settler?: Address;
+  NightTokenDeployer?: Address;
+  USDC_EIP712?: { name: string; version: string };
+  x402Available: boolean;
   chainId: number;
   block?: number;
   forkBlock?: number;
@@ -54,6 +58,22 @@ export function parseDeployment(value: unknown, chainId = 5042): ArcDeployment {
   const addresses = Object.fromEntries(
     addressKeys.map((key) => [key, address(data[key], key)]),
   );
+  const x402Available = chainId !== 5042002 || data.X402Settler !== undefined;
+  const x402 = x402Available
+    ? {
+        X402Settler: address(data.X402Settler, "X402Settler"),
+        NightTokenDeployer: address(
+          data.NightTokenDeployer,
+          "NightTokenDeployer",
+        ),
+      }
+    : {};
+  const usdcDomain = data.USDC_EIP712 as ArcDeployment["USDC_EIP712"];
+  if (
+    x402Available &&
+    (usdcDomain?.name !== "USDC" || usdcDomain.version !== "2")
+  )
+    throw new Error("Arc deployment USDC_EIP712 must be USDC version 2.");
   if (!data.abis || typeof data.abis !== "object" || Array.isArray(data.abis))
     throw new Error("Arc deployment abis must be an object.");
   for (const key of ["NightHook", "NightToken", "TradeRouter"]) {
@@ -96,6 +116,9 @@ export function parseDeployment(value: unknown, chainId = 5042): ArcDeployment {
   );
   return {
     ...addresses,
+    ...x402,
+    x402Available,
+    USDC_EIP712: usdcDomain,
     chainId,
     block: data.block,
     forkBlock: data.forkBlock,

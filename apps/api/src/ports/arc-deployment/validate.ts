@@ -8,9 +8,10 @@ import {
   zeroAddress,
 } from "viem";
 import { serialize } from "../chain-executor/chain-executor";
+import { authorizationAbi } from "../chain-executor/x402-codecs";
 import type { ArcDeployment } from "./arc-deployment";
 import { assertLocalForkRpc } from "./local-fork";
-import { requiredAbi } from "./required-abi";
+import { legacyRequiredAbi, requiredAbi } from "./required-abi";
 export const forkChain = (rpcUrl: string) =>
   defineChain({
     id: 5042,
@@ -29,7 +30,9 @@ export type ForkClient = ReturnType<typeof forkClient>;
 export const digest = (value: unknown) =>
   createHash("sha256").update(serialize(value)).digest("hex");
 export function validateExecutionAbi(d: ArcDeployment): void {
-  for (const [contract, signatures] of Object.entries(requiredAbi)) {
+  for (const [contract, signatures] of Object.entries(
+    d.x402Available ? requiredAbi : legacyRequiredAbi,
+  )) {
     const actual = d.abis[contract];
     for (const signature of signatures) {
       if (!actual?.some((item) => JSON.stringify(item) === signature))
@@ -62,6 +65,8 @@ export async function validateDeployment(
   }
   const wiring: Record<string, keyof ArcDeployment> = {
     factory: "NightFactory",
+    tokenDeployer: "NightTokenDeployer",
+    settler: "X402Settler",
     poolManager: "POOL_MANAGER",
     manager: "POOL_MANAGER",
     usdc: "USDC",
@@ -104,6 +109,11 @@ export async function validateDeployment(
     abi: d.abis.NightFactory ?? [],
     functionName: "dependencies",
   })) as Record<string, Address>;
+  if (
+    d.x402Available &&
+    dependencies.settler?.toLowerCase() !== d.X402Settler?.toLowerCase()
+  )
+    throw new Error("Factory dependency mismatch: settler.");
   for (const [name, actual] of Object.entries(dependencies)) {
     const key = wiring[name];
     if (!key || String(d[key]).toLowerCase() !== actual.toLowerCase())
@@ -114,10 +124,11 @@ export async function validateDeployment(
     "HumanRegistry",
     "NightFactory",
     "Settlement",
+    ...(d.x402Available ? (["USDC", "NightToken"] as const) : []),
   ] as const) {
     const actual = await client.readContract({
       address: d[name],
-      abi: d.abis[name] ?? [],
+      abi: name === "USDC" ? authorizationAbi : (d.abis[name] ?? []),
       functionName: "DOMAIN_SEPARATOR",
     });
     const expected = hashDomain({
@@ -130,8 +141,13 @@ export async function validateDeployment(
         ],
       },
       domain: {
-        name: "NightShares",
-        version: "1",
+        name:
+          name === "USDC"
+            ? d.USDC_EIP712?.name
+            : name === "NightToken"
+              ? "NightShares Room Night"
+              : "NightShares",
+        version: name === "USDC" ? d.USDC_EIP712?.version : "1",
         chainId: 5042n,
         verifyingContract: d[name],
       },

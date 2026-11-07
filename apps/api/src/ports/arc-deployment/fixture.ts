@@ -2,6 +2,8 @@ import { getAddress } from "viem";
 export function fixture() {
   const address = getAddress(`0x${"ab".repeat(20)}`);
   const keys = [
+    "X402Settler",
+    "NightTokenDeployer",
     "TradeRouter",
     "BookingRouter",
     "HumanRegistry",
@@ -21,6 +23,7 @@ export function fixture() {
   ];
   return {
     ...Object.fromEntries(keys.map((key) => [key, address])),
+    USDC_EIP712: { name: "USDC", version: "2" },
     chainId: 5042,
     abis: { NightHook: [], NightToken: [], TradeRouter: [] },
     EIP712Domain: {

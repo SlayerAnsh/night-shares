@@ -32,7 +32,40 @@ export type WalkAttestation = {
   deadline: bigint;
 };
 type Routing = { night: Hex; asks: Ask[]; hints: Hint[]; deadline: bigint };
+export type Authorization = {
+  from: Address;
+  to: Address;
+  value: bigint;
+  validAfter: bigint;
+  validBefore: bigint;
+  nonce: Hex;
+};
+export type X402Command =
+  | ({
+      kind: "x402Buy";
+      auth: Authorization;
+      signature: Hex;
+      qty: bigint;
+      salt: Hex;
+    } & Routing)
+  | {
+      kind: "x402Sell";
+      auth: Authorization;
+      signature: Hex;
+      night: Hex;
+      minReceived: bigint;
+      hints: Hint[];
+      deadline: bigint;
+      salt: Hex;
+    }
+  | {
+      kind: "authorizedTransfer";
+      token: Address;
+      auth: Authorization;
+      signature: Hex;
+    };
 export type ChainCommand =
+  | X402Command
   | ({ kind: "buy"; qty: bigint; maxPaid: bigint } & Routing)
   | {
       kind: "sell";
