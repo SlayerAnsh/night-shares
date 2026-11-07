@@ -1,6 +1,7 @@
 import { createServer as createHttpServer } from "node:http";
 import { loadServerConfig, type ServerConfig } from "../config/server-config";
 import type { Container } from "../container/build-container";
+import { redactRpc } from "../shared/redact-url";
 import { createAgentPassRoute } from "./agent-pass-route";
 import { serveDocs } from "./docs/serve-docs";
 import { clientIp } from "./limits/client-ip";
@@ -74,7 +75,7 @@ export function createServer(
           .end(
             JSON.stringify({
               status: healthy ? "ok" : "unavailable",
-              ...(reason ? { reason } : {}),
+              ...(reason ? { reason: redactRpc(reason) } : {}),
             }),
           );
         return;

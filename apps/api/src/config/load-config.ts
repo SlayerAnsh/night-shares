@@ -13,6 +13,7 @@ import { assertLocalForkRpc } from "../ports/arc-deployment/local-fork";
 import { chainConfig } from "../ports/chain-status/config";
 import type { GasPolicy } from "../ports/wallet-custody/gas-float";
 import { parseDate } from "../shared/dates";
+import { registerRpcUrls, rpcJsonReplacer } from "../shared/redact-url";
 import { ARC_NETWORKS } from "./arc-networks";
 import { loadChainKeys } from "./chain-keys";
 import { loadServerConfig, type ServerConfig } from "./server-config";
@@ -20,6 +21,7 @@ export type Config = Partial<ServerConfig> &
   AgentPassConfig & {
     chain?: { network: "fork" | "testnet" | "mainnet" };
     arcRpcUrls?: string[];
+    toJSON?: () => unknown;
     attesterKey?: () => `0x${string}`;
     opsKey?: () => `0x${string}`;
     gasPolicy?: GasPolicy;
@@ -117,6 +119,7 @@ export function loadConfig(
   )
     .split(",")
     .map((url) => url.trim());
+  registerRpcUrls(arcRpcUrls);
   const arcRpcUrl = arcRpcUrls[0] as string;
   for (const rpcUrl of arcRpcUrls) {
     try {
@@ -287,6 +290,10 @@ export function loadConfig(
   if (!dbPath.trim() || dbPath.includes("\0"))
     throw new Error("DB_PATH must be a nonempty SQLite file path or :memory:.");
   return {
+    toJSON() {
+      const { toJSON: _toJSON, ...config } = this;
+      return JSON.parse(JSON.stringify(config, rpcJsonReplacer));
+    },
     ...loadServerConfig(env),
     ...chainConfig(env),
     ...agentPassConfig(env),
