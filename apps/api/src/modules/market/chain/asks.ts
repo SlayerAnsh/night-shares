@@ -70,8 +70,15 @@ export function askRows(deps: Deps, key?: string) {
     )
     .all(reader.fingerprint, key ?? null, key ?? null);
 }
-export async function liveAsks(deps: Deps, key: string): Promise<Ask[]> {
-  const rows = askRows(deps, key);
+export async function liveAsks(
+  deps: Deps,
+  key: string,
+  options: { maker?: Address } = {},
+): Promise<Ask[]> {
+  const rows = askRows(deps, key).filter(
+    (row) =>
+      !options.maker || row.maker.toLowerCase() === options.maker.toLowerCase(),
+  );
   if (!rows.length) return [];
 
   const { reader, client, deployment: d } = chainMarket(deps.ports);
@@ -136,15 +143,9 @@ export async function liveAsks(deps: Deps, key: string): Promise<Ask[]> {
       if (a.qty > 0n) asks.push(a);
     }
   }
-  return asks
-    .sort((a, b) =>
-      a.order.price < b.order.price
-        ? -1
-        : a.order.price > b.order.price
-          ? 1
-          : 0,
-    )
-    .slice(0, 50);
+  return asks.sort((a, b) =>
+    a.order.price < b.order.price ? -1 : a.order.price > b.order.price ? 1 : 0,
+  );
 }
 export async function prepareChainAsk(
   deps: Deps,

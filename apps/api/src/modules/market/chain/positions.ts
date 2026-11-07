@@ -115,7 +115,13 @@ export async function chainPortfolio(deps: Deps, user: User) {
             }
           : undefined,
       });
-    const live = await liveAsks(deps, record.key);
+    const live = (
+      await Promise.all(
+        wallets.map((wallet) =>
+          liveAsks(deps, record.key, { maker: wallet.address }),
+        ),
+      )
+    ).flat();
     for (const row of askRows(deps, record.key).filter((r) =>
       wallets.some((w) => w.address.toLowerCase() === r.maker.toLowerCase()),
     )) {

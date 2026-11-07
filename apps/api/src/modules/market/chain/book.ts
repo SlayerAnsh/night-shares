@@ -63,7 +63,7 @@ export async function chainBook(deps: Deps, key: string) {
       size: { tenths: Number(balance / 100000000000000000n) },
       isHost: wallet === config.host.toLowerCase(),
     }));
-  const asks = await liveAsks(deps, key);
+  const asks = (await liveAsks(deps, key)).slice(0, 50);
   return {
     tradingPaused: pool.paused,
     holders,

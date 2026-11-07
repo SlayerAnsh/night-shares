@@ -280,6 +280,7 @@ export function createChainReader(
             "chain_snapshots",
             "chain_nights",
             "chain_market_snapshots",
+            "chain_usdc_wallet_cursors",
           ])
             db.query(`DELETE FROM ${table} WHERE fingerprint = ?`).run(
               fingerprint,
@@ -331,43 +332,8 @@ export function createChainReader(
             /* Unrelated factory event. */
           }
         }
-        const wallets = db
-          .query<{ address: Address }, []>(
-            "SELECT address FROM wallet_custody UNION SELECT wallet_address AS address FROM identity_users UNION SELECT payout AS address FROM host_chain_bindings",
-          )
-          .all()
-          .map((row) => row.address);
-        if (
-          db
-            .query(
-              "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'anvil_wallets'",
-            )
-            .get()
-        )
-          wallets.push(
-            ...db
-              .query<{ address: Address }, []>(
-                "SELECT address FROM anvil_wallets",
-              )
-              .all()
-              .map((row) => row.address),
-          );
-        const participants = [
-          ...new Set([
-            ...fixed.map(([, address]) => address),
-            ...tokens,
-            ...wallets,
-            d.OWNER,
-            d.PLATFORM,
-          ]),
-        ].filter(
-          (address): address is Address =>
-            !!address &&
-            /^0x[0-9a-fA-F]{40}$/.test(address) &&
-            address !== zeroAddress,
-        );
         const tokenEvents = (d.abis.NightToken ?? []).filter(
-          (item) => item.type === "event" && item.name !== "Transfer",
+          (item) => item.type === "event",
         );
         if (tokens.size && tokenEvents.length)
           logs.push(
@@ -378,27 +344,6 @@ export function createChainReader(
               toBlock: end,
             })),
           );
-        // Separate indexed from/to queries implement OR without admitting unrelated transfers.
-        for (let offset = 0; offset < participants.length; offset += 100) {
-          const addresses = participants.slice(offset, offset + 100);
-          const batches = await Promise.all([
-            client.getLogs({
-              address: [d.USDC, ...tokens],
-              event: transfer,
-              args: { from: addresses },
-              fromBlock: start,
-              toBlock: end,
-            }),
-            client.getLogs({
-              address: [d.USDC, ...tokens],
-              event: transfer,
-              args: { to: addresses },
-              fromBlock: start,
-              toBlock: end,
-            }),
-          ]);
-          for (const batch of batches) logs.push(...batch);
-        }
         const filtered = [
           ...new Map(
             logs.map((log) => [`${log.blockHash}:${log.logIndex}`, log]),
@@ -492,6 +437,105 @@ export function createChainReader(
             block.hash,
           );
         }).immediate();
+      }
+      const tokens = db
+        .query<{ token: Address }, [string]>(
+          "SELECT token FROM chain_nights WHERE fingerprint = ?",
+        )
+        .all(fingerprint)
+        .map((row) => row.token);
+      const wallets = db
+        .query<{ address: Address }, []>(
+          "SELECT address FROM wallet_custody UNION SELECT wallet_address AS address FROM identity_users UNION SELECT payout AS address FROM host_chain_bindings",
+        )
+        .all()
+        .map((row) => row.address);
+      if (
+        db
+          .query(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'anvil_wallets'",
+          )
+          .get()
+      )
+        wallets.push(
+          ...db
+            .query<{ address: Address }, []>(
+              "SELECT address FROM anvil_wallets",
+            )
+            .all()
+            .map((row) => row.address),
+        );
+      const participants = [
+        ...new Set([
+          ...fixed.map(([, address]) => address),
+          ...tokens,
+          ...wallets,
+          d.OWNER,
+          d.PLATFORM,
+        ]),
+      ].filter(
+        (address): address is Address =>
+          !!address &&
+          /^0x[0-9a-fA-F]{40}$/.test(address) &&
+          address !== zeroAddress,
+      );
+      // Each participant starts at deployment, even if the global cursor has passed it.
+      // Commit events and progress together so interrupted backfills can resume safely.
+      const through =
+        end >= start ? end : cursor ? BigInt(cursor.number) : head.number;
+      const groups = new Map<bigint, Address[]>();
+      for (const wallet of new Set(
+        participants.map((address) => address.toLowerCase() as Address),
+      )) {
+        const progress = db
+          .query<{ number: bigint }, [string, string]>(
+            "SELECT number FROM chain_usdc_wallet_cursors WHERE fingerprint = ? AND wallet = ?",
+          )
+          .get(fingerprint, wallet);
+        const from = progress
+          ? BigInt(progress.number) + 1n
+          : BigInt(d.block as number);
+        const group = groups.get(from) ?? [];
+        group.push(wallet);
+        groups.set(from, group);
+      }
+      for (const [start, group] of groups) {
+        for (let offset = 0; offset < group.length; offset += 100) {
+          const wallets = group.slice(offset, offset + 100);
+          let from = start;
+          while (from <= through) {
+            const limit = from + BigInt(maxBlocks - 1);
+            // biome-ignore lint/complexity/useMathMinMax: Math.min does not accept bigint block numbers.
+            const to = limit < through ? limit : through;
+            const block = await blockAt(to);
+            const batches = await Promise.all([
+              client.getLogs({
+                address: d.USDC,
+                event: transfer,
+                args: { from: wallets },
+                fromBlock: from,
+                toBlock: to,
+              }),
+              client.getLogs({
+                address: d.USDC,
+                event: transfer,
+                args: { to: wallets },
+                fromBlock: from,
+                toBlock: to,
+              }),
+            ]);
+            if ((await blockAt(to)).hash !== block.hash)
+              throw new Error("Block changed during reconciliation.");
+            db.transaction(() => {
+              reduce(batches.flat());
+              for (const wallet of wallets)
+                db.query(
+                  "INSERT OR REPLACE INTO chain_usdc_wallet_cursors VALUES (?, ?, ?)",
+                ).run(fingerprint, wallet, to);
+            }).immediate();
+            from = to + 1n;
+          }
+        }
       }
       return end >= start ? blockAt(end) : head;
     },

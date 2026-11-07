@@ -78,12 +78,19 @@ test("fork config selects deployment domain, refuses modes and hides attester", 
   }
 });
 
-test("network deployment selection loads current testnet and refuses missing mainnet", () => {
+test("network deployment selection loads the committed testnet and mainnet files", () => {
   const testnet = loadDeployment("testnet");
   expect(testnet?.chainId).toBe(5042002);
   expect(testnet?.block).toBeGreaterThan(0);
   expect(testnet?.x402Available).toBe(true);
-  expect(() => loadDeployment("mainnet")).toThrow("5042.json");
+  // Mainnet (dc30c82) has the x402 set and no demo night.
+  const mainnet = loadDeployment("mainnet");
+  expect(mainnet?.chainId).toBe(5042);
+  expect(mainnet?.x402Available).toBe(true);
+  expect(mainnet?.demoNight).toBeUndefined();
+  expect(mainnet?.NightToken).toBe(
+    "0x0000000000000000000000000000000000000000",
+  );
 });
 
 test("mainnet deployment requires neither NightToken nor demoNight", () => {
