@@ -23,7 +23,9 @@ import type { User } from "../ports/sessions/session-store";
 export async function runChainJobs(ports: Ports) {
   const { reader, executor, custody, deployment } = chainMarket(ports);
   await reader.assertCurrent();
-  const indexed = await reader.poll(100);
+  const target = (await reader.head()).number;
+  let indexed = await reader.poll();
+  while (indexed.number < target) indexed = await reader.poll();
   if (indexed.number < (await reader.head()).number) return;
   const errors: unknown[] = [];
   const attempt = async (work: () => Promise<unknown>) => {
@@ -214,7 +216,7 @@ export async function runChainJobs(ports: Ports) {
       }
     }
   }
-  await reader.poll(100);
+  await reader.poll();
   if (errors.length)
     throw new AggregateError(errors, "Chain jobs require reconciliation.");
 }

@@ -72,6 +72,7 @@ export async function chainNight(deps: Deps, key: string) {
   };
 }
 async function paused(deps: Deps) {
+  await chainMarket(deps.ports).reader.ready;
   const row = deps.ports.db
     .query<{ value: string }, [string]>(
       "SELECT value FROM chain_snapshots WHERE fingerprint = ? AND key = 'market:paused'",

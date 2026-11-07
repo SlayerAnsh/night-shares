@@ -10,6 +10,7 @@ export type ReadRequest = {
 };
 export type Snapshot<T = unknown> = { block: BlockStamp; value: T };
 export interface ChainReader {
+  ready?: Promise<void>;
   readonly fingerprint: string;
   readonly client?: ForkClient;
   head(): Promise<BlockStamp>;

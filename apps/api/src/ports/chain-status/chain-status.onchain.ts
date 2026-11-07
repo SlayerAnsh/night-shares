@@ -1,4 +1,11 @@
-import { createPublicClient } from "viem";
+import {
+  type Address,
+  createPublicClient,
+  type Hex,
+  keccak256,
+  stringToHex,
+  zeroAddress,
+} from "viem";
 import type { ArcDeployment } from "../arc-deployment/arc-deployment";
 import { arcTransport } from "../arc-deployment/transport";
 
@@ -16,7 +23,7 @@ export function createOnchainChainStatus(
       retries: fetchFn ? 0 : 4,
     }),
   });
-  for (const name of ["NightHook"] as const) {
+  for (const name of ["NightHook", "NightToken"] as const) {
     const matches = deployment.abis[name]?.filter(
       (item) =>
         item.type === "function" &&
@@ -60,6 +67,26 @@ export function createOnchainChainStatus(
             functionName: "paused",
           }),
         ];
+        if (nightKey) {
+          const night = /^0x[0-9a-fA-F]{64}$/.test(nightKey)
+            ? (nightKey as Hex)
+            : keccak256(stringToHex(nightKey));
+          const token = (await client.readContract({
+            address: deployment.NightFactory,
+            abi: deployment.abis.NightFactory ?? [],
+            functionName: "tokenOf",
+            args: [night],
+          })) as Address;
+          if (!token || token === zeroAddress)
+            throw new Error("Unknown night.");
+          results.push(
+            await client.readContract({
+              address: token,
+              abi: deployment.abis.NightToken ?? [],
+              functionName: "paused",
+            }),
+          );
+        }
         if (results.some((result) => typeof result !== "boolean"))
           throw new Error("Invalid chain pause response.");
         state.paused = results.some(Boolean);
@@ -75,7 +102,10 @@ export function createOnchainChainStatus(
     })();
     return state.pending;
   };
+  const ready = refresh();
+  void ready.catch(() => {});
   return {
+    ready,
     refresh,
     readPaused: refresh,
     isPaused(nightKey?: string) {

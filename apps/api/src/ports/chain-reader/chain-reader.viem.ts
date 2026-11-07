@@ -5,6 +5,7 @@ import {
   decodeEventLog,
   type Hex,
   type Log,
+  parseAbiItem,
   zeroAddress,
 } from "viem";
 import { type Pool, readPoolAt } from "../../modules/market/chain/pool";
@@ -42,8 +43,23 @@ export function createChainReader(
       throw new Error("Missing canonical block.");
     return { number: b.number, hash: b.hash, timestamp: b.timestamp };
   };
-  const fixed = Object.entries(d).filter(
-    ([, v]) => typeof v === "string" && /^0x[0-9a-fA-F]{40}$/.test(v),
+  const contractNames = [
+    "NightFactory",
+    "NightHook",
+    "TradeRouter",
+    "BookingRouter",
+    "Settlement",
+    "NightVault",
+    "HumanRegistry",
+    "X402Settler",
+    "CoverFund",
+    "RebatePool",
+  ] as const;
+  const fixed = contractNames
+    .map((name) => [name, d[name] as Address] as const)
+    .filter(([, address]) => address && address !== zeroAddress);
+  const transfer = parseAbiItem(
+    "event Transfer(address indexed from, address indexed to, uint256 value)",
   );
   const reduce = (logs: Log[]) => {
     for (const log of logs) {
@@ -58,7 +74,11 @@ export function createChainReader(
         ([, v]) => String(v).toLowerCase() === log.address.toLowerCase(),
       )?.[0];
       const abi =
-        name === "USDC" ? usdcAbi : name ? d.abis[name] : d.abis.NightToken;
+        log.address.toLowerCase() === d.USDC.toLowerCase()
+          ? usdcAbi
+          : name
+            ? d.abis[name]
+            : d.abis.NightToken;
       if (!abi) continue;
       const decoded = (() => {
         try {
@@ -231,7 +251,7 @@ export function createChainReader(
         );
       }
     },
-    async poll(maxBlocks = 100) {
+    async poll(maxBlocks = 9999) {
       if (!Number.isSafeInteger(maxBlocks) || maxBlocks < 1)
         throw new Error("Invalid block batch.");
       maxBlocks = Math.min(maxBlocks, 9999);
@@ -282,20 +302,23 @@ export function createChainReader(
       if (start <= end) {
         const n = end;
         const block = await blockAt(n);
-        // Read all logs to include tokens created in this very block. Filter by known factory creations.
-        const logs = await client.getLogs({ fromBlock: start, toBlock: end });
-        const tokens = new Set<string>();
-        for (const row of db
-          .query<{ args: string }, [string]>(
-            "SELECT args FROM chain_events WHERE fingerprint = ? AND event = 'NightOpened'",
-          )
-          .all(fingerprint)) {
-          const args = deserialize<{ token: Address }>(row.args);
-          tokens.add(args.token.toLowerCase());
-        }
-        for (const log of logs.filter(
-          (l) => l.address.toLowerCase() === d.NightFactory.toLowerCase(),
-        )) {
+        // Discover creations before querying token logs over the same inclusive range.
+        const logs = await client.getLogs({
+          address: fixed.map(([, address]) => address),
+          fromBlock: start,
+          toBlock: end,
+        });
+        const tokens = new Set<Address>(
+          db
+            .query<{ token: Address }, [string]>(
+              "SELECT token FROM chain_nights WHERE fingerprint = ?",
+            )
+            .all(fingerprint)
+            .map((row) => row.token),
+        );
+        for (const log of logs) {
+          if (log.address.toLowerCase() !== d.NightFactory.toLowerCase())
+            continue;
           try {
             const decoded = decodeEventLog({
               abi: d.abis.NightFactory ?? [],
@@ -303,21 +326,87 @@ export function createChainReader(
               topics: log.topics,
             });
             if (decoded.eventName === "NightOpened")
-              tokens.add(
-                (
-                  decoded.args as unknown as { token: Address }
-                ).token.toLowerCase(),
-              );
+              tokens.add((decoded.args as unknown as { token: Address }).token);
           } catch {
-            /* Not a creation log. */
+            /* Unrelated factory event. */
           }
         }
-        const filtered = logs.filter(
-          (l) =>
-            tokens.has(l.address.toLowerCase()) ||
-            fixed.some(
-              ([, a]) => String(a).toLowerCase() === l.address.toLowerCase(),
-            ),
+        const wallets = db
+          .query<{ address: Address }, []>(
+            "SELECT address FROM wallet_custody UNION SELECT wallet_address AS address FROM identity_users UNION SELECT payout AS address FROM host_chain_bindings",
+          )
+          .all()
+          .map((row) => row.address);
+        if (
+          db
+            .query(
+              "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'anvil_wallets'",
+            )
+            .get()
+        )
+          wallets.push(
+            ...db
+              .query<{ address: Address }, []>(
+                "SELECT address FROM anvil_wallets",
+              )
+              .all()
+              .map((row) => row.address),
+          );
+        const participants = [
+          ...new Set([
+            ...fixed.map(([, address]) => address),
+            ...tokens,
+            ...wallets,
+            d.OWNER,
+            d.PLATFORM,
+          ]),
+        ].filter(
+          (address): address is Address =>
+            !!address &&
+            /^0x[0-9a-fA-F]{40}$/.test(address) &&
+            address !== zeroAddress,
+        );
+        const tokenEvents = (d.abis.NightToken ?? []).filter(
+          (item) => item.type === "event" && item.name !== "Transfer",
+        );
+        if (tokens.size && tokenEvents.length)
+          logs.push(
+            ...(await client.getLogs({
+              address: [...tokens],
+              events: tokenEvents,
+              fromBlock: start,
+              toBlock: end,
+            })),
+          );
+        // Separate indexed from/to queries implement OR without admitting unrelated transfers.
+        for (let offset = 0; offset < participants.length; offset += 100) {
+          const addresses = participants.slice(offset, offset + 100);
+          const batches = await Promise.all([
+            client.getLogs({
+              address: [d.USDC, ...tokens],
+              event: transfer,
+              args: { from: addresses },
+              fromBlock: start,
+              toBlock: end,
+            }),
+            client.getLogs({
+              address: [d.USDC, ...tokens],
+              event: transfer,
+              args: { to: addresses },
+              fromBlock: start,
+              toBlock: end,
+            }),
+          ]);
+          for (const batch of batches) logs.push(...batch);
+        }
+        const filtered = [
+          ...new Map(
+            logs.map((log) => [`${log.blockHash}:${log.logIndex}`, log]),
+          ).values(),
+        ].sort(
+          (a, b) =>
+            Number((a.blockNumber ?? 0n) - (b.blockNumber ?? 0n)) ||
+            (a.logIndex ?? 0) - (b.logIndex ?? 0),
         );
         const snapshots: { key: string; snapshot: { value: unknown } }[] = [];
         for (const watch of db
@@ -395,7 +484,7 @@ export function createChainReader(
           for (const market of markets) saveMarket(market.night, market.value);
           for (const { key, snapshot } of snapshots)
             db.query(
-              "INSERT OR REPLACE INTO chain_snapshots VALUES (?, ?, ?, ?, ?)",
+              "INSERT INTO chain_snapshots VALUES (?, ?, ?, ?, ?) ON CONFLICT(fingerprint, key) DO UPDATE SET block_number = excluded.block_number, block_hash = excluded.block_hash, value = excluded.value WHERE excluded.block_number >= chain_snapshots.block_number",
             ).run(fingerprint, key, n, block.hash, serialize(snapshot.value));
           db.query("INSERT OR REPLACE INTO chain_blocks VALUES (?, ?, ?)").run(
             fingerprint,
@@ -407,5 +496,22 @@ export function createChainReader(
       return end >= start ? blockAt(end) : head;
     },
   };
+  reader.ready = (async () => {
+    const snapshot = await reader.read<boolean>({
+      contract: "NightHook",
+      functionName: "paused",
+    });
+    if (typeof snapshot.value !== "boolean")
+      throw new Error("Invalid chain pause response.");
+    db.query(
+      "INSERT INTO chain_snapshots VALUES (?, ?, ?, ?, ?) ON CONFLICT(fingerprint, key) DO UPDATE SET block_number = excluded.block_number, block_hash = excluded.block_hash, value = excluded.value WHERE excluded.block_number >= chain_snapshots.block_number",
+    ).run(
+      fingerprint,
+      "market:paused",
+      snapshot.block.number,
+      snapshot.block.hash,
+      serialize(snapshot.value),
+    );
+  })().catch(() => {});
   return reader;
 }

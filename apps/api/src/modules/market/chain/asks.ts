@@ -65,68 +65,86 @@ function typed(deps: Deps, order: Ask["order"]) {
 export function askRows(deps: Deps, key?: string) {
   const { reader } = chainMarket(deps.ports);
   return deps.ports.db
-    .query<AskRow, [string]>(
-      "SELECT * FROM market_chain_asks WHERE fingerprint = ? AND status = 'open'",
+    .query<AskRow, [string, string | null, string | null]>(
+      "SELECT * FROM market_chain_asks WHERE fingerprint = ? AND status = 'open' AND (? IS NULL OR night_key = ?)",
     )
-    .all(reader.fingerprint)
-    .filter((r) => key === undefined || r.night_key === key);
+    .all(reader.fingerprint, key ?? null, key ?? null);
 }
 export async function liveAsks(deps: Deps, key: string): Promise<Ask[]> {
   const rows = askRows(deps, key);
   if (!rows.length) return [];
-  if (rows.length > 1000) throw new Error("Too many open asks.");
+
   const { reader, client, deployment: d } = chainMarket(deps.ports);
   const head = await reader.head();
   const token = await reader.tokenOf(nightHash(key), head.number);
-  const values = await client.multicall({
-    multicallAddress,
-    blockNumber: head.number,
-    allowFailure: false,
-    batchSize: 0,
-    contracts: rows.flatMap((row) => [
-      {
-        address: d.TradeRouter,
-        abi: d.abis.TradeRouter ?? [],
-        functionName: "nonces",
-        args: [row.maker],
-      },
-      {
-        address: d.TradeRouter,
-        abi: d.abis.TradeRouter ?? [],
-        functionName: "filled",
-        args: [row.digest],
-      },
-      {
-        address: token,
-        abi: d.abis.NightToken ?? [],
-        functionName: "balanceOf",
-        args: [row.maker],
-      },
-    ]),
+  const close = (row: AskRow, status: string) =>
+    deps.ports.db
+      .query(
+        "UPDATE market_chain_asks SET status = ? WHERE fingerprint = ? AND digest = ? AND status = 'open'",
+      )
+      .run(status, reader.fingerprint, row.digest);
+  const active = rows.filter((row) => {
+    if (deserialize<Ask>(row.payload).order.expiry > head.timestamp)
+      return true;
+    close(row, "expired");
+    return false;
   });
   const asks: Ask[] = [];
-  for (const [i, row] of rows.entries()) {
-    const a = deserialize<Ask>(row.payload);
-    const [nonce, filled, balance] = values.slice(i * 3, i * 3 + 3) as [
-      bigint,
-      bigint,
-      bigint,
-    ];
-    if (
-      nonce !== a.order.nonce ||
-      head.timestamp >= a.order.expiry ||
-      filled >= a.order.size
-    )
-      continue;
-    const remaining = a.order.size - filled;
-    a.qty =
-      (minBigInt(remaining, balance) / 100000000000000000n) *
-      100000000000000000n;
-    if (a.qty > 0n) asks.push(a);
+  for (let offset = 0; offset < active.length; offset += 100) {
+    const batch = active.slice(offset, offset + 100);
+    const values = await client.multicall({
+      multicallAddress,
+      blockNumber: head.number,
+      allowFailure: false,
+      batchSize: 0,
+      contracts: batch.flatMap((row) => [
+        {
+          address: d.TradeRouter,
+          abi: d.abis.TradeRouter ?? [],
+          functionName: "nonces",
+          args: [row.maker],
+        },
+        {
+          address: d.TradeRouter,
+          abi: d.abis.TradeRouter ?? [],
+          functionName: "filled",
+          args: [row.digest],
+        },
+        {
+          address: token,
+          abi: d.abis.NightToken ?? [],
+          functionName: "balanceOf",
+          args: [row.maker],
+        },
+      ]),
+    });
+    for (const [i, row] of batch.entries()) {
+      const a = deserialize<Ask>(row.payload);
+      const [nonce, filled, balance] = values.slice(i * 3, i * 3 + 3) as [
+        bigint,
+        bigint,
+        bigint,
+      ];
+      if (nonce !== a.order.nonce || filled >= a.order.size) {
+        close(row, nonce !== a.order.nonce ? "cancelled" : "filled");
+        continue;
+      }
+      const remaining = a.order.size - filled;
+      a.qty =
+        (minBigInt(remaining, balance) / 100000000000000000n) *
+        100000000000000000n;
+      if (a.qty > 0n) asks.push(a);
+    }
   }
-  return asks.sort((a, b) =>
-    a.order.price < b.order.price ? -1 : a.order.price > b.order.price ? 1 : 0,
-  );
+  return asks
+    .sort((a, b) =>
+      a.order.price < b.order.price
+        ? -1
+        : a.order.price > b.order.price
+          ? 1
+          : 0,
+    )
+    .slice(0, 50);
 }
 export async function prepareChainAsk(
   deps: Deps,

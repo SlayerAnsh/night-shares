@@ -11,7 +11,7 @@ const deployment = () => {
   data.abis.NightToken = abi;
   return data;
 };
-test("pause cache coalesces reads, reads hook only, expires and fails closed", async () => {
+test("pause cache coalesces reads, reads global hook, expires and fails closed", async () => {
   let calls = 0;
   let fail = false;
   let tokenPaused = false;
@@ -61,7 +61,7 @@ test("pause adapter rejects missing or ambiguous view functions", () => {
   );
 });
 
-test("global and night pause use NightHook without a demo token", async () => {
+test("unknown night fails closed without a demo token", async () => {
   const { executionFixture } = await import("../arc-deployment/fixture");
   const { zeroAddress } = await import("viem");
   const data = executionFixture();
@@ -83,10 +83,58 @@ test("global and night pause use NightHook without a demo token", async () => {
     },
   );
   expect(await status.readPaused()).toBe(false);
-  expect(await status.readPaused("hotel:room:2026-11-07")).toBe(false);
+  await expect(status.readPaused("hotel:room:2026-11-07")).rejects.toThrow(
+    "Unknown night.",
+  );
+  expect(status.isPaused("hotel:room:2026-11-07")).toBe(true);
   expect(
-    requests.every(
-      (address) => address.toLowerCase() === data.NightHook.toLowerCase(),
+    requests.some(
+      (address) => address.toLowerCase() === data.NightFactory.toLowerCase(),
     ),
   ).toBe(true);
+});
+
+for (const hookPaused of [false, true]) {
+  for (const tokenPaused of [false, true]) {
+    test(`night pause OR hook=${hookPaused} token=${tokenPaused}`, async () => {
+      const { executionFixture } = await import("../arc-deployment/fixture");
+      const data = executionFixture();
+      const token = "0x1111111111111111111111111111111111111111";
+      const status = createOnchainChainStatus(
+        data,
+        "http://fork.invalid",
+        5000,
+        async (_, init) => {
+          const request = JSON.parse(String(init?.body));
+          const address = request.params?.[0]?.to?.toLowerCase();
+          const result =
+            request.method === "eth_chainId"
+              ? "0x13b2"
+              : address === data.NightFactory.toLowerCase()
+                ? `0x${token.slice(2).padStart(64, "0")}`
+                : `0x${((address === token ? tokenPaused : hookPaused) ? "1" : "0").padStart(64, "0")}`;
+          return Response.json({ jsonrpc: "2.0", id: request.id, result });
+        },
+      );
+      await status.ready;
+      expect(status.isPaused()).toBe(hookPaused);
+      expect(await status.readPaused("hotel:room:2026-11-07")).toBe(
+        hookPaused || tokenPaused,
+      );
+      expect(status.isPaused("hotel:room:2026-11-07")).toBe(
+        hookPaused || tokenPaused,
+      );
+    });
+  }
+}
+
+test("ambiguous NightToken.paused is rejected", () => {
+  const data = deployment();
+  data.abis.NightToken = [
+    ...(data.abis.NightToken ?? []),
+    ...(data.abis.NightToken ?? []),
+  ];
+  expect(() => createOnchainChainStatus(data, "http://fork.invalid")).toThrow(
+    "abis.NightToken",
+  );
 });

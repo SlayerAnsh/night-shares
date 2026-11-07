@@ -1,15 +1,48 @@
+import { Database } from "bun:sqlite";
 import { ARC_NETWORKS } from "../config/arc-networks";
 import { preflightReason, runPreflight } from "../container/chain-preflight";
+import { migrate } from "../db/migrate";
 import { loadDeployment } from "../ports/arc-deployment/arc-deployment";
 import { assertLocalForkRpc } from "../ports/arc-deployment/local-fork";
 import type { ForkClient } from "../ports/arc-deployment/validate";
+import { chainClient } from "../ports/arc-deployment/validate";
+import type { ChainReader } from "../ports/chain-reader/chain-reader";
+import { createChainReader } from "../ports/chain-reader/chain-reader.viem";
 import { redactRpc } from "../shared/redact-url";
+
+/** Scan to the head observed at entry without running transaction-producing jobs. */
+export async function catchUp(
+  reader: ChainReader,
+  db: Database,
+  deploymentBlock: bigint,
+) {
+  const started = performance.now();
+  await reader.ready;
+  const target = (await reader.head()).number;
+  let indexed = await reader.poll();
+  while (indexed.number < target) indexed = await reader.poll();
+  const count = (table: string) =>
+    Number(
+      db
+        .query<{ n: bigint }, [string]>(
+          `SELECT count(*) AS n FROM ${table} WHERE fingerprint = ?`,
+        )
+        .get(reader.fingerprint)?.n ?? 0,
+    );
+  return {
+    blocksScanned: Math.max(0, Number(indexed.number - deploymentBlock + 1n)),
+    logsIngested: count("chain_events"),
+    nightsProjected: count("chain_nights"),
+    elapsedSeconds: (performance.now() - started) / 1000,
+  };
+}
 
 // Load only read-only chain configuration; diagnostics never require signing keys.
 export async function chainCheck(
   env: Record<string, string | undefined> = process.env,
   dependencies = { loadDeployment, runPreflight },
   client?: ForkClient,
+  catchup = false,
 ) {
   const warnings: string[] = [];
   let fingerprint: string | null = null;
@@ -50,8 +83,31 @@ export async function chainCheck(
       client,
       (message) => warnings.push(message),
     );
+    let catchupStats: Record<string, number> | undefined;
+    if (catchup) {
+      const db = new Database(":memory:", { safeIntegers: true });
+      try {
+        migrate(db);
+        const reader = createChainReader(
+          db,
+          deployment,
+          client ?? chainClient(rpcUrls, deployment.chainId),
+          fingerprint,
+        );
+        catchupStats = await catchUp(reader, db, BigInt(deployment.block ?? 0));
+      } finally {
+        db.close();
+      }
+    }
     return redactRpc(
-      { status: "ok", network, fingerprint, x402Available, warnings },
+      {
+        status: "ok",
+        network,
+        fingerprint,
+        x402Available,
+        warnings,
+        ...(catchupStats ? { catchup: catchupStats } : {}),
+      },
       rpcUrls,
     );
   } catch (error) {
@@ -70,7 +126,12 @@ export async function chainCheck(
 }
 
 if (import.meta.main) {
-  const result = await chainCheck();
+  const result = await chainCheck(
+    process.env,
+    undefined,
+    undefined,
+    process.argv.includes("--catchup"),
+  );
   process.stdout.write(`${JSON.stringify(result)}\n`);
   process.exitCode = result.status === "ok" ? 0 : 1;
 }

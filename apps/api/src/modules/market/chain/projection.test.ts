@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import { DiscoverSort } from "@night-shares/proto/market/v1/analytics_pb";
 import {
+  type Abi,
   encodeEventTopics,
   type Hex,
   type TransactionReceipt,
@@ -39,9 +40,9 @@ async function setup() {
       calls++;
       return block;
     },
-    readContract: async () => {
+    readContract: async ({ functionName }: { functionName: string }) => {
       calls++;
-      return token;
+      return functionName === "paused" ? false : token;
     },
     multicall: async (request: {
       multicallAddress: string;
@@ -50,13 +51,15 @@ async function setup() {
     }) => {
       calls++;
       expect(request.multicallAddress).toBe(multicallAddress);
-      expect(request.blockNumber).toBe(block.number);
+      expect(request.blockNumber).toBeLessThanOrEqual(block.number);
       return request.contracts[0]?.functionName === "config"
         ? [config, 0n, 0n, true, false, false, 0n]
         : request.contracts.map(() => `0x${"0".repeat(64)}`);
     },
   } as unknown as ForkClient;
   const reader = createChainReader(deps.ports.db, d, client, "projection-test");
+  await reader.ready;
+  calls = 0;
   deps.ports.chainReader = reader;
   deps.ports.chainExecutor = { mode: "chain" } as NonNullable<
     typeof deps.ports.chainExecutor
@@ -218,20 +221,123 @@ test("range poll projects logs and reorg replay removes orphaned nights", async 
       return logs;
     }) as typeof s.client.getLogs;
     await s.reader.poll(1000);
-    expect(ranges).toBe(1);
+    expect(ranges).toBe(4);
     expect(
       s.ports.db.query("SELECT * FROM chain_market_snapshots").all(),
     ).toHaveLength(1);
     s.block.hash = `0x${"56".repeat(32)}`;
     logs = [];
     await s.reader.poll(1000);
-    expect(ranges).toBe(2);
+    expect(ranges).toBe(7);
     expect(s.ports.db.query("SELECT * FROM chain_nights").all()).toHaveLength(
       0,
     );
     expect(
       s.ports.db.query("SELECT * FROM chain_market_snapshots").all(),
     ).toHaveLength(0);
+  } finally {
+    s.ports.db.close();
+  }
+});
+
+test("busy-chain catch-up uses scoped 9999-block ranges and ABI-recorded creation topics", async () => {
+  const s = await setup();
+  try {
+    const { default: recorded } = await import(
+      "../../../ports/chain-reader/fixtures/night-opened.json"
+    );
+    const { default: deployed } = await import(
+      "../../../../../../packages/contracts/deployments/5042002.json"
+    );
+    const { decodeEventLog } = await import("viem");
+    expect(
+      String(
+        decodeEventLog({
+          abi: deployed.abis.NightFactory as Abi,
+          data: recorded.data as Hex,
+          topics: recorded.topics as [Hex, ...Hex[]],
+        }).eventName,
+      ),
+    ).toBe("NightOpened");
+    s.d.NightFactory = recorded.address as Hex;
+    s.block.number = 30000n;
+    s.client.getBlock = (async ({
+      blockNumber,
+    }: {
+      blockNumber?: bigint;
+    } = {}) => ({
+      ...s.block,
+      number: blockNumber ?? s.block.number,
+    })) as typeof s.client.getBlock;
+    s.reader.assertCurrent = async () => {};
+    const ranges: [bigint, bigint][] = [];
+    let tokenQueried = false;
+    s.client.getLogs = (async (request: {
+      address: string[];
+      fromBlock: bigint;
+      toBlock: bigint;
+      event?: { name: string };
+      events?: unknown[];
+      args?: { from?: string[]; to?: string[] };
+    }) => {
+      await Bun.sleep(2);
+      expect(request.address.length).toBeGreaterThan(0);
+      expect(request.toBlock - request.fromBlock).toBeLessThanOrEqual(9998n);
+      if (request.address.includes(s.d.USDC)) {
+        expect(request.event?.name).toBe("Transfer");
+        expect(
+          (request.args?.from ?? request.args?.to)?.length,
+        ).toBeGreaterThan(0);
+      }
+      if (request.events) tokenQueried = true;
+      if (!request.event && !request.events) {
+        expect(request.address).not.toContain(s.d.USDC);
+        ranges.push([request.fromBlock, request.toBlock]);
+        if (request.fromBlock === 1n)
+          return [
+            {
+              ...recorded,
+              address: s.d.NightFactory,
+              blockNumber: 500n,
+              blockHash: s.block.hash,
+              transactionHash: s.block.hash,
+              logIndex: 2,
+            },
+          ];
+      }
+      return [];
+    }) as typeof s.client.getLogs;
+    // Construct after selecting the recorded deployment address.
+    const reader = createChainReader(
+      s.ports.db,
+      s.d,
+      s.client,
+      s.reader.fingerprint,
+    );
+    reader.assertCurrent = async () => {};
+    await reader.ready;
+    const { catchUp } = await import("../../../dev/chain-check");
+    const stats = await catchUp(reader, s.ports.db, 1n);
+    expect(stats.blocksScanned).toBe(30000);
+    expect(stats.logsIngested).toBe(1);
+    expect(stats.nightsProjected).toBe(1);
+    const seconds = stats.elapsedSeconds;
+    console.info(
+      `Mock catch-up: 30000 blocks / ${seconds.toFixed(3)}s = ${Math.round(30000 / seconds)} blocks/s (2ms getLogs latency).`,
+    );
+    expect(ranges).toEqual([
+      [1n, 9999n],
+      [10000n, 19998n],
+      [19999n, 29997n],
+      [29998n, 30000n],
+    ]);
+    expect(tokenQueried).toBe(true);
+    expect(s.ports.db.query("SELECT * FROM chain_nights").all()).toHaveLength(
+      1,
+    );
+    expect(s.ports.db.query("SELECT * FROM chain_events").all()).toHaveLength(
+      1,
+    );
   } finally {
     s.ports.db.close();
   }
