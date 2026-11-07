@@ -16,20 +16,24 @@ export function createGetPayout(deps: HostDeps, includeDebt = true) {
             outstandingGuest(deps.ports.db, propertyId)
           : 0n),
     );
+    const fingerprint = deps.ports.chainReader?.fingerprint ?? null;
     const last = deps.ports.db
-      .query<{ amount: bigint; at: bigint; transaction_id: string }, [string]>(
-        "SELECT amount, at, transaction_id FROM host_sweeps WHERE property_id = ? AND status = 'settled' ORDER BY at DESC, rowid DESC LIMIT 1",
+      .query<
+        { amount: bigint; at: bigint; transaction_id: string },
+        [string, string | null]
+      >(
+        "SELECT amount, at, transaction_id FROM host_sweeps WHERE property_id = ? AND status = 'settled' AND (?2 IS NULL OR id IN (SELECT operation_id FROM host_chain_sweeps WHERE fingerprint = ?2)) ORDER BY at DESC, rowid DESC LIMIT 1",
       )
-      .get(propertyId);
+      .get(propertyId, fingerprint);
     return {
       ...payout,
       sweptTotal: {
         micros:
           deps.ports.db
-            .query<{ total: bigint }, [string]>(
-              "SELECT COALESCE(SUM(amount), 0) AS total FROM host_sweeps WHERE property_id = ? AND status = 'settled'",
+            .query<{ total: bigint }, [string, string | null]>(
+              "SELECT COALESCE(SUM(amount), 0) AS total FROM host_sweeps WHERE property_id = ? AND status = 'settled' AND (?2 IS NULL OR id IN (SELECT operation_id FROM host_chain_sweeps WHERE fingerprint = ?2))",
             )
-            .get(propertyId)?.total ?? 0n,
+            .get(propertyId, fingerprint)?.total ?? 0n,
       },
       lastSweepAt: last ? timestampFromMs(Number(last.at)) : undefined,
       lastSweepAmount: { micros: last?.amount ?? 0n },

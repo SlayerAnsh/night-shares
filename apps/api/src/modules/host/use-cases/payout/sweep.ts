@@ -6,12 +6,17 @@ import {
 } from "../../../walk/repo/cover-accounts";
 import { snapshotSweep } from "../../../walk/repo/night-pending";
 import { finishOwed, reserveOwed } from "../../../walk/repo/owed";
+import { sweepChain } from "../../chain/sweep";
 import type { HostDeps } from "../deps";
 import { createGetPayout } from "./get-payout";
 
 export function createSweep(deps: HostDeps) {
   const { ports, repo } = deps;
   return async (userId: string, propertyId: string, walletAddress: string) => {
+    if (ports.chainExecutor?.mode === "fork") {
+      await sweepChain(deps, userId, propertyId);
+      return;
+    }
     const reserved = transaction(ports.db, () => {
       if (
         ports.db

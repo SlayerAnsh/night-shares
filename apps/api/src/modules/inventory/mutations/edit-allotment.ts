@@ -12,6 +12,11 @@ export function editAllotment(
   record: NightRecord,
   edit: AllotmentEdit,
 ): NightRecord {
+  if (record.chainFingerprint && record.openedAt > 0)
+    throw new DomainError(
+      "FAILED_PRECONDITION",
+      "Opened-night allotment edits are not supported on chain networks.",
+    );
   if (
     record.openedAt > 0 &&
     (edit.tenths !== toWholeTenths(record.state.S) ||

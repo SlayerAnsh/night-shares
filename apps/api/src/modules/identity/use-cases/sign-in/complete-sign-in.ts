@@ -2,13 +2,15 @@ import type { Ports } from "../../../../container/ports";
 import type { IdentityProof } from "../../../../ports/identity-verifier/identity-verifier";
 import type { User } from "../../../../ports/sessions/session-store";
 import { DomainError } from "../../../../shared/errors/domain-error";
+import { ensureChainIdentity } from "../../chain-ready";
 import type { UserRepo } from "../../repo/user-repo";
 
 export function createCompleteSignIn(
   deps: Pick<
     Ports,
     "identityVerifier" | "walletProvider" | "ids" | "sessions"
-  > & { repo: UserRepo },
+  > &
+    Partial<Ports> & { repo: UserRepo },
 ) {
   const pending = new Map<string, Promise<User>>();
   async function findOrCreate(humanId: string): Promise<User> {
@@ -51,6 +53,8 @@ export function createCompleteSignIn(
     const found = await findOrCreate(verified.subject);
     const user = deps.repo.get(found.humanId) ?? found;
     if (verified.level === "orb") user.level = "orb";
+    if (deps.chainExecutor?.mode === "fork")
+      await ensureChainIdentity(deps as Ports, user);
     deps.repo.save(user);
     const sessionUser = { ...user, level: verified.level };
     return {

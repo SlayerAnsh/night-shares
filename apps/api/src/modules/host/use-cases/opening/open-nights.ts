@@ -13,6 +13,7 @@ import { toWholeTenths } from "../../../../shared/tenths";
 import { editAllotment } from "../../../inventory/mutations/edit-allotment";
 import { openAllotment } from "../../../inventory/mutations/open-allotment";
 import { walkIncidents } from "../../../walk/repo/incidents";
+import { openChainNights } from "../../chain/open";
 import { assertChainPrices } from "../../chain-limits";
 import { mapNight } from "../../mappers/night";
 import { assertMaxSupply } from "../../max-s";
@@ -27,6 +28,8 @@ export function createOpenNights(deps: HostDeps) {
   return (userId: string, selection?: OpenNightsSelection) => {
     assertTrading(deps.ports);
     const plans = selectNights(deps, userId, selection);
+    if (deps.ports.chainExecutor?.mode === "fork")
+      return openChainNights(deps, userId, plans);
     for (const { record } of plans) assertTrading(deps.ports, record.key);
     if (
       plans.some(

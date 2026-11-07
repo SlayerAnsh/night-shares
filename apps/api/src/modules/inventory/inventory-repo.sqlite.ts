@@ -4,6 +4,7 @@ import type { Clock } from "../../ports/clock/clock";
 import { DomainError } from "../../shared/errors/domain-error";
 import { format, parse } from "../../shared/night-key";
 import type { CatalogRepo } from "../catalog-data/catalog-repo";
+import { chainDraft } from "./chain-draft";
 import type { InventoryRepo, NightRecord } from "./inventory-repo";
 import { seedNight } from "./seed-night";
 import { wholeQuantities } from "./whole-quantities";
@@ -25,8 +26,17 @@ export function createSqliteInventoryRepo(deps: {
             "SELECT record FROM inventory WHERE night_key = ?",
           )
           .get(key);
-        if (row) return wholeQuantities(JSON.parse(row.record) as NightRecord);
-        const record = wholeQuantities(seedNight(deps, night));
+        if (row) {
+          const record = wholeQuantities(
+            chainDraft(db, JSON.parse(row.record) as NightRecord),
+          );
+          db.query("UPDATE inventory SET record = ? WHERE night_key = ?").run(
+            JSON.stringify(record),
+            key,
+          );
+          return record;
+        }
+        const record = wholeQuantities(chainDraft(db, seedNight(deps, night)));
         db.query("INSERT INTO inventory VALUES (?, ?, ?, ?, ?)").run(
           key,
           night.propertyId,
@@ -76,7 +86,11 @@ export function createSqliteInventoryRepo(deps: {
           filter.start || null,
           filter.end || null,
         )
-        .map((row) => wholeQuantities(JSON.parse(row.record) as NightRecord));
+        .map((row) =>
+          wholeQuantities(
+            chainDraft(db, JSON.parse(row.record) as NightRecord),
+          ),
+        );
     },
   };
   return repo;

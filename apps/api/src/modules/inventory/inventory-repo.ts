@@ -2,6 +2,8 @@ import type { NightState } from "@night-shares/market-model";
 import type { NightIdentity } from "../../shared/night-key";
 export type NightRecord = NightIdentity & {
   key: string;
+  chainFingerprint?: string;
+  chainBlock?: string;
   state: NightState & { cutoffPaid?: number };
   released?: boolean;
   cutoffAt?: number;

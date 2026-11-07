@@ -8,6 +8,7 @@ import {
 import type { Property } from "@night-shares/proto/catalog/v1/property_pb";
 import { Pms } from "@night-shares/proto/host/v1/opening_pb";
 import Link from "next/link";
+import { useState } from "react";
 import { useRequireAccess } from "../../../../session/require-access";
 import { useHostMutations } from "../../hooks/use-host-data";
 import { useHostSearch } from "../../hooks/use-host-search";
@@ -34,6 +35,7 @@ export function ConnectHotel({
   const propertyId = search.get("connect") ?? options[0]?.id ?? "";
   const pms = Number(search.get("pms") ?? Pms.MEWS) as Pms;
   const { connect } = useHostMutations();
+  const [payoutAddress, setPayoutAddress] = useState("");
   const access = useRequireAccess();
   const imported = connect.data?.property;
   const valid = options.some((p) => p.id === propertyId);
@@ -95,7 +97,7 @@ export function ConnectHotel({
             event.preventDefault();
             set({ connect: propertyId, pms: String(pms) });
             if (access.require("host", "orb"))
-              connect.mutate({ propertyId, pms });
+              connect.mutate({ propertyId, pms, payoutAddress });
           }}
         >
           <label className={styles.field}>
@@ -124,6 +126,20 @@ export function ConnectHotel({
               onChange={(value) => set({ pms: String(value) })}
             />
           </div>
+          <label className={styles.field}>
+            <span>Permanent payout address (required on chain networks)</span>
+            <input
+              className={styles.select}
+              value={payoutAddress}
+              onChange={(event) => setPayoutAddress(event.target.value)}
+              placeholder="0x…"
+              pattern="0x[0-9a-fA-F]{40}"
+            />
+            <small>
+              Use your host custody wallet to open nights. This binding cannot
+              be changed.
+            </small>
+          </label>
           <button
             type="submit"
             className={buttonClass({

@@ -16,6 +16,7 @@ export function createHostHandler(
         host(ctx).id,
         r.propertyId,
         r.pms,
+        ctx.requestHeader.get("x-host-payout-address") ?? undefined,
       ),
     }),
     getPortfolio: (_, ctx) => use.getPortfolio(host(ctx).id),
@@ -26,8 +27,28 @@ export function createHostHandler(
       nights: await use.openNights(host(ctx).id, r.selection),
     }),
     getNight: (r, ctx) => use.getNight(host(ctx).id, r.propertyId, r.date),
-    getPayout: (r, ctx) => ({
-      payout: use.getPayout(host(ctx).id, r.propertyId),
-    }),
+    getPayout: async (r, ctx) => {
+      const user = host(ctx);
+      const payout = use.getPayout(user.id, r.propertyId);
+      const chain = await use.chainPayout(user.id, r.propertyId);
+      if (chain) {
+        ctx.responseHeader.set(
+          "x-host-payout-credit",
+          chain.payoutCredit.toString(),
+        );
+        ctx.responseHeader.set("x-host-debt", chain.debt.toString());
+        ctx.responseHeader.set(
+          "x-host-owed-to-guest",
+          chain.owedToGuest.toString(),
+        );
+        ctx.responseHeader.set(
+          "x-host-payout-block",
+          chain.block.number.toString(),
+        );
+        payout.availableNow.micros =
+          chain.pending > chain.debt ? chain.pending - chain.debt : 0n;
+      }
+      return { payout };
+    },
   };
 }
