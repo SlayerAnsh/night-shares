@@ -1,18 +1,24 @@
+# Deployable stack (Dokploy or plain `docker compose up --build -d`).
+# API runtime config and secrets come from ./.env (see .env.example).
+# Dokploy writes its Environment tab to that file. Route a domain to
+# service `web`, port 3000. No host ports are published, so the stack
+# cannot collide with Dokploy or other apps on the host.
 services:
   api:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+    env_file:
+      - path: .env
+        required: false
     environment:
+      # Container layout. These override .env on purpose.
       PORT: "8787"
       DB_PATH: /data/night-shares.db
-      ADAPTERS: mock
-      CORS_ORIGINS: http://localhost:3000
-      TRUST_PROXY: "false"
     volumes:
       - api-data:/data
-    ports:
-      - "8787:8787"
+    expose:
+      - "8787"
     stop_grace_period: 15s
     restart: unless-stopped
   web:
@@ -21,8 +27,8 @@ services:
       dockerfile: apps/web/Dockerfile
     environment:
       API_URL: http://api:8787
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     depends_on:
       api:
         condition: service_healthy

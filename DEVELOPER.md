@@ -164,19 +164,32 @@ One commit per task, Conventional Commits style (`feat(api): ...`). Stage explic
 
 ## Running in containers
 
-From the workspace root, build and start both services with:
+`docker-compose.yml` is the deployable stack: `api` and `web`. It targets Dokploy and also runs with plain Compose:
 
 ```sh
+cp .env.example .env
 docker compose up --build -d
-docker compose logs -f api web
+docker compose logs -f
 docker compose down
 ```
 
-Stop local development servers on ports 8787 and 3000 before starting this stack, or change the compose host port mappings. API and web Dockerfiles use the workspace root as build context and install dependencies with pnpm 10.20.0 and the frozen lockfile. The API runtime is pinned to oven/bun:1.3.5 (released December 17, 2025). The web image runs `next build` during construction and `next start` as a non-root user at runtime. Both images exclude local environment files, database files, node_modules and build caches through `.dockerignore`.
+The API reads its runtime config and secrets from `.env` next to the compose file (gitignored, excluded from Docker build contexts). The file is optional; without it the API starts with mock defaults. `.env` accepts every key documented in `apps/api/.env.example`; the template lists the ones a deployment usually sets. The compose file fixes `PORT` and `DB_PATH`, which override `.env`. `apps/api/.env` remains the local `bun` development file and is not read by Compose.
 
-The web service uses `API_URL=http://api:8787` for server-side calls and browser RPC proxying. Open `http://localhost:3000`; API documentation is at `http://localhost:8787/docs`. Wallet and chain settlement remain mock. The API healthcheck calls `/readyz`; `/healthz` is process liveness. The API's named volume mounts at `/data`, with `DB_PATH=/data/night-shares.db`, and survives `docker compose down`. Removing the volume deletes persisted application data. Bind mounts used instead of the named volume must be writable by the image's bun user.
+No host ports are published (`expose` only), so the stack cannot collide with Dokploy's own port 3000 or other apps. For local access without a proxy, add a `ports` mapping in an untracked `docker-compose.override.yml`. API and web Dockerfiles use the workspace root as build context and install dependencies with pnpm 10.20.0 and the frozen lockfile. The API runtime is pinned to oven/bun:1.3.5 (released December 17, 2025). The web image runs `next build` during construction and `next start` as a non-root user at runtime.
 
-Operational defaults and all configuration keys are documented in `apps/api/README.md` and `apps/api/.env.example`. Compose environment values do not automatically load that example file. Set overrides explicitly under the API service's environment configuration. Keep `stop_grace_period` longer than `SHUTDOWN_TIMEOUT_MS` (defaults: 15 seconds and 10 seconds). On termination, the API drains requests and scheduler work before closing SQLite, or exits with code 1 if the deadline expires. Configure trusted forwarding only behind an ingress that sanitizes forwarded headers. The included web proxy shares one IP quota for its users.
+The web service uses `API_URL=http://api:8787` for server-side calls and browser RPC proxying. Wallet and chain settlement remain mock. The API healthcheck calls `/readyz`; `/healthz` is process liveness. The API's named volume mounts at `/data`, with `DB_PATH=/data/night-shares.db`, and survives `docker compose down`. Removing the volume deletes persisted application data. Bind mounts used instead of the named volume must be writable by the image's bun user.
+
+Keep `stop_grace_period` longer than `SHUTDOWN_TIMEOUT_MS` (defaults: 15 seconds and 10 seconds). On termination, the API drains requests and scheduler work before closing SQLite, or exits with code 1 if the deadline expires. Configure trusted forwarding only behind an ingress that sanitizes forwarded headers. The included web proxy shares one IP quota for its users.
+
+The Arc fork chain (`docker-compose.chain.yml`) is a local development tool and is not part of the deployable stack. See Arc fork below.
+
+### Dokploy
+
+1. Create a Compose service pointing at this repository, compose path `app/docker-compose.yml` (or `docker-compose.yml` when the repository root is `app`).
+2. Paste the contents of `.env.example`, with real values, into the Environment tab. Dokploy writes it to `.env` beside the compose file, which the API loads.
+3. Add a domain routed to service `web`, container port 3000, with HTTPS. Only `web` needs a domain, because it proxies all API calls server-side. HTTPS matters because the production web build sets the session cookie `Secure`.
+4. Set `WEB_ORIGIN` and `CORS_ORIGINS` to that domain's HTTPS origin and replace `ORDER_MOCK_SECRET`.
+5. `AGENT_PASS_MODE=oidc` redirects the browser to the API callback, so it additionally needs a domain routed to service `api`, port 8787, and a matching `AGENT_PASS_REDIRECT_URI`. Mock Agent Pass needs neither.
 
 Container execution and network e2e checks require a host with Docker and permission to bind ports. The operations unit suite runs without listening sockets: `cd apps/api && bun test src/server`.
 
