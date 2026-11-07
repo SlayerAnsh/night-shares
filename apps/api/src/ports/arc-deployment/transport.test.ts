@@ -147,3 +147,98 @@ test("readyz body cannot expose a sanitized transport failure", async () => {
     container.ports.db.close();
   }
 });
+
+for (const error of [
+  { code: -32603, message: "Request exceeds defined limit" },
+  { code: -32005, message: "limit exceeded" },
+  { code: -32005, message: "rate limit" },
+]) {
+  test(`RPC retries JSON-RPC ${error.code} ${error.message} with bounded backoff`, async () => {
+    let calls = 0;
+    const waits: number[] = [];
+    const client = createPublicClient({
+      transport: arcTransport(["https://rpc.invalid"], {
+        retries: 2,
+        wait: async (ms) => {
+          waits.push(ms);
+        },
+        fetchFn: (async (_input: RequestInfo | URL, init?: RequestInit) => {
+          calls++;
+          return Response.json({
+            jsonrpc: "2.0",
+            id: JSON.parse(String(init?.body)).id,
+            ...(calls < 3 ? { error } : { result: "0x13b2" }),
+          });
+        }) as typeof fetch,
+      }),
+    });
+    expect(await client.getChainId()).toBe(5042);
+    expect(calls).toBe(3);
+    expect(waits).toEqual([250, 500]);
+    calls = 0;
+    const failing = createPublicClient({
+      transport: arcTransport(["https://rpc.invalid"], {
+        retries: 2,
+        wait: async () => {},
+        fetchFn: (async (_input: RequestInfo | URL, init?: RequestInit) => {
+          calls++;
+          return Response.json({
+            jsonrpc: "2.0",
+            id: JSON.parse(String(init?.body)).id,
+            error,
+          });
+        }) as typeof fetch,
+      }),
+    });
+    await expect(failing.getChainId()).rejects.toThrow();
+    expect(calls).toBe(3);
+  });
+}
+
+test("concurrent preflights serialize and space RPC reads", async () => {
+  const { executionFixture } = await import("./fixture");
+  const { arcChain, validateDeployment } = await import("./validate");
+  const d = executionFixture();
+  const starts: number[] = [];
+  const ends: number[] = [];
+  let active = 0;
+  let maximum = 0;
+  const client = createPublicClient({
+    chain: arcChain("https://rpc.invalid", d.chainId),
+    transport: arcTransport(["https://rpc.invalid"], {
+      fetchFn: (async (_input: RequestInfo | URL, init?: RequestInit) => {
+        starts.push(performance.now());
+        maximum = Math.max(maximum, ++active);
+        await Bun.sleep(5);
+        const { id, method } = JSON.parse(String(init?.body));
+        const result =
+          method === "eth_chainId"
+            ? `0x${d.chainId.toString(16)}`
+            : method === "eth_getBlockByNumber"
+              ? {
+                  number: "0x0",
+                  hash: `0x${"11".repeat(32)}`,
+                  timestamp: "0x1",
+                  transactions: [],
+                }
+              : "0x";
+        active--;
+        ends.push(performance.now());
+        return Response.json({ jsonrpc: "2.0", id, result });
+      }) as typeof fetch,
+    }),
+  });
+  const results = await Promise.allSettled([
+    validateDeployment(d, client),
+    validateDeployment(d, client),
+  ]);
+  for (const result of results) {
+    expect(result.status).toBe("rejected");
+    if (result.status === "rejected")
+      expect(String(result.reason)).toContain("Deployment code missing");
+  }
+  expect(starts).toHaveLength(6);
+  expect(maximum).toBe(1);
+  for (let i = 1; i < starts.length; i++)
+    expect(Number(starts[i]) - Number(ends[i - 1])).toBeGreaterThanOrEqual(20);
+});

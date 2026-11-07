@@ -9,7 +9,10 @@ import {
 import { fixture } from "../../modules/market/testing/fixture";
 import { executionFixture } from "../arc-deployment/fixture";
 import type { ForkClient } from "../arc-deployment/validate";
-import { createChainReader } from "./chain-reader.viem";
+import {
+  createChainReader,
+  USDC_BACKFILL_WINDOW_BUDGET,
+} from "./chain-reader.viem";
 
 const transfer = parseAbiItem(
   "event Transfer(address indexed from, address indexed to, uint256 value)",
@@ -154,6 +157,86 @@ test("projects outside NightToken transfers and backfills newly discovered USDC 
       db.exec("DELETE FROM wallet_custody WHERE owner = 'late'");
       db.exec("DELETE FROM identity_users WHERE human_id = 'late'");
     }
+  } finally {
+    db.close();
+  }
+});
+
+test("500 wallets share nearby windows and resume within the poll budget after restart", async () => {
+  const { ports } = await fixture();
+  const db = ports.db;
+  const d = executionFixture();
+  d.block = 0;
+  const head = 40000n;
+  const requests: {
+    fromBlock: bigint;
+    toBlock: bigint;
+    args: { from?: Address[]; to?: Address[] };
+  }[] = [];
+  const client = {
+    getBlock: async ({ blockNumber = head } = {}) => ({
+      number: blockNumber,
+      hash,
+      timestamp: 100n,
+    }),
+    readContract: async () => false,
+    getLogs: async (request: (typeof requests)[number]) => {
+      requests.push(request);
+      expect(request.toBlock - request.fromBlock).toBeLessThanOrEqual(9998n);
+      expect(
+        (request.args.from ?? request.args.to)?.length,
+      ).toBeLessThanOrEqual(100);
+      return [];
+    },
+  } as unknown as ForkClient;
+  db.query("INSERT INTO chain_blocks VALUES (?, ?, ?)").run(
+    "budget",
+    head,
+    hash,
+  );
+  for (let i = 0; i < 500; i++) {
+    const wallet = `0x${(10000 + i).toString(16).padStart(40, "0")}`;
+    db.query("INSERT INTO wallet_custody VALUES (?, 'mock', ?, ?)").run(
+      `owner-${i}`,
+      `wallet-${i}`,
+      wallet,
+    );
+    db.query("INSERT INTO chain_usdc_wallet_cursors VALUES (?, ?, ?)").run(
+      "budget",
+      wallet,
+      i,
+    );
+  }
+  try {
+    let complete = false;
+    for (let poll = 0; poll < 20; poll++) {
+      // Recreate the reader to prove progress survives beyond its in-memory queue.
+      const reader = createChainReader(db, d, client, "budget");
+      reader.assertCurrent = async () => {};
+      await reader.ready;
+      requests.length = 0;
+      await reader.poll();
+      expect(requests.length).toBeLessThanOrEqual(
+        USDC_BACKFILL_WINDOW_BUDGET * 2,
+      );
+      if (poll === 0) {
+        expect(requests.length).toBe(USDC_BACKFILL_WINDOW_BUDGET * 2);
+        expect(
+          requests.some((request) => (request.args.from?.length ?? 0) === 100),
+        ).toBe(true);
+      }
+      const remaining = db
+        .query(
+          "SELECT 1 FROM wallet_custody w LEFT JOIN chain_usdc_wallet_cursors c ON c.wallet = w.address AND c.fingerprint = 'budget' WHERE c.number IS NULL OR c.number < ?",
+        )
+        .get(head);
+      if (!remaining) {
+        expect(poll).toBeGreaterThan(0);
+        complete = true;
+        break;
+      }
+    }
+    expect(complete).toBe(true);
   } finally {
     db.close();
   }

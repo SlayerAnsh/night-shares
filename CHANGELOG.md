@@ -7,6 +7,8 @@ All notable changes to this monorepo. Newest first.
 
 - Root README with deployments, Arc Studio and Uniswap v4 integration links.
 
+- Chain reads tolerate public Arc RPCs: live asks default to the cheapest 50 (own listings stay uncut), USDC wallet backfill runs in a resumable budget of five windows per poll, "Request exceeds defined limit" retries with backoff, and preflight reads are serialized and paced.
+
 - Add an idempotent Arc testnet catalog seed with Privy custody, journaled trader funding, an ops budget guard, and rehearsal instructions.
 
 - Enable Arc mainnet execution and recovery behind an explicit execution switch, with read-only mainnet defaults and startup limit validation.

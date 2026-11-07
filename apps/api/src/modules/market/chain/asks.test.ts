@@ -9,7 +9,7 @@ import { cancelChainAsks, liveAsks } from "./asks";
 import { chainPortfolio } from "./positions";
 import { configureChainMarket, nightHash } from "./runtime";
 
-test("large books close stale asks and return all live asks with bounded multicalls", async () => {
+test("large books close stale asks and return the cheapest live asks with bounded multicalls", async () => {
   const deps = await fixture();
   const d = executionFixture();
   let calls = 0;
@@ -67,10 +67,14 @@ test("large books close stale asks and return all live asks with bounded multica
         );
     }
     const asks = await liveAsks(deps, deps.key);
-    expect(asks).toHaveLength(605);
+    expect(asks).toHaveLength(50);
     expect(asks[0]?.order.price).toBe(1n);
     expect(asks[49]?.order.price).toBe(50n);
     expect(calls).toBe(11);
+    expect(
+      await liveAsks(deps, deps.key, { maker: d.OWNER, limit: null }),
+    ).toHaveLength(605);
+    expect(await liveAsks(deps, deps.key, { limit: 3 })).toHaveLength(3);
     const counts = deps.ports.db
       .query(
         "SELECT status, count(*) AS n FROM market_chain_asks GROUP BY status ORDER BY status",

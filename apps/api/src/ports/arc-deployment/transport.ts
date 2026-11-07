@@ -8,8 +8,14 @@ import { redactRpc, registerRpcUrls } from "../../shared/redact-url";
 
 export function retryableRpcError(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
-  const e = error as { status?: number; code?: number; cause?: unknown };
+  const e = error as {
+    status?: number;
+    code?: number;
+    message?: string;
+    cause?: unknown;
+  };
   return (
+    /request exceeds defined limit/i.test(e.message ?? "") ||
     e.status === 429 ||
     (e.status !== undefined && e.status >= 500 && e.status < 600) ||
     e.code === -32014 ||

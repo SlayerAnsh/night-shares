@@ -73,7 +73,7 @@ export function askRows(deps: Deps, key?: string) {
 export async function liveAsks(
   deps: Deps,
   key: string,
-  options: { maker?: Address } = {},
+  options: { maker?: Address; limit?: number | null } = {},
 ): Promise<Ask[]> {
   const rows = askRows(deps, key).filter(
     (row) =>
@@ -143,9 +143,10 @@ export async function liveAsks(
       if (a.qty > 0n) asks.push(a);
     }
   }
-  return asks.sort((a, b) =>
+  const sorted = asks.sort((a, b) =>
     a.order.price < b.order.price ? -1 : a.order.price > b.order.price ? 1 : 0,
   );
+  return options.limit === null ? sorted : sorted.slice(0, options.limit ?? 50);
 }
 export async function prepareChainAsk(
   deps: Deps,

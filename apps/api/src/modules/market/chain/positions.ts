@@ -118,7 +118,7 @@ export async function chainPortfolio(deps: Deps, user: User) {
     const live = (
       await Promise.all(
         wallets.map((wallet) =>
-          liveAsks(deps, record.key, { maker: wallet.address }),
+          liveAsks(deps, record.key, { maker: wallet.address, limit: null }),
         ),
       )
     ).flat();

@@ -17,6 +17,9 @@ import {
 import { deserialize, serialize } from "../chain-executor/chain-executor";
 import { commandCall, permit2Abi, usdcAbi } from "../chain-executor/codecs";
 import type { BlockStamp, ChainReader, ReadRequest } from "./chain-reader";
+// Each window uses two getLogs calls, one for each transfer direction.
+export const USDC_BACKFILL_WINDOW_BUDGET = 5;
+
 export function createChainReader(
   db: Database,
   d: ArcDeployment,
@@ -483,7 +486,7 @@ export function createChainReader(
       // Commit events and progress together so interrupted backfills can resume safely.
       const through =
         end >= start ? end : cursor ? BigInt(cursor.number) : head.number;
-      const groups = new Map<bigint, Address[]>();
+      const pending: { wallet: Address; from: bigint }[] = [];
       for (const wallet of new Set(
         participants.map((address) => address.toLowerCase() as Address),
       )) {
@@ -495,47 +498,59 @@ export function createChainReader(
         const from = progress
           ? BigInt(progress.number) + 1n
           : BigInt(d.block as number);
-        const group = groups.get(from) ?? [];
-        group.push(wallet);
-        groups.set(from, group);
+        if (from <= through) pending.push({ wallet, from });
       }
-      for (const [start, group] of groups) {
-        for (let offset = 0; offset < group.length; offset += 100) {
-          const wallets = group.slice(offset, offset + 100);
-          let from = start;
-          while (from <= through) {
-            const limit = from + BigInt(maxBlocks - 1);
-            // biome-ignore lint/complexity/useMathMinMax: Math.min does not accept bigint block numbers.
-            const to = limit < through ? limit : through;
-            const block = await blockAt(to);
-            const batches = await Promise.all([
-              client.getLogs({
-                address: d.USDC,
-                event: transfer,
-                args: { from: wallets },
-                fromBlock: from,
-                toBlock: to,
-              }),
-              client.getLogs({
-                address: d.USDC,
-                event: transfer,
-                args: { to: wallets },
-                fromBlock: from,
-                toBlock: to,
-              }),
-            ]);
-            if ((await blockAt(to)).hash !== block.hash)
-              throw new Error("Block changed during reconciliation.");
-            db.transaction(() => {
-              reduce(batches.flat());
-              for (const wallet of wallets)
-                db.query(
-                  "INSERT OR REPLACE INTO chain_usdc_wallet_cursors VALUES (?, ?, ?)",
-                ).run(fingerprint, wallet, to);
-            }).immediate();
-            from = to + 1n;
-          }
-        }
+      for (
+        let window = 0;
+        window < USDC_BACKFILL_WINDOW_BUDGET && pending.length;
+        window++
+      ) {
+        // Oldest cursors get priority; nearby starts share a window. Re-reading
+        // overlap is safe because events are inserted idempotently.
+        pending.sort((a, b) =>
+          a.from < b.from ? -1 : a.from > b.from ? 1 : 0,
+        );
+        const first = pending[0];
+        if (!first) break;
+        const from = first.from;
+        const limit = from + BigInt(maxBlocks - 1);
+        // biome-ignore lint/complexity/useMathMinMax: Math.min does not accept bigint block numbers.
+        const to = limit < through ? limit : through;
+        const count = pending
+          .slice(0, 100)
+          .filter((entry) => entry.from <= to).length;
+        const group = pending.splice(0, count);
+        const wallets = group.map((entry) => entry.wallet);
+        const block = await blockAt(to);
+        const batches = await Promise.all([
+          client.getLogs({
+            address: d.USDC,
+            event: transfer,
+            args: { from: wallets },
+            fromBlock: from,
+            toBlock: to,
+          }),
+          client.getLogs({
+            address: d.USDC,
+            event: transfer,
+            args: { to: wallets },
+            fromBlock: from,
+            toBlock: to,
+          }),
+        ]);
+        if ((await blockAt(to)).hash !== block.hash)
+          throw new Error("Block changed during reconciliation.");
+        db.transaction(() => {
+          reduce(batches.flat());
+          for (const wallet of wallets)
+            db.query(
+              "INSERT OR REPLACE INTO chain_usdc_wallet_cursors VALUES (?, ?, ?)",
+            ).run(fingerprint, wallet, to);
+        }).immediate();
+        if (to < through)
+          pending.push(
+            ...group.map(({ wallet }) => ({ wallet, from: to + 1n })),
+          );
       }
       return end >= start ? blockAt(end) : head;
     },

@@ -44,6 +44,30 @@ export function validateExecutionAbi(d: ArcDeployment): void {
   }
 }
 
+// Serialize preflight reads per client and space requests to public RPCs.
+const preflightQueues = new WeakMap<ForkClient, Promise<void>>();
+function preflightRead<T>(
+  client: ForkClient,
+  read: () => Promise<T>,
+): Promise<T> {
+  const previous = preflightQueues.get(client) ?? Promise.resolve();
+  const result = previous.then(read);
+  const pause = () => {
+    const url = client.chain?.rpcUrls.default.http[0];
+    if (url) {
+      try {
+        assertLocalForkRpc(url);
+        return Promise.resolve();
+      } catch {
+        // Public RPCs need pacing even when their responses are fast.
+      }
+    }
+    return new Promise<void>((resolve) => setTimeout(resolve, 25));
+  };
+  preflightQueues.set(client, result.then(pause, pause));
+  return result;
+}
+
 export async function validateDeployment(
   d: ArcDeployment,
   client: ForkClient,
@@ -55,14 +79,16 @@ export async function validateDeployment(
     if (d.x402Available && !d.USDC_EIP712)
       throw new Error("Missing USDC_EIP712 domain.");
     check = "chainId";
-    if ((await client.getChainId()) !== d.chainId)
+    if ((await preflightRead(client, () => client.getChainId())) !== d.chainId)
       throw new Error("Arc RPC chainId must match deployment.");
     check = "block";
     if (!Number.isSafeInteger(d.block) || (d.block ?? -1) < 0)
       throw new Error("Deployment block is required.");
-    const block = await client.getBlock({
-      blockNumber: BigInt(d.block as number),
-    });
+    const block = await preflightRead(client, () =>
+      client.getBlock({
+        blockNumber: BigInt(d.block as number),
+      }),
+    );
     const addresses = Object.entries(d).filter(
       ([key, value]) =>
         typeof value === "string" &&
@@ -72,7 +98,9 @@ export async function validateDeployment(
     );
     for (const [name, address] of addresses) {
       check = `code ${name} ${address}`;
-      const code = await client.getCode({ address: address as Address });
+      const code = await preflightRead(client, () =>
+        client.getCode({ address: address as Address }),
+      );
       if (!code || code === "0x")
         throw new Error(`Deployment code missing: ${name}.`);
     }
@@ -108,11 +136,13 @@ export async function validateDeployment(
           continue;
         const expected = d[wiring[item.name] as keyof ArcDeployment];
         check = `dependency ${contract}.${item.name} ${d[contract as "TradeRouter"]}`;
-        const actual = await client.readContract({
-          address: d[contract as "TradeRouter"],
-          abi,
-          functionName: item.name,
-        });
+        const actual = await preflightRead(client, () =>
+          client.readContract({
+            address: d[contract as "TradeRouter"],
+            abi,
+            functionName: item.name,
+          }),
+        );
         if (String(actual).toLowerCase() !== String(expected).toLowerCase())
           throw new Error(
             `Deployment dependency mismatch: ${contract}.${item.name}.`,
@@ -120,11 +150,13 @@ export async function validateDeployment(
       }
     }
     check = `dependency NightFactory.dependencies ${d.NightFactory}`;
-    const dependencies = (await client.readContract({
-      address: d.NightFactory,
-      abi: d.abis.NightFactory ?? [],
-      functionName: "dependencies",
-    })) as Record<string, Address>;
+    const dependencies = (await preflightRead(client, () =>
+      client.readContract({
+        address: d.NightFactory,
+        abi: d.abis.NightFactory ?? [],
+        functionName: "dependencies",
+      }),
+    )) as Record<string, Address>;
     if (
       d.x402Available &&
       dependencies.settler?.toLowerCase() !== d.X402Settler?.toLowerCase()
@@ -144,11 +176,13 @@ export async function validateDeployment(
     ] as const) {
       const address = d[name];
       check = `domain ${name} ${address}`;
-      const actual = await client.readContract({
-        address,
-        abi: name === "USDC" ? authorizationAbi : (d.abis[name] ?? []),
-        functionName: "DOMAIN_SEPARATOR",
-      });
+      const actual = await preflightRead(client, () =>
+        client.readContract({
+          address,
+          abi: name === "USDC" ? authorizationAbi : (d.abis[name] ?? []),
+          functionName: "DOMAIN_SEPARATOR",
+        }),
+      );
       const expected = hashDomain({
         types: {
           EIP712Domain: [

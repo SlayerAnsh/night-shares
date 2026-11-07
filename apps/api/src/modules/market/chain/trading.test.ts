@@ -1,9 +1,13 @@
 import { expect, test } from "bun:test";
 import type { ArcDeployment } from "../../../ports/arc-deployment/arc-deployment";
 import type { ForkClient } from "../../../ports/arc-deployment/validate";
+import {
+  type Ask,
+  serialize,
+} from "../../../ports/chain-executor/chain-executor";
 import type { ChainReader } from "../../../ports/chain-reader/chain-reader";
 import { fixture } from "../testing/fixture";
-import { configureChainMarket } from "./runtime";
+import { configureChainMarket, nightHash } from "./runtime";
 import { quoteChainTrade } from "./trading";
 
 for (const approved of [false, true]) {
@@ -87,7 +91,9 @@ for (const approved of [false, true]) {
                 false,
                 0n,
               ]
-            : request.contracts.map(() => `0x${"00".repeat(32)}`),
+            : request.contracts[0]?.functionName === "nonces"
+              ? request.contracts.map((_, i) => (i % 3 === 2 ? 10n ** 18n : 0n))
+              : request.contracts.map(() => `0x${"00".repeat(32)}`),
         readContract: async (request: { functionName: string }) =>
           request.functionName === "extsload"
             ? `0x${"00".repeat(32)}`
@@ -95,7 +101,16 @@ for (const approved of [false, true]) {
         simulateContract: async (request: {
           account: string;
           stateOverride: unknown[];
+          functionName: string;
+          args: unknown[];
         }) => {
+          if (request.functionName === "buy") {
+            const asks = request.args[3] as Ask[];
+            expect(asks).toHaveLength(50);
+            expect(asks.map((ask) => ask.order.price)).toEqual(
+              Array.from({ length: 50 }, (_, i) => BigInt(i + 1)),
+            );
+          }
           expect(request.account).toBe(wallet.address);
           expect(request.stateOverride.length).toBeGreaterThan(0);
           return { result: 100n };
@@ -111,6 +126,32 @@ for (const approved of [false, true]) {
         abis: { TradeRouter: [] },
       } as unknown as ArcDeployment,
     });
+    for (let i = 0; i < 200; i++) {
+      ports.db
+        .query(
+          "INSERT INTO market_chain_asks VALUES (?, ?, ?, ?, ?, ?, ?, 'open')",
+        )
+        .run(
+          "quotes",
+          key,
+          wallet.address,
+          user.humanId,
+          wallet.walletId,
+          `0x${i.toString(16).padStart(64, "0")}`,
+          serialize({
+            order: {
+              night: nightHash(key),
+              maker: wallet.address,
+              size: 10n ** 18n,
+              price: BigInt(200 - i),
+              expiry: 1000n,
+              nonce: 0n,
+            },
+            signature: "0x",
+            qty: 0n,
+          }),
+        );
+    }
     const journal = ports.db.query("SELECT * FROM chain_operations").all();
     try {
       for (let i = 0; i < 4; i++) {

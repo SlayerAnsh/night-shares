@@ -138,7 +138,7 @@ test("x402 startup fails on settler, deployer wiring and either authorization do
       "mismatch",
     );
   }
-});
+}, 30000);
 
 test("required x402 functions, events, errors and dependencies are pinned", () => {
   const d = deployment();
