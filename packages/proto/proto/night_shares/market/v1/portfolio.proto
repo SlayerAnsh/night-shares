@@ -10,6 +10,7 @@ enum AgentOrderStatus {
   AGENT_ORDER_STATUS_PENDING = 1;
   AGENT_ORDER_STATUS_APPROVED = 2;
   AGENT_ORDER_STATUS_EXECUTED = 3;
+  AGENT_ORDER_STATUS_CANCELLED = 4;
 }
 
 message Holding {
@@ -31,6 +32,10 @@ message AgentOrder {
   string wallet_address = 6;
   AgentOrderStatus status = 7;
   bool requires_verification = 8;
+  // An empty ID identifies the user's default agent.
+  string agent_id = 9;
+  // The side is "buy" or "sell".
+  string side = 10;
 }
 
 message TraderTrackRecord {

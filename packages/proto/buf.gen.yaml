@@ -43,3 +43,9 @@ plugins:
       - path=wallet.openapi.yaml
       - services=night_shares.wallet.v1.WalletService
       - trim-unused-types
+  - remote: buf.build/community/sudorandom-connect-openapi:v0.25.7
+    out: gen/openapi
+    opt:
+      - path=agent.openapi.yaml
+      - services=night_shares.agent.v1.AgentService
+      - trim-unused-types

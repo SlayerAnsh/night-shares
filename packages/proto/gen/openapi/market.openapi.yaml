@@ -1217,6 +1217,14 @@ components:
         requiresVerification:
           type: boolean
           title: requires_verification
+        agentId:
+          type: string
+          title: agent_id
+          description: An empty ID identifies the user's default agent.
+        side:
+          type: string
+          title: side
+          description: The side is "buy" or "sell".
       title: AgentOrder
       additionalProperties: false
     night_shares.market.v1.AgentOrderStatus:
@@ -1227,6 +1235,7 @@ components:
         - AGENT_ORDER_STATUS_PENDING
         - AGENT_ORDER_STATUS_APPROVED
         - AGENT_ORDER_STATUS_EXECUTED
+        - AGENT_ORDER_STATUS_CANCELLED
     night_shares.market.v1.AgentWallet:
       type: object
       properties:
@@ -1258,6 +1267,10 @@ components:
           items:
             $ref: '#/components/schemas/night_shares.market.v1.Holding'
           title: holdings
+        agentId:
+          type: string
+          title: agent_id
+          description: An empty ID selects the user's default agent.
       title: AgentWallet
       additionalProperties: false
       description: Agent holdings are attributed purchases within the shared human position.
@@ -1435,6 +1448,10 @@ components:
         budget:
           title: budget
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        agentId:
+          type: string
+          title: agent_id
+          description: An empty ID selects the user's default agent.
       title: CreateAgentOrderRequest
       additionalProperties: false
     night_shares.market.v1.CreateAgentOrderResponse:
@@ -1540,6 +1557,9 @@ components:
         amount:
           title: amount
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        agentId:
+          type: string
+          title: agent_id
       title: FundAgentWalletRequest
       additionalProperties: false
     night_shares.market.v1.GetAgentCheckpointRequest:
@@ -1566,8 +1586,13 @@ components:
       additionalProperties: false
     night_shares.market.v1.GetAgentWalletRequest:
       type: object
+      properties:
+        agentId:
+          type: string
+          title: agent_id
       title: GetAgentWalletRequest
       additionalProperties: false
+      description: An empty agent_id selects the user's default agent in the wallet RPCs.
     night_shares.market.v1.GetBookRequest:
       type: object
       properties:
@@ -2093,6 +2118,10 @@ components:
           items:
             $ref: '#/components/schemas/night_shares.common.v1.NightKey'
           title: allowed_nights
+        agentId:
+          type: string
+          title: agent_id
+          description: An empty ID selects the user's default agent.
       title: SetAgentBudgetRequest
       additionalProperties: false
     night_shares.market.v1.StartAgentCheckpointRequest:
@@ -2239,6 +2268,9 @@ components:
         amount:
           title: amount
           $ref: '#/components/schemas/night_shares.common.v1.Usdc'
+        agentId:
+          type: string
+          title: agent_id
       title: WithdrawAgentWalletRequest
       additionalProperties: false
 security: []

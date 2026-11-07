@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package night_shares.agent.v1;
+
+import "night_shares/common/v1/night.proto";
+
+message AgentStrategy {
+  int32 version = 1;
+  AgentMarkets markets = 2;
+  AgentEntry entry = 3;
+  AgentExit exit = 4;
+  AgentSizing sizing = 5;
+}
+
+message AgentMarkets {
+  repeated string property_ids = 1;
+  repeated night_shares.common.v1.NightKey nights = 2;
+  string date_from = 3;
+  string date_to = 4;
+  repeated int32 weekdays = 5;
+  repeated night_shares.common.v1.NightKey disabled = 6;
+}
+
+message AgentEntry {
+  int32 max_price_vs_fair_bps = 1;
+  int32 min_hours_to_release = 2;
+  int32 max_hours_to_release = 3;
+  int32 momentum_lookback_hours = 4;
+  int32 momentum_min_rise_bps = 5;
+}
+
+message AgentExit {
+  int32 take_profit_bps = 1;
+  int32 stop_loss_bps = 2;
+  int32 exit_hours_before_release = 3;
+}
+
+message AgentSizing {
+  night_shares.common.v1.RoomNights max_per_night = 1;
+  night_shares.common.v1.RoomNights max_per_trade = 2;
+}

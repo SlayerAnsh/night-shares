@@ -1,0 +1,169 @@
+syntax = "proto3";
+
+package night_shares.agent.v1;
+
+import "google/protobuf/timestamp.proto";
+import "night_shares/agent/v1/strategy.proto";
+import "night_shares/auth/v1/access.proto";
+import "night_shares/common/v1/money.proto";
+import "night_shares/common/v1/night.proto";
+import "night_shares/market/v1/portfolio.proto";
+
+service AgentService {
+  rpc ListAgentTemplates(ListAgentTemplatesRequest) returns (ListAgentTemplatesResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc DraftAgentStrategy(DraftAgentStrategyRequest) returns (DraftAgentStrategyResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc CreateAgent(CreateAgentRequest) returns (CreateAgentResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc UpdateAgent(UpdateAgentRequest) returns (UpdateAgentResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc PauseAgent(PauseAgentRequest) returns (PauseAgentResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc ResumeAgent(ResumeAgentRequest) returns (ResumeAgentResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc RetireAgent(RetireAgentRequest) returns (RetireAgentResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc WithdrawAllAgent(WithdrawAllAgentRequest) returns (WithdrawAllAgentResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc ListAgents(ListAgentsRequest) returns (ListAgentsResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+  rpc GetAgent(GetAgentRequest) returns (GetAgentResponse) {
+    option (night_shares.auth.v1.access) = ACCESS_ORB;
+  }
+}
+
+enum AgentStatus {
+  AGENT_STATUS_UNSPECIFIED = 0;
+  AGENT_STATUS_ACTIVE = 1;
+  AGENT_STATUS_PAUSED = 2;
+  AGENT_STATUS_RETIRED = 3;
+}
+
+message Agent {
+  string id = 1;
+  string name = 2;
+  string template_id = 3;
+  AgentStatus status = 4;
+  string status_reason = 5;
+  string wallet_address = 6;
+  AgentStrategy strategy = 7;
+  string strategy_reason = 8;
+  night_shares.common.v1.Usdc total_budget = 9;
+  night_shares.common.v1.Usdc per_order_cap = 10;
+  night_shares.common.v1.Usdc spent = 11;
+  night_shares.common.v1.Usdc balance = 12;
+  night_shares.common.v1.Usdc value = 13;
+  night_shares.common.v1.Usdc pnl = 14;
+  int32 trade_count = 15;
+  repeated night_shares.common.v1.NightKey allowed_nights = 16;
+}
+
+message AgentStrategyVersion {
+  int32 version = 1;
+  AgentStrategy strategy = 2;
+  string reason = 3;
+  // The source is "template", "user", or "model".
+  string source = 4;
+  string provider = 5;
+  string model = 6;
+  string request_id = 7;
+  google.protobuf.Timestamp at = 8;
+}
+
+message AgentTrade {
+  string id = 1;
+  // The side is "buy" or "sell".
+  string side = 2;
+  night_shares.common.v1.NightKey night = 3;
+  night_shares.common.v1.RoomNights size = 4;
+  night_shares.common.v1.Usdc total = 5;
+  string status = 6;
+  string reason = 7;
+  string tx_hash = 8;
+  string explorer_url = 9;
+  google.protobuf.Timestamp at = 10;
+  string order_id = 11;
+}
+
+message AgentDetail {
+  Agent agent = 1;
+  repeated AgentStrategyVersion strategies = 2;
+  repeated AgentTrade trades = 3;
+  repeated night_shares.market.v1.AgentOrder pending_orders = 4;
+}
+
+message WithdrawAllResult {
+  night_shares.common.v1.Usdc usdc = 1;
+  repeated night_shares.market.v1.Holding nights = 2;
+  repeated string tx_hashes = 3;
+  // Each entry describes a withdrawal that is not yet final and its reason.
+  repeated string pending = 4;
+}
+
+message AgentTemplate {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  AgentStrategy strategy = 4;
+}
+
+message ListAgentTemplatesRequest {}
+message ListAgentTemplatesResponse { repeated AgentTemplate templates = 1; }
+
+message DraftAgentStrategyRequest {
+  oneof source {
+    string template_id = 1;
+    string description = 2;
+  }
+}
+message DraftAgentStrategyResponse {
+  AgentStrategy strategy = 1;
+  string reason = 2;
+}
+
+message CreateAgentRequest {
+  string name = 1;
+  string template_id = 2;
+  AgentStrategy strategy = 3;
+  night_shares.common.v1.Usdc total_budget = 4;
+  night_shares.common.v1.Usdc per_order_cap = 5;
+  repeated night_shares.common.v1.NightKey allowed_nights = 6;
+}
+message CreateAgentResponse { Agent agent = 1; }
+
+// Updates replace the editable settings, including the allowed nights.
+message UpdateAgentRequest {
+  string agent_id = 1;
+  string name = 2;
+  AgentStrategy strategy = 3;
+  night_shares.common.v1.Usdc total_budget = 4;
+  night_shares.common.v1.Usdc per_order_cap = 5;
+  repeated night_shares.common.v1.NightKey allowed_nights = 6;
+}
+message UpdateAgentResponse { Agent agent = 1; }
+
+message PauseAgentRequest { string agent_id = 1; }
+message PauseAgentResponse { Agent agent = 1; }
+message ResumeAgentRequest { string agent_id = 1; }
+message ResumeAgentResponse { Agent agent = 1; }
+message RetireAgentRequest { string agent_id = 1; }
+message RetireAgentResponse {
+  Agent agent = 1;
+  WithdrawAllResult result = 2;
+}
+message WithdrawAllAgentRequest { string agent_id = 1; }
+message WithdrawAllAgentResponse { WithdrawAllResult result = 1; }
+message ListAgentsRequest {}
+message ListAgentsResponse { repeated Agent agents = 1; }
+message GetAgentRequest { string agent_id = 1; }
+message GetAgentResponse { AgentDetail detail = 1; }

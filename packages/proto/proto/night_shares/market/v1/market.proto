@@ -248,6 +248,8 @@ message CreateAgentOrderRequest {
   night_shares.common.v1.NightKey night = 1;
   night_shares.common.v1.RoomNights size = 2;
   night_shares.common.v1.Usdc budget = 3;
+  // An empty ID selects the user's default agent.
+  string agent_id = 4;
 }
 
 message CreateAgentOrderResponse {
@@ -274,15 +276,26 @@ message AgentWallet {
   night_shares.common.v1.Usdc spent = 5;
   repeated night_shares.common.v1.NightKey allowed_nights = 6;
   repeated Holding holdings = 7;
+  // An empty ID selects the user's default agent.
+  string agent_id = 9;
 }
 message AgentWalletResponse { AgentWallet wallet = 1; }
-message GetAgentWalletRequest {}
-message FundAgentWalletRequest { night_shares.common.v1.Usdc amount = 1; }
-message WithdrawAgentWalletRequest { night_shares.common.v1.Usdc amount = 1; }
+// An empty agent_id selects the user's default agent in the wallet RPCs.
+message GetAgentWalletRequest { string agent_id = 1; }
+message FundAgentWalletRequest {
+  night_shares.common.v1.Usdc amount = 1;
+  string agent_id = 2;
+}
+message WithdrawAgentWalletRequest {
+  night_shares.common.v1.Usdc amount = 1;
+  string agent_id = 2;
+}
 message SetAgentBudgetRequest {
   night_shares.common.v1.Usdc total_budget = 1;
   night_shares.common.v1.Usdc per_order_cap = 2;
   repeated night_shares.common.v1.NightKey allowed_nights = 3;
+  // An empty ID selects the user's default agent.
+  string agent_id = 4;
 }
 
 
