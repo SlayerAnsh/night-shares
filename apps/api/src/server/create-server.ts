@@ -62,12 +62,21 @@ export function createServer(
       if (!applyHttpLimits(req, res, config)) return;
       // Probes do not consume application quotas, so monitoring cannot exhaust them.
       if (req.method === "GET" && (path === "/healthz" || path === "/readyz")) {
-        const healthy = path === "/healthz" || ready();
+        const reason =
+          path === "/readyz"
+            ? await container.ports.chainReadiness?.()
+            : undefined;
+        const healthy = path === "/healthz" || (ready() && !reason);
         res
           .writeHead(healthy ? 200 : 503, {
             "content-type": "application/json",
           })
-          .end(JSON.stringify({ status: healthy ? "ok" : "unavailable" }));
+          .end(
+            JSON.stringify({
+              status: healthy ? "ok" : "unavailable",
+              ...(reason ? { reason } : {}),
+            }),
+          );
         return;
       }
       if (

@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { toHex } from "viem";
 import { DomainError } from "../../shared/errors/domain-error";
 import { privyAuthorization } from "./privy-authorization";
 import {
@@ -12,7 +13,8 @@ export function createPrivyWalletCustody(deps: {
   appSecret: string;
   authorizationKey?: string;
   fetch?: (input: string, init: RequestInit) => Promise<Response>;
-}): WalletCustody {
+}): WalletCustody &
+  Required<Pick<WalletCustody, "signTransaction" | "resolveWallet">> {
   if (!deps.appId.trim() || !deps.appSecret.trim())
     throw new Error(
       "PRIVY_APP_ID and PRIVY_APP_SECRET are required in privy mode.",
@@ -37,13 +39,28 @@ export function createPrivyWalletCustody(deps: {
         privyHeaders,
       );
     try {
-      return await request(url, {
+      const response = await request(url, {
         method: body ? "POST" : "GET",
         headers,
         body: body ? JSON.stringify(body) : undefined,
         signal: AbortSignal.timeout(10000),
       });
-    } catch {
+      if (
+        !authorization &&
+        !response.ok &&
+        (response.status === 401 ||
+          response.status === 403 ||
+          /authorization|wallet.auth|signature.*required/i.test(
+            await response.clone().text(),
+          ))
+      )
+        throw new DomainError(
+          "FAILED_PRECONDITION",
+          "Privy authorization rejected; configure PRIVY_AUTHORIZATION_KEY if wallet policy requires authorization signatures.",
+        );
+      return response;
+    } catch (error) {
+      if (error instanceof DomainError) throw error;
       // Do not expose vendor errors that could contain request credentials.
       throw new DomainError(
         "FAILED_PRECONDITION",
@@ -78,8 +95,48 @@ export function createPrivyWalletCustody(deps: {
     async resolveWallet(id) {
       return wallet(await call(`/${encodeURIComponent(id)}`));
     },
-    async signTransaction() {
-      throw new Error("Privy transaction sending not implemented");
+    async signTransaction(walletId, tx) {
+      const body = {
+        method: "eth_signTransaction",
+        params: {
+          transaction: {
+            chain_id: tx.chainId,
+            type: 2,
+            nonce: tx.nonce,
+            to: tx.to,
+            data: tx.data,
+            value: toHex(tx.value),
+            gas_limit: toHex(tx.gas),
+            max_fee_per_gas: toHex(tx.maxFeePerGas),
+            max_priority_fee_per_gas: toHex(tx.maxPriorityFeePerGas),
+          },
+        },
+      };
+      // The persisted envelope uniquely identifies a journal signing attempt.
+      const id = createHash("sha256")
+        .update(walletId)
+        .update(JSON.stringify(body))
+        .digest("hex");
+      const response = await call(
+        `/${encodeURIComponent(walletId)}/rpc`,
+        body,
+        `tx-${id}`,
+      );
+      if (!response.ok)
+        throw new DomainError(
+          "FAILED_PRECONDITION",
+          "Privy eth_signTransaction rejected. Verify wallet signing policy and custom chain support; journal operation remains prepared.",
+        );
+      const data = await response.json();
+      const signed: unknown = data.data?.signed_transaction;
+      if (
+        data.method !== "eth_signTransaction" ||
+        data.data?.encoding !== "rlp" ||
+        typeof signed !== "string" ||
+        !/^0x(?:[0-9a-fA-F]{2})+$/.test(signed)
+      )
+        return failure();
+      return signed as `0x${string}`;
     },
     getWallet,
     async createWallet(owner) {

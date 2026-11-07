@@ -1,3 +1,4 @@
+import { parseUnits } from "viem";
 import { assertOrderDomain } from "../modules/market/orders/typed-data";
 import {
   type AgentPassConfig,
@@ -10,6 +11,7 @@ import {
 } from "../ports/arc-deployment/arc-deployment";
 import { assertLocalForkRpc } from "../ports/arc-deployment/local-fork";
 import { chainConfig } from "../ports/chain-status/config";
+import type { GasPolicy } from "../ports/wallet-custody/gas-float";
 import { parseDate } from "../shared/dates";
 import { ARC_NETWORKS } from "./arc-networks";
 import { loadChainKeys } from "./chain-keys";
@@ -20,6 +22,7 @@ export type Config = Partial<ServerConfig> &
     arcRpcUrls?: string[];
     attesterKey?: () => `0x${string}`;
     opsKey?: () => `0x${string}`;
+    gasPolicy?: GasPolicy;
     chainLimits?: string;
     chainPaused?: boolean;
     agentApprovalThreshold?: bigint;
@@ -137,7 +140,28 @@ export function loadConfig(
     );
   if (chain && chainStatus !== "onchain")
     throw new Error("Chain execution requires CHAIN_STATUS=onchain.");
-  const forkGasHeadroomBps = Number(env.FORK_GAS_HEADROOM_BPS ?? "12000");
+  const amount = (name: string, fallback: string) => {
+    const value = env[name] ?? fallback;
+    if (!/^\d+(?:\.\d{1,18})?$/.test(value) || parseUnits(value, 18) <= 0n)
+      throw new Error(
+        `${name} must be a positive native USDC amount with at most 18 decimals.`,
+      );
+    return parseUnits(value, 18);
+  };
+  const gasPolicy = {
+    float: amount("CHAIN_GAS_FLOAT", "0.05"),
+    lowWater: amount("CHAIN_GAS_LOW_WATER", "0.01"),
+    dailyCap: amount("CHAIN_GAS_DAILY_CAP_PER_WALLET", "0.2"),
+    opsMinBalance: amount("CHAIN_OPS_MIN_BALANCE", "0.1"),
+  };
+  if (
+    gasPolicy.lowWater >= gasPolicy.float ||
+    gasPolicy.dailyCap < gasPolicy.float
+  )
+    throw new Error("Gas policy requires low water < float <= daily cap.");
+  const forkGasHeadroomBps = Number(
+    env.CHAIN_GAS_HEADROOM_BPS ?? env.FORK_GAS_HEADROOM_BPS ?? "12000",
+  );
   if (
     !Number.isInteger(forkGasHeadroomBps) ||
     forkGasHeadroomBps < 10000 ||
@@ -273,6 +297,7 @@ export function loadConfig(
     chain,
     attesterKey,
     opsKey,
+    gasPolicy,
     arcRpcUrls,
     arcNetwork,
     arcDeployment,

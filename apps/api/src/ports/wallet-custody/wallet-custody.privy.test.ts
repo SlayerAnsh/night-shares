@@ -155,7 +155,9 @@ test("Privy failures redact secrets and malformed signatures fail closed", async
       fetch: async () => response,
     });
     await expect(adapter.signTypedData(wallet.id, data)).rejects.toThrow(
-      "Wallet service rejected",
+      response.status === 403
+        ? "PRIVY_AUTHORIZATION_KEY"
+        : "Wallet service rejected",
     );
   }
 });

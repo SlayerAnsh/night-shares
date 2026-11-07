@@ -205,7 +205,7 @@ Setting `ARC_NETWORK=fork`, `testnet`, or `mainnet` activates `config.chain.netw
 | `testnet` | 5042002 | `packages/contracts/deployments/5042002.json` | `https://rpc.testnet.arc.network,https://rpc.testnet.arc.io` |
 | `mainnet` | 5042 | `packages/contracts/deployments/5042.json` | `https://rpc.mainnet.arc.io` |
 
-`ARC_DEPLOYMENT_FILE` overrides the artifact path. A missing deployment fails startup; mainnet currently has no deployment artifact. `ARC_RPC_URLS` is a comma-separated endpoint list and takes precedence over the single-endpoint `ARC_RPC_URL`. All fork endpoints must be local. The transport rotates endpoints and applies bounded exponential backoff for HTTP 429, 5xx, and JSON-RPC -32014/-32005. Polling starts at the deployment block (71115581 on testnet); each poll is capped at 9,999 blocks and log requests currently cover one block each.
+`ARC_DEPLOYMENT_FILE` overrides the artifact path. A missing deployment fails startup; mainnet currently has no deployment artifact. `ARC_RPC_URLS` is a comma-separated endpoint list and takes precedence over the single-endpoint `ARC_RPC_URL`. All fork endpoints must be local. The transport rotates endpoints and applies bounded exponential backoff for HTTP 429, 5xx, and JSON-RPC -32014/-32005. Polling starts at the selected artifact's deployment block; each poll is capped at 9,999 blocks and log requests currently cover one block each.
 
 Fork environment:
 
@@ -225,19 +225,29 @@ export ARC_NETWORK=testnet
 export WALLET_CUSTODY=privy
 export ATTESTER_KEYSTORE="$HOME/.foundry/keystores/ns-testnet-attester"
 export ATTESTER_KEYCHAIN_SERVICE=ns-testnet-attester
-# Optional: load the ops gas wallet for the next transaction-sending round.
+# Required: fund the ops wallet with native testnet USDC before trading.
 export OPS_KEYSTORE="$HOME/.foundry/keystores/ns-testnet-ops"
 export OPS_KEYCHAIN_SERVICE=ns-testnet-ops
 # Supply PRIVY_APP_ID and PRIVY_APP_SECRET through runtime secret management.
+# Supply PRIVY_AUTHORIZATION_KEY if required by the wallet ownership policy.
+export CHAIN_GAS_FLOAT=0.05
+export CHAIN_GAS_LOW_WATER=0.01
+export CHAIN_GAS_DAILY_CAP_PER_WALLET=0.2
+export CHAIN_OPS_MIN_BALANCE=0.1
+export CHAIN_GAS_HEADROOM_BPS=12000
 ```
 
 For mainnet, use `ARC_NETWORK=mainnet`, `WALLET_CUSTODY=privy`, and dedicated mainnet attester keystore/service values. Supply the reviewed `5042.json` before boot validation. No mainnet transactions are enabled or exercised in this round.
 
-The API itself invokes `security find-generic-password -s <service> -w` with `execFileSync`, without a shell. It decrypts Foundry/geth JSON keystores in memory using ethers. Password buffers are cleared after use; immutable JavaScript strings and signer internals cannot be reliably wiped. Passwords and private keys are never written to disk, environment variables, or logs. Config key accessors serialize as `[REDACTED]`; decryption errors omit vendor details. Both members of each keystore/service pair are required. Raw `ATTESTER_KEY` is supported only on fork; do not put raw keys in env files. The attester address must match deployment `ATTESTER` at startup. `OWNER`/`OPERATOR` keys are not required. This password source requires macOS Keychain; containers need a separately implemented secret-provider integration.
+For each of `ATTESTER` and `OPS`, select exactly one source: `<NAME>_KEYSTORE` with `<NAME>_KEYCHAIN_SERVICE` (macOS), `<NAME>_KEYSTORE` with `<NAME>_KEYSTORE_PASSWORD`, `<NAME>_KEYSTORE` with `<NAME>_KEYSTORE_PASSWORD_FILE`, or raw `<NAME>_KEY`. Ambiguous or incomplete sources fail startup. `FORK_ATTESTER_KEY` remains a fork-only alias and cannot coexist with another attester source. Dokploy can mount password files or inject passwords through runtime secrets; no Keychain is needed. Keychain access uses `security find-generic-password -s <service> -w` without a shell. Decryption happens in memory; password buffers are cleared. JavaScript strings cannot be reliably wiped. Key accessors serialize as `[REDACTED]`, and errors omit key/password values. The attester must match deployment `ATTESTER`. Privy chain mode requires an ops key; `OWNER`/`OPERATOR` keys are not required.
 
-Privy custody boots with the real chain reader, attester, and executor. Transaction execution and recovery fail with `Privy transaction sending not implemented` before signing or broadcasting. Provisioning gas with `anvil_setBalance`, the faucet, Anvil custody, `dev:fork`, and `seed:fork` remain fork-only. Privy transaction sending is deferred to the next round.
+Privy uses `eth_signTransaction` with an explicit numeric `chain_id` (5042002 on testnet, 5042 on fork), EIP-1559 fees, and the journal's nonce. The persisted envelope determines the Privy idempotency key. The response carries `encoding: "rlp"`. Signed bytes are checked against that envelope and sender, persisted before broadcast, and recovered by rebroadcasting identical bytes. There is no automatic `eth_sendTransaction` fallback: a signing rejection leaves the operation prepared and fails closed, preserving nonce/recovery semantics. Arc signing availability must be verified with the manual smoke below; a provider-send fallback would require a separately persisted submission/reconciliation protocol with `caip2: eip155:<id>`. Mainnet execution and recovery remain disabled.
 
-Off-fork execution uses live RPC `estimateGas` without the preceding `simulateContract` transfer path. Off-fork market quotes project the deployed pool's ladder positions instead of overriding Arc USDC storage: its blocklist precompile is not supported by local simulation. These pool-only estimates include sell-back fees but exclude peer asks; router limits remain authoritative. Fork quotes retain simulation. Testnet's pre-x402 deployment disables x402, and its absent demo NightToken is skipped during boot code and pause checks.
+On first chain use and whenever a wallet's native balance is below `CHAIN_GAS_LOW_WATER` (default 0.01), the ops wallet funds it up to `CHAIN_GAS_FLOAT` (0.05). Already-funded wallets need no transfer. All amounts are native USDC with 18 decimals. Native transfers use the same transaction journal as trading. Persistent reservations cap funding at `CHAIN_GAS_DAILY_CAP_PER_WALLET` (0.2) per address and UTC day in the API database (including across deployment changes); uncertain and reverted transfers conservatively consume the cap. Unresolved reservations are resumed before allocating new funding, including after midnight, when an unresolved reservation is charged against the retry day before delivery. The ops wallet never funds itself. `/readyz` returns 503 with a reason when its native balance is below `CHAIN_OPS_MIN_BALANCE` (0.1) or its balance cannot be read. `/healthz` remains a liveness probe. Trading ERC-20 USDC uses 6 decimals and must come from deposits. Faucets, Anvil custody, and `anvil_setBalance` remain fork-only.
+
+Run the optional manual smoke with `ARC_NETWORK=testnet bun src/dev/privy-smoke.ts` from `apps/api`, supplying Privy credentials at runtime. It creates a fresh server wallet and signs a zero-value self transaction for chain 5042002; it never broadcasts or contacts a chain RPC and does not print signed bytes. Automated tests use mocked Privy responses or a local HTTP stub on disposable child forks; they must not load production keys or contact public RPCs.
+
+`CHAIN_GAS_HEADROOM_BPS` defaults to 12000 (20% headroom); `FORK_GAS_HEADROOM_BPS` remains a legacy fallback. Off-fork execution uses live RPC `estimateGas` without the preceding `simulateContract` transfer path. Off-fork market quotes project the deployed pool's ladder positions instead of overriding Arc USDC storage: its blocklist precompile is not supported by local simulation. These pool-only estimates include sell-back fees but exclude peer asks; router limits remain authoritative. Fork quotes retain simulation. Legacy testnet artifacts without x402 disable those routes; an absent demo NightToken is skipped during boot code and pause checks. The current testnet artifact includes x402.
 
 Tests use throwaway encrypted keystores and a stub password reader; never use real Keychain services in tests or smoke checks. Fork acceptance runs only on disposable child forks. Fresh `seed:fork` openings use `F=0.5` USDC (500,000 micro USDC), below `MAX_F=1,000,000`; existing immutable openings retain their original price.
 

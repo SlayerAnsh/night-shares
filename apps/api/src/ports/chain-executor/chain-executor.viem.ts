@@ -4,6 +4,8 @@ import {
   type Address,
   type Hex,
   keccak256,
+  parseTransaction,
+  recoverTransactionAddress,
   type TransactionReceipt,
 } from "viem";
 import type { ArcDeployment } from "../arc-deployment/arc-deployment";
@@ -47,7 +49,10 @@ export function createChainExecutor(deps: {
   custody: WalletCustody;
   gasHeadroomBps?: number;
   network?: "fork" | "testnet" | "mainnet";
-  sendingUnavailable?: boolean;
+  provisionWallet?: (wallet: {
+    walletId: string;
+    address: Address;
+  }) => Promise<void>;
   afterBroadcast?: () => void;
 }): ChainExecutor {
   const { db, deployment: d, client, reader, custody } = deps;
@@ -154,8 +159,8 @@ export function createChainExecutor(deps: {
         .all(reader.fingerprint)
         .map((r) => r.id),
     async recover(id) {
-      if (deps.sendingUnavailable)
-        throw new Error("Privy transaction sending not implemented");
+      if (deps.network === "mainnet")
+        throw new Error("Mainnet transactions are disabled.");
       const r = row(id);
       if (!r) throw new Error("Unknown chain operation.");
       if (r.fingerprint !== reader.fingerprint)
@@ -169,8 +174,8 @@ export function createChainExecutor(deps: {
       return deliver(r);
     },
     async execute(request: ExecutionRequest) {
-      if (deps.sendingUnavailable)
-        throw new Error("Privy transaction sending not implemented");
+      if (deps.network === "mainnet")
+        throw new Error("Mainnet transactions are disabled.");
       if (
         deps.network &&
         deps.network !== "fork" &&
@@ -203,24 +208,38 @@ export function createChainExecutor(deps: {
         wallet.address.toLowerCase() !== d.ATTESTER.toLowerCase()
       )
         throw new Error("verifyHuman requires the attester sender.");
-      const call = await commandCall(d, request.command, (night) =>
-        reader.tokenOf(night),
-      );
-      const data = calldata(call);
-      if ((deps.network ?? "fork") === "fork")
+      const native =
+        request.command.kind === "nativeTransfer" ? request.command : undefined;
+      if (native && (request.walletId !== "chain:ops" || native.amount <= 0n))
+        throw new Error(
+          "Native gas funding requires the ops wallet and a positive amount.",
+        );
+      if (!native) await deps.provisionWallet?.(wallet);
+      const call = native
+        ? undefined
+        : await commandCall(d, request.command, (night) =>
+            reader.tokenOf(night),
+          );
+      const destination = native?.to ?? call?.address;
+      if (!destination) throw new Error("Missing transaction destination.");
+      const data = call ? calldata(call) : "0x";
+      const value = native?.amount ?? 0n;
+      if (call && (deps.network ?? "fork") === "fork")
         await client.simulateContract({ ...call, account: wallet.address });
       const gas =
         ((await client.estimateGas({
           account: wallet.address,
-          to: call.address,
+          to: destination,
           data,
+          value,
         })) *
-          BigInt(headroom)) /
+          BigInt(headroom) +
+          9999n) /
         10000n;
       const fees = await client.estimateFeesPerGas();
       if (
         (await client.getBalance({ address: wallet.address })) <
-        gas * fees.maxFeePerGas
+        value + gas * fees.maxFeePerGas
       )
         throw new Error("Insufficient native USDC gas balance (18 decimals).");
       const pendingNonce = await client.getTransactionCount({
@@ -253,9 +272,9 @@ export function createChainExecutor(deps: {
             chainId: d.chainId,
             type: "eip1559",
             nonce,
-            to: call.address,
+            to: destination,
             data,
-            value: 0n,
+            value,
             gas,
             maxFeePerGas: fees.maxFeePerGas,
             maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
@@ -271,7 +290,7 @@ export function createChainExecutor(deps: {
             wallet.address.toLowerCase(),
             nonce,
             data,
-            call.address,
+            destination,
             serialize(envelope),
           );
           return row(request.operationId) as Row;
@@ -283,6 +302,31 @@ export function createChainExecutor(deps: {
         deserialize<TransactionEnvelope>(existing.envelope as string),
       );
       if (!signed) throw new Error("Custody did not sign transaction.");
+      if (!signed.startsWith("0x02"))
+        throw new Error("Custody must sign an EIP-1559 transaction.");
+      const expected = deserialize<TransactionEnvelope>(
+        existing.envelope as string,
+      );
+      const actual = parseTransaction(signed);
+      if (
+        (
+          await recoverTransactionAddress({
+            serializedTransaction: signed as `0x02${string}`,
+          })
+        ).toLowerCase() !== wallet.address.toLowerCase() ||
+        actual.to?.toLowerCase() !== expected.to.toLowerCase() ||
+        actual.chainId !== expected.chainId ||
+        actual.nonce !== expected.nonce ||
+        (actual.data ?? "0x") !== expected.data ||
+        (actual.value ?? 0n) !== expected.value ||
+        actual.gas !== expected.gas ||
+        actual.maxFeePerGas !== expected.maxFeePerGas ||
+        actual.maxPriorityFeePerGas !== expected.maxPriorityFeePerGas ||
+        actual.type !== expected.type
+      )
+        throw new Error(
+          "Custody signed transaction does not match journal envelope.",
+        );
       db.query(
         "UPDATE chain_operations SET signed_payload = ?, tx_hash = ?, state = 'signed' WHERE id = ? AND signed_payload IS NULL",
       ).run(signed, keccak256(signed), existing.id);

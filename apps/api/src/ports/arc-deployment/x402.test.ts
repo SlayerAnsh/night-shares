@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { hashDomain, zeroAddress } from "viem";
-import { loadDeployment, parseDeployment } from "./arc-deployment";
+import { parseDeployment } from "./arc-deployment";
 import { executionFixture, fixture } from "./fixture";
 import { requiredAbi } from "./required-abi";
 import {
@@ -15,9 +15,17 @@ test("x402 deployment requires addresses and USDC domain; legacy testnet remains
       key,
     );
   }
-  const legacy = loadDeployment(
-    "testnet",
-    "packages/contracts/deployments/5042002.json",
+  const raw = fixture();
+  const legacy = parseDeployment(
+    {
+      ...raw,
+      chainId: 5042002,
+      EIP712Domain: { ...raw.EIP712Domain, chainId: 5042002 },
+      X402Settler: undefined,
+      NightTokenDeployer: undefined,
+      USDC_EIP712: undefined,
+    },
+    5042002,
   );
   expect(legacy?.x402Available).toBe(false);
   expect(legacy?.X402Settler).toBeUndefined();

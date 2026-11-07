@@ -78,10 +78,10 @@ test("fork config selects deployment domain, refuses modes and hides attester", 
   }
 });
 
-test("network deployment selection loads legacy testnet and refuses missing mainnet", () => {
+test("network deployment selection loads current testnet and refuses missing mainnet", () => {
   const testnet = loadDeployment("testnet");
   expect(testnet?.chainId).toBe(5042002);
-  expect(testnet?.block).toBe(71115581);
-  expect(testnet?.x402Available).toBe(false);
+  expect(testnet?.block).toBeGreaterThan(0);
+  expect(testnet?.x402Available).toBe(true);
   expect(() => loadDeployment("mainnet")).toThrow("5042.json");
 });

@@ -13,6 +13,8 @@ const secret = (key: Hex): Secret =>
   Object.assign(() => key, { toJSON: () => "[REDACTED]" });
 
 export function readKeychainPassword(service: string): Buffer {
+  if (process.platform !== "darwin")
+    throw new Error("Keychain requires macOS.");
   try {
     return execFileSync(
       "security",
@@ -37,33 +39,39 @@ export function loadChainKeys(
   function load(role: "ATTESTER" | "OPS"): Secret | undefined {
     const path = env[`${role}_KEYSTORE`];
     const service = env[`${role}_KEYCHAIN_SERVICE`];
-    let raw =
-      role === "ATTESTER"
-        ? (env.ATTESTER_KEY ??
-          (network === "fork" ? env.FORK_ATTESTER_KEY : undefined))
+    const passwordEnv = env[`${role}_KEYSTORE_PASSWORD`];
+    const passwordFile = env[`${role}_KEYSTORE_PASSWORD_FILE`];
+    const alias =
+      role === "ATTESTER" && network === "fork"
+        ? env.FORK_ATTESTER_KEY
         : undefined;
-    if (raw && network !== "fork") {
-      // Validate the public address first so a wrong startup credential has a
-      // useful diagnostic; matching raw credentials are still refused off-fork.
-      if (role === "ATTESTER" && deployment) checkAttester(raw, deployment);
-      throw new Error(
-        "Raw ATTESTER_KEY is fork-only; use ATTESTER_KEYSTORE and ATTESTER_KEYCHAIN_SERVICE.",
-      );
-    }
-    if (raw && (path || service))
+    let raw = env[`${role}_KEY`] ?? alias;
+    const sources = [service, passwordEnv, passwordFile].filter(
+      (v) => v !== undefined,
+    );
+    if (
+      (raw !== undefined && (path !== undefined || sources.length > 0)) ||
+      sources.length > 1 ||
+      (alias !== undefined && env.ATTESTER_KEY !== undefined)
+    )
       throw new Error(`${role} key sources are mutually exclusive.`);
-    if (!!path !== !!service)
+    if ((path !== undefined) !== (sources.length === 1))
       throw new Error(
-        `${role}_KEYSTORE and ${role}_KEYCHAIN_SERVICE must be supplied together.`,
+        `${role}_KEYSTORE and exactly one password source must be supplied together.`,
       );
-    if (path && service) {
+    if (path) {
       let password: Buffer | undefined;
       let json: string | undefined;
       try {
-        password = passwordReader(service);
+        password =
+          service !== undefined
+            ? passwordReader(service)
+            : passwordFile !== undefined
+              ? readFileSync(passwordFile)
+              : Buffer.from(passwordEnv ?? "");
         // security appends one newline. Preserve all other password characters.
         const end =
-          password[password.length - 1] === 10
+          passwordEnv === undefined && password[password.length - 1] === 10
             ? password.length - 1
             : password.length;
         json = readFileSync(
@@ -96,7 +104,7 @@ export function loadChainKeys(
   const attesterKey = load("ATTESTER");
   if (!attesterKey && network !== "fork")
     throw new Error(
-      "ATTESTER_KEYSTORE and ATTESTER_KEYCHAIN_SERVICE are required for chain startup.",
+      "ATTESTER_KEYSTORE with a password source or ATTESTER_KEY is required for chain startup.",
     );
   if (attesterKey && deployment) checkAttester(attesterKey(), deployment);
   return { attesterKey, opsKey: load("OPS") };

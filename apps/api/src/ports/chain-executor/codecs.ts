@@ -45,6 +45,8 @@ export async function commandCall(
     args,
   });
   switch (c.kind) {
+    case "nativeTransfer":
+      throw new Error("Native transfers do not use contract calldata.");
     case "x402Buy":
     case "x402Sell":
     case "authorizedTransfer":

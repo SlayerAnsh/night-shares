@@ -5,6 +5,8 @@ All notable changes to this monorepo. Newest first.
 
 ## Unreleased
 
+- Enable journaled Privy transaction signing, capped native gas floats with ops readiness, and password/file/raw server key sources; keep mainnet sending disabled.
+
 - Generalize the API chain stack across Arc fork, testnet and mainnet with Keychain-backed keystores, resilient RPCs, Privy send guards, and realistic fork seed prices.
 
 - Add `docker-compose.testnet.yml` and `docker-compose.mainnet.yml`, copies of the deployable stack without `expose`, for separate Dokploy deployments.

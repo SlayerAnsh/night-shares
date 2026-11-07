@@ -65,6 +65,7 @@ export type X402Command =
       signature: Hex;
     };
 export type ChainCommand =
+  | { kind: "nativeTransfer"; to: Address; amount: bigint }
   | X402Command
   | ({ kind: "buy"; qty: bigint; maxPaid: bigint } & Routing)
   | {

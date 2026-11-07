@@ -144,6 +144,7 @@ export function buildContainer(config: Config) {
     {
       chainExecutor: foundation?.chainExecutor ?? createMockChainExecutor(),
       chainReader: foundation?.chainReader,
+      chainReadiness: foundation?.chainReadiness,
       chainAttester: foundation?.chainAttester,
       provisionWallet: foundation?.provisionWallet,
       receptionTag,

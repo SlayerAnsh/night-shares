@@ -15,6 +15,7 @@ import type { VerificationStore } from "../ports/verifications/verification-stor
 import type { CustodyWallet } from "../ports/wallet-custody/wallet-custody";
 import type { WalletProvider } from "../ports/wallet-provider/wallet-provider";
 export type Ports = {
+  chainReadiness?: () => Promise<string | undefined>;
   chainExecutor?: ChainExecutor;
   chainReader?: ChainReader;
   chainAttester?: ChainAttester;

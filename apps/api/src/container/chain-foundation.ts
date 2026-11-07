@@ -1,6 +1,7 @@
 import type { Database } from "bun:sqlite";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, URL } from "node:url";
+import { privateKeyToAccount } from "viem/accounts";
 import type { Config } from "../config/load-config";
 import { assertLocalForkRpc } from "../ports/arc-deployment/local-fork";
 import {
@@ -10,6 +11,7 @@ import {
 import { createChainAttester } from "../ports/chain-attester/chain-attester";
 import { createChainExecutor } from "../ports/chain-executor/chain-executor.viem";
 import { createChainReader } from "../ports/chain-reader/chain-reader.viem";
+import { createGasFloat } from "../ports/wallet-custody/gas-float";
 import { forkProvisioner } from "../ports/wallet-custody/provision-fork";
 import type {
   CustodyWallet,
@@ -81,9 +83,16 @@ export function createChainFoundation(config: Config, db: Database) {
             authorizationKey: config.privyAuthorizationKey,
           }),
         );
+  const ops = config.opsKey ? privateKeyToAccount(config.opsKey()) : undefined;
+  if (config.walletCustody === "privy" && (!ops || !config.gasPolicy))
+    throw new Error(
+      "Privy chain execution requires OPS_KEYSTORE with a password source or OPS_KEY and a gas policy.",
+    );
   const custody: WalletCustody = {
     ...adapter,
     async resolveWallet(id) {
+      if (id === "chain:ops" && ops)
+        return { walletId: id, address: ops.address };
       const resolved = await ((id === "chain:attester" ||
         id === "fork:attester") &&
       signing
@@ -94,6 +103,7 @@ export function createChainFoundation(config: Config, db: Database) {
       return resolved;
     },
     async signTransaction(id, tx) {
+      if (id === "chain:ops" && ops) return ops.signTransaction(tx);
       const signed = await ((id === "chain:attester" ||
         id === "fork:attester") &&
       signing
@@ -112,8 +122,25 @@ export function createChainFoundation(config: Config, db: Database) {
     custody,
     gasHeadroomBps: config.forkGasHeadroomBps,
     network,
-    sendingUnavailable: config.walletCustody === "privy",
+    provisionWallet:
+      config.walletCustody === "privy"
+        ? async (wallet) => {
+            await provision?.(wallet);
+          }
+        : undefined,
   });
+  const gasFloat =
+    ops && config.gasPolicy && config.walletCustody === "privy"
+      ? createGasFloat({
+          db,
+          fingerprint: reader.fingerprint,
+          opsAddress: ops.address,
+          policy: config.gasPolicy,
+          getBalance: (address) => client.getBalance({ address }),
+          executor,
+        })
+      : undefined;
+  if (gasFloat) provision = gasFloat.provision;
   if (network === "fork" && config.walletCustody === "anvil")
     provision = forkProvisioner({
       db,
@@ -125,6 +152,7 @@ export function createChainFoundation(config: Config, db: Database) {
     });
   return {
     client,
+    chainReadiness: gasFloat?.readiness,
     chainExecutor: executor,
     chainReader: reader,
     chainAttester: signing?.attester,

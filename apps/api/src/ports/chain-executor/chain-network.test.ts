@@ -7,7 +7,7 @@ import { createPrivyWalletCustody } from "../wallet-custody/wallet-custody.privy
 import { persistWalletCustody } from "../wallet-custody/wallet-custody.sqlite";
 import { createChainExecutor } from "./chain-executor.viem";
 
-test("Privy chain executor boots and refuses execute/recover before RPC or journal writes", async () => {
+test("mainnet executor refuses execute/recover before RPC or journal writes", async () => {
   const db = openDatabase(":memory:");
   const deployment = loadDeployment("testnet");
   if (!deployment) throw new Error("Missing test deployment.");
@@ -29,8 +29,7 @@ test("Privy chain executor boots and refuses execute/recover before RPC or journ
       client: {} as ForkClient,
       reader: { fingerprint: "public-testnet" } as ChainReader,
       custody,
-      network: "testnet",
-      sendingUnavailable: true,
+      network: "mainnet",
     });
     expect(executor.mode).toBe("chain");
     await expect(
@@ -39,15 +38,12 @@ test("Privy chain executor boots and refuses execute/recover before RPC or journ
         walletId: "unused",
         command: { kind: "verifyHuman", humanId: 1n, orb: true },
       }),
-    ).rejects.toThrow("Privy transaction sending not implemented");
+    ).rejects.toThrow("Mainnet transactions are disabled");
     await expect(executor.recover("send")).rejects.toThrow(
-      "Privy transaction sending not implemented",
+      "Mainnet transactions are disabled",
     );
     expect(executor.pending()).toEqual([]);
     expect(db.query("SELECT * FROM chain_operations").all()).toEqual([]);
-    await expect(
-      custody.signTransaction?.("unused", {} as never),
-    ).rejects.toThrow("Privy transaction sending not implemented");
   } finally {
     db.close();
   }
